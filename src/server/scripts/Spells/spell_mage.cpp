@@ -471,7 +471,7 @@ class spell_mage_cold_snap : public SpellScript
         for (PlayerSpellMap::const_iterator itr = spellMap.begin(); itr != spellMap.end(); ++itr)
         {
             SpellInfo const* spellInfo = sSpellMgr->AssertSpellInfo(itr->first);
-            if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && (spellInfo->GetSchoolMask() & SPELL_SCHOOL_MASK_FROST) && spellInfo->Id != SPELL_MAGE_COLD_SNAP && spellInfo->GetRecoveryTime() > 0)
+            if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && (spellInfo->GetSchoolMask() & SPELL_SCHOOL_MASK_FROST) && ((spellInfo->SpellFamilyFlags[0] & 0x240) || (spellInfo->SpellFamilyFlags[1] & 0x81)) && spellInfo->GetRecoveryTime() > 0)
             {
                 SpellCooldowns::iterator citr = caster->GetSpellCooldownMap().find(spellInfo->Id);
                 if (citr != caster->GetSpellCooldownMap().end() && citr->second.needSendToClient)

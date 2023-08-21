@@ -12322,7 +12322,7 @@ float Unit::SpellTakenCritChance(Unit const* caster, SpellInfo const* spellProto
                         {
                             // Shatter
                             case 911:
-                                modChance += 16;
+                                modChance += 21;
                                 [[fallthrough]];
                             case 910:
                                 modChance += 17;

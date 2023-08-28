@@ -55,7 +55,32 @@ enum MageSpells
     SPELL_MAGE_SUMMON_WATER_ELEMENTAL_PERMANENT  = 70908,
     SPELL_MAGE_SUMMON_WATER_ELEMENTAL_TEMPORARY  = 70907,
     SPELL_MAGE_GLYPH_OF_BLAST_WAVE               = 62126,
-    SPELL_MAGE_FINGERS_OF_FROST                  = 44543
+    SPELL_MAGE_FINGERS_OF_FROST                  = 44543,
+
+    // Duskhaven
+    SPELL_MAGE_BRAIN_FREEZE                      = 44549,
+    SPELL_MAGE_BRAIN_FREEZE_AURA                 = 57761,
+    SPELL_MAGE_CHAIN_REACTION                    = 1290055,
+    SPELL_MAGE_CHAIN_REACTION_AURA               = 1290062,
+    SPELL_MAGE_DIAMOND_ICE                       = 1290058,
+    SPELL_MAGE_FINGERS_OF_FROST_AURA             = 1290012,
+    SPELL_MAGE_GLACIAL_SPIKE_RANK1               = 1290063,
+    SPELL_MAGE_HAILSTONES_RANK1                  = 1290056,
+    SPELL_MAGE_HAILSTONES_RANK2                  = 1290057,
+    SPELL_MAGE_ICICLE_AURA                       = 1290061,
+    SPELL_MAGE_ICICLE_RANK1                      = 1290029,
+    SPELL_MAGE_ICICLE_RANK2                      = 1290030,
+    SPELL_MAGE_ICICLE_RANK3                      = 1290031,
+    SPELL_MAGE_ICICLE_RANK4                      = 1290032,
+    SPELL_MAGE_ICICLE_RANK5                      = 1290033,
+    SPELL_MAGE_ICICLE_RANK6                      = 1290034,
+    SPELL_MAGE_ICICLE_RANK7                      = 1290035,
+    SPELL_MAGE_ICICLE_RANK8                      = 1290036,
+    SPELL_MAGE_ICICLE_RANK9                      = 1290037,
+    SPELL_MAGE_ICY_VEINS                         = 12472,
+    SPELL_MAGE_MASTERY_ICICLES                   = 1290060,
+    SPELL_MAGE_SNAP_FREEZE                       = 1290054,
+    SPELL_MAGE_THERMAL_VOID                      = 1290059
 };
 
 class spell_mage_arcane_blast : public SpellScript
@@ -1062,6 +1087,72 @@ class spell_mage_fingers_of_frost_proc : public AuraScript
     }
 };
 
+// Duskhaven
+class spell_mage_icy_veins : public SpellScript
+{
+    PrepareSpellScript(spell_mage_icy_veins);
+
+    bool Validate(SpellInfo const* /*spellEntry*/) override
+    {
+        return ValidateSpellInfo(
+            {
+                SPELL_MAGE_SNAP_FREEZE,
+                SPELL_MAGE_FINGERS_OF_FROST,
+                SPELL_MAGE_FINGERS_OF_FROST_AURA,
+                SPELL_MAGE_BRAIN_FREEZE,
+                SPELL_MAGE_BRAIN_FREEZE_AURA
+            });
+    }
+
+    void HandleDummy(SpellEffIndex)
+    {
+        Unit* caster = GetCaster();
+
+        if (caster->HasAura(SPELL_MAGE_SNAP_FREEZE))
+        {
+            if (caster->HasAura(SPELL_MAGE_FINGERS_OF_FROST))
+                caster->CastSpell(caster, SPELL_MAGE_FINGERS_OF_FROST_AURA, true);
+            if (caster->HasAura(SPELL_MAGE_BRAIN_FREEZE))
+                caster->CastSpell(caster, SPELL_MAGE_BRAIN_FREEZE_AURA, true);
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_mage_icy_veins::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
+    }
+};
+
+class spell_mage_cone_of_cold : public SpellScript
+{
+    PrepareSpellScript(spell_mage_cone_of_cold);
+
+    bool Validate(SpellInfo const* /*spellEntry*/) override
+    {
+        return ValidateSpellInfo(
+            {
+                SPELL_MAGE_DIAMOND_ICE
+            });
+    }
+
+    void HandleDummy(SpellEffIndex)
+    {
+        Unit* caster = GetCaster();
+        Player* player = caster->ToPlayer();
+
+        if (caster->HasAura(SPELL_MAGE_DIAMOND_ICE))
+        {
+            player->RemoveCategoryCooldown(29);
+            player->RemoveCategoryCooldown(58);
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_mage_cone_of_cold::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
+    }
+};
+
 void AddSC_mage_spell_scripts()
 {
     RegisterSpellScript(spell_mage_arcane_blast);
@@ -1085,6 +1176,10 @@ void AddSC_mage_spell_scripts()
     RegisterSpellScript(spell_mage_master_of_elements);
     RegisterSpellScript(spell_mage_polymorph_cast_visual);
     RegisterSpellScript(spell_mage_summon_water_elemental);
-    RegisterSpellScript(spell_mage_fingers_of_frost_proc_aura);
-    RegisterSpellScript(spell_mage_fingers_of_frost_proc);
+    RegisterSpellScript(spell_mage_fingers_of_frost_proc_aura);    // Probably not needed anymore
+    RegisterSpellScript(spell_mage_fingers_of_frost_proc);         // And this one as well
+    
+    // Duskhaven
+    RegisterSpellScript(spell_mage_icy_veins);
+    RegisterSpellScript(spell_mage_cone_of_cold);
 }

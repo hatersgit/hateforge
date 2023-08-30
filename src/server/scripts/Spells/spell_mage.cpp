@@ -64,7 +64,10 @@ enum MageSpells
     SPELL_MAGE_CHAIN_REACTION_AURA               = 1290062,
     SPELL_MAGE_DIAMOND_ICE                       = 1290058,
     SPELL_MAGE_FINGERS_OF_FROST_AURA             = 1290012,
-    SPELL_MAGE_GLACIAL_SPIKE_RANK1               = 1290063,
+    SPELL_MAGE_FRACTURED_FROST_AURA              = 1290063,
+    SPELL_MAGE_FRACTURED_FROST_RANK1             = 1290052,
+    SPELL_MAGE_FRACTURED_FROST_RANK2             = 1290053,
+    SPELL_MAGE_GLACIAL_SPIKE_RANK1               = 1290065,
     SPELL_MAGE_HAILSTONES_RANK1                  = 1290056,
     SPELL_MAGE_HAILSTONES_RANK2                  = 1290057,
     SPELL_MAGE_ICICLE_AURA                       = 1290061,
@@ -79,7 +82,10 @@ enum MageSpells
     SPELL_MAGE_ICICLE_RANK9                      = 1290037,
     SPELL_MAGE_ICY_VEINS                         = 12472,
     SPELL_MAGE_MASTERY_ICICLES                   = 1290060,
+    SPELL_MAGE_PARADOX                           = 1290038,
     SPELL_MAGE_SNAP_FREEZE                       = 1290054,
+    SPELL_MAGE_SPLINTERING_COLD_RANK1            = 1290047,
+    SPELL_MAGE_SPLINTERING_COLD_RANK2            = 1290048,
     SPELL_MAGE_THERMAL_VOID                      = 1290059
 };
 
@@ -1153,6 +1159,82 @@ class spell_mage_cone_of_cold : public SpellScript
     }
 };
 
+class spell_mage_frostfire_bolt : public SpellScript
+{
+    PrepareSpellScript(spell_mage_frostfire_bolt);
+
+    bool Validate(SpellInfo const* /*spellEntry*/) override
+    {
+        return ValidateSpellInfo(
+            {
+                SPELL_MAGE_PARADOX,
+                SPELL_MAGE_BRAIN_FREEZE_AURA,
+                SPELL_MAGE_FINGERS_OF_FROST_AURA
+            });
+    }
+
+    void HandleCast()
+    {
+        Unit* caster = GetCaster();
+        Unit* victim = caster->GetTargetUnit();
+
+        if (caster->HasAura(SPELL_MAGE_PARADOX) && caster->HasAura(SPELL_MAGE_BRAIN_FREEZE_AURA))
+            caster->CastSpell(victim, SPELL_MAGE_FINGERS_OF_FROST_AURA, true);
+    }
+
+    void Register() override
+    {
+        OnCast += SpellCastFn(spell_mage_frostfire_bolt::HandleCast);
+    }
+};
+
+class spell_mage_frostbolt : public SpellScript
+{
+    PrepareSpellScript(spell_mage_frostbolt);
+
+    bool Validate(SpellInfo const* /*spellEntry*/) override
+    {
+        return ValidateSpellInfo(
+            {
+                SPELL_MAGE_FRACTURED_FROST_RANK1,
+                SPELL_MAGE_FRACTURED_FROST_RANK2,
+                SPELL_MAGE_FRACTURED_FROST_AURA,
+                SPELL_MAGE_SPLINTERING_COLD_RANK1,
+                SPELL_MAGE_SPLINTERING_COLD_RANK2,
+                SPELL_MAGE_ICICLE_AURA
+            });
+    }
+
+    void HandleBeforeCast()
+    {
+        Unit* caster = GetCaster();
+
+        if (caster->HasAura(SPELL_MAGE_FRACTURED_FROST_RANK1) && (irand(1, 100) > 85))
+            caster->CastSpell(caster, SPELL_MAGE_FRACTURED_FROST_AURA, true);
+        else if (caster->HasAura(SPELL_MAGE_FRACTURED_FROST_RANK2) && (irand(1, 100) > 70))
+            caster->CastSpell(caster, SPELL_MAGE_FRACTURED_FROST_AURA, true);
+    }
+
+    void HandleCast()
+    {
+        Unit* caster = GetCaster();
+
+        if (caster->GetAura(SPELL_MAGE_FRACTURED_FROST_AURA))
+            caster->RemoveAuraFromStack(SPELL_MAGE_FRACTURED_FROST_AURA);
+
+        if (caster->GetAura(SPELL_MAGE_SPLINTERING_COLD_RANK1) && (irand(1, 100) > 85))
+            caster->CastSpell(caster, SPELL_MAGE_ICICLE_AURA, true);
+        else if (caster->GetAura(SPELL_MAGE_SPLINTERING_COLD_RANK2) && (irand(1, 100) > 70))
+            caster->CastSpell(caster, SPELL_MAGE_ICICLE_AURA, true);
+    }
+
+    void Register() override
+    {
+        BeforeCast += SpellCastFn(spell_mage_frostbolt::HandleBeforeCast);
+        OnCast += SpellCastFn(spell_mage_frostbolt::HandleCast);
+    }
+};
+
 void AddSC_mage_spell_scripts()
 {
     RegisterSpellScript(spell_mage_arcane_blast);
@@ -1182,4 +1264,6 @@ void AddSC_mage_spell_scripts()
     // Duskhaven
     RegisterSpellScript(spell_mage_icy_veins);
     RegisterSpellScript(spell_mage_cone_of_cold);
+    RegisterSpellScript(spell_mage_frostfire_bolt);
+    RegisterSpellScript(spell_mage_frostbolt);
 }

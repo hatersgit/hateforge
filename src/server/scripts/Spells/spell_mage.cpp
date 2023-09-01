@@ -1148,8 +1148,8 @@ class spell_mage_cone_of_cold : public SpellScript
 
         if (caster->HasAura(SPELL_MAGE_DIAMOND_ICE))
         {
-            player->RemoveCategoryCooldown(29);
-            player->RemoveCategoryCooldown(58);
+            player->RemoveCategoryCooldown(29); // Blizzard
+            player->RemoveCategoryCooldown(58); // Comet Storm
         }
     }
 
@@ -1196,12 +1196,39 @@ class spell_mage_frostbolt : public SpellScript
     {
         return ValidateSpellInfo(
             {
-                SPELL_MAGE_FRACTURED_FROST_RANK1,
-                SPELL_MAGE_FRACTURED_FROST_RANK2,
-                SPELL_MAGE_FRACTURED_FROST_AURA,
                 SPELL_MAGE_SPLINTERING_COLD_RANK1,
                 SPELL_MAGE_SPLINTERING_COLD_RANK2,
                 SPELL_MAGE_ICICLE_AURA
+            });
+    }
+
+    void HandleCast()
+    {
+        Unit* caster = GetCaster();
+
+        if (caster->GetAura(SPELL_MAGE_SPLINTERING_COLD_RANK1) && (irand(1, 100) > 85))
+            caster->CastSpell(caster, SPELL_MAGE_ICICLE_AURA, true);
+        else if (caster->GetAura(SPELL_MAGE_SPLINTERING_COLD_RANK2) && (irand(1, 100) > 70))
+            caster->CastSpell(caster, SPELL_MAGE_ICICLE_AURA, true);
+    }
+
+    void Register() override
+    {
+        OnCast += SpellCastFn(spell_mage_frostbolt::HandleCast);
+    }
+};
+
+class spell_mage_frostbolt_trigger : public SpellScript
+{
+    PrepareSpellScript(spell_mage_frostbolt_trigger);
+
+    bool Validate(SpellInfo const* /*spellEntry*/) override
+    {
+        return ValidateSpellInfo(
+            {
+                SPELL_MAGE_FRACTURED_FROST_RANK1,
+                SPELL_MAGE_FRACTURED_FROST_RANK2,
+                SPELL_MAGE_FRACTURED_FROST_AURA
             });
     }
 
@@ -1221,18 +1248,74 @@ class spell_mage_frostbolt : public SpellScript
 
         if (caster->GetAura(SPELL_MAGE_FRACTURED_FROST_AURA))
             caster->RemoveAuraFromStack(SPELL_MAGE_FRACTURED_FROST_AURA);
-
-        if (caster->GetAura(SPELL_MAGE_SPLINTERING_COLD_RANK1) && (irand(1, 100) > 85))
-            caster->CastSpell(caster, SPELL_MAGE_ICICLE_AURA, true);
-        else if (caster->GetAura(SPELL_MAGE_SPLINTERING_COLD_RANK2) && (irand(1, 100) > 70))
-            caster->CastSpell(caster, SPELL_MAGE_ICICLE_AURA, true);
     }
 
     void Register() override
     {
-        BeforeCast += SpellCastFn(spell_mage_frostbolt::HandleBeforeCast);
-        OnCast += SpellCastFn(spell_mage_frostbolt::HandleCast);
+        BeforeCast += SpellCastFn(spell_mage_frostbolt_trigger::HandleBeforeCast);
+        OnCast += SpellCastFn(spell_mage_frostbolt_trigger::HandleCast);
     }
+};
+
+class spell_mage_glacial_spike : public SpellScript
+{
+    PrepareSpellScript(spell_mage_glacial_spike);
+
+    bool Validate(SpellInfo const* /*spellEntry*/) override
+    {
+        return ValidateSpellInfo(
+            {
+                SPELL_MAGE_ICICLE_AURA
+            });
+    }
+
+public:
+    spell_mage_glacial_spike(uint32 spellrank) : SpellScript(),
+        _spellrank(spellrank) { }
+
+    SpellCastResult CheckCast()
+    {
+        Unit* caster = GetCaster();
+        int stacks = 0;
+
+        if (caster->HasAura(SPELL_MAGE_ICICLE_AURA))
+            stacks = caster->GetAura(SPELL_MAGE_ICICLE_AURA)->GetStackAmount();
+
+        if (stacks < 5)
+            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
+        return SPELL_CAST_OK;
+    }
+
+    void HandleDamage(SpellMissInfo missInfo)
+    {
+        if (missInfo != SPELL_MISS_NONE)
+        {
+            return;
+        }
+
+        Unit* caster = GetCaster();
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(_spellrank);
+        int32 damage = GetHitDamage();
+        damage += (spellInfo->GetEffect(EFFECT_0).CalcValue()) * 5;
+        int stacks = caster->GetAura(SPELL_MAGE_ICICLE_AURA)->GetStackAmount();
+
+        SetHitDamage(damage);
+
+        for (int i = 0; i < stacks; i++)
+        {
+            caster->RemoveAuraFromStack(SPELL_MAGE_ICICLE_AURA);
+        }
+    }
+
+    void Register() override
+    {
+        OnCheckCast += SpellCheckCastFn(spell_mage_glacial_spike::CheckCast);
+        BeforeHit += BeforeSpellHitFn(spell_mage_glacial_spike::HandleDamage);
+    }
+
+private:
+    uint32 _spellrank;
 };
 
 void AddSC_mage_spell_scripts()
@@ -1266,4 +1349,7 @@ void AddSC_mage_spell_scripts()
     RegisterSpellScript(spell_mage_cone_of_cold);
     RegisterSpellScript(spell_mage_frostfire_bolt);
     RegisterSpellScript(spell_mage_frostbolt);
+    RegisterSpellScript(spell_mage_frostbolt_trigger);
+    RegisterSpellScriptWithArgs(spell_mage_glacial_spike, "spell_mage_glacial_spike_rank1", SPELL_MAGE_ICICLE_RANK8);
+    RegisterSpellScriptWithArgs(spell_mage_glacial_spike, "spell_mage_glacial_spike_rank2", SPELL_MAGE_ICICLE_RANK9);
 }

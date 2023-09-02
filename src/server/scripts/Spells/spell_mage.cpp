@@ -67,7 +67,7 @@ enum MageSpells
     SPELL_MAGE_FRACTURED_FROST_AURA              = 1290063,
     SPELL_MAGE_FRACTURED_FROST_RANK1             = 1290052,
     SPELL_MAGE_FRACTURED_FROST_RANK2             = 1290053,
-    SPELL_MAGE_GLACIAL_SPIKE_RANK1               = 1290065,
+    SPELL_MAGE_GLACIAL_SPIKE_RANK1               = 1290024,
     SPELL_MAGE_HAILSTONES_RANK1                  = 1290056,
     SPELL_MAGE_HAILSTONES_RANK2                  = 1290057,
     SPELL_MAGE_ICICLE_AURA                       = 1290061,
@@ -1273,6 +1273,41 @@ public:
     spell_mage_glacial_spike(uint32 spellrank) : SpellScript(),
         _spellrank(spellrank) { }
 
+    void HandleDamage(SpellMissInfo missInfo)
+    {
+        if (missInfo != SPELL_MISS_NONE)
+        {
+            return;
+        }
+
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(_spellrank);
+        int32 damage = GetHitDamage();
+        damage += (spellInfo->GetEffect(EFFECT_0).CalcValue()) * 5;
+
+        SetHitDamage(damage);
+    }
+
+    void Register() override
+    {
+        BeforeHit += BeforeSpellHitFn(spell_mage_glacial_spike::HandleDamage);
+    }
+
+private:
+    uint32 _spellrank;
+};
+
+class spell_mage_glacial_spike_trigger : public SpellScript
+{
+    PrepareSpellScript(spell_mage_glacial_spike_trigger);
+
+    bool Validate(SpellInfo const* /*spellEntry*/) override
+    {
+        return ValidateSpellInfo(
+            {
+                SPELL_MAGE_ICICLE_AURA
+            });
+    }
+
     SpellCastResult CheckCast()
     {
         Unit* caster = GetCaster();
@@ -1287,22 +1322,11 @@ public:
         return SPELL_CAST_OK;
     }
 
-    void HandleDamage(SpellMissInfo missInfo)
+    void HandleStacks()
     {
-        if (missInfo != SPELL_MISS_NONE)
-        {
-            return;
-        }
-
         Unit* caster = GetCaster();
-        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(_spellrank);
-        int32 damage = GetHitDamage();
-        damage += (spellInfo->GetEffect(EFFECT_0).CalcValue()) * 5;
-        int stacks = caster->GetAura(SPELL_MAGE_ICICLE_AURA)->GetStackAmount();
 
-        SetHitDamage(damage);
-
-        for (int i = 0; i < stacks; i++)
+        for (int i = 0; i < 5; i++)
         {
             caster->RemoveAuraFromStack(SPELL_MAGE_ICICLE_AURA);
         }
@@ -1310,12 +1334,9 @@ public:
 
     void Register() override
     {
-        OnCheckCast += SpellCheckCastFn(spell_mage_glacial_spike::CheckCast);
-        BeforeHit += BeforeSpellHitFn(spell_mage_glacial_spike::HandleDamage);
+        OnCheckCast += SpellCheckCastFn(spell_mage_glacial_spike_trigger::CheckCast);
+        OnCast += SpellCastFn(spell_mage_glacial_spike_trigger::HandleStacks);
     }
-
-private:
-    uint32 _spellrank;
 };
 
 void AddSC_mage_spell_scripts()
@@ -1352,4 +1373,5 @@ void AddSC_mage_spell_scripts()
     RegisterSpellScript(spell_mage_frostbolt_trigger);
     RegisterSpellScriptWithArgs(spell_mage_glacial_spike, "spell_mage_glacial_spike_rank1", SPELL_MAGE_ICICLE_RANK8);
     RegisterSpellScriptWithArgs(spell_mage_glacial_spike, "spell_mage_glacial_spike_rank2", SPELL_MAGE_ICICLE_RANK9);
+    RegisterSpellScript(spell_mage_glacial_spike_trigger);
 }

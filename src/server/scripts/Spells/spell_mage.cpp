@@ -62,6 +62,8 @@ enum MageSpells
     SPELL_MAGE_BRAIN_FREEZE_AURA                 = 57761,
     SPELL_MAGE_CHAIN_REACTION                    = 1290055,
     SPELL_MAGE_CHAIN_REACTION_AURA               = 1290062,
+    SPELL_MAGE_COMET_STORM_MISSILE_RANK1         = 1290026,
+    SPELL_MAGE_COMET_STORM_MISSILE_RANK2         = 1290027,
     SPELL_MAGE_DIAMOND_ICE                       = 1290058,
     SPELL_MAGE_FINGERS_OF_FROST_AURA             = 1290012,
     SPELL_MAGE_FRACTURED_FROST_AURA              = 1290063,
@@ -1339,6 +1341,98 @@ class spell_mage_glacial_spike_trigger : public SpellScript
     }
 };
 
+class SpellMageIceLanceEvent : public BasicEvent
+{
+public:
+    SpellMageIceLanceEvent(Unit* caster, Unit* victim, uint32 spellid) : _caster(caster), _victim(victim), _spellid(spellid) {}
+
+    bool Execute(uint64 /*time*/, uint32 /*diff*/) override
+    {
+        _caster->CastSpell(_victim, _spellid);
+        return true;
+    }
+
+private:
+    Unit* _caster;
+    Unit* _victim;
+    uint32 _spellid;
+};
+
+class spell_mage_ice_lance : public SpellScript
+{
+    PrepareSpellScript(spell_mage_ice_lance);
+
+    bool Validate(SpellInfo const* /*spellEntry*/) override
+    {
+        return ValidateSpellInfo(
+            {
+                SPELL_MAGE_FINGERS_OF_FROST_AURA,
+                SPELL_MAGE_ICICLE_AURA,
+                SPELL_MAGE_GLACIAL_SPIKE_RANK1,
+                SPELL_MAGE_ICY_VEINS,
+                SPELL_MAGE_THERMAL_VOID,
+                SPELL_MAGE_HAILSTONES_RANK1,
+                SPELL_MAGE_HAILSTONES_RANK2,
+                SPELL_MAGE_CHAIN_REACTION,
+                SPELL_MAGE_CHAIN_REACTION_AURA
+            });
+    }
+
+public:
+    spell_mage_ice_lance(uint32 spellrank) : SpellScript(),
+        _spellrank(spellrank) { }
+
+    void HandleDummy(SpellEffIndex)
+    {
+        Unit* caster = GetCaster();
+        Unit* victim = caster->GetTargetUnit();
+
+        if (caster->HasAura(SPELL_MAGE_ICICLE_AURA) && !caster->HasSpell(SPELL_MAGE_GLACIAL_SPIKE_RANK1))
+        {
+            Aura* icicleStack = caster->GetAura(SPELL_MAGE_ICICLE_AURA);
+            int stacks = icicleStack->GetStackAmount();
+
+            for (uint8 i = 0; i < stacks; i++)
+            {
+                caster->RemoveAuraFromStack(SPELL_MAGE_ICICLE_AURA);
+                caster->m_Events.AddEvent(new SpellMageIceLanceEvent(caster, victim, _spellrank), caster->m_Events.CalculateTime(i*200));
+            }
+        }
+
+        if (victim->HasAuraState(AURA_STATE_FROZEN) || caster->HasAura(SPELL_MAGE_FINGERS_OF_FROST_AURA))
+        {
+            if (caster->HasAura(SPELL_MAGE_CHAIN_REACTION))
+                caster->CastSpell(caster, SPELL_MAGE_CHAIN_REACTION_AURA, true);
+
+            if (caster->HasAura(SPELL_MAGE_ICY_VEINS) && caster->HasAura(SPELL_MAGE_THERMAL_VOID))
+            {
+                Aura* icyVeins = caster->GetAura(SPELL_MAGE_ICY_VEINS);
+                icyVeins->AddDuration(1000);
+            }
+
+            if (caster->HasAura(SPELL_MAGE_HAILSTONES_RANK1))
+            {
+                if (irand(1, 100) > 50)
+                    caster->CastSpell(caster, SPELL_MAGE_ICICLE_AURA, true);
+            }
+            else if (caster->HasAura(SPELL_MAGE_HAILSTONES_RANK2))
+                caster->CastSpell(caster, SPELL_MAGE_ICICLE_AURA, true);
+
+        }
+
+        if (caster->HasAura(SPELL_MAGE_FINGERS_OF_FROST_AURA))
+            caster->RemoveAuraFromStack(SPELL_MAGE_FINGERS_OF_FROST_AURA);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_mage_ice_lance::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
+    }
+
+private:
+    uint32 _spellrank;
+};
+
 void AddSC_mage_spell_scripts()
 {
     RegisterSpellScript(spell_mage_arcane_blast);
@@ -1374,4 +1468,13 @@ void AddSC_mage_spell_scripts()
     RegisterSpellScriptWithArgs(spell_mage_glacial_spike, "spell_mage_glacial_spike_rank1", SPELL_MAGE_ICICLE_RANK8);
     RegisterSpellScriptWithArgs(spell_mage_glacial_spike, "spell_mage_glacial_spike_rank2", SPELL_MAGE_ICICLE_RANK9);
     RegisterSpellScript(spell_mage_glacial_spike_trigger);
+    RegisterSpellScriptWithArgs(spell_mage_ice_lance, "spell_mage_ice_lance_rank1", SPELL_MAGE_ICICLE_RANK1);
+    RegisterSpellScriptWithArgs(spell_mage_ice_lance, "spell_mage_ice_lance_rank2", SPELL_MAGE_ICICLE_RANK2);
+    RegisterSpellScriptWithArgs(spell_mage_ice_lance, "spell_mage_ice_lance_rank3", SPELL_MAGE_ICICLE_RANK3);
+    RegisterSpellScriptWithArgs(spell_mage_ice_lance, "spell_mage_ice_lance_rank4", SPELL_MAGE_ICICLE_RANK4);
+    RegisterSpellScriptWithArgs(spell_mage_ice_lance, "spell_mage_ice_lance_rank5", SPELL_MAGE_ICICLE_RANK5);
+    RegisterSpellScriptWithArgs(spell_mage_ice_lance, "spell_mage_ice_lance_rank6", SPELL_MAGE_ICICLE_RANK6);
+    RegisterSpellScriptWithArgs(spell_mage_ice_lance, "spell_mage_ice_lance_rank7", SPELL_MAGE_ICICLE_RANK7);
+    RegisterSpellScriptWithArgs(spell_mage_ice_lance, "spell_mage_ice_lance_rank8", SPELL_MAGE_ICICLE_RANK8);
+    RegisterSpellScriptWithArgs(spell_mage_ice_lance, "spell_mage_ice_lance_rank9", SPELL_MAGE_ICICLE_RANK9);
 }

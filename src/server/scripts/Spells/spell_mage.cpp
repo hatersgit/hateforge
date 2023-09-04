@@ -1208,9 +1208,9 @@ class spell_mage_frostbolt : public SpellScript
     {
         Unit* caster = GetCaster();
 
-        if (caster->GetAura(SPELL_MAGE_SPLINTERING_COLD_RANK1) && (irand(1, 100) > 85))
+        if (caster->GetAura(SPELL_MAGE_SPLINTERING_COLD_RANK2) && (irand(1, 100) > 70))
             caster->CastSpell(caster, SPELL_MAGE_ICICLE_AURA, true);
-        else if (caster->GetAura(SPELL_MAGE_SPLINTERING_COLD_RANK2) && (irand(1, 100) > 70))
+        else if (caster->GetAura(SPELL_MAGE_SPLINTERING_COLD_RANK1) && (irand(1, 100) > 85))
             caster->CastSpell(caster, SPELL_MAGE_ICICLE_AURA, true);
     }
 
@@ -1238,9 +1238,9 @@ class spell_mage_frostbolt_trigger : public SpellScript
     {
         Unit* caster = GetCaster();
 
-        if (caster->HasAura(SPELL_MAGE_FRACTURED_FROST_RANK1) && (irand(1, 100) > 85))
+        if (caster->HasAura(SPELL_MAGE_FRACTURED_FROST_RANK2) && (irand(1, 100) > 70))
             caster->CastSpell(caster, SPELL_MAGE_FRACTURED_FROST_AURA, true);
-        else if (caster->HasAura(SPELL_MAGE_FRACTURED_FROST_RANK2) && (irand(1, 100) > 70))
+        else if (caster->HasAura(SPELL_MAGE_FRACTURED_FROST_RANK1) && (irand(1, 100) > 85))
             caster->CastSpell(caster, SPELL_MAGE_FRACTURED_FROST_AURA, true);
     }
 
@@ -1410,14 +1410,10 @@ public:
                 icyVeins->AddDuration(1000);
             }
 
-            if (caster->HasAura(SPELL_MAGE_HAILSTONES_RANK1))
-            {
-                if (irand(1, 100) > 50)
-                    caster->CastSpell(caster, SPELL_MAGE_ICICLE_AURA, true);
-            }
-            else if (caster->HasAura(SPELL_MAGE_HAILSTONES_RANK2))
+            if (caster->HasAura(SPELL_MAGE_HAILSTONES_RANK2))
                 caster->CastSpell(caster, SPELL_MAGE_ICICLE_AURA, true);
-
+            else if (caster->HasAura(SPELL_MAGE_HAILSTONES_RANK1) && irand(1, 100) > 50)
+                caster->CastSpell(caster, SPELL_MAGE_ICICLE_AURA, true);
         }
 
         if (caster->HasAura(SPELL_MAGE_FINGERS_OF_FROST_AURA))

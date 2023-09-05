@@ -1267,7 +1267,8 @@ class spell_mage_glacial_spike : public SpellScript
     {
         return ValidateSpellInfo(
             {
-                SPELL_MAGE_ICICLE_AURA
+                SPELL_MAGE_ICICLE_AURA,
+                _spellrank
             });
     }
 
@@ -1374,7 +1375,8 @@ class spell_mage_ice_lance : public SpellScript
                 SPELL_MAGE_HAILSTONES_RANK1,
                 SPELL_MAGE_HAILSTONES_RANK2,
                 SPELL_MAGE_CHAIN_REACTION,
-                SPELL_MAGE_CHAIN_REACTION_AURA
+                SPELL_MAGE_CHAIN_REACTION_AURA,
+                _spellrank
             });
     }
 

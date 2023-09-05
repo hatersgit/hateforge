@@ -64,6 +64,8 @@ enum MageSpells
     SPELL_MAGE_CHAIN_REACTION_AURA               = 1290062,
     SPELL_MAGE_COMET_STORM_MISSILE_RANK1         = 1290026,
     SPELL_MAGE_COMET_STORM_MISSILE_RANK2         = 1290027,
+    SPELL_MAGE_COMET_STORM_RANK1                 = 1290067,
+    SPELL_MAGE_COMET_STORM_RANK2                 = 1290068,
     SPELL_MAGE_DIAMOND_ICE                       = 1290058,
     SPELL_MAGE_FINGERS_OF_FROST_AURA             = 1290012,
     SPELL_MAGE_FRACTURED_FROST_AURA              = 1290063,
@@ -89,6 +91,11 @@ enum MageSpells
     SPELL_MAGE_SPLINTERING_COLD_RANK1            = 1290047,
     SPELL_MAGE_SPLINTERING_COLD_RANK2            = 1290048,
     SPELL_MAGE_THERMAL_VOID                      = 1290059
+};
+
+enum SpellBunnies
+{
+    NPC_MAGE_COMET_STORM_TARGET                  = 1291000
 };
 
 class spell_mage_arcane_blast : public SpellScript
@@ -1431,6 +1438,69 @@ private:
     uint32 _spellrank;
 };
 
+class SpellMageCometStormEvent : public BasicEvent
+{
+public:
+    SpellMageCometStormEvent(Unit* caster, Unit* victim, uint32 spellid, Position const& dest) : _caster(caster), _victim(victim), _spellid(spellid), _dest(dest), _count(0) {}
+
+    bool Execute(uint64 /*time*/, uint32 /*diff*/) override
+    {
+        float x = _dest.GetPositionX() + frand(-3.0f, 3.0f);
+        float y = _dest.GetPositionY() + frand(-3.0f, 3.0f);
+        float z = _dest.GetPositionZ();
+        
+        Creature* pSpawn = _victim->SummonCreature(NPC_MAGE_COMET_STORM_TARGET, x, y, z, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 1500);
+        pSpawn->SetFaction(_victim->GetFaction());
+        _caster->CastSpell(pSpawn, _spellid, true);
+        _count++;
+
+        if (_count >= 7)
+            return true;
+
+        _caster->m_Events.AddEvent(this, irand(100, 275));
+        return false;
+    }
+
+private:
+    Unit* _caster;
+    Unit* _victim;
+    uint32 _spellid;
+    uint8 _count;
+    Position _dest;
+};
+
+class spell_mage_comet_storm : public SpellScript
+{
+    PrepareSpellScript(spell_mage_comet_storm);
+
+    bool Validate(SpellInfo const* /*spellEntry*/) override
+    {
+        return ValidateSpellInfo(
+            {
+                _spellrank
+            });
+    }
+
+public:
+    spell_mage_comet_storm(uint32 spellrank) : SpellScript(),
+        _spellrank(spellrank) { }
+
+    void EffectHit(SpellEffIndex /*effIndex*/)
+    {
+        Unit* caster = GetCaster();
+        Unit* victim = caster->GetTargetUnit();
+        caster->m_Events.AddEventAtOffset(new SpellMageCometStormEvent(caster, victim, _spellrank, victim->GetPosition()/**GetHitDest()*/), randtime(100ms, 275ms));
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_mage_comet_storm::EffectHit, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+
+private:
+    uint32 _spellrank;
+};
+
 void AddSC_mage_spell_scripts()
 {
     RegisterSpellScript(spell_mage_arcane_blast);
@@ -1475,4 +1545,6 @@ void AddSC_mage_spell_scripts()
     RegisterSpellScriptWithArgs(spell_mage_ice_lance, "spell_mage_ice_lance_rank7", SPELL_MAGE_ICICLE_RANK7);
     RegisterSpellScriptWithArgs(spell_mage_ice_lance, "spell_mage_ice_lance_rank8", SPELL_MAGE_ICICLE_RANK8);
     RegisterSpellScriptWithArgs(spell_mage_ice_lance, "spell_mage_ice_lance_rank9", SPELL_MAGE_ICICLE_RANK9);
+    RegisterSpellScriptWithArgs(spell_mage_comet_storm, "spell_mage_comet_storm_rank1", SPELL_MAGE_COMET_STORM_MISSILE_RANK1);
+    RegisterSpellScriptWithArgs(spell_mage_comet_storm, "spell_mage_comet_storm_rank2", SPELL_MAGE_COMET_STORM_MISSILE_RANK2);
 }

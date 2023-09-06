@@ -21,85 +21,9 @@
 #include "Define.h"
 #include "EnumFlag.h"
 #include <cassert>
-#include <string>
-#include <list>
-#include <vector>
-#include <unordered_map>
 
 float const GROUND_HEIGHT_TOLERANCE = 0.05f; // Extra tolerance to z position to check if it is in air or on ground.
 constexpr float Z_OFFSET_FIND_HEIGHT = 2.0f;
-const std::string MSG_TYPE_FORGE = "FORGE";
-static std::vector<uint32> PRESTIGE_IGNORE_SPELLS = {};
-extern std::unordered_map<uint32, float> PlayerSpellScaleMap;
-
-enum class ForgeTopic
-{
-    GET_TALENTS = 0,
-    LEARN_TALENT = 1,
-    // a single talent
-    UNLEARN_TALENT = 2,
-    // respec talents
-    RESPEC_TALENTS = 3,
-    RESPEC_TALENTS_ERROR = 4,
-    UPDATE_SPEC = 5,
-    ACTIVATE_SPEC = 6,
-    PRESTIGE = 7,
-    TALENT_TREE_LAYOUT = 8,
-    GET_SHOP_ITEMS = 9,
-    UPDATE_SPEC_ERROR = 10,
-    ACTIVATE_SPEC_ERROR = 11,
-    LEARN_TALENT_ERROR = 12,
-    BUY_ITEM_ERROR = 13,
-    UNLEARN_TALENT_ERROR = 14,
-    GET_TALENT_ERROR = 15,
-    BUY_ITEMS = 16,
-    GET_ITEM_FROM_COLLECTION = 17,
-    GET_PLAYER_COLLECTION = 18,
-    GET_SHOP_LAYOUT = 19,
-    HOLIDAYS = 20,
-    GET_CHARACTER_SPECS = 21,
-    PRESTIGE_ERROR = 22,
-    ACTIVATE_CLASS_SPEC = 23,
-    ACTIVATE_CLASS_SPEC_ERROR = 24,
-    GET_TOOLTIPS = 25,
-    FORGET_TOOLTIP = 26,
-    GET_GAME_MODES = 27,
-    SET_GAME_MODES = 28,
-    SET_GAME_MODES_ERROR = 29,
-    END_GAME_MODES = 30,
-    COLLECTION_INIT = 31,
-    OUTFIT_COST = 32,
-    LOAD_XMOG_SET = 33,
-    LOAD_XMOG_SET_ERROR = 34,
-    SEARCH_XMOG = 35,
-    LOAD_XMOG = 36,
-    LOAD_MOUNTS = 37,
-    LOAD_PETS = 38,
-    LOAD_TOYS = 39,
-    LOAD_HEIRLOOM = 40,
-    MISSING_XMOG = 41,
-    PREVIEW_XMOG = 42,
-    PLAYER_XMOG = 43,
-    LEARN_MOUNT = 44,
-    USE_TOY = 45,
-    GET_XMOG_COST = 46,
-    APPLY_XMOG = 47,
-    REMOVE_XMOG_SET = 48,
-    SAVE_XMOG_SET = 49,
-    RENAME_XMOG_SET = 50,
-    MAX_OUTFITS = 51,
-    COLLECTION_SETUP_STARTED = 52,
-    COLLECTION_SETUP_FINISHED = 53,
-    ADD_XMOG = 54,
-    APPLY_XMOG_ERROR = 55
-};
-
-enum class ForgeError
-{
-    OK = 0,
-    UNKNOWN_SPELL = 1
-};
-
 
 enum SpellEffIndex
 {
@@ -139,47 +63,99 @@ enum Gender
 };
 
 // Race value is index in ChrRaces.dbc
-// EnumUtils: DESCRIBE THIS
 enum Races
-{
-    RACE_NONE               = 0,  // SKIP
-    RACE_HUMAN              = 1,  // TITLE Human
-    RACE_ORC                = 2,  // TITLE Orc
-    RACE_DWARF              = 3,  // TITLE Dwarf
-    RACE_NIGHTELF           = 4,  // TITLE Night Elf
-    RACE_UNDEAD_PLAYER      = 5,  // TITLE Undead
-    RACE_TAUREN             = 6,  // TITLE Tauren
-    RACE_GNOME              = 7,  // TITLE Gnome
-    RACE_TROLL              = 8,  // TITLE Troll
-    //RACE_GOBLIN             = 9,
-    RACE_BLOODELF           = 10, // TITLE Blood Elf
-    RACE_DRAENEI            = 11 //, TITLE Draenei
-    //RACE_FEL_ORC        = 12,
-    //RACE_NAGA           = 13,
-    //RACE_BROKEN         = 14,
-    //RACE_SKELETON       = 15,
-    //RACE_VRYKUL         = 16,
-    //RACE_TUSKARR        = 17,
-    //RACE_FOREST_TROLL   = 18,
-    //RACE_TAUNKA         = 19,
-    //RACE_NORTHREND_SKELETON = 20,
-    //RACE_ICE_TROLL      = 21
+{ 
+    RACE_NONE           = 0,
+    RACE_HUMAN          = 1,
+    RACE_ORC            = 2,
+    RACE_DWARF          = 3,
+    RACE_NIGHTELF       = 4,
+    RACE_UNDEAD_PLAYER  = 5,
+    RACE_TAUREN         = 6,
+    RACE_GNOME          = 7,
+    RACE_TROLL          = 8,
+    RACE_VULPERA        = 9,
+    RACE_BLOODELF       = 10,
+    RACE_DRAENEI        = 11,
+    RACE_WORGEN         = 12,
+    RACE_NIGHTBORNE     = 13,
+    RACE_PANDAREN       = 14,
+    RACE_VOIDELF        = 15,
+    RACE_EREDAR         = 16,
+    RACE_DRACKTYR         = 17,
+    RACE_ZANDALARI_TROLL   = 18,
+    RACE_OGRE        = 19,
+    RACE_DRAENEI_LIGHTFORGED = 20,
+    RACE_GOBLIN         = 21,
+	RACE_NAGA         = 22,
+	RACE_BROKEN         = 23,
+	RACE_TUSKARR         = 24,
+	RACE_FORESTROLL         = 25,
+	RACE_SKELETON         = 26,
+	RACE_DEMONHUNTERH         = 27,
+	RACE_ARAKOA         = 28,
+	RACE_TAUNKA         = 29,
+	RACE_FELORC         = 30,
+	RACE_KULTIRAN         = 31,
+	RACE_DEMONHUNTERA         = 32
+	
 };
 
 // max+1 for player race
-#define MAX_RACES         12
+#define MAX_RACES         33
 
 #define RACEMASK_ALL_PLAYABLE \
     ((1<<(RACE_HUMAN-1))   |(1<<(RACE_ORC-1))          |(1<<(RACE_DWARF-1))   | \
-    (1<<(RACE_NIGHTELF-1))|(1<<(RACE_UNDEAD_PLAYER-1))|(1<<(RACE_TAUREN-1))  | \
-    (1<<(RACE_GNOME-1))   |(1<<(RACE_TROLL-1))        |(1<<(RACE_BLOODELF-1))| \
-    (1<<(RACE_DRAENEI-1)))
+     (1<<(RACE_NIGHTELF-1))|(1<<(RACE_UNDEAD_PLAYER-1))|(1<<(RACE_TAUREN-1))  | \
+     (1<<(RACE_GNOME-1))   |(1<<(RACE_TROLL-1))        |(1<<(RACE_BLOODELF-1))| \
+     (1<<(RACE_VULPERA-1))   |(1<<(RACE_WORGEN-1))        |(1<<(RACE_NIGHTBORNE-1))   | \
+     (1<<(RACE_PANDAREN-1))   |(1<<(RACE_VOIDELF-1))        |(1<<(RACE_EREDAR-1))   | \
+     (1<<(RACE_DRACKTYR-1))   |(1<<(RACE_ZANDALARI_TROLL-1))        |(1<<(RACE_OGRE-1))   | \
+     (1<<(RACE_DRAENEI_LIGHTFORGED-1))   |(1<<(RACE_GOBLIN-1))  |(1<<(RACE_NAGA-1))   | \
+	 (1<<(RACE_BROKEN-1))   |(1<<(RACE_TUSKARR-1))          |(1<<(RACE_FORESTROLL-1))   | \
+	 (1<<(RACE_SKELETON-1))   |(1<<(RACE_DEMONHUNTERH-1))          |(1<<(RACE_ARAKOA-1))   | \
+	 (1<<(RACE_TAUNKA-1))   |(1<<(RACE_FELORC-1))          |(1<<(RACE_KULTIRAN-1))   | \
+	 (1<<(RACE_DEMONHUNTERA-1))   | \
+	 (1<<(RACE_DRAENEI-1)))
+
 
 #define RACEMASK_ALLIANCE \
-    ((1<<(RACE_HUMAN-1)) | (1<<(RACE_DWARF-1)) | (1<<(RACE_NIGHTELF-1)) | \
-    (1<<(RACE_GNOME-1)) | (1<<(RACE_DRAENEI-1)))
+    ((1<<(RACE_HUMAN-1))    | \
+     (1<<(RACE_DWARF-1))    | \
+     (1<<(RACE_NIGHTELF-1)) | \
+     (1<<(RACE_GNOME-1))    | \
+     (1<<(RACE_DRAENEI-1))  | \
+     (1<<(RACE_WORGEN-1))  | \
+     (1<<(RACE_VOIDELF-1))   | \
+     (1<<(RACE_OGRE-1))   | \
+	 (1<<(RACE_PANDAREN-1))   | \
+	 (1<<(RACE_FORESTROLL-1))   | \
+	 (1<<(RACE_SKELETON-1))   | \
+	 (1<<(RACE_TAUNKA-1))   | \
+	 (1<<(RACE_FELORC-1))   | \
+	 (1<<(RACE_KULTIRAN-1))   | \
+	 (1<<(RACE_DEMONHUNTERA-1))   | \
+	 (1<<(RACE_DRAENEI_LIGHTFORGED-1)))
+	 
+     
 
-#define RACEMASK_HORDE RACEMASK_ALL_PLAYABLE & ~RACEMASK_ALLIANCE
+#define RACEMASK_HORDE \
+    ((1<<(RACE_ORC-1))    | \
+     (1<<(RACE_UNDEAD_PLAYER-1))    | \
+     (1<<(RACE_TAUREN-1)) | \
+     (1<<(RACE_TROLL-1))    | \
+     (1<<(RACE_BLOODELF-1))  | \
+     (1<<(RACE_GOBLIN-1))  | \
+     (1<<(RACE_NIGHTBORNE-1))   | \
+	 (1<<(RACE_DRACKTYR-1))   | \
+     (1<<(RACE_ZANDALARI_TROLL-1))   | \
+	 (1<<(RACE_EREDAR-1))   | \
+	 (1<<(RACE_NAGA-1))   | \
+	 (1<<(RACE_BROKEN-1))   | \
+	 (1<<(RACE_TUSKARR-1))   | \
+	 (1<<(RACE_DEMONHUNTERH-1))   | \
+	 (1<<(RACE_ARAKOA-1))   | \
+	 (1<<(RACE_VULPERA-1)))
 
 // Class value is index in ChrClasses.dbc
 // EnumUtils: DESCRIBE THIS
@@ -1361,7 +1337,6 @@ enum AuraStateType
     //AURA_STATE_UNKNOWN21                  = 21,           //     | not used
     AURA_STATE_UNKNOWN22                    = 22,           // C  t| varius spells (63884, 50240)
     AURA_STATE_HEALTH_ABOVE_75_PERCENT      = 23,           // C   |
-    AURA_STATE_POWER_BELOW_50_PERCENT       = 24,           // C   |
 };
 
 #define PER_CASTER_AURA_STATE_MASK (\
@@ -1560,7 +1535,6 @@ enum Targets
     TARGET_UNK_DEST_AREA_UNK_107       = 107, // not enough info - only generic spells avalible
     TARGET_GAMEOBJECT_CONE             = 108,
     TARGET_DEST_UNK_110                = 110, // 1 spell
-    TARGET_UNIT_CASTER_AREA_SUMMONS    = 111,
     TOTAL_SPELL_TARGETS
 };
 

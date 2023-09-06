@@ -1433,6 +1433,17 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
         damageInfo->resist = dmgInfo.GetResist();
         damageInfo->damage = dmgInfo.GetDamage();
     }
+
+    // Aleist3r: Hijacked this to apply mage's Icy Propulsion talent proc
+    // probably a bit hacky and there may be better place to do this but hey, at least it works
+    if (crit)
+    {
+        Unit* caster = damageInfo->attacker;
+        if (spellInfo->SpellFamilyName & SPELLFAMILY_MAGE && (spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_MAGE_SINGLETARGET
+            || spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_MAGE_SINGLETARGET || spellInfo->SpellFamilyFlags[2] & SPELLFAMILYFLAG2_MAGE_SINGLETARGET))
+            if (caster->HasAura(1290050) && caster->HasSpellCooldown(12472))   // 1290050 - Icy Propulsion Talent; 12472 - Icy Veins
+                caster->ToPlayer()->ModifySpellCooldown(12472, -1000);
+    }
 }
 
 void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss, Spell const* spell /*= nullptr*/)
@@ -12322,7 +12333,7 @@ float Unit::SpellTakenCritChance(Unit const* caster, SpellInfo const* spellProto
                         {
                             // Shatter
                             case 911:
-                                modChance += 16;
+                                modChance += 21;
                                 [[fallthrough]];
                             case 910:
                                 modChance += 17;

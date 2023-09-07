@@ -608,8 +608,19 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
     //     weaponMaxDamage += GetAmmoDPS() * attackSpeedMod;
     // }
 
-    minDamage = ((weaponMinDamage + baseValue) * basePct + totalValue) * totalPct;
-    maxDamage = ((weaponMaxDamage + baseValue) * basePct + totalValue) * totalPct;
+    float damageMinAdd = 0.0f;
+    float damageMaxAdd = 0.0f;
+
+    if (HasAura(1040001))
+    {
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(1040001);
+        float damagePercent = spellInfo->Effects[EFFECT_1].BasePoints * 0.01f;
+        damageMinAdd = ((weaponMinDamage + baseValue) * basePct + totalValue) * totalPct * damagePercent;
+        damageMaxAdd = ((weaponMaxDamage + baseValue) * basePct + totalValue) * totalPct * damagePercent;
+    }
+
+    minDamage = ((weaponMinDamage + baseValue) * basePct + totalValue) * totalPct + damageMinAdd;
+    maxDamage = ((weaponMaxDamage + baseValue) * basePct + totalValue) * totalPct + damageMaxAdd;
 
     // pussywizard: crashfix (casting negative to uint => min > max => assertion in urand)
     if (minDamage < 0.0f || minDamage > 1000000000.0f)

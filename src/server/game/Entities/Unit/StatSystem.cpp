@@ -614,7 +614,7 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
     if (HasAura(1040001))
     {
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(1040001);
-        float damagePercent = spellInfo->Effects[EFFECT_1].BasePoints * 0.01f;
+        float damagePercent = (spellInfo->Effects[EFFECT_1].BasePoints + spellInfo->Effects[EFFECT_1].DieSides) * 0.01f;
         damageMinAdd = ((weaponMinDamage + baseValue) * basePct + totalValue) * totalPct * damagePercent;
         damageMaxAdd = ((weaponMaxDamage + baseValue) * basePct + totalValue) * totalPct * damagePercent;
     }

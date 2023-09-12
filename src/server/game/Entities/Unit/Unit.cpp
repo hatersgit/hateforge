@@ -11710,7 +11710,7 @@ float Unit::SpellPctDamageModsDone(Unit* victim, SpellInfo const* spellProto, Da
             // Ice Lance
             if (spellProto->SpellIconID == 186)
             {
-                if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
+                if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this) || owner->HasAura(1290012))
                 {
                     // Glyph of Ice Lance
                     if (owner->HasAura(56377) && victim->GetLevel() > owner->GetLevel())

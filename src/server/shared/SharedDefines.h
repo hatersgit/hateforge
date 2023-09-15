@@ -234,28 +234,33 @@ enum Races
 // EnumUtils: DESCRIBE THIS
 enum Classes
 {
-    CLASS_NONE          = 0, // SKIP
-    CLASS_WARRIOR       = 1, // TITLE Warrior
-    CLASS_PALADIN       = 2, // TITLE Paladin
-    CLASS_HUNTER        = 3, // TITLE Hunter
-    CLASS_ROGUE         = 4, // TITLE Rogue
-    CLASS_PRIEST        = 5, // TITLE Priest
-    CLASS_DEATH_KNIGHT  = 6, // TITLE Death Knight
-    CLASS_SHAMAN        = 7, // TITLE Shaman
-    CLASS_MAGE          = 8, // TITLE Mage
-    CLASS_WARLOCK       = 9, // TITLE Warlock
-    //CLASS_UNK           = 10,
-    CLASS_DRUID         = 11 // TITLE Druid
+    CLASS_NONE          = 0,  // SKIP
+    CLASS_WARRIOR       = 1,  // TITLE Warrior
+    CLASS_PALADIN       = 2,  // TITLE Paladin
+    CLASS_HUNTER        = 3,  // TITLE Hunter
+    CLASS_ROGUE         = 4,  // TITLE Rogue
+    CLASS_PRIEST        = 5,  // TITLE Priest
+    CLASS_DEATH_KNIGHT  = 6,  // TITLE Death Knight
+    CLASS_SHAMAN        = 7,  // TITLE Shaman
+    CLASS_MAGE          = 8,  // TITLE Mage
+    CLASS_WARLOCK       = 9,  // TITLE Warlock
+    CLASS_MONK          = 10, // TITLE Monk
+    CLASS_DRUID         = 11, // TITLE Druid
+    CLASS_TINKER        = 12, // TITLE Tinker
+    CLASS_DEMONHUNTER   = 13, // TITLE DemonHunter
+    CLASS_BARD          = 14, // TITLE Bard
 };
 
 // max+1 for player class
-#define MAX_CLASSES       12
+#define MAX_CLASSES       15
 
 #define CLASSMASK_ALL_PLAYABLE \
-    ((1<<(CLASS_WARRIOR-1))|(1<<(CLASS_PALADIN-1))|(1<<(CLASS_HUNTER-1))| \
-    (1<<(CLASS_ROGUE-1))  |(1<<(CLASS_PRIEST-1)) |(1<<(CLASS_SHAMAN-1))| \
-    (1<<(CLASS_MAGE-1))   |(1<<(CLASS_WARLOCK-1))|(1<<(CLASS_DRUID-1)) | \
-    (1<<(CLASS_DEATH_KNIGHT-1)))
+    ((1<<(CLASS_WARRIOR-1))      |(1<<(CLASS_PALADIN-1))       |(1<<(CLASS_HUNTER-1))     | \
+    (1<<(CLASS_ROGUE-1))         |(1<<(CLASS_PRIEST-1))        |(1<<(CLASS_SHAMAN-1))     | \
+    (1<<(CLASS_MAGE-1))          |(1<<(CLASS_WARLOCK-1))       |(1<<(CLASS_DRUID-1))      | \
+    (1<<(CLASS_DEATH_KNIGHT-1))  |(1<<(CLASS_MONK-1))          |(1<<(CLASS_TINKER-1))     | \
+    (1<<(CLASS_DEMONHUNTER-1))   |(1<<(CLASS_BARD-1)))
+
 
 // valid classes for creature_template.unit_class
 enum UnitClass

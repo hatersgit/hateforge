@@ -295,7 +295,6 @@ void AddSC_Gamemode()
     sTopicRouter->AddHandler(new SetGameModesHandler());
     sTopicRouter->AddHandler(new EndGameModesHandler());
 
-    RegisterSpellScript(spell_insanity);
     new PS_Gamemode();
     new WS_Gamemode();
 }

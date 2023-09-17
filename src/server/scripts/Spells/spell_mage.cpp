@@ -1524,8 +1524,8 @@ void AddSC_mage_spell_scripts()
     RegisterSpellScript(spell_mage_master_of_elements);
     RegisterSpellScript(spell_mage_polymorph_cast_visual);
     RegisterSpellScript(spell_mage_summon_water_elemental);
-    RegisterSpellScript(spell_mage_fingers_of_frost_proc_aura);    // Probably not needed anymore
-    RegisterSpellScript(spell_mage_fingers_of_frost_proc);         // And this one as well
+   // RegisterSpellScript(spell_mage_fingers_of_frost_proc_aura);    // Probably not needed anymore
+   // RegisterSpellScript(spell_mage_fingers_of_frost_proc);         // And this one as well
     
     // Duskhaven
     RegisterSpellScript(spell_mage_icy_veins);

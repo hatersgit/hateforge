@@ -252,41 +252,41 @@ public:
 
 };
 
-class spell_insanity : public AuraScript
-{
-    PrepareAuraScript(spell_insanity);
+// class spell_insanity : public AuraScript
+// {
+    // PrepareAuraScript(spell_insanity);
 
-    std::vector<uint32> curses = {
-        1910005,
-        1910006,
-        1910007,
-        1910008,
-        1910009,
-        1910010
-    };
+    // std::vector<uint32> curses = {
+        // 1910005,
+        // 1910006,
+        // 1910007,
+        // 1910008,
+        // 1910009,
+        // 1910010
+    // };
 
-    void ChangeCurse(AuraEffect const* effect)
-    {
-        if (Unit* caster = GetCaster())
-        {
-            Player* player;
-            if (caster->IsPlayer())
-                player = caster->ToPlayer();
-            else
-                return;
+    // void ChangeCurse(AuraEffect const* effect)
+    // {
+        // if (Unit* caster = GetCaster())
+        // {
+            // Player* player;
+            // if (caster->IsPlayer())
+                // player = caster->ToPlayer();
+            // else
+                // return;
 
-            for (auto c : curses)
-                player->RemoveAura(c);
+            // for (auto c : curses)
+                // player->RemoveAura(c);
 
-            player->AddAura(curses[irand(0, 5)], player);
-        }
-    }
+            // player->AddAura(curses[irand(0, 5)], player);
+        // }
+    // }
 
-    void Register() override
-    {
-        OnEffectPeriodic += AuraEffectPeriodicFn(spell_insanity::ChangeCurse, EFFECT_2, SPELL_AURA_PERIODIC_DUMMY);
-    }
-};
+    // void Register() override
+    // {
+        // OnEffectPeriodic += AuraEffectPeriodicFn(spell_insanity::ChangeCurse, EFFECT_2, SPELL_AURA_PERIODIC_DUMMY);
+    // }
+// };
 
 
 void AddSC_Gamemode()

@@ -420,7 +420,7 @@ enum ItemSubclassArmor
     ITEM_SUBCLASS_ARMOR_IDOL                    = 8,
     ITEM_SUBCLASS_ARMOR_TOTEM                   = 9,
     ITEM_SUBCLASS_ARMOR_SIGIL                   = 10,
-    ITEM_SUBCLASS_INSTRUMENT                    = 11
+    ITEM_SUBCLASS_ARMOR_INSTRUMENT              = 11
 };
 
 #define MAX_ITEM_SUBCLASS_ARMOR                   11

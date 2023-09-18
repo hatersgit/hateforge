@@ -2276,10 +2276,13 @@ InventoryResult Player::CanUseItem(Item* pItem, bool not_loading) const
 
                     switch (getClass())
                     {
+                        case CLASS_TINKER:
+                        case CLASS_MONK:
                         case CLASS_HUNTER:
                         case CLASS_SHAMAN:
                             allowEquip = (itemSkill == SKILL_MAIL);
                             break;
+                        case CLASS_DEATH_KNIGHT:
                         case CLASS_PALADIN:
                         case CLASS_WARRIOR:
                             allowEquip = (itemSkill == SKILL_PLATE_MAIL);

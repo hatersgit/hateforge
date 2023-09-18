@@ -2933,6 +2933,10 @@ enum QuestSort
     QUEST_SORT_NOBLEGARDEN         = 374,
     QUEST_SORT_PILGRIMS_BOUNTY     = 375,
     QUEST_SORT_LOVE_IS_IN_THE_AIR  = 376,
+    QUEST_SORT_MONK                = 377,
+    QUEST_SORT_TINKER              = 378,
+    QUEST_SORT_DEMONHUNTER         = 379,
+    QUEST_SORT_BARD                = 380,
 };
 
 inline uint8 ClassByQuestSort(int32 QuestSort)
@@ -2959,6 +2963,14 @@ inline uint8 ClassByQuestSort(int32 QuestSort)
             return CLASS_DRUID;
         case QUEST_SORT_DEATH_KNIGHT:
             return CLASS_DEATH_KNIGHT;
+        case QUEST_SORT_MONK:
+            return CLASS_MONK;
+        case QUEST_SORT_TINKER:
+            return CLASS_TINKER;
+        case QUEST_SORT_DEMONHUNTER:
+            return CLASS_DEMONHUNTER;
+        case QUEST_SORT_BARD:
+            return CLASS_BARD;
     }
     return 0;
 }
@@ -3116,10 +3128,11 @@ enum SkillType
     SKILL_PET_WASP                 = 785,
     SKILL_PET_EXOTIC_RHINO         = 786,
     SKILL_PET_EXOTIC_CORE_HOUND    = 787,
-    SKILL_PET_EXOTIC_SPIRIT_BEAST  = 788
+    SKILL_PET_EXOTIC_SPIRIT_BEAST  = 788,
+    SKILL_WARGLAIVES               = 789
 };
 
-#define MAX_SKILL_TYPE               789
+#define MAX_SKILL_TYPE               790
 
 inline SkillType SkillByLockType(LockType locktype)
 {
@@ -3646,7 +3659,11 @@ enum SpellFamilyNames
     // 14 - unused
     SPELLFAMILY_DEATHKNIGHT = 15,
     // 16 - unused
-    SPELLFAMILY_PET         = 17
+    SPELLFAMILY_PET         = 17,
+    SPELLFAMILY_MONK        = 18,
+    SPELLFAMILY_TINKER      = 19,
+    SPELLFAMILY_DEMONHUNTER = 20,
+    SPELLFAMILY_BARD        = 21
 };
 
 enum TradeStatus

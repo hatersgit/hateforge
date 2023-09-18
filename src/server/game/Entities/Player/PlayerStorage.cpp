@@ -265,6 +265,10 @@ uint8 Player::FindEquipSlot(ItemTemplate const* proto, uint32 slot, bool swap) c
                     if (playerClass == CLASS_DEATH_KNIGHT)
                         slots[0] = EQUIPMENT_SLOT_RANGED;
                     break;
+                case ITEM_SUBCLASS_ARMOR_INSTRUMENR:
+                    if (playerClass == CLASS_BARD)
+                        slots[0] = EQUIPMENT_SLOT_RANGED;
+                    break;
             }
             break;
         }

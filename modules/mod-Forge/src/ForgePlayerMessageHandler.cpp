@@ -272,6 +272,6 @@ void AddForgePlayerMessageHandler()
     sTopicRouter->AddHandler(new PrestigeHandler(cache, cm));
     sTopicRouter->AddHandler(new ActivateClassSpecHandler(cache, cm));
 
-    new UseSkillBook();
+    // new UseSkillBook();
     new ForgeCacheCommands();
 }

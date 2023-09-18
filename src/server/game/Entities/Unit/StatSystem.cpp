@@ -355,6 +355,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
 
         switch (getClass())
         {
+            case CLASS_TINKER:
             case CLASS_HUNTER:
                 val2 = level * 2.0f + GetStat(STAT_AGILITY) - 10.0f;
                 break;
@@ -389,6 +390,10 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
             case CLASS_WARRIOR:
                 val2 = level * 3.0f + GetStat(STAT_STRENGTH) * 2.0f - 20.0f;
                 break;
+            case CLASS_BARD:    // Aleist3r: new classes may need some spec-related formulas different for dps and healers
+            case CLASS_MONK:    // for now using same as rogue
+            case CLASS_DEMONHUNTER:
+            case CLASS_TINKER:
             case CLASS_HUNTER:
             case CLASS_SHAMAN:
             case CLASS_ROGUE:
@@ -715,8 +720,11 @@ const float m_diminishing_k[MAX_CLASSES] =
     0.9880f,  // Shaman
     0.9830f,  // Mage
     0.9830f,  // Warlock
-    0.0f,     // ??
-    0.9720f   // Druid
+    0.9880f,  // Monk
+    0.9720f,  // Druid
+    0.9830f,  // Tinker
+    0.9880f,  // Demon Hunter
+    0.9830f   // Bard
 };
 
 float Player::GetMissPercentageFromDefence() const
@@ -732,8 +740,11 @@ float Player::GetMissPercentageFromDefence() const
         16.00f,     // Shaman  //?
         16.00f,     // Mage    //?
         16.00f,     // Warlock //?
-        0.0f,       // ??
-        16.00f      // Druid   //?
+        16.00f,     // Monk
+        16.00f,     // Druid   //?
+        16.00f,     // Tinker
+        16.00f,     // Demon Hunter
+        16.00f      // Bard
     };
 
     float diminishing = 0.0f, nondiminishing = 0.0f;
@@ -759,8 +770,11 @@ void Player::UpdateParryPercentage()
         145.560408f,    // Shaman
         0.0f,           // Mage
         0.0f,           // Warlock
-        0.0f,           // ??
-        0.0f            // Druid
+        145.560408f,    // Monk
+        0.0f,           // Druid
+        145.560408f,    // Tinker
+        145.560408f,    // Demon Hunter
+        0.0f            // Bard
     };
 
     // No parry
@@ -805,8 +819,11 @@ void Player::UpdateDodgePercentage()
         145.560408f,    // Shaman
         150.375940f,    // Mage
         150.375940f,    // Warlock
-        0.0f,           // ??
-        116.890707f     // Druid
+        145.560408f,    // Monk
+        116.890707f,    // Druid
+        145.560408f,    // Tinker
+        145.560408f,    // Demon Hunter
+        145.560408f,    // Bard
     };
 
     float diminishing = 0.0f, nondiminishing = 0.0f;

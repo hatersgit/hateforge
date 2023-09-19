@@ -171,7 +171,11 @@ public:
             CLASS_SHAMAN,
             CLASS_MAGE,
             CLASS_WARLOCK,
-            CLASS_DRUID
+            CLASS_MONK,
+            CLASS_DRUID,
+            CLASS_TINKER,
+            CLASS_DEMONHUNTER,
+            CLASS_BARD
         };
 
         TALENT_POINT_TYPES =

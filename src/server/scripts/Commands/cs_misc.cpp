@@ -2248,7 +2248,7 @@ public:
             case RACE_TUSKARR:
 				raceStr = "Tuskarr";
 				break;
-            case RACE_FORESTROLL:
+            case RACE_FOREST_TROLL:
 				raceStr = "Forest Troll";
 				break;
             case RACE_SKELETON:

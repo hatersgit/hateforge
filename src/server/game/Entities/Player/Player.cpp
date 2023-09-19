@@ -16695,14 +16695,18 @@ std::string Player::GetPlayerName()
 
     switch (getClass())
     {
+        case CLASS_BARD:         color = "|cff007F6B"; break;
         case CLASS_DEATH_KNIGHT: color = "|cffC41F3B"; break;
+        case CLASS_DEMONHUNTER:  color = "|cffA330C9"; break;
         case CLASS_DRUID:        color = "|cffFF7D0A"; break;
         case CLASS_HUNTER:       color = "|cffABD473"; break;
         case CLASS_MAGE:         color = "|cff69CCF0"; break;
+        case CLASS_MONK:         color = "|cffFF6F61"; break;
         case CLASS_PALADIN:      color = "|cffF58CBA"; break;
         case CLASS_PRIEST:       color = "|cffFFFFFF"; break;
         case CLASS_ROGUE:        color = "|cffFFF569"; break;
         case CLASS_SHAMAN:       color = "|cff0070DE"; break;
+        case CLASS_TINKER:       color = "|cffCD7F32"; break;
         case CLASS_WARLOCK:      color = "|cff9482C9"; break;
         case CLASS_WARRIOR:      color = "|cffC79C6E"; break;
     }

@@ -39,8 +39,30 @@ AC_API_EXPORT EnumText EnumUtils<Races>::ToString(Races value)
         case RACE_TAUREN: return { "RACE_TAUREN", "Tauren", "" };
         case RACE_GNOME: return { "RACE_GNOME", "Gnome", "" };
         case RACE_TROLL: return { "RACE_TROLL", "Troll", "" };
+        case RACE_VULPERA: return { "RACE_VULPERA", "Vulpera", "" };
         case RACE_BLOODELF: return { "RACE_BLOODELF", "Blood Elf", "" };
         case RACE_DRAENEI: return { "RACE_DRAENEI", "Draenei", "" };
+        case RACE_WORGEN: return { "RACE_WORGEN", "", "" };
+        case RACE_NIGHTBORNE: return { "RACE_NIGHTBORNE", "Nightborne", "" };
+		case RACE_PANDAREN: return { "RACE_PANDAREN", "Pandaren", "" };
+		case RACE_VOIDELF: return { "RACE_VOIDELF", "Void Elf", "" };
+		case RACE_EREDAR: return { "RACE_EREDAR", "Eredar", "" };
+		case RACE_DRACTYR: return { "RACE_DRACTYR", "Dracthyr", "" };
+		case RACE_ZANDALARI_TROLL: return { "RACE_ZANDALARI_TROLL", "Zandalari Troll", "" };
+		case RACE_OGRE: return { "RACE_OGRE", "Ogre", "" };
+		case RACE_DRAENEI_LIGHTFORGED: return { "RACE_DRAENEI_LIGHTFORGED", "Lightforged Draenei", "" };
+		case RACE_GOBLIN: return { "RACE_GOBLIN", "Goblin", "" };
+		case RACE_NAGA: return { "RACE_NAGA", "Naga", "" };
+		case RACE_BROKEN: return { "RACE_BROKEN", "Broken", "" };
+		case RACE_TUSKARR: return { "RACE_TUSKARR", "Tuskarr", "" };
+		case RACE_FOREST_TROLL: return { "RACE_FOREST_TROLL", "Forest Troll", "" };
+		case RACE_SKELETON: return { "RACE_SKELETON", "Skeleton", "" };
+		case RACE_DEMONHUNTERH: return { "RACE_DEMONHUNTERH", "Blood Elf", "" };
+		case RACE_ARAKKOA: return { "RACE_ARAKKOA", "Arakkoa", "" };
+		case RACE_TAUNKA: return { "RACE_TAUNKA", "Taunka", "" };
+		case RACE_FELORC: return { "RACE_FELORC", "Fel Orc", "" };
+		case RACE_KULTIRAN: return { "RACE_KULTIRAN", "Kul Tiran", "" };
+		case RACE_DEMONHUNTERA: return { "RACE_DEMONHUNTERA", "Night Elf", "" };
         default: throw std::out_of_range("value");
     }
 }
@@ -61,8 +83,30 @@ AC_API_EXPORT Races EnumUtils<Races>::FromIndex(size_t index)
         case 5: return RACE_TAUREN;
         case 6: return RACE_GNOME;
         case 7: return RACE_TROLL;
-        case 8: return RACE_BLOODELF;
-        case 9: return RACE_DRAENEI;
+        case 8: return RACE_VULPERA;
+        case 9: return RACE_BLOODELF;
+        case 10: return RACE_DRAENEI;
+        case 11: return RACE_WORGEN;
+		case 12: return RACE_NIGHTBORNE;
+		case 13: return RACE_PANDAREN;
+		case 14: return RACE_VOIDELF;
+		case 15: return RACE_EREDAR;
+		case 16: return RACE_DRACTYR;
+		case 17: return RACE_ZANDALARI_TROLL;
+		case 18: return RACE_OGRE;
+		case 19: return RACE_DRAENEI_LIGHTFORGED;
+		case 20: return RACE_GOBLIN;
+		case 21: return RACE_NAGA;
+		case 22: return RACE_BROKEN;
+		case 23: return RACE_TUSKARR;
+		case 24: return RACE_FOREST_TROLL;
+		case 25: return RACE_SKELETON;
+		case 26: return RACE_DEMONHUNTERH;
+		case 27: return RACE_ARAKKOA;
+		case 28: return RACE_TAUNKA;
+		case 29: return RACE_FELORC;
+		case 30: return RACE_KULTIRAN;
+		case 31: return RACE_DEMONHUNTERA;
         default: throw std::out_of_range("index");
     }
 }
@@ -80,8 +124,30 @@ AC_API_EXPORT size_t EnumUtils<Races>::ToIndex(Races value)
         case RACE_TAUREN: return 5;
         case RACE_GNOME: return 6;
         case RACE_TROLL: return 7;
-        case RACE_BLOODELF: return 8;
-        case RACE_DRAENEI: return 9;
+        case RACE_VULPERA: return 8;
+        case RACE_BLOODELF: return 9;
+        case RACE_DRAENEI: return 10;
+        case RACE_WORGEN: return 11;
+		case RACE_NIGHTBORNE: return 12;
+		case RACE_PANDAREN: return 13;
+		case RACE_VOIDELF: return 14;
+		case RACE_EREDAR: return 15;
+		case RACE_DRACTYR: return 16;
+		case RACE_ZANDALARI_TROLL: return 17;
+		case RACE_OGRE: return 18;
+		case RACE_DRAENEI_LIGHTFORGED: return 19;
+		case RACE_GOBLIN: return 20;
+		case RACE_NAGA: return 21;
+		case RACE_BROKEN: return 22;
+		case RACE_TUSKARR: return 23;
+		case RACE_FOREST_TROLL: return 24;
+		case RACE_SKELETON: return 25;
+		case RACE_DEMONHUNTERH: return 26;
+		case RACE_ARAKKOA: return 27;
+		case RACE_TAUNKA: return 28;
+		case RACE_FELORC: return 29;
+		case RACE_KULTIRAN: return 30;
+		case RACE_DEMONHUNTERA: return 31;
         default: throw std::out_of_range("value");
     }
 }
@@ -103,13 +169,17 @@ AC_API_EXPORT EnumText EnumUtils<Classes>::ToString(Classes value)
         case CLASS_SHAMAN: return { "CLASS_SHAMAN", "Shaman", "" };
         case CLASS_MAGE: return { "CLASS_MAGE", "Mage", "" };
         case CLASS_WARLOCK: return { "CLASS_WARLOCK", "Warlock", "" };
+        case CLASS_MONK: return { "CLASS_MONK", "Monk", ""};
         case CLASS_DRUID: return { "CLASS_DRUID", "Druid", "" };
+        case CLASS_TINKER: return { "CLASS_TINKER", "Tinker", "" };
+        case CLASS_DEMONHUNTER: return { "CLASS_DEMONHUNTER", "Demon Hunter", "" };
+        case CLASS_BARD: return { "CLASS_BARD", "Bard", "" };
         default: throw std::out_of_range("value");
     }
 }
 
 template <>
-AC_API_EXPORT size_t EnumUtils<Classes>::Count() { return 10; }
+AC_API_EXPORT size_t EnumUtils<Classes>::Count() { return 14; }
 
 template <>
 AC_API_EXPORT Classes EnumUtils<Classes>::FromIndex(size_t index)
@@ -125,7 +195,11 @@ AC_API_EXPORT Classes EnumUtils<Classes>::FromIndex(size_t index)
         case 6: return CLASS_SHAMAN;
         case 7: return CLASS_MAGE;
         case 8: return CLASS_WARLOCK;
-        case 9: return CLASS_DRUID;
+        case 9: return CLASS_MONK;
+        case 10: return CLASS_DRUID;
+        case 11: return CLASS_TINKER;
+        case 12: return CLASS_DEMONHUNTER;
+        case 13: return CLASS_BARD;
         default: throw std::out_of_range("index");
     }
 }
@@ -144,7 +218,11 @@ AC_API_EXPORT size_t EnumUtils<Classes>::ToIndex(Classes value)
         case CLASS_SHAMAN: return 6;
         case CLASS_MAGE: return 7;
         case CLASS_WARLOCK: return 8;
-        case CLASS_DRUID: return 9;
+        case CLASS_MONK: return 9;
+        case CLASS_DRUID: return 10;
+        case CLASS_TINKER: return 11;
+        case CLASS_DEMONHUNTER: return 12;
+        case CLASS_BARD: return 13;
         default: throw std::out_of_range("value");
     }
 }
@@ -1807,6 +1885,7 @@ AC_API_EXPORT EnumText EnumUtils<AuraStateType>::ToString(AuraStateType value)
         case AURA_STATE_UNKNOWN19: return { "AURA_STATE_UNKNOWN19", "AURA_STATE_UNKNOWN19", "|" };
         case AURA_STATE_UNKNOWN22: return { "AURA_STATE_UNKNOWN22", "AURA_STATE_UNKNOWN22", "C  t| varius spells (63884, 50240)" };
         case AURA_STATE_HEALTH_ABOVE_75_PERCENT: return { "AURA_STATE_HEALTH_ABOVE_75_PERCENT", "AURA_STATE_HEALTH_ABOVE_75_PERCENT", "C   |" };
+        case AURA_STATE_POWER_BELOW_50_PERCENT: return { "AURA_STATE_POWER_BELOW_50_PERCENT", "AURA_STATE_POWER_BELOW_50_PERCENT", "C   |" };
         default: throw std::out_of_range("value");
     }
 }
@@ -1837,6 +1916,7 @@ AC_API_EXPORT AuraStateType EnumUtils<AuraStateType>::FromIndex(size_t index)
         case 15: return AURA_STATE_UNKNOWN19;
         case 16: return AURA_STATE_UNKNOWN22;
         case 17: return AURA_STATE_HEALTH_ABOVE_75_PERCENT;
+        case 18: return AURA_STATE_POWER_BELOW_50_PERCENT;
         default: throw std::out_of_range("index");
     }
 }
@@ -1864,6 +1944,7 @@ AC_API_EXPORT size_t EnumUtils<AuraStateType>::ToIndex(AuraStateType value)
         case AURA_STATE_UNKNOWN19: return 15;
         case AURA_STATE_UNKNOWN22: return 16;
         case AURA_STATE_HEALTH_ABOVE_75_PERCENT: return 17;
+        case AURA_STATE_POWER_BELOW_50_PERCENT: return 18;
         default: throw std::out_of_range("value");
     }
 }

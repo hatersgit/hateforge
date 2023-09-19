@@ -722,7 +722,7 @@ const float m_diminishing_k[MAX_CLASSES] =
     0.9830f,  // Warlock
     0.9880f,  // Monk
     0.9720f,  // Druid
-    0.9830f,  // Tinker
+    0.9560f,  // Tinker
     0.9880f,  // Demon Hunter
     0.9830f   // Bard
 };
@@ -772,7 +772,7 @@ void Player::UpdateParryPercentage()
         0.0f,           // Warlock
         145.560408f,    // Monk
         0.0f,           // Druid
-        145.560408f,    // Tinker
+        47.003525f,     // Tinker
         145.560408f,    // Demon Hunter
         145.560408f     // Bard
     };
@@ -821,9 +821,9 @@ void Player::UpdateDodgePercentage()
         150.375940f,    // Warlock
         145.560408f,    // Monk
         116.890707f,    // Druid
-        145.560408f,    // Tinker
+        88.129021f,     // Tinker
         145.560408f,    // Demon Hunter
-        145.560408f,    // Bard
+        150.375940f,    // Bard
     };
 
     float diminishing = 0.0f, nondiminishing = 0.0f;

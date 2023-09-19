@@ -774,7 +774,7 @@ void Player::UpdateParryPercentage()
         0.0f,           // Druid
         145.560408f,    // Tinker
         145.560408f,    // Demon Hunter
-        0.0f            // Bard
+        145.560408f     // Bard
     };
 
     // No parry

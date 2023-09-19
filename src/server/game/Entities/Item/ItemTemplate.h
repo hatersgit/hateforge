@@ -423,7 +423,7 @@ enum ItemSubclassArmor
     ITEM_SUBCLASS_ARMOR_INSTRUMENT              = 11
 };
 
-#define MAX_ITEM_SUBCLASS_ARMOR                   11
+#define MAX_ITEM_SUBCLASS_ARMOR                   12
 
 enum ItemSubclassReagent
 {
@@ -558,7 +558,7 @@ enum ItemSubclassGlyph
     ITEM_SUBCLASS_GLYPH_BARD                    = 14
 };
 
-#define MAX_ITEM_SUBCLASS_GLYPH                   12
+#define MAX_ITEM_SUBCLASS_GLYPH                   15
 
 const uint32 MaxItemSubclassValues[MAX_ITEM_CLASS] =
 {

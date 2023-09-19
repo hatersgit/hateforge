@@ -138,39 +138,39 @@ enum Gender
 // Race value is index in ChrRaces.dbc
 enum Races
 { 
-    RACE_NONE           = 0,
-    RACE_HUMAN          = 1,
-    RACE_ORC            = 2,
-    RACE_DWARF          = 3,
-    RACE_NIGHTELF       = 4,
-    RACE_UNDEAD_PLAYER  = 5,
-    RACE_TAUREN         = 6,
-    RACE_GNOME          = 7,
-    RACE_TROLL          = 8,
-    RACE_VULPERA        = 9,
-    RACE_BLOODELF       = 10,
-    RACE_DRAENEI        = 11,
-    RACE_WORGEN         = 12,
-    RACE_NIGHTBORNE     = 13,
-    RACE_PANDAREN       = 14,
-    RACE_VOIDELF        = 15,
-    RACE_EREDAR         = 16,
-    RACE_DRACKTYR         = 17,
-    RACE_ZANDALARI_TROLL   = 18,
-    RACE_OGRE        = 19,
+    RACE_NONE                = 0,
+    RACE_HUMAN               = 1,
+    RACE_ORC                 = 2,
+    RACE_DWARF               = 3,
+    RACE_NIGHTELF            = 4,
+    RACE_UNDEAD_PLAYER       = 5,
+    RACE_TAUREN              = 6,
+    RACE_GNOME               = 7,
+    RACE_TROLL               = 8,
+    RACE_VULPERA             = 9,
+    RACE_BLOODELF            = 10,
+    RACE_DRAENEI             = 11,
+    RACE_WORGEN              = 12,
+    RACE_NIGHTBORNE          = 13,
+    RACE_PANDAREN            = 14,
+    RACE_VOIDELF             = 15,
+    RACE_EREDAR              = 16,
+    RACE_DRACTYR             = 17,
+    RACE_ZANDALARI_TROLL     = 18,
+    RACE_OGRE                = 19,
     RACE_DRAENEI_LIGHTFORGED = 20,
-    RACE_GOBLIN         = 21,
-	RACE_NAGA         = 22,
-	RACE_BROKEN         = 23,
-	RACE_TUSKARR         = 24,
-	RACE_FORESTROLL         = 25,
-	RACE_SKELETON         = 26,
-	RACE_DEMONHUNTERH         = 27,
-	RACE_ARAKOA         = 28,
-	RACE_TAUNKA         = 29,
-	RACE_FELORC         = 30,
-	RACE_KULTIRAN         = 31,
-	RACE_DEMONHUNTERA         = 32
+    RACE_GOBLIN              = 21,
+	RACE_NAGA                = 22,
+	RACE_BROKEN              = 23,
+	RACE_TUSKARR             = 24,
+	RACE_FOREST_TROLL        = 25,
+	RACE_SKELETON            = 26,
+	RACE_DEMONHUNTERH        = 27,
+	RACE_ARAKKOA             = 28,
+	RACE_TAUNKA              = 29,
+	RACE_FELORC              = 30,
+	RACE_KULTIRAN            = 31,
+	RACE_DEMONHUNTERA        = 32
 	
 };
 
@@ -183,13 +183,12 @@ enum Races
      (1<<(RACE_GNOME-1))   |(1<<(RACE_TROLL-1))        |(1<<(RACE_BLOODELF-1))| \
      (1<<(RACE_VULPERA-1))   |(1<<(RACE_WORGEN-1))        |(1<<(RACE_NIGHTBORNE-1))   | \
      (1<<(RACE_PANDAREN-1))   |(1<<(RACE_VOIDELF-1))        |(1<<(RACE_EREDAR-1))   | \
-     (1<<(RACE_DRACKTYR-1))   |(1<<(RACE_ZANDALARI_TROLL-1))        |(1<<(RACE_OGRE-1))   | \
+     (1<<(RACE_DRACTYR-1))   |(1<<(RACE_ZANDALARI_TROLL-1))        |(1<<(RACE_OGRE-1))   | \
      (1<<(RACE_DRAENEI_LIGHTFORGED-1))   |(1<<(RACE_GOBLIN-1))  |(1<<(RACE_NAGA-1))   | \
-	 (1<<(RACE_BROKEN-1))   |(1<<(RACE_TUSKARR-1))          |(1<<(RACE_FORESTROLL-1))   | \
-	 (1<<(RACE_SKELETON-1))   |(1<<(RACE_DEMONHUNTERH-1))          |(1<<(RACE_ARAKOA-1))   | \
+	 (1<<(RACE_BROKEN-1))   |(1<<(RACE_TUSKARR-1))          |(1<<(RACE_FOREST_TROLL-1))   | \
+	 (1<<(RACE_SKELETON-1))   |(1<<(RACE_DEMONHUNTERH-1))          |(1<<(RACE_ARAKKOA-1))   | \
 	 (1<<(RACE_TAUNKA-1))   |(1<<(RACE_FELORC-1))          |(1<<(RACE_KULTIRAN-1))   | \
-	 (1<<(RACE_DEMONHUNTERA-1))   | \
-	 (1<<(RACE_DRAENEI-1)))
+	 (1<<(RACE_DEMONHUNTERA-1))   | (1<<(RACE_DRAENEI-1)))
 
 
 #define RACEMASK_ALLIANCE \

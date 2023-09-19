@@ -2200,12 +2200,78 @@ public:
             case RACE_TROLL:
                 raceStr = "Troll";
                 break;
+            case RACE_VULPERA:
+                raceStr = "Vulpera";
+                break;
             case RACE_BLOODELF:
                 raceStr = "Blood Elf";
                 break;
             case RACE_DRAENEI:
                 raceStr = "Draenei";
                 break;
+            case RACE_WORGEN:
+                raceStr = "Worgen";
+                break;
+            case RACE_NIGHTBORNE:
+                raceStr = "Nightborne";
+                break;
+            case RACE_PANDAREN:
+                raceStr = "Pandaren";
+                break;
+            case RACE_VOIDELF:
+                raceStr = "Void Elf";
+                break;
+            case RACE_EREDAR:
+                raceStr = "Eredar";
+                break;
+            case RACE_DRACTHYR:
+                raceStr = "Dracthyr";
+                break;
+            case RACE_ZANDALARI_TROLL:
+                raceStr = "Zandalari Troll";
+                break;
+            case RACE_OGRE:
+                raceStr = "Ogre";
+                break;
+            case RACE_DRAENEI_LIGHTFORGED:
+                raceStr = "Lightforged Draenei";
+                break;
+            case RACE_GOBLIN:
+                raceStr = "Goblin";
+                break;
+            case RACE_NAGA:
+				raceStr = "Naga";
+				break;
+            case RACE_BROKEN:
+				raceStr = "Broken";
+				break;
+            case RACE_TUSKARR:
+				raceStr = "Tuskarr";
+				break;
+            case RACE_FORESTROLL:
+				raceStr = "Forest Troll";
+				break;
+            case RACE_SKELETON:
+				raceStr = "Skeleton";
+				break;
+            case RACE_DEMONHUNTERH:
+				raceStr = "Blood Elf";
+				break;
+            case RACE_ARAKKOA:
+				raceStr = "Arakkoa";
+				break;
+            case RACE_TAUNKA:
+				raceStr = "Taunka";
+				break;
+            case RACE_FELORC:
+				raceStr = "Fel Orc";
+				break;
+            case RACE_KULTIRAN:
+				raceStr = "Kul Tiran";
+				break;
+            case RACE_DEMONHUNTERA:
+				raceStr = "Night Elf";
+				break;
         }
 
         switch (classid)
@@ -2237,8 +2303,20 @@ public:
             case CLASS_WARLOCK:
                 classStr = "Warlock";
                 break;
+            case CLASS_MONK:
+                classStr = "Monk";
+                break;
             case CLASS_DRUID:
                 classStr = "Druid";
+                break;
+            case CLASS_TINKER:
+                classStr = "Tinker";
+                break;
+            case CLASS_DEMONHUNTER:
+                classStr = "Demon Hunter";
+                break;
+            case CLASS_BARD:
+                classStr = "Bard";
                 break;
         }
 

@@ -597,7 +597,7 @@ uint32 Item::GetSpell()
                     return 5011;
                 case ITEM_SUBCLASS_WEAPON_WAND:
                     return 5009;
-                case ITEM_SUBCLASS_WEAPON_WARGLAIVE
+                case ITEM_SUBCLASS_WEAPON_WARGLAIVE:
                     return 1410000;
                 default:
                     return 0;

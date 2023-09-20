@@ -2277,12 +2277,12 @@ InventoryResult Player::CanUseItem(Item* pItem, bool not_loading) const
 
                     switch (getClass())
                     {
-                        case CLASS_TINKER:
                         case CLASS_MONK:
                         case CLASS_HUNTER:
                         case CLASS_SHAMAN:
                             allowEquip = (itemSkill == SKILL_MAIL);
                             break;
+                        case CLASS_TINKER:
                         case CLASS_DEATH_KNIGHT:
                         case CLASS_PALADIN:
                         case CLASS_WARRIOR:
@@ -2460,10 +2460,10 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
                 [[fallthrough]];
             case CLASS_DEATH_KNIGHT:
             case CLASS_PALADIN:
+                case CLASS_TINKER:
                 subclassToCompare = ITEM_SUBCLASS_ARMOR_PLATE;
                 break;
             case CLASS_MONK:
-            case CLASS_TINKER:
             case CLASS_HUNTER:
             case CLASS_SHAMAN:
                 subclassToCompare = ITEM_SUBCLASS_ARMOR_MAIL;

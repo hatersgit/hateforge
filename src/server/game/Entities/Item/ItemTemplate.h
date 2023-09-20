@@ -372,7 +372,7 @@ enum ItemSubclassWeapon
     ITEM_SUBCLASS_WEAPON_POLEARM                = 6,
     ITEM_SUBCLASS_WEAPON_SWORD                  = 7,
     ITEM_SUBCLASS_WEAPON_SWORD2                 = 8,
-    ITEM_SUBCLASS_WEAPON_obsolete               = 9,
+    ITEM_SUBCLASS_WEAPON_WARGLAIVE              = 9,
     ITEM_SUBCLASS_WEAPON_STAFF                  = 10,
     ITEM_SUBCLASS_WEAPON_EXOTIC                 = 11,
     ITEM_SUBCLASS_WEAPON_EXOTIC2                = 12,
@@ -419,10 +419,11 @@ enum ItemSubclassArmor
     ITEM_SUBCLASS_ARMOR_LIBRAM                  = 7,
     ITEM_SUBCLASS_ARMOR_IDOL                    = 8,
     ITEM_SUBCLASS_ARMOR_TOTEM                   = 9,
-    ITEM_SUBCLASS_ARMOR_SIGIL                   = 10
+    ITEM_SUBCLASS_ARMOR_SIGIL                   = 10,
+    ITEM_SUBCLASS_ARMOR_INSTRUMENT              = 11
 };
 
-#define MAX_ITEM_SUBCLASS_ARMOR                   11
+#define MAX_ITEM_SUBCLASS_ARMOR                   12
 
 enum ItemSubclassReagent
 {
@@ -550,10 +551,14 @@ enum ItemSubclassGlyph
     ITEM_SUBCLASS_GLYPH_SHAMAN                  = 7,
     ITEM_SUBCLASS_GLYPH_MAGE                    = 8,
     ITEM_SUBCLASS_GLYPH_WARLOCK                 = 9,
-    ITEM_SUBCLASS_GLYPH_DRUID                   = 11
+    ITEM_SUBCLASS_GLYPH_MONK                    = 10,
+    ITEM_SUBCLASS_GLYPH_DRUID                   = 11,
+    ITEM_SUBCLASS_GLYPH_TINKER                  = 12,
+    ITEM_SUBCLASS_GLYPH_DEMONHUNTER             = 13,
+    ITEM_SUBCLASS_GLYPH_BARD                    = 14
 };
 
-#define MAX_ITEM_SUBCLASS_GLYPH                   12
+#define MAX_ITEM_SUBCLASS_GLYPH                   15
 
 const uint32 MaxItemSubclassValues[MAX_ITEM_CLASS] =
 {
@@ -808,7 +813,7 @@ struct ItemTemplate
         const static uint32 item_weapon_skills[MAX_ITEM_SUBCLASS_WEAPON] =
         {
             SKILL_AXES,     SKILL_2H_AXES,  SKILL_BOWS,          SKILL_GUNS,      SKILL_MACES,
-            SKILL_2H_MACES, SKILL_POLEARMS, SKILL_SWORDS,        SKILL_2H_SWORDS, 0,
+            SKILL_2H_MACES, SKILL_POLEARMS, SKILL_SWORDS,        SKILL_2H_SWORDS, SKILL_WARGLAIVES,
             SKILL_STAVES,   0,              0,                   SKILL_FIST_WEAPONS,   0,
             SKILL_DAGGERS,  SKILL_THROWN,   SKILL_ASSASSINATION, SKILL_CROSSBOWS, SKILL_WANDS,
             SKILL_FISHING

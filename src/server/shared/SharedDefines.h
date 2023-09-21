@@ -183,7 +183,7 @@ enum Races
      (1<<(RACE_GNOME-1))   |(1<<(RACE_TROLL-1))        |(1<<(RACE_BLOODELF-1))| \
      (1<<(RACE_VULPERA-1))   |(1<<(RACE_WORGEN-1))        |(1<<(RACE_NIGHTBORNE-1))   | \
      (1<<(RACE_PANDAREN-1))   |(1<<(RACE_VOIDELF-1))        |(1<<(RACE_EREDAR-1))   | \
-     (1<<(RACE_DRACTYR-1))   |(1<<(RACE_ZANDALARI_TROLL-1))        |(1<<(RACE_OGRE-1))   | \
+     (1<<(RACE_DRACTHYR-1))   |(1<<(RACE_ZANDALARI_TROLL-1))        |(1<<(RACE_OGRE-1))   | \
      (1<<(RACE_DRAENEI_LIGHTFORGED-1))   |(1<<(RACE_GOBLIN-1))  |(1<<(RACE_NAGA-1))   | \
 	 (1<<(RACE_BROKEN-1))   |(1<<(RACE_TUSKARR-1))          |(1<<(RACE_FOREST_TROLL-1))   | \
 	 (1<<(RACE_SKELETON-1))   |(1<<(RACE_DEMONHUNTERH-1))          |(1<<(RACE_ARAKKOA-1))   | \
@@ -201,7 +201,7 @@ enum Races
      (1<<(RACE_VOIDELF-1))   | \
      (1<<(RACE_OGRE-1))   | \
 	 (1<<(RACE_PANDAREN-1))   | \
-	 (1<<(RACE_FORESTROLL-1))   | \
+	 (1<<(RACE_FOREST_TROLL-1))   | \
 	 (1<<(RACE_SKELETON-1))   | \
 	 (1<<(RACE_TAUNKA-1))   | \
 	 (1<<(RACE_FELORC-1))   | \
@@ -219,14 +219,14 @@ enum Races
      (1<<(RACE_BLOODELF-1))  | \
      (1<<(RACE_GOBLIN-1))  | \
      (1<<(RACE_NIGHTBORNE-1))   | \
-	 (1<<(RACE_DRACKTYR-1))   | \
+	 (1<<(RACE_DRACTHYR-1))   | \
      (1<<(RACE_ZANDALARI_TROLL-1))   | \
 	 (1<<(RACE_EREDAR-1))   | \
 	 (1<<(RACE_NAGA-1))   | \
 	 (1<<(RACE_BROKEN-1))   | \
 	 (1<<(RACE_TUSKARR-1))   | \
 	 (1<<(RACE_DEMONHUNTERH-1))   | \
-	 (1<<(RACE_ARAKOA-1))   | \
+	 (1<<(RACE_ARAKKOA-1))   | \
 	 (1<<(RACE_VULPERA-1)))
 
 // Class value is index in ChrClasses.dbc

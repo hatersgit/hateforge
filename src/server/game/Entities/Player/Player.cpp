@@ -16533,6 +16533,25 @@ uint32 Player::GetSpec(int8 spec)
 }
 
 // TODO: update Has[]Spec() commands after all specs are finalized
+bool Player::HasTankSpec()
+{
+    switch (GetSpec())
+    {
+        case TALENT_TREE_WARRIOR_PROTECTION:
+        case TALENT_TREE_PALADIN_PROTECTION:
+        case TALENT_TREE_DEATH_KNIGHT_BLOOD:
+        case TALENT_TREE_SHAMAN_WATCHER:
+        case TALENT_TREE_MONK_FELLOWSHIP:
+        case TALENT_TREE_DRUID_GUARDIAN:
+        case TALENT_TREE_TINKER_VANGUARD:
+        case TALENT_TREE_DEMONHUNTER_VENGEANCE:
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
+
 bool Player::HasMeleeSpec()
 {
     switch (GetSpec(GetActiveSpec()))

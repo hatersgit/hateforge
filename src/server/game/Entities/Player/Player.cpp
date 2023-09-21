@@ -608,8 +608,11 @@ bool Player::Create(ObjectGuid::LowType guidlow, CharacterCreateInfo* createInfo
     }
     else if (getPowerType() == POWER_RUNIC_POWER)
     {
-        SetPower(POWER_RUNE, 8);
-        SetMaxPower(POWER_RUNE, 8);
+        if (getClass() == CLASS_DEATH_KNIGHT)
+        {
+            SetPower(POWER_RUNE, 8);
+            SetMaxPower(POWER_RUNE, 8);
+        }
         SetPower(POWER_RUNIC_POWER, 0);
         SetMaxPower(POWER_RUNIC_POWER, 1000);
     }
@@ -1799,8 +1802,7 @@ void Player::RegenerateAll()
         }
 
         Regenerate(POWER_RAGE);
-        if (getClass() == CLASS_DEATH_KNIGHT)
-            Regenerate(POWER_RUNIC_POWER);
+        Regenerate(POWER_RUNIC_POWER);
 
         m_regenTimerCount -= 2000;
     }

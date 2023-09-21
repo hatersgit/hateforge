@@ -16532,24 +16532,7 @@ uint32 Player::GetSpec(int8 spec)
     return mostTalentTabId;
 }
 
-bool Player::HasTankSpec()
-{
-    switch (GetSpec())
-    {
-        case TALENT_TREE_WARRIOR_PROTECTION:
-        case TALENT_TREE_PALADIN_PROTECTION:
-        case TALENT_TREE_DEATH_KNIGHT_BLOOD:
-            return true;
-        case TALENT_TREE_DRUID_FERAL_COMBAT:
-            if (GetShapeshiftForm() == FORM_BEAR || GetShapeshiftForm() == FORM_DIREBEAR)
-                return true;
-            break;
-        default:
-            break;
-    }
-    return false;
-}
-
+// TODO: update Has[]Spec() commands after all specs are finalized
 bool Player::HasMeleeSpec()
 {
     switch (GetSpec(GetActiveSpec()))
@@ -16563,10 +16546,10 @@ bool Player::HasMeleeSpec()
         case TALENT_TREE_DEATH_KNIGHT_FROST:
         case TALENT_TREE_DEATH_KNIGHT_UNHOLY:
         case TALENT_TREE_SHAMAN_ENHANCEMENT:
-            return true;
+        case TALENT_TREE_MONK_ZEALOTRY:
         case TALENT_TREE_DRUID_FERAL_COMBAT:
-            if (GetShapeshiftForm() == FORM_CAT)
-                return true;
+        case TALENT_TREE_DEMONHUNTER_HAVOC:
+            return true;
         default:
             break;
     }
@@ -16577,6 +16560,10 @@ bool Player::HasCasterSpec()
 {
     switch (GetSpec(GetActiveSpec()))
     {
+        case TALENT_TREE_HUNTER_BEAST_MASTERY:
+        case TALENT_TREE_HUNTER_MARKSMANSHIP:
+        case TALENT_TREE_HUNTER_SURVIVAL:
+        case TALENT_TREE_PRIEST_INQUISITION:
         case TALENT_TREE_PRIEST_SHADOW:
         case TALENT_TREE_SHAMAN_ELEMENTAL:
         case TALENT_TREE_MAGE_ARCANE:
@@ -16586,9 +16573,7 @@ bool Player::HasCasterSpec()
         case TALENT_TREE_WARLOCK_DEMONOLOGY:
         case TALENT_TREE_WARLOCK_DESTRUCTION:
         case TALENT_TREE_DRUID_BALANCE:
-        case TALENT_TREE_HUNTER_BEAST_MASTERY:
-        case TALENT_TREE_HUNTER_MARKSMANSHIP:
-        case TALENT_TREE_HUNTER_SURVIVAL:
+        case TALENT_TREE_TINKER_SCRAPPER:
             return true;
         default:
             break;
@@ -16604,7 +16589,9 @@ bool Player::HasHealSpec()
         case TALENT_TREE_PRIEST_DISCIPLINE:
         case TALENT_TREE_PRIEST_HOLY:
         case TALENT_TREE_SHAMAN_RESTORATION:
+        case TALENT_TREE_MONK_RADIANCE:
         case TALENT_TREE_DRUID_RESTORATION:
+        case TALENT_TREE_TINKER_PHYSICIAN:
             return true;
         default:
             break;

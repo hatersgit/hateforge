@@ -20824,7 +20824,7 @@ void Unit::SendRemoveFromThreatListOpcode(HostileReference* pHostileReference)
 
 void Unit::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker)
 {
-    if (getClass != CLASS_WARRIOR || getClass != CLASS_DRUID)
+    if (getClass == CLASS_BARD)
         return;
 
     float addRage;

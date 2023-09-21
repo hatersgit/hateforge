@@ -10212,6 +10212,10 @@ void Unit::setPowerType(Powers new_powertype)
             SetMaxPower(POWER_HAPPINESS, uint32(std::ceil(GetCreatePowers(POWER_HAPPINESS) * powerMultiplier)));
             SetPower(POWER_HAPPINESS, uint32(std::ceil(GetCreatePowers(POWER_HAPPINESS) * powerMultiplier)));
             break;
+        case POWER_RUNIC_POWER:
+            SetMaxPower(POWER_RUNIC_POWER, uint32(std::ceil(GetCreatePowers(POWER_RUNIC_POWER) * powerMultiplier)));
+            SetPower(POWER_RUNIC_POWER, 0);
+            break;
     }
 
     if (Player const* player = ToPlayer())
@@ -20820,6 +20824,9 @@ void Unit::SendRemoveFromThreatListOpcode(HostileReference* pHostileReference)
 
 void Unit::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker)
 {
+    if (getClass != CLASS_WARRIOR || getClass != CLASS_DRUID)
+        return;
+
     float addRage;
 
     float rageconversion = ((0.0091107836f * GetLevel() * GetLevel()) + 3.225598133f * GetLevel()) + 4.2652911f;

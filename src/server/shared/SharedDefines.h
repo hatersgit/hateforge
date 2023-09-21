@@ -3128,10 +3128,25 @@ enum SkillType
     SKILL_PET_EXOTIC_RHINO         = 786,
     SKILL_PET_EXOTIC_CORE_HOUND    = 787,
     SKILL_PET_EXOTIC_SPIRIT_BEAST  = 788,
-    SKILL_WARGLAIVES               = 789
+    SKILL_WARGLAIVES               = 789,
+    SKILL_INQUISITION              = 790,
+    SKILL_WATCHER                  = 791,
+    SKILL_FELLOWSHIP               = 792
+    SKILL_RADIANCE                 = 793,
+    SKILL_ZEALOTRY                 = 794,
+    SKILL_GUARDIAN                 = 795,
+    SKILL_PHYSICIAN                = 796,
+    SKILL_SCRAPPER                 = 797,
+    SKILL_VANGUARD                 = 798,
+    SKILL_ANGUISH                  = 799,
+    SKILL_HAVOC                    = 800,
+    SKILL_VENGEANCE                = 801,
+    SKILL_BLADESONG                = 802,
+    SKILL_INSPIRATION              = 803,
+    SKILL_SONGWEAVER               = 804
 };
 
-#define MAX_SKILL_TYPE               790
+#define MAX_SKILL_TYPE               805
 
 inline SkillType SkillByLockType(LockType locktype)
 {

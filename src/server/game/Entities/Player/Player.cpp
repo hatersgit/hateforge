@@ -1891,8 +1891,16 @@ void Player::Regenerate(Powers power)
             {
                 if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
                 {
-                    float RageDecreaseRate = sWorld->getRate(RATE_POWER_RAGE_LOSS);
-                    addvalue += -20 * RageDecreaseRate;               // 2 rage by tick (= 2 seconds => 1 rage/sec)
+                    if (getClass() == CLASS_BARD)
+                    {
+                        float DiscordDecreaseRate = sWorld->getRate(RATE_POWER_DISCORD_LOSS);
+                        addvalue += -30 * DiscordDecreaseRate;
+                    }
+                    else
+                    {
+                        float RageDecreaseRate = sWorld->getRate(RATE_POWER_RAGE_LOSS);
+                        addvalue += -20 * RageDecreaseRate;               // 2 rage by tick (= 2 seconds => 1 rage/sec)
+                    }
                 }
             }
             break;

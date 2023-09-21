@@ -1911,8 +1911,42 @@ void Player::Regenerate(Powers power)
             {
                 if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
                 {
-                    float RunicPowerDecreaseRate = sWorld->getRate(RATE_POWER_RUNICPOWER_LOSS);
-                    addvalue += -30 * RunicPowerDecreaseRate;         // 3 RunicPower by tick
+                    if (getClass() == CLASS_PRIEST)
+                    {
+                        if (GetSpec() == TALENT_TREE_PRIEST_SHADOW)
+                        {
+                            float InsanityDecreaseRate = sWorld->getRate(RATE_POWER_INSANITY_LOSS);
+                            addvalue += -30 * InsanityDecreaseRate;
+                        }
+                        else if (GetSpec() == TALENT_TREE_PRIEST_INQUISITION)
+                        {
+                            float WrathDecreaseRate = sWorld->getRate(RATE_POWER_WRATH_LOSS);
+                            addvalue += -30 * WrathDecreaseRate;
+                        }
+                    }
+                    else if (getClass() == CLASS_TINKER)
+                    {
+                        if (GetSpec() != TALENT_TREE_TINKER_PHYSICIAN)
+                        {
+                            float BatteryGaugeDecreaseRate = sWorld->getRate(RATE_POWER_RUNICPOWER_LOSS);
+                            addvalue += -30 * BatteryGaugeDecreaseRate;
+                        }
+                    }
+                    else if (getClass() == CLASS_DEMONHUNTER)
+                    {
+                        float FuryDecreaseRate = sWorld->getRate(RATE_POWER_FURY_LOSS);
+                        addvalue += -30 * FuryDecreaseRate;
+                    }
+                    else if (getClass() == CLASS_BARD)
+                    {
+                        float HarmonyDecreaseRate = sWorld->getRate(RATE_POWER_HARMONY_LOSS);
+                        addvalue += -30 * HarmonyDecreaseRate;
+                    }
+                    else
+                    {
+                        float RunicPowerDecreaseRate = sWorld->getRate(RATE_POWER_RUNICPOWER_LOSS);
+                        addvalue += -30 * RunicPowerDecreaseRate;         // 3 RunicPower by tick
+                    }
                 }
             }
             break;

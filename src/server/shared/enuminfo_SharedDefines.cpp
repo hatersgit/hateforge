@@ -47,7 +47,7 @@ AC_API_EXPORT EnumText EnumUtils<Races>::ToString(Races value)
 		case RACE_PANDAREN: return { "RACE_PANDAREN", "Pandaren", "" };
 		case RACE_VOIDELF: return { "RACE_VOIDELF", "Void Elf", "" };
 		case RACE_EREDAR: return { "RACE_EREDAR", "Eredar", "" };
-		case RACE_DRACTYR: return { "RACE_DRACTYR", "Dracthyr", "" };
+		case RACE_DRACTHYR: return { "RACE_DRACTHYR", "Dracthyr", "" };
 		case RACE_ZANDALARI_TROLL: return { "RACE_ZANDALARI_TROLL", "Zandalari Troll", "" };
 		case RACE_OGRE: return { "RACE_OGRE", "Ogre", "" };
 		case RACE_DRAENEI_LIGHTFORGED: return { "RACE_DRAENEI_LIGHTFORGED", "Lightforged Draenei", "" };
@@ -91,7 +91,7 @@ AC_API_EXPORT Races EnumUtils<Races>::FromIndex(size_t index)
 		case 13: return RACE_PANDAREN;
 		case 14: return RACE_VOIDELF;
 		case 15: return RACE_EREDAR;
-		case 16: return RACE_DRACTYR;
+		case 16: return RACE_DRACTHYR;
 		case 17: return RACE_ZANDALARI_TROLL;
 		case 18: return RACE_OGRE;
 		case 19: return RACE_DRAENEI_LIGHTFORGED;
@@ -132,7 +132,7 @@ AC_API_EXPORT size_t EnumUtils<Races>::ToIndex(Races value)
 		case RACE_PANDAREN: return 13;
 		case RACE_VOIDELF: return 14;
 		case RACE_EREDAR: return 15;
-		case RACE_DRACTYR: return 16;
+		case RACE_DRACTHYR: return 16;
 		case RACE_ZANDALARI_TROLL: return 17;
 		case RACE_OGRE: return 18;
 		case RACE_DRAENEI_LIGHTFORGED: return 19;

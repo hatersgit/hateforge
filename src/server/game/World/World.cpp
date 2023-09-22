@@ -569,6 +569,50 @@ void World::LoadConfigSettings(bool reload)
     _rate_values[RATE_MISS_CHANCE_MULTIPLIER_TARGET_PLAYER]         = sConfigMgr->GetOption<float>("Rate.MissChanceMultiplier.TargetPlayer", 7.0f);
     _bool_configs[CONFIG_MISS_CHANCE_MULTIPLIER_ONLY_FOR_PLAYERS] = sConfigMgr->GetOption<bool>("Rate.MissChanceMultiplier.OnlyAffectsPlayer", false);
 
+    // Duskhaven custom player resources
+    _rate_values[RATE_POWER_BATTERYGAUGE_INCOME]            = sConfigMgr->GetOption<float>("Rate.BatteryGauge.Income", 1);
+    _rate_values[RATE_POWER_BATTERYGAUGE_LOSS] = sConfigMgr->GetOption<float>("Rate.BatteryGauge.Loss", 1);
+    if (_rate_values[RATE_POWER_BATTERYGAUGE_LOSS] < 0)
+    {
+        LOG_ERROR("server.loading", "Rate.BatteryGauge.Loss ({}) must be > 0. Using 1 instead.", _rate_values[RATE_POWER_BATTERYGAUGE_LOSS]);
+        _rate_values[RATE_POWER_BATTERYGAUGE_LOSS] = 1;
+    }
+    _rate_values[RATE_POWER_DISCORD_INCOME] = sConfigMgr->GetOption<float>("Rate.Discord.Income", 1);
+    _rate_values[RATE_POWER_DISCORD_LOSS] = sConfigMgr->GetOption<float>("Rate.Discord.Loss", 1);
+    if (_rate_values[RATE_POWER_DISCORD_LOSS] < 0)
+    {
+        LOG_ERROR("server.loading", "Rate.Discord.Loss ({}) must be > 0. Using 1 instead.", _rate_values[RATE_POWER_DISCORD_LOSS]);
+        _rate_values[RATE_POWER_DISCORD_LOSS] = 1;
+    }
+    _rate_values[RATE_POWER_FURY_INCOME] = sConfigMgr->GetOption<float>("Rate.Fury.Income", 1);
+    _rate_values[RATE_POWER_FURY_LOSS] = sConfigMgr->GetOption<float>("Rate.Fury.Loss", 1);
+    if (_rate_values[RATE_POWER_FURY_LOSS] < 0)
+    {
+        LOG_ERROR("server.loading", "Rate.Fury.Loss ({}) must be > 0. Using 1 instead.", _rate_values[RATE_POWER_FURY_LOSS]);
+        _rate_values[RATE_POWER_FURY_LOSS] = 1;
+    }
+    _rate_values[RATE_POWER_HARMONY_INCOME] = sConfigMgr->GetOption<float>("Rate.Harmony.Income", 1);
+    _rate_values[RATE_POWER_HARMONY_LOSS] = sConfigMgr->GetOption<float>("Rate.Harmony.Loss", 1);
+    if (_rate_values[RATE_POWER_HARMONY_LOSS] < 0)
+    {
+        LOG_ERROR("server.loading", "Rate.Harmony.Loss ({}) must be > 0. Using 1 instead.", _rate_values[RATE_POWER_HARMONY_LOSS]);
+        _rate_values[RATE_POWER_HARMONY_LOSS] = 1;
+    }
+    _rate_values[RATE_POWER_INSANITY_INCOME] = sConfigMgr->GetOption<float>("Rate.Insanity.Income", 1);
+    _rate_values[RATE_POWER_INSANITY_LOSS] = sConfigMgr->GetOption<float>("Rate.Insanity.Loss", 1);
+    if (_rate_values[RATE_POWER_INSANITY_LOSS] < 0)
+    {
+        LOG_ERROR("server.loading", "Rate.Insanity.Loss ({}) must be > 0. Using 1 instead.", _rate_values[RATE_POWER_INSANITY_LOSS]);
+        _rate_values[RATE_POWER_INSANITY_LOSS] = 1;
+    }
+    _rate_values[RATE_POWER_WRATH_INCOME] = sConfigMgr->GetOption<float>("Rate.Wrath.Income", 1);
+    _rate_values[RATE_POWER_WRATH_LOSS] = sConfigMgr->GetOption<float>("Rate.Wrath.Loss", 1);
+    if (_rate_values[RATE_POWER_WRATH_LOSS] < 0)
+    {
+        LOG_ERROR("server.loading", "Rate.Wrath.Loss ({}) must be > 0. Using 1 instead.", _rate_values[RATE_POWER_WRATH_LOSS]);
+        _rate_values[RATE_POWER_WRATH_LOSS] = 1;
+    }
+
     _rate_values[RATE_TALENT]                               = sConfigMgr->GetOption<float>("Rate.Talent", 1.0f);
     if (_rate_values[RATE_TALENT] < 0.0f)
     {

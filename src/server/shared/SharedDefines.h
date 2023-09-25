@@ -243,11 +243,11 @@ enum Classes
     CLASS_SHAMAN        = 7,  // TITLE Shaman
     CLASS_MAGE          = 8,  // TITLE Mage
     CLASS_WARLOCK       = 9,  // TITLE Warlock
-    CLASS_MONK          = 10, // TITLE Monk
     CLASS_DRUID         = 11, // TITLE Druid
-    CLASS_TINKER        = 12, // TITLE Tinker
-    CLASS_DEMONHUNTER   = 13, // TITLE DemonHunter
-    CLASS_BARD          = 14, // TITLE Bard
+	CLASS_MONK          = 12, // TITLE Monk
+    CLASS_TINKER        = 13, // TITLE Tinker
+    CLASS_DEMONHUNTER   = 14, // TITLE DemonHunter
+    CLASS_BARD          = 15, // TITLE Bard
 };
 
 // max+1 for player class

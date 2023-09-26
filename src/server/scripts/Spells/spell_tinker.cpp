@@ -9,6 +9,6 @@ enum TinkerSpells
 {
 };
 
-AddSC_tinker_spell_scripts()
+void AddSC_tinker_spell_scripts()
 {
 }

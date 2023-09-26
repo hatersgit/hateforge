@@ -155,7 +155,7 @@ enum Races
     RACE_PANDAREN            = 14,
     RACE_VOIDELF             = 15,
     RACE_EREDAR              = 16,
-    RACE_DRACTYR             = 17,
+    RACE_DRACTHYR            = 17,
     RACE_ZANDALARI_TROLL     = 18,
     RACE_OGRE                = 19,
     RACE_DRAENEI_LIGHTFORGED = 20,
@@ -243,15 +243,15 @@ enum Classes
     CLASS_SHAMAN        = 7,  // TITLE Shaman
     CLASS_MAGE          = 8,  // TITLE Mage
     CLASS_WARLOCK       = 9,  // TITLE Warlock
-    CLASS_MONK          = 10, // TITLE Monk
     CLASS_DRUID         = 11, // TITLE Druid
-    CLASS_TINKER        = 12, // TITLE Tinker
-    CLASS_DEMONHUNTER   = 13, // TITLE DemonHunter
-    CLASS_BARD          = 14, // TITLE Bard
+	CLASS_MONK          = 12, // TITLE Monk
+    CLASS_TINKER        = 13, // TITLE Tinker
+    CLASS_DEMONHUNTER   = 14, // TITLE DemonHunter
+    CLASS_BARD          = 15, // TITLE Bard
 };
 
 // max+1 for player class
-#define MAX_CLASSES       15
+#define MAX_CLASSES       16
 
 #define CLASSMASK_ALL_PLAYABLE \
     ((1<<(CLASS_WARRIOR-1))      |(1<<(CLASS_PALADIN-1))       |(1<<(CLASS_HUNTER-1))     | \
@@ -3131,7 +3131,7 @@ enum SkillType
     SKILL_WARGLAIVES               = 789,
     SKILL_INQUISITION              = 790,
     SKILL_WATCHER                  = 791,
-    SKILL_FELLOWSHIP               = 792
+    SKILL_FELLOWSHIP               = 792,
     SKILL_RADIANCE                 = 793,
     SKILL_ZEALOTRY                 = 794,
     SKILL_GUARDIAN                 = 795,
@@ -3143,7 +3143,7 @@ enum SkillType
     SKILL_VENGEANCE                = 801,
     SKILL_BLADESONG                = 802,
     SKILL_INSPIRATION              = 803,
-    SKILL_SONGWEAVER               = 804
+    SKILL_SONGWEAVER               = 804,
 };
 
 #define MAX_SKILL_TYPE               805

@@ -155,7 +155,7 @@ enum Races
     RACE_PANDAREN            = 14,
     RACE_VOIDELF             = 15,
     RACE_EREDAR              = 16,
-    RACE_DRACTYR             = 17,
+    RACE_DRACTHYR            = 17,
     RACE_ZANDALARI_TROLL     = 18,
     RACE_OGRE                = 19,
     RACE_DRAENEI_LIGHTFORGED = 20,
@@ -3131,7 +3131,7 @@ enum SkillType
     SKILL_WARGLAIVES               = 789,
     SKILL_INQUISITION              = 790,
     SKILL_WATCHER                  = 791,
-    SKILL_FELLOWSHIP               = 792
+    SKILL_FELLOWSHIP               = 792,
     SKILL_RADIANCE                 = 793,
     SKILL_ZEALOTRY                 = 794,
     SKILL_GUARDIAN                 = 795,
@@ -3143,7 +3143,7 @@ enum SkillType
     SKILL_VENGEANCE                = 801,
     SKILL_BLADESONG                = 802,
     SKILL_INSPIRATION              = 803,
-    SKILL_SONGWEAVER               = 804
+    SKILL_SONGWEAVER               = 804,
 };
 
 #define MAX_SKILL_TYPE               805

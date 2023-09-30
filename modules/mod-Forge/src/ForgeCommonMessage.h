@@ -31,6 +31,11 @@ public:
     std::string BuildTree(Player*, CharacterPointType pointType, std::list<ForgeTalentTab*> tabs);
     void ApplyKnownForgeSpells(Player*);
     bool CanLearnTalent(Player*, uint32, uint32);
+    // hater: transmog
+    /*void SendCollections(Player*);
+    std::string SendCollections(Player*, uint32, std::string);*/
+    void SendXmogSet(Player*, uint8 /*set id*/);
+    void SendXmogSets(Player*);
 private:
 
     std::string DoBuildRanks(std::unordered_map<uint32, ForgeCharacterTalent*>& spec, Player* player, std::string clientMsg, uint32 tabId);

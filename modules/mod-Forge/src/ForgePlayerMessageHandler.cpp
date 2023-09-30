@@ -25,6 +25,12 @@
 #include <ForgeCache.cpp>
 #include <ForgeCacheCommands.cpp>
 #include <ActivateClassSpecHandler.cpp>
+#include <GetCollectionsHandler.cpp>
+#include <ApplyTransmogHandler.cpp>
+#include <GetTransmogHandler.cpp>
+#include <GetTransmogSetsHandler.cpp>
+#include <SaveTransmogSetHandler.cpp>
+#include <unordered_map>
 
 // Add player scripts
 class ForgePlayerMessageHandler : public PlayerScript
@@ -271,6 +277,11 @@ void AddForgePlayerMessageHandler()
     sTopicRouter->AddHandler(new UpdateSpecHandler(cache));
     sTopicRouter->AddHandler(new PrestigeHandler(cache, cm));
     sTopicRouter->AddHandler(new ActivateClassSpecHandler(cache, cm));
+    sTopicRouter->AddHandler(new GetCollectionsHandler(cache, cm));
+    sTopicRouter->AddHandler(new ApplyTransmogHandler(cache, cm));
+    sTopicRouter->AddHandler(new SaveTransmogSetHandler(cache, cm));
+    sTopicRouter->AddHandler(new GetTransmogSetsHandler(cache, cm));
+    sTopicRouter->AddHandler(new GetTransmogHandler(cache, cm));
 
     // new UseSkillBook();
     new ForgeCacheCommands();

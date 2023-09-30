@@ -214,7 +214,6 @@ struct ForgeAddonMessage
     std::string message;
 };
 
-typedef std::array<std::unordered_set<uint32>, TRANSMOG_TYPE_COUNT> AppearanceContainer;
 struct PresetData
 {
     std::string name;
@@ -936,7 +935,6 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_PET_SLOTS               = 37,
     PLAYER_LOGIN_QUERY_LOAD_SPELL_CHARGES           = 38,
     PLAYER_LOGIN_QUERY_LOAD_TRANSMOG,
-    PLAYER_LOGIN_QUERY_LOAD_TRANSMOG_SETS,
     MAX_PLAYER_LOGIN_QUERY
 };
 
@@ -2678,6 +2676,7 @@ public:
     void SendSystemMessage(std::string_view msg, bool escapeCharacters = false);
 
     BasicEvent* pendingTransmogCheck = nullptr;
+    typedef std::array<std::unordered_set<uint32>, EQUIPMENT_SLOT_END> AppearanceContainer;
     AppearanceContainer transmogrification_appearances;
     PresetMapType presetMap;
     std::string GetDebugInfo() const override;

@@ -207,9 +207,9 @@ bool ForgeCommonMessage::CanLearnTalent(Player* player, uint32 tabId, uint32 spe
         if (ft->RequiredLevel > player->getLevel())
             return false;
 
-		if (ft->TabPointReq > spec->PointsSpent[tabId])
+        if (ft->TabPointReq > spec->PointsSpent[tabId])
             return false;
-		
+
         if (curPoints->Sum < ft->RankCost)
             return false;
         

@@ -4882,6 +4882,86 @@ void AuraEffect::HandleAuraModAttackPowerOfArmor(AuraApplication const* aurApp, 
     if (target->GetTypeId() == TYPEID_PLAYER)
         target->ToPlayer()->UpdateAttackPowerAndDamage(false);
 }
+
+/********************************/
+/***         SPELL POWER      ***/
+/********************************/
+void AuraEffect::HandleAuraModSpellPower(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (target->GetTypeId() == TYPEID_PLAYER)
+    {
+        int32 spellPowerBonus = GetAmount();
+        target->ToPlayer()->ApplySpellPowerBonus(spellPowerBonus, apply);
+    }
+}
+
+void AuraEffect::HandleAuraModSpellPowerPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+    int32 spellPowerBonus = 0;
+
+    if (target->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (apply)
+            spellPowerBonus = int32(CalculatePct(target->ToPlayer()->GetBaseSpellPowerBonus(), float(GetAmount())));
+        else
+            spellPowerBonus = int32(target->ToPlayer()->GetBaseSpellPowerBonus()*10/(100+GetAmount()));
+
+        target->ToPlayer()->ApplySpellPowerBonus(spellPowerBonus, apply);
+    }
+}
+
+void AuraEffect::HandleAuraModSpellPowerOfStatPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+    int32 spellPowerBonus = 0;
+
+    if (GetMiscValue() < -1 || GetMiscValue() > 4)
+    {
+        LOG_ERROR("spells.aura.effect", "WARNING: Misc Value for SPELL_AURA_MOD_SPELL_POWER_OF_STAT_PERCENT not valid");
+        return;
+    }
+
+    for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
+        if (GetMiscValue() == i || GetMiscValue() == -1)
+            spellPowerBonus = int32(CalculatePct(target->GetStat(Stats(i)), GetAmount()));
+
+    if (target->GetTypeId() == TYPEID_PLAYER)
+        target->ToPlayer()->ApplySpellPowerBonus(spellPowerBonus, apply);
+}
+
+void AuraEffect::HandleAuraModSpellPowerOfCombatRatingPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (GetMiscValue() < 0 || GetMiscValue() > 24)
+    {
+        LOG_ERROR("spells.aura.effect", "WARNING: Misc Value for SPELL_AURA_MOD_SPELL_POWER_OF_RATING_PERCENT not valid");
+        return;
+    }
+
+    for (uint32 i = CR_WEAPON_SKILL; i < MAX_COMBAT_RATING; ++i)
+        if (GetMiscValue() == i && target->GetTypeId() == TYPEID_PLAYER)
+        {
+            int32 spellPowerBonus = int32(CalculatePct(target->ToPlayer()->GetRatingBonusValue(CombatRating(i)), GetAmount()));
+            target->ToPlayer()->ApplySpellPowerBonus(spellPowerBonus, apply);
+        }
+}
+
 /********************************/
 /***        DAMAGE BONUS      ***/
 /********************************/

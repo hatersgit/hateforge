@@ -4917,7 +4917,11 @@ void AuraEffect::HandleAuraModSpellPowerPercent(AuraApplication const* aurApp, u
         if (apply)
             spellPowerBonus = int32(CalculatePct(target->ToPlayer()->GetBaseSpellPowerBonus(), float(GetAmount())));
         else
-            spellPowerBonus = int32(target->ToPlayer()->GetBaseSpellPowerBonus()*10/(100+GetAmount()));
+        {
+            int32 temp = target->ToPlayer()->GetBaseSpellPowerBonus();
+            float mult = (GetAmount() + 100) * 0.01f;
+            spellPowerBonus = int32(temp - (temp / mult));
+        }
 
         target->ToPlayer()->ApplySpellPowerBonus(spellPowerBonus, apply);
     }

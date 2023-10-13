@@ -4788,6 +4788,9 @@ void AuraEffect::HandleModRating(AuraApplication const* aurApp, uint8 mode, bool
     for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
         if (GetMiscValue() & (1 << rating))
             target->ToPlayer()->ApplyRatingMod(CombatRating(rating), GetAmount(), apply);
+
+    // Aleist3r: ugly hack to actually correctly update SPELL_AURA_MOD_SPELL_POWER_OF_RATING_PERCENT
+    target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
 }
 
 void AuraEffect::HandleModRatingFromStat(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -4804,6 +4807,9 @@ void AuraEffect::HandleModRatingFromStat(AuraApplication const* aurApp, uint8 mo
     for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
         if (GetMiscValue() & (1 << rating))
             target->ToPlayer()->ApplyRatingMod(CombatRating(rating), 0, apply);
+
+    // Aleist3r: ugly hack here as well
+    target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
 }
 
 /********************************/
@@ -4897,11 +4903,10 @@ void AuraEffect::HandleAuraModSpellPower(AuraApplication const* aurApp, uint8 mo
 
     Unit* target = aurApp->GetTarget();
 
-    if (target->GetTypeId() == TYPEID_PLAYER)
-    {
-        int32 spellPowerBonus = GetAmount();
-        target->ToPlayer()->ApplySpellPowerBonus(spellPowerBonus, apply);
-    }
+    if (target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
 }
 
 void AuraEffect::HandleAuraModSpellPowerPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -4910,21 +4915,11 @@ void AuraEffect::HandleAuraModSpellPowerPercent(AuraApplication const* aurApp, u
         return;
 
     Unit* target = aurApp->GetTarget();
-    int32 spellPowerBonus = 0;
 
-    if (target->GetTypeId() == TYPEID_PLAYER)
-    {
-        if (apply)
-            spellPowerBonus = int32(CalculatePct(target->ToPlayer()->GetBaseSpellPowerBonus(), float(GetAmount())));
-        else
-        {
-            int32 temp = target->ToPlayer()->GetBaseSpellPowerBonus();
-            float mult = (GetAmount() + 100) * 0.01f;
-            spellPowerBonus = int32(temp - (temp / mult));
-        }
+    if (target->GetTypeId() != TYPEID_PLAYER)
+        return;
 
-        target->ToPlayer()->ApplySpellPowerBonus(spellPowerBonus, apply);
-    }
+    target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
 }
 
 void AuraEffect::HandleAuraModSpellPowerOfStatPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -4933,20 +4928,11 @@ void AuraEffect::HandleAuraModSpellPowerOfStatPercent(AuraApplication const* aur
         return;
 
     Unit* target = aurApp->GetTarget();
-    int32 spellPowerBonus = 0;
 
-    if (GetMiscValue() < -1 || GetMiscValue() > 4)
-    {
-        LOG_ERROR("spells.aura.effect", "WARNING: Misc Value for SPELL_AURA_MOD_SPELL_POWER_OF_STAT_PERCENT not valid");
+    if (target->GetTypeId() != TYPEID_PLAYER)
         return;
-    }
 
-    for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
-        if (GetMiscValue() == i || GetMiscValue() == -1)
-            spellPowerBonus = int32(CalculatePct(target->GetStat(Stats(i)), GetAmount()));
-
-    if (target->GetTypeId() == TYPEID_PLAYER)
-        target->ToPlayer()->ApplySpellPowerBonus(spellPowerBonus, apply);
+    target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
 }
 
 void AuraEffect::HandleAuraModSpellPowerOfCombatRatingPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -4956,18 +4942,10 @@ void AuraEffect::HandleAuraModSpellPowerOfCombatRatingPercent(AuraApplication co
 
     Unit* target = aurApp->GetTarget();
 
-    if (GetMiscValue() < 0 || GetMiscValue() > 24)
-    {
-        LOG_ERROR("spells.aura.effect", "WARNING: Misc Value for SPELL_AURA_MOD_SPELL_POWER_OF_RATING_PERCENT not valid");
+    if (target->GetTypeId() != TYPEID_PLAYER)
         return;
-    }
 
-    for (uint32 i = CR_WEAPON_SKILL; i < MAX_COMBAT_RATING; ++i)
-        if (GetMiscValue() == i && target->GetTypeId() == TYPEID_PLAYER)
-        {
-            int32 spellPowerBonus = int32(CalculatePct(target->ToPlayer()->GetRatingBonusValue(CombatRating(i)), GetAmount()));
-            target->ToPlayer()->ApplySpellPowerBonus(spellPowerBonus, apply);
-        }
+    target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
 }
 
 /********************************/

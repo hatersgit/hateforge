@@ -65,6 +65,7 @@ enum class ForgeTopic
     SET_GAME_MODES = 28,
     SET_GAME_MODES_ERROR = 29,
     END_GAME_MODES = 30,
+
     COLLECTION_INIT = 31,
     GET_XMOG_SETS = 32,
     LOAD_XMOG_SET = 33,
@@ -80,7 +81,18 @@ enum class ForgeTopic
     COLLECTION_SETUP_STARTED = 52,
     COLLECTION_SETUP_FINISHED = 53,
     ADD_XMOG = 54,
-    APPLY_XMOG_ERROR = 55
+    APPLY_XMOG_ERROR = 55,
+
+    // m+
+    MYTHIC_GET_WEEKLY_REWARD = 101,
+    MYTHIC_GET_MAP_STATS = 102,
+    MYTHIC_GET_AFFIXES_LIST = 103,
+    MYTHIC_SET_AFFIXES_AND_START = 104,
+    MYTHIC_KEY_COMPLETED = 105, // send confirmation that key has ended
+    MYTHIC_OPEN_WINDOW = 106,
+    MYTHIC_UPDATE_TIMER = 107,
+    MYTHIC_UPDATE_DEATHS = 108,
+    MYTHIC_UPDATE_CRITERIA = 109,
 };
 
 enum class ForgeError
@@ -1502,8 +1514,8 @@ enum Targets
 {
     TARGET_UNIT_CASTER                 = 1,
     TARGET_UNIT_NEARBY_ENEMY           = 2,
-    TARGET_UNIT_NEARBY_PARTY           = 3,
-    TARGET_UNIT_NEARBY_ALLY            = 4,
+    TARGET_UNIT_NEARBY_ALLY            = 3,
+    TARGET_UNIT_NEARBY_PARTY           = 4,
     TARGET_UNIT_PET                    = 5,
     TARGET_UNIT_TARGET_ENEMY           = 6,
     TARGET_UNIT_SRC_AREA_ENTRY         = 7,

@@ -857,6 +857,7 @@ public:
 
     // tabId
     std::unordered_map<uint32, ForgeTalentTab*> TalentTabs;
+
 private:
     std::unordered_map<ObjectGuid, uint32> CharacterActiveSpecs;
     std::unordered_map<std::string, uint32> CONFIG;
@@ -933,6 +934,17 @@ private:
         AddCharacterPointsFromDB();
         AddCharacterClassSpecs();
         AddCharacterXmogSets();
+
+        LOG_INFO("server.load", "Loading m+ difficulty multipliers...");
+        sObjectMgr->LoadInstanceDifficultyMultiplier();
+        LOG_INFO("server.load", "Loading m+ difficulty level scales...");
+        sObjectMgr->LoadMythicLevelScale();
+        LOG_INFO("server.load", "Loading m+ minion values...");
+        sObjectMgr->LoadMythicMinionValue();
+        LOG_INFO("server.load", "Loading m+ keys...");
+        sObjectMgr->LoadMythicDungeonKeyMap();
+        LOG_INFO("server.load", "Loading m+ affixes...");
+        sObjectMgr->LoadMythicAffixes();
     }
 
     void GetCharacters()

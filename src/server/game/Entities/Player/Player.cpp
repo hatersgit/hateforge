@@ -389,6 +389,8 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
 
     _activeCheats = CHEAT_NONE;
 
+    m_creationTime = 0s;
+
     _cinematicMgr = new CinematicMgr(this);
 
     m_achievementMgr = new AchievementMgr(this);
@@ -1307,6 +1309,8 @@ uint8 Player::GetChatTag() const
         tag |= CHAT_TAG_DND;
     if (isAFK())
         tag |= CHAT_TAG_AFK;
+    if (IsCommentator())
+        tag |= CHAT_TAG_COM;
     if (IsDeveloper())
         tag |= CHAT_TAG_DEV;
 
@@ -5161,6 +5165,14 @@ void Player::RepopAtGraveyard()
         ResurrectPlayer(0.5f);
         SpawnCorpseBones();
     }
+
+    if (auto script = GetInstanceScript())
+        if (GetMap()->IsDungeon()) {
+            ResurrectPlayer(0.5f);
+            SpawnCorpseBones();
+            script->DoNearTeleportPlayers(script->_challengeEntranceLoc);
+            return;
+        }
 
     GraveyardStruct const* ClosestGrave = nullptr;
 
@@ -14055,8 +14067,13 @@ uint32 Player::CalculateTalentsPoints() const
     return uint32(talentPointsForLevel * sWorld->getRate(RATE_TALENT));
 }
 
-bool Player::canFlyInZone(uint32 mapid, uint32 zone, SpellInfo const* bySpell) const
+bool Player::canFlyInZone(uint32 mapid, uint32 zone, SpellInfo const* bySpell)
 {
+    if (!sScriptMgr->OnCanPlayerFlyInZone(this, mapid,zone,bySpell))
+    {
+        return false;
+    }
+
     // continent checked in SpellInfo::CheckLocation at cast and area update
     uint32 v_map = GetVirtualMapForMapAndZone(mapid, zone);
     if (v_map == 571 && !bySpell->HasAttribute(SPELL_ATTR7_IGNORES_COLD_WEATHER_FLYING_REQUIREMENT))
@@ -16022,6 +16039,42 @@ bool Player::AddItem(uint32 itemId, uint32 count)
         return false;
     
     //sScriptMgr->OnAddItem(this, itemId, count);
+    return true;
+}
+
+bool Player::AddChallengeKey(uint32 challengeId, uint32 challengeLevel/* = 2*/)
+{
+    uint32 itemId = challengeId;
+
+    uint8 count = 1;
+    uint32 noSpaceForCount = 0;
+    ItemPosCountVec dest;
+
+    bool existingKey = false;
+    auto keyMap = sObjectMgr->GetDungeonKeyMap();
+    for (auto key : keyMap)
+        existingKey = existingKey || HasItemCount(key.second->itemId, 1, true);
+
+    InventoryResult msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, count, &noSpaceForCount);
+
+    if (msg != EQUIP_ERR_OK)
+        count -= noSpaceForCount;
+
+    if (count == 0 || dest.empty() || existingKey)
+    {
+        /// @todo Send to mailbox if no space
+        ChatHandler(GetSession()).PSendSysMessage("You don't have any space in your bags.");
+        return false;
+    }
+
+    Item* item = StoreNewItem(dest, itemId, true);
+    if (item)
+    {
+        item->SetItemRandomProperties(-(challengeLevel+100));
+        SendNewItem(item, count, true, false);
+    }
+    else
+        return false;
     return true;
 }
 

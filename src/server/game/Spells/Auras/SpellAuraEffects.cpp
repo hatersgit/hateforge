@@ -388,6 +388,10 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleNoImmediateEffect,                         //325 SPELL_AURA_MOD_DAMAGE_TAKEN_PCT_BEFORE_BLOCK
     &AuraEffect::HandleNoImmediateEffect,                         //326 SPELL_AURA_ADD_SPELL_BLOCK
     &AuraEffect::HandleNoImmediateEffect,                         //327 SPELL_AURA_MOD_MOVEMENT_SPEED_COMBAT
+    &AuraEffect::HandleAuraModSpellPower,                         //328 SPELL_AURA_MOD_SPELL_POWER
+    &AuraEffect::HandleAuraModSpellPowerPercent,                  //329 SPELL_AURA_MOD_SPELL_POWER_PCT
+    &AuraEffect::HandleAuraModSpellPowerOfStatPercent,            //330 SPELL_AURA_MOD_SPELL_POWER_OF_STAT_PERCENT
+    &AuraEffect::HandleAuraModSpellPowerOfCombatRatingPercent,    //331 SPELL_AURA_MOD_SPELL_POWER_OF_RATING_PERCENT
 };
 
 AuraEffect::AuraEffect(Aura* base, uint8 effIndex, int32* baseAmount, Unit* caster):
@@ -4882,6 +4886,90 @@ void AuraEffect::HandleAuraModAttackPowerOfArmor(AuraApplication const* aurApp, 
     if (target->GetTypeId() == TYPEID_PLAYER)
         target->ToPlayer()->UpdateAttackPowerAndDamage(false);
 }
+
+/********************************/
+/***         SPELL POWER      ***/
+/********************************/
+void AuraEffect::HandleAuraModSpellPower(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (target->GetTypeId() == TYPEID_PLAYER)
+    {
+        int32 spellPowerBonus = GetAmount();
+        target->ToPlayer()->ApplySpellPowerBonus(spellPowerBonus, apply);
+    }
+}
+
+void AuraEffect::HandleAuraModSpellPowerPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+    int32 spellPowerBonus = 0;
+
+    if (target->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (apply)
+            spellPowerBonus = int32(CalculatePct(target->ToPlayer()->GetBaseSpellPowerBonus(), float(GetAmount())));
+        else
+        {
+            int32 temp = target->ToPlayer()->GetBaseSpellPowerBonus();
+            float mult = (GetAmount() + 100) * 0.01f;
+            spellPowerBonus = int32(temp - (temp / mult));
+        }
+
+        target->ToPlayer()->ApplySpellPowerBonus(spellPowerBonus, apply);
+    }
+}
+
+void AuraEffect::HandleAuraModSpellPowerOfStatPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+    int32 spellPowerBonus = 0;
+
+    if (GetMiscValue() < -1 || GetMiscValue() > 4)
+    {
+        LOG_ERROR("spells.aura.effect", "WARNING: Misc Value for SPELL_AURA_MOD_SPELL_POWER_OF_STAT_PERCENT not valid");
+        return;
+    }
+
+    for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
+        if (GetMiscValue() == i || GetMiscValue() == -1)
+            spellPowerBonus = int32(CalculatePct(target->GetStat(Stats(i)), GetAmount()));
+
+    if (target->GetTypeId() == TYPEID_PLAYER)
+        target->ToPlayer()->ApplySpellPowerBonus(spellPowerBonus, apply);
+}
+
+void AuraEffect::HandleAuraModSpellPowerOfCombatRatingPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (GetMiscValue() < 0 || GetMiscValue() > 24)
+    {
+        LOG_ERROR("spells.aura.effect", "WARNING: Misc Value for SPELL_AURA_MOD_SPELL_POWER_OF_RATING_PERCENT not valid");
+        return;
+    }
+
+    for (uint32 i = CR_WEAPON_SKILL; i < MAX_COMBAT_RATING; ++i)
+        if (GetMiscValue() == i && target->GetTypeId() == TYPEID_PLAYER)
+        {
+            int32 spellPowerBonus = int32(CalculatePct(target->ToPlayer()->GetRatingBonusValue(CombatRating(i)), GetAmount()));
+            target->ToPlayer()->ApplySpellPowerBonus(spellPowerBonus, apply);
+        }
+}
+
 /********************************/
 /***        DAMAGE BONUS      ***/
 /********************************/

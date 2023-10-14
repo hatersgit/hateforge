@@ -2432,7 +2432,7 @@ class spell_gen_lifeblood : public AuraScript
         float f;
 
         if (Unit* owner = GetUnitOwner())
-            amount += int32(CalculatePct(owner->GetMaxHealth(), 1.5f / aurEff->GetTotalTicks(f)));
+            amount += int32(CalculatePct(owner->GetMaxHealth(), 1.5f / aurEff->GetTotalTicks(f, true)));
 
         if (f != 0)
             amount += amount * f;
@@ -4252,7 +4252,7 @@ class spell_gen_gift_of_naaru : public AuraScript
         }
         float f;
 
-        int32 healTick = floor(heal / aurEff->GetTotalTicks(f));
+        int32 healTick = floor(heal / aurEff->GetTotalTicks(f, true));
 
         if (f != 0)
             healTick += healTick * f;

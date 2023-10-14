@@ -734,13 +734,13 @@ const float m_diminishing_k[MAX_CLASSES] =
     0.9880f,  // Shaman
     0.9830f,  // Mage
     0.9830f,  // Warlock
-    0.9880f,  // Monk
+    0.0f,     // ??
     0.9720f,  // Druid
+    0.9880f,  // Monk
     0.9560f,  // Tinker
     0.9880f,  // Demon Hunter
     0.9830f   // Bard
 };
-
 float Player::GetMissPercentageFromDefence() const
 {
     float const miss_cap[MAX_CLASSES] =
@@ -754,8 +754,9 @@ float Player::GetMissPercentageFromDefence() const
         16.00f,     // Shaman  //?
         16.00f,     // Mage    //?
         16.00f,     // Warlock //?
-        16.00f,     // Monk
+        0.0f,       // ??
         16.00f,     // Druid   //?
+        16.00f,     // Monk
         16.00f,     // Tinker
         16.00f,     // Demon Hunter
         16.00f      // Bard
@@ -784,8 +785,9 @@ void Player::UpdateParryPercentage()
         145.560408f,    // Shaman
         0.0f,           // Mage
         0.0f,           // Warlock
-        145.560408f,    // Monk
+        0.0f,           // ??
         0.0f,           // Druid
+        145.560408f,    // Monk
         47.003525f,     // Tinker
         145.560408f,    // Demon Hunter
         145.560408f     // Bard
@@ -833,8 +835,9 @@ void Player::UpdateDodgePercentage()
         145.560408f,    // Shaman
         150.375940f,    // Mage
         150.375940f,    // Warlock
-        145.560408f,    // Monk
+        0.0f,           // ??
         116.890707f,    // Druid
+        145.560408f,    // Monk
         88.129021f,     // Tinker
         145.560408f,    // Demon Hunter
         150.375940f,    // Bard

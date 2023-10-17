@@ -15854,6 +15854,8 @@ void Unit::SetMaxHealth(uint32 val)
 
 void Unit::SetPower(Powers power, uint32 val, bool withPowerUpdate /*= true*/, bool fromRegenerate /* = false */)
 {
+    ToggleOnPowerPctAuras();
+    
     if (!fromRegenerate && GetPower(power) == val)
     {
         return;
@@ -21936,6 +21938,25 @@ void Unit::ToggleCombatAuras(bool startingCombat)
             AddAura(aura->GetTriggerSpell(), this);
         else if (!startingCombat && aura->GetMiscValueB() == 0)
             AddAura(aura->GetTriggerSpell(), this);
+        else
+            RemoveAura(aura->GetTriggerSpell());
+    }
+}
+
+void Unit::ToggleOnPowerPctAuras()
+{
+    auto auras = GetAuraEffectsByType(SPELL_AURA_MOD_TRIGGER_SPELL_ON_POWER_PCT);
+    for (auto aura : auras)
+    {
+        int8 power = aura->GetMiscValue();
+        int32 amount = aura->GetAmount();
+
+        if ((aura->GetMiscValueB() == 0 && (float)GetPowerPct(Powers(power)) < amount)
+            || (aura->GetMiscValueB() == 1 && (float)GetPowerPct(Powers(power)) > amount))
+        {
+            if (!HasAura(aura->GetTriggerSpell()))
+                AddAura(aura->GetTriggerSpell(), this);
+        }
         else
             RemoveAura(aura->GetTriggerSpell());
     }

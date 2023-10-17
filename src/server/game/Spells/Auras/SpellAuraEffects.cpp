@@ -392,6 +392,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleAuraModSpellPowerPercent,                  //329 SPELL_AURA_MOD_SPELL_POWER_PCT
     &AuraEffect::HandleAuraModSpellPowerOfStatPercent,            //330 SPELL_AURA_MOD_SPELL_POWER_OF_STAT_PERCENT
     &AuraEffect::HandleAuraModSpellPowerOfCombatRatingPercent,    //331 SPELL_AURA_MOD_SPELL_POWER_OF_RATING_PERCENT
+    &AuraEffect::HandleAuraModTriggerSpellPowerPercent,           //332 SPELL_AURA_MOD_TRIGGER_SPELL_ON_POWER_PCT
 };
 
 AuraEffect::AuraEffect(Aura* base, uint8 effIndex, int32* baseAmount, Unit* caster):
@@ -7204,6 +7205,28 @@ void AuraEffect::HandleModToggleAuraCombatState(AuraApplication const* aurApp, u
             || (!caster->IsInCombat() && GetMiscValueB() == 0))
             caster->AddAura(GetTriggerSpell(), caster);
         else if (GetAmplitude() != 1)
+            caster->RemoveAura(GetTriggerSpell());
+    }
+    else
+        caster->RemoveAura(GetTriggerSpell());
+}
+
+void AuraEffect::HandleAuraModTriggerSpellPowerPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    auto caster = GetCaster();
+
+    if (apply)
+    {
+        int8 power = GetMiscValue();
+        int32 amount = GetAmount();
+
+        if ((GetMiscValueB() == 0 && (float)(caster->GetPowerPct(Powers(power))) < amount)
+            || (GetMiscValueB() == 1 && (float)(caster->GetPowerPct(Powers(power))) > amount))
+        {
+            if (!caster->HasAura(GetTriggerSpell()))
+                caster->AddAura(GetTriggerSpell(), caster);
+        }
+        else
             caster->RemoveAura(GetTriggerSpell());
     }
     else

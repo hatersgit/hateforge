@@ -251,7 +251,7 @@ uint8 Player::FindEquipSlot(ItemTemplate const* proto, uint32 slot, bool swap) c
                         slots[0] = EQUIPMENT_SLOT_RANGED;
                     break;
                 case ITEM_SUBCLASS_ARMOR_IDOL:
-                    if (playerClass == CLASS_DRUID)
+                    if (playerClass == CLASS_DRUID || playerClass == CLASS_MONK)
                         slots[0] = EQUIPMENT_SLOT_RANGED;
                     break;
                 case ITEM_SUBCLASS_ARMOR_TOTEM:
@@ -263,7 +263,11 @@ uint8 Player::FindEquipSlot(ItemTemplate const* proto, uint32 slot, bool swap) c
                         slots[0] = EQUIPMENT_SLOT_RANGED;
                     break;
                 case ITEM_SUBCLASS_ARMOR_SIGIL:
-                    if (playerClass == CLASS_DEATH_KNIGHT)
+                    if (playerClass == CLASS_DEATH_KNIGHT || playerClass == CLASS_DEMONHUNTER)
+                        slots[0] = EQUIPMENT_SLOT_RANGED;
+                    break;
+                case ITEM_SUBCLASS_ARMOR_INSTRUMENT:
+                    if (playerClass == CLASS_BARD)
                         slots[0] = EQUIPMENT_SLOT_RANGED;
                     break;
             }
@@ -2273,10 +2277,13 @@ InventoryResult Player::CanUseItem(Item* pItem, bool not_loading) const
 
                     switch (getClass())
                     {
+                        case CLASS_MONK:
                         case CLASS_HUNTER:
                         case CLASS_SHAMAN:
                             allowEquip = (itemSkill == SKILL_MAIL);
                             break;
+                        case CLASS_TINKER:
+                        case CLASS_DEATH_KNIGHT:
                         case CLASS_PALADIN:
                         case CLASS_WARRIOR:
                             allowEquip = (itemSkill == SKILL_PLATE_MAIL);
@@ -2375,7 +2382,7 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
     const static uint32 item_weapon_skills[MAX_ITEM_SUBCLASS_WEAPON] =
     {
         SKILL_AXES,     SKILL_2H_AXES,  SKILL_BOWS,          SKILL_GUNS,        SKILL_MACES,
-        SKILL_2H_MACES, SKILL_POLEARMS, SKILL_SWORDS,        SKILL_2H_SWORDS,   0,
+        SKILL_2H_MACES, SKILL_POLEARMS, SKILL_SWORDS,        SKILL_2H_SWORDS,   SKILL_WARGLAIVES,
         SKILL_STAVES,   0,              0,                   SKILL_FIST_WEAPONS,0,
         SKILL_DAGGERS,  SKILL_THROWN,   SKILL_ASSASSINATION, SKILL_CROSSBOWS,   SKILL_WANDS,
         SKILL_FISHING
@@ -2415,7 +2422,7 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
         }
 
         // CHeck for idols.
-        if (proto->SubClass == ITEM_SUBCLASS_ARMOR_IDOL && _class != CLASS_DRUID)
+        if (proto->SubClass == ITEM_SUBCLASS_ARMOR_IDOL && !(_class == CLASS_DRUID || _class == CLASS_MONK))
         {
             return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
         }
@@ -2427,7 +2434,13 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
         }
 
         // Check for sigils.
-        if (proto->SubClass == ITEM_SUBCLASS_ARMOR_SIGIL && _class != CLASS_DEATH_KNIGHT)
+        if (proto->SubClass == ITEM_SUBCLASS_ARMOR_SIGIL && !(_class == CLASS_DEATH_KNIGHT || _class == CLASS_DEMONHUNTER))
+        {
+            return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
+        }
+
+        // Check for instruments.
+        if (proto->SubClass == ITEM_SUBCLASS_ARMOR_INSTRUMENT && _class != CLASS_BARD)
         {
             return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
         }
@@ -2447,18 +2460,22 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
                 [[fallthrough]];
             case CLASS_DEATH_KNIGHT:
             case CLASS_PALADIN:
+                case CLASS_TINKER:
                 subclassToCompare = ITEM_SUBCLASS_ARMOR_PLATE;
                 break;
+            case CLASS_MONK:
             case CLASS_HUNTER:
             case CLASS_SHAMAN:
                 subclassToCompare = ITEM_SUBCLASS_ARMOR_MAIL;
                 break;
+            case CLASS_DEMONHUNTER:
             case CLASS_ROGUE:
                 if (proto->HasStat(ITEM_MOD_SPELL_POWER) || proto->HasSpellPowerStat())
                 {
                     return EQUIP_ERR_CANT_DO_RIGHT_NOW;
                 }
                 [[fallthrough]];
+            case CLASS_BARD:
             case CLASS_DRUID:
                 subclassToCompare = ITEM_SUBCLASS_ARMOR_LEATHER;
                 break;
@@ -4985,8 +5002,8 @@ bool Player::LoadFromDB(ObjectGuid playerGuid, CharacterDatabaseQueryHolder cons
     //"arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk, "
     // 55      56      57      58      59      60      61      62      63           64                 65                 66             67              68      69
     //"health, power1, power2, power3, power4, power5, power6, power7, instance_id, talentGroupsCount, activeTalentGroup, exploredZones, equipmentCache, ammoId, knownTitles,
-    // 70          71               72            73
-    //"actionBars, grantableLevels, innTriggerId, extraBonusTalentCount FROM characters WHERE guid = '{}'", guid);
+    // 70          71               72            73                     74
+    //"actionBars, grantableLevels, innTriggerId, extraBonusTalentCount, UNIX_TIMESTAMP(creation_date) FROM characters WHERE guid = '{}'", guid);
     PreparedQueryResult result = holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_FROM);
 
     if (!result)
@@ -5062,6 +5079,9 @@ bool Player::LoadFromDB(ObjectGuid playerGuid, CharacterDatabaseQueryHolder cons
 
     SetObjectScale(1.0f);
     SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 1.0f);
+
+    // load character creation date, relevant for achievements of type average
+    SetCreationTime(fields[74].Get<Seconds>());
 
     // load achievements before anything else to prevent multiple gains for the same achievement/criteria on every loading (as loading does call UpdateAchievementCriteria)
     m_achievementMgr->LoadFromDB(holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_ACHIEVEMENTS), holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CRITERIA_PROGRESS));

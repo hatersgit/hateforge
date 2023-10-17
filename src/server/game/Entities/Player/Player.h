@@ -144,36 +144,51 @@ struct PlayerTalent
 
 enum TalentTree // talent tabs
 {
-    TALENT_TREE_WARRIOR_ARMS = 161,
-    TALENT_TREE_WARRIOR_FURY = 164,
-    TALENT_TREE_WARRIOR_PROTECTION = 163,
-    TALENT_TREE_PALADIN_HOLY = 382,
-    TALENT_TREE_PALADIN_PROTECTION = 383,
-    TALENT_TREE_PALADIN_RETRIBUTION = 381,
-    TALENT_TREE_HUNTER_BEAST_MASTERY = 361,
-    TALENT_TREE_HUNTER_MARKSMANSHIP = 363,
-    TALENT_TREE_HUNTER_SURVIVAL = 362,
-    TALENT_TREE_ROGUE_ASSASSINATION = 182,
-    TALENT_TREE_ROGUE_COMBAT = 181,
-    TALENT_TREE_ROGUE_SUBTLETY = 183,
-    TALENT_TREE_PRIEST_DISCIPLINE = 201,
-    TALENT_TREE_PRIEST_HOLY = 202,
-    TALENT_TREE_PRIEST_SHADOW = 203,
-    TALENT_TREE_DEATH_KNIGHT_BLOOD = 398,
-    TALENT_TREE_DEATH_KNIGHT_FROST = 399,
-    TALENT_TREE_DEATH_KNIGHT_UNHOLY = 400,
-    TALENT_TREE_SHAMAN_ELEMENTAL = 261,
-    TALENT_TREE_SHAMAN_ENHANCEMENT = 263,
-    TALENT_TREE_SHAMAN_RESTORATION = 262,
-    TALENT_TREE_MAGE_ARCANE = 81,
-    TALENT_TREE_MAGE_FIRE = 41,
-    TALENT_TREE_MAGE_FROST = 61,
-    TALENT_TREE_WARLOCK_AFFLICTION = 302,
-    TALENT_TREE_WARLOCK_DEMONOLOGY = 303,
-    TALENT_TREE_WARLOCK_DESTRUCTION = 301,
-    TALENT_TREE_DRUID_BALANCE = 283,
-    TALENT_TREE_DRUID_FERAL_COMBAT = 281,
-    TALENT_TREE_DRUID_RESTORATION = 282
+    TALENT_TREE_WARRIOR_ARMS			 = 161,
+	TALENT_TREE_WARRIOR_FURY			 = 164,
+	TALENT_TREE_WARRIOR_PROTECTION		 = 163,
+	TALENT_TREE_PALADIN_HOLY			 = 382,
+	TALENT_TREE_PALADIN_PROTECTION		 = 383,
+	TALENT_TREE_PALADIN_RETRIBUTION		 = 381,
+	TALENT_TREE_HUNTER_BEAST_MASTERY	 = 361,
+	TALENT_TREE_HUNTER_MARKSMANSHIP		 = 363,
+	TALENT_TREE_HUNTER_SURVIVAL			 = 362,
+	TALENT_TREE_ROGUE_ASSASSINATION		 = 182,
+	TALENT_TREE_ROGUE_COMBAT			 = 181,
+	TALENT_TREE_ROGUE_SUBTLETY			 = 183,
+	TALENT_TREE_PRIEST_DISCIPLINE		 = 201,
+	TALENT_TREE_PRIEST_HOLY				 = 202,
+	TALENT_TREE_PRIEST_INQUISITION		 = 410,
+	TALENT_TREE_PRIEST_SHADOW			 = 203,
+	TALENT_TREE_DEATH_KNIGHT_BLOOD		 = 398,
+	TALENT_TREE_DEATH_KNIGHT_FROST		 = 399,
+	TALENT_TREE_DEATH_KNIGHT_UNHOLY		 = 400,
+	TALENT_TREE_SHAMAN_ELEMENTAL		 = 261,
+	TALENT_TREE_SHAMAN_ENHANCEMENT		 = 263,
+	TALENT_TREE_SHAMAN_RESTORATION		 = 262,
+	TALENT_TREE_SHAMAN_WATCHER			 = 408,
+	TALENT_TREE_MAGE_ARCANE				 = 81,
+	TALENT_TREE_MAGE_FIRE				 = 41,
+	TALENT_TREE_MAGE_FROST				 = 61,
+	TALENT_TREE_WARLOCK_AFFLICTION		 = 302,
+	TALENT_TREE_WARLOCK_DEMONOLOGY		 = 303,
+	TALENT_TREE_WARLOCK_DESTRUCTION		 = 301,
+    TALENT_TREE_MONK_FELLOWSHIP          = 420,
+    TALENT_TREE_MONK_RADIANCE            = 421,
+    TALENT_TREE_MONK_ZEALOTRY            = 422,
+	TALENT_TREE_DRUID_BALANCE			 = 283,
+	TALENT_TREE_DRUID_FERAL_COMBAT		 = 281,
+	TALENT_TREE_DRUID_GUARDIAN			 = 409,
+	TALENT_TREE_DRUID_RESTORATION		 = 282,
+	TALENT_TREE_TINKER_PHYSICIAN		 = 413,
+	TALENT_TREE_TINKER_SCRAPPER			 = 412,
+	TALENT_TREE_TINKER_VANGUARD			 = 411,
+	TALENT_TREE_DEMONHUNTER_ANGUISH		 = 414,
+	TALENT_TREE_DEMONHUNTER_HAVOC		 = 415,
+	TALENT_TREE_DEMONHUNTER_VENGEANCE	 = 416,
+	TALENT_TREE_BARD_BLADESONG			 = 417,
+	TALENT_TREE_BARD_INSPIRATION		 = 418,
+	TALENT_TREE_BARD_SONGWEAVER			 = 419
 };
 
 #define SPEC_MASK_ALL 255
@@ -870,7 +885,7 @@ enum PlayerChatTag
     CHAT_TAG_AFK        = 0x01,
     CHAT_TAG_DND        = 0x02,
     CHAT_TAG_GM         = 0x04,
-    CHAT_TAG_COM        = 0x08, // Commentator
+    CHAT_TAG_COM        = 0x08, // Commentator tag. Do not exist in clean client
     CHAT_TAG_DEV        = 0x10,
 };
 
@@ -1172,6 +1187,8 @@ public:
     void SendTaxiNodeStatusMultiple();
     // mount_id can be used in scripting calls
 
+    [[nodiscard]] bool IsCommentator() const { return HasPlayerFlag(PLAYER_FLAGS_COMMENTATOR2); }
+    void SetCommentator(bool on) { ApplyModFlag(PLAYER_FLAGS, PLAYER_FLAGS_COMMENTATOR2, on); }
     [[nodiscard]] bool IsDeveloper() const { return HasPlayerFlag(PLAYER_FLAGS_DEVELOPER); }
     void SetDeveloper(bool on) { ApplyModFlag(PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER, on); }
     [[nodiscard]] bool isAcceptWhispers() const { return m_ExtraFlags & PLAYER_EXTRA_ACCEPT_WHISPERS; }
@@ -1600,6 +1617,7 @@ public:
     void SaveToDB(CharacterDatabaseTransaction trans, bool create, bool logout);
     void SaveInventoryAndGoldToDB(CharacterDatabaseTransaction trans);                    // fast save function for item/money cheating preventing
     void SaveGoldToDB(CharacterDatabaseTransaction trans);
+    void _SaveSkills(CharacterDatabaseTransaction trans);
 
     static void Customize(CharacterCustomizeInfo const* customizeInfo, CharacterDatabaseTransaction trans);
     static void SavePositionInDB(uint32 mapid, float x, float y, float z, float o, uint32 zone, ObjectGuid guid);
@@ -2371,7 +2389,7 @@ public:
     }
     void HandleFall(MovementInfo const& movementInfo);
 
-    [[nodiscard]] bool canFlyInZone(uint32 mapid, uint32 zone, SpellInfo const* bySpell) const;
+    [[nodiscard]] bool canFlyInZone(uint32 mapid, uint32 zone, SpellInfo const* bySpell);
 
     void SetClientControl(Unit* target, bool allowMove, bool packetOnly = false);
 
@@ -2421,7 +2439,7 @@ public:
     bool IsVisibleGloballyFor(Player const* player) const;
 
     void GetInitialVisiblePackets(Unit* target);
-    void UpdateObjectVisibility(bool forced = true, bool fromUpdate = false) override;
+    void UpdateObjectVisibility(bool forced = true) override;
     void UpdateVisibilityForPlayer(bool mapChange = false);
     void UpdateVisibilityOf(WorldObject* target);
     void UpdateTriggerVisibility();
@@ -2570,6 +2588,9 @@ public:
     void RemoveTimedAchievement(AchievementCriteriaTimedTypes type, uint32 entry);
     void CompletedAchievement(AchievementEntry const* entry);
     [[nodiscard]] AchievementMgr* GetAchievementMgr() const { return m_achievementMgr; }
+
+    void SetCreationTime(Seconds creationTime) { m_creationTime = creationTime; }
+    [[nodiscard]] Seconds GetCreationTime() const { return m_creationTime; }
 
     [[nodiscard]] bool HasTitle(uint32 bitIndex) const;
     bool HasTitle(CharTitlesEntry const* title) const { return HasTitle(title->bit_index); }
@@ -2772,7 +2793,6 @@ public:
     void _SaveWeeklyQuestStatus(CharacterDatabaseTransaction trans);
     void _SaveMonthlyQuestStatus(CharacterDatabaseTransaction trans);
     void _SaveSeasonalQuestStatus(CharacterDatabaseTransaction trans);
-    void _SaveSkills(CharacterDatabaseTransaction trans);
     void _SaveSpells(CharacterDatabaseTransaction trans);
     void _SaveEquipmentSets(CharacterDatabaseTransaction trans);
     void _SaveEntryPoint(CharacterDatabaseTransaction trans);
@@ -3032,6 +3052,8 @@ private:
     bool _wasOutdoor;
 
     PlayerSettingMap m_charSettingsMap;
+
+    Seconds m_creationTime;
 };
 
 void AddItemsSetItem(Player* player, Item* item);

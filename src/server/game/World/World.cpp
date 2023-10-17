@@ -111,6 +111,10 @@ float World::_maxVisibleDistanceOnContinents = DEFAULT_VISIBILITY_DISTANCE;
 float World::_maxVisibleDistanceInInstances  = DEFAULT_VISIBILITY_INSTANCE;
 float World::_maxVisibleDistanceInBGArenas   = DEFAULT_VISIBILITY_BGARENAS;
 
+int32 World::m_visibility_notify_periodOnContinents = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
+int32 World::m_visibility_notify_periodInInstances = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
+int32 World::m_visibility_notify_periodInBGArenas = DEFAULT_VISIBILITY_NOTIFY_PERIOD;
+
 Realm realm;
 
 /// World constructor
@@ -569,6 +573,50 @@ void World::LoadConfigSettings(bool reload)
     _rate_values[RATE_MISS_CHANCE_MULTIPLIER_TARGET_PLAYER]         = sConfigMgr->GetOption<float>("Rate.MissChanceMultiplier.TargetPlayer", 7.0f);
     _bool_configs[CONFIG_MISS_CHANCE_MULTIPLIER_ONLY_FOR_PLAYERS] = sConfigMgr->GetOption<bool>("Rate.MissChanceMultiplier.OnlyAffectsPlayer", false);
 
+    // Duskhaven custom player resources
+    _rate_values[RATE_POWER_BATTERYGAUGE_INCOME]            = sConfigMgr->GetOption<float>("Rate.BatteryGauge.Income", 1);
+    _rate_values[RATE_POWER_BATTERYGAUGE_LOSS] = sConfigMgr->GetOption<float>("Rate.BatteryGauge.Loss", 1);
+    if (_rate_values[RATE_POWER_BATTERYGAUGE_LOSS] < 0)
+    {
+        LOG_ERROR("server.loading", "Rate.BatteryGauge.Loss ({}) must be > 0. Using 1 instead.", _rate_values[RATE_POWER_BATTERYGAUGE_LOSS]);
+        _rate_values[RATE_POWER_BATTERYGAUGE_LOSS] = 1;
+    }
+    _rate_values[RATE_POWER_DISCORD_INCOME] = sConfigMgr->GetOption<float>("Rate.Discord.Income", 1);
+    _rate_values[RATE_POWER_DISCORD_LOSS] = sConfigMgr->GetOption<float>("Rate.Discord.Loss", 1);
+    if (_rate_values[RATE_POWER_DISCORD_LOSS] < 0)
+    {
+        LOG_ERROR("server.loading", "Rate.Discord.Loss ({}) must be > 0. Using 1 instead.", _rate_values[RATE_POWER_DISCORD_LOSS]);
+        _rate_values[RATE_POWER_DISCORD_LOSS] = 1;
+    }
+    _rate_values[RATE_POWER_FURY_INCOME] = sConfigMgr->GetOption<float>("Rate.Fury.Income", 1);
+    _rate_values[RATE_POWER_FURY_LOSS] = sConfigMgr->GetOption<float>("Rate.Fury.Loss", 1);
+    if (_rate_values[RATE_POWER_FURY_LOSS] < 0)
+    {
+        LOG_ERROR("server.loading", "Rate.Fury.Loss ({}) must be > 0. Using 1 instead.", _rate_values[RATE_POWER_FURY_LOSS]);
+        _rate_values[RATE_POWER_FURY_LOSS] = 1;
+    }
+    _rate_values[RATE_POWER_HARMONY_INCOME] = sConfigMgr->GetOption<float>("Rate.Harmony.Income", 1);
+    _rate_values[RATE_POWER_HARMONY_LOSS] = sConfigMgr->GetOption<float>("Rate.Harmony.Loss", 1);
+    if (_rate_values[RATE_POWER_HARMONY_LOSS] < 0)
+    {
+        LOG_ERROR("server.loading", "Rate.Harmony.Loss ({}) must be > 0. Using 1 instead.", _rate_values[RATE_POWER_HARMONY_LOSS]);
+        _rate_values[RATE_POWER_HARMONY_LOSS] = 1;
+    }
+    _rate_values[RATE_POWER_INSANITY_INCOME] = sConfigMgr->GetOption<float>("Rate.Insanity.Income", 1);
+    _rate_values[RATE_POWER_INSANITY_LOSS] = sConfigMgr->GetOption<float>("Rate.Insanity.Loss", 1);
+    if (_rate_values[RATE_POWER_INSANITY_LOSS] < 0)
+    {
+        LOG_ERROR("server.loading", "Rate.Insanity.Loss ({}) must be > 0. Using 1 instead.", _rate_values[RATE_POWER_INSANITY_LOSS]);
+        _rate_values[RATE_POWER_INSANITY_LOSS] = 1;
+    }
+    _rate_values[RATE_POWER_WRATH_INCOME] = sConfigMgr->GetOption<float>("Rate.Wrath.Income", 1);
+    _rate_values[RATE_POWER_WRATH_LOSS] = sConfigMgr->GetOption<float>("Rate.Wrath.Loss", 1);
+    if (_rate_values[RATE_POWER_WRATH_LOSS] < 0)
+    {
+        LOG_ERROR("server.loading", "Rate.Wrath.Loss ({}) must be > 0. Using 1 instead.", _rate_values[RATE_POWER_WRATH_LOSS]);
+        _rate_values[RATE_POWER_WRATH_LOSS] = 1;
+    }
+
     _rate_values[RATE_TALENT]                               = sConfigMgr->GetOption<float>("Rate.Talent", 1.0f);
     if (_rate_values[RATE_TALENT] < 0.0f)
     {
@@ -668,6 +716,14 @@ void World::LoadConfigSettings(bool reload)
         LOG_ERROR("server.loading", "PlayerSave.Stats.MinLevel ({}) must be in range 0..80. Using default, do not save character stats (0).", _int_configs[CONFIG_MIN_LEVEL_STAT_SAVE]);
         _int_configs[CONFIG_MIN_LEVEL_STAT_SAVE] = 0;
     }
+    _int_configs[CONFIG_INTERVAL_GRIDCLEAN] = sConfigMgr->GetOption("GridCleanUpDelay", 5 * MINUTE * IN_MILLISECONDS);
+    if (_int_configs[CONFIG_INTERVAL_GRIDCLEAN] < MIN_GRID_DELAY)
+    {
+        LOG_ERROR("server.loading", "GridCleanUpDelay ({}) must be greater {}. Use this minimal value.", _int_configs[CONFIG_INTERVAL_GRIDCLEAN], MIN_GRID_DELAY);
+        _int_configs[CONFIG_INTERVAL_GRIDCLEAN] = MIN_GRID_DELAY;
+    }
+    if (reload)
+        sMapMgr->SetGridCleanUpDelay(_int_configs[CONFIG_INTERVAL_GRIDCLEAN]);
 
     _int_configs[CONFIG_INTERVAL_MAPUPDATE] = sConfigMgr->GetOption<int32>("MapUpdateInterval", 10);
     if (_int_configs[CONFIG_INTERVAL_MAPUPDATE] < MIN_MAP_UPDATE_DELAY)
@@ -1261,6 +1317,10 @@ void World::LoadConfigSettings(bool reload)
         LOG_ERROR("server.loading", "Visibility.Distance.BGArenas can't be greater {}", MAX_VISIBILITY_DISTANCE);
         _maxVisibleDistanceInBGArenas = MAX_VISIBILITY_DISTANCE;
     }
+
+    m_visibility_notify_periodOnContinents = sConfigMgr->GetOption<int32>("Visibility.Notify.Period.OnContinents", DEFAULT_VISIBILITY_NOTIFY_PERIOD);
+    m_visibility_notify_periodInInstances = sConfigMgr->GetOption<int32>("Visibility.Notify.Period.InInstances", DEFAULT_VISIBILITY_NOTIFY_PERIOD);
+    m_visibility_notify_periodInBGArenas = sConfigMgr->GetOption<int32>("Visibility.Notify.Period.InBGArenas", DEFAULT_VISIBILITY_NOTIFY_PERIOD);
 
     ///- Load the CharDelete related config options
     _int_configs[CONFIG_CHARDELETE_METHOD]    = sConfigMgr->GetOption<int32>("CharDelete.Method", 0);

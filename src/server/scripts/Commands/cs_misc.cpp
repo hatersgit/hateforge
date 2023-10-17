@@ -88,6 +88,7 @@ public:
     {
         static ChatCommandTable commandTable =
         {
+            { "commentator",       HandleCommentatorCommand,       SEC_MODERATOR,          Console::No  },
             { "dev",               HandleDevCommand,               SEC_ADMINISTRATOR,      Console::No  },
             { "gps",               HandleGPSCommand,               SEC_MODERATOR,          Console::No  },
             { "aura",              HandleAuraCommand,              SEC_GAMEMASTER,         Console::No  },
@@ -451,6 +452,51 @@ public:
         return true;
     }
 
+    static bool HandleCommentatorCommand(ChatHandler* handler, Optional<bool> enableArg)
+    {
+        WorldSession* session = handler->GetSession();
+
+        if (!session)
+        {
+            return false;
+        }
+
+        auto SetCommentatorMod = [&](bool enable)
+        {
+            session->SendNotification(enable ? "Commentator mode on" : "Commentator mode off");
+            session->GetPlayer()->SetCommentator(enable);
+        };
+
+        if (!enableArg)
+        {
+            if (!AccountMgr::IsPlayerAccount(session->GetSecurity()) && session->GetPlayer()->IsCommentator())
+            {
+                SetCommentatorMod(true);
+            }
+            else
+            {
+                SetCommentatorMod(false);
+            }
+
+            return true;
+        }
+
+        if (*enableArg)
+        {
+            SetCommentatorMod(true);
+            return true;
+        }
+        else
+        {
+            SetCommentatorMod(false);
+            return true;
+        }
+
+        handler->SendSysMessage(LANG_USE_BOL);
+        handler->SetSentErrorMessage(true);
+        return false;
+    }
+
     static bool HandleDevCommand(ChatHandler* handler, Optional<bool> enableArg)
     {
         WorldSession* session = handler->GetSession();
@@ -467,32 +513,29 @@ public:
             sScriptMgr->OnHandleDevCommand(handler->GetSession()->GetPlayer(), enable);
         };
 
-        if (WorldSession* session = handler->GetSession())
+        if (!enableArg)
         {
-            if (!enableArg)
-            {
-                if (!AccountMgr::IsPlayerAccount(session->GetSecurity()) && session->GetPlayer()->IsDeveloper())
-                {
-                    SetDevMod(true);
-                }
-                else
-                {
-                    SetDevMod(false);
-                }
-
-                return true;
-            }
-
-            if (*enableArg)
+            if (!AccountMgr::IsPlayerAccount(session->GetSecurity()) && session->GetPlayer()->IsDeveloper())
             {
                 SetDevMod(true);
-                return true;
             }
             else
             {
                 SetDevMod(false);
-                return true;
             }
+
+            return true;
+        }
+
+        if (*enableArg)
+        {
+            SetDevMod(true);
+            return true;
+        }
+        else
+        {
+            SetDevMod(false);
+            return true;
         }
 
         handler->SendSysMessage(LANG_USE_BOL);
@@ -2200,12 +2243,78 @@ public:
             case RACE_TROLL:
                 raceStr = "Troll";
                 break;
+            case RACE_VULPERA:
+                raceStr = "Vulpera";
+                break;
             case RACE_BLOODELF:
                 raceStr = "Blood Elf";
                 break;
             case RACE_DRAENEI:
                 raceStr = "Draenei";
                 break;
+            case RACE_WORGEN:
+                raceStr = "Worgen";
+                break;
+            case RACE_NIGHTBORNE:
+                raceStr = "Nightborne";
+                break;
+            case RACE_PANDAREN:
+                raceStr = "Pandaren";
+                break;
+            case RACE_VOIDELF:
+                raceStr = "Void Elf";
+                break;
+            case RACE_EREDAR:
+                raceStr = "Eredar";
+                break;
+            case RACE_DRACTHYR:
+                raceStr = "Dracthyr";
+                break;
+            case RACE_ZANDALARI_TROLL:
+                raceStr = "Zandalari Troll";
+                break;
+            case RACE_OGRE:
+                raceStr = "Ogre";
+                break;
+            case RACE_DRAENEI_LIGHTFORGED:
+                raceStr = "Lightforged Draenei";
+                break;
+            case RACE_GOBLIN:
+                raceStr = "Goblin";
+                break;
+            case RACE_NAGA:
+				raceStr = "Naga";
+				break;
+            case RACE_BROKEN:
+				raceStr = "Broken";
+				break;
+            case RACE_TUSKARR:
+				raceStr = "Tuskarr";
+				break;
+            case RACE_FOREST_TROLL:
+				raceStr = "Forest Troll";
+				break;
+            case RACE_SKELETON:
+				raceStr = "Skeleton";
+				break;
+            case RACE_DEMONHUNTERH:
+				raceStr = "Blood Elf";
+				break;
+            case RACE_ARAKKOA:
+				raceStr = "Arakkoa";
+				break;
+            case RACE_TAUNKA:
+				raceStr = "Taunka";
+				break;
+            case RACE_FELORC:
+				raceStr = "Fel Orc";
+				break;
+            case RACE_KULTIRAN:
+				raceStr = "Kul Tiran";
+				break;
+            case RACE_DEMONHUNTERA:
+				raceStr = "Night Elf";
+				break;
         }
 
         switch (classid)
@@ -2237,8 +2346,20 @@ public:
             case CLASS_WARLOCK:
                 classStr = "Warlock";
                 break;
+            case CLASS_MONK:
+                classStr = "Monk";
+                break;
             case CLASS_DRUID:
                 classStr = "Druid";
+                break;
+            case CLASS_TINKER:
+                classStr = "Tinker";
+                break;
+            case CLASS_DEMONHUNTER:
+                classStr = "Demon Hunter";
+                break;
+            case CLASS_BARD:
+                classStr = "Bard";
                 break;
         }
 

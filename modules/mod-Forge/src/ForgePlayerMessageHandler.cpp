@@ -287,6 +287,6 @@ void AddForgePlayerMessageHandler()
     sTopicRouter->AddHandler(new StartMythicHandler(cache, cm));
     sTopicRouter->AddHandler(new GetAffixesHandler(cache, cm));
 
-    new UseSkillBook();
+    // new UseSkillBook();
     new ForgeCacheCommands();
 }

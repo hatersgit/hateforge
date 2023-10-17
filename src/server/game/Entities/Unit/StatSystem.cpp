@@ -355,6 +355,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
 
         switch (getClass())
         {
+            case CLASS_TINKER:
             case CLASS_HUNTER:
                 val2 = level * 2.0f + GetStat(STAT_AGILITY) - 10.0f;
                 break;
@@ -389,6 +390,10 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
             case CLASS_WARRIOR:
                 val2 = level * 3.0f + GetStat(STAT_STRENGTH) * 2.0f - 20.0f;
                 break;
+            case CLASS_BARD:    // Aleist3r: new classes may need some spec-related formulas different for dps and healers
+            case CLASS_MONK:    // for now using same as rogue
+            case CLASS_DEMONHUNTER:
+            case CLASS_TINKER:
             case CLASS_HUNTER:
             case CLASS_SHAMAN:
             case CLASS_ROGUE:
@@ -508,7 +513,10 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
         AuraEffectList const& mAPbyArmor = GetAuraEffectsByType(SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR);
         for (AuraEffectList::const_iterator iter = mAPbyArmor.begin(); iter != mAPbyArmor.end(); ++iter)
             // always: ((*i)->GetModifier()->m_miscvalue == 1 == SPELL_SCHOOL_MASK_NORMAL)
-            attPowerMod += int32(GetArmor() / (*iter)->GetAmount());
+            if ((*iter)->GetMiscValueB() > 0)
+                attPowerMod += CalculatePct(GetArmor(), (*iter)->GetAmount());
+            else
+                attPowerMod += int32(GetArmor() / (*iter)->GetAmount());
     }
 
     float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT) - 1.0f;
@@ -608,8 +616,19 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
     //     weaponMaxDamage += GetAmmoDPS() * attackSpeedMod;
     // }
 
-    minDamage = ((weaponMinDamage + baseValue) * basePct + totalValue) * totalPct;
-    maxDamage = ((weaponMaxDamage + baseValue) * basePct + totalValue) * totalPct;
+    float damageMinAdd = 0.0f;
+    float damageMaxAdd = 0.0f;
+
+    if (HasAura(1040001))
+    {
+        AuraEffect const* aurEff = GetAuraEffect(1040001, EFFECT_1);
+        float damagePercent = (aurEff->GetAmount()) * 0.01f;
+        damageMinAdd = ((weaponMinDamage + baseValue) * basePct + totalValue) * totalPct * damagePercent;
+        damageMaxAdd = ((weaponMaxDamage + baseValue) * basePct + totalValue) * totalPct * damagePercent;
+    }
+
+    minDamage = ((weaponMinDamage + baseValue) * basePct + totalValue) * totalPct + damageMinAdd;
+    maxDamage = ((weaponMaxDamage + baseValue) * basePct + totalValue) * totalPct + damageMaxAdd;
 
     // pussywizard: crashfix (casting negative to uint => min > max => assertion in urand)
     if (minDamage < 0.0f || minDamage > 1000000000.0f)
@@ -716,9 +735,12 @@ const float m_diminishing_k[MAX_CLASSES] =
     0.9830f,  // Mage
     0.9830f,  // Warlock
     0.0f,     // ??
-    0.9720f   // Druid
+    0.9720f,  // Druid
+    0.9880f,  // Monk
+    0.9560f,  // Tinker
+    0.9880f,  // Demon Hunter
+    0.9830f   // Bard
 };
-
 float Player::GetMissPercentageFromDefence() const
 {
     float const miss_cap[MAX_CLASSES] =
@@ -733,7 +755,11 @@ float Player::GetMissPercentageFromDefence() const
         16.00f,     // Mage    //?
         16.00f,     // Warlock //?
         0.0f,       // ??
-        16.00f      // Druid   //?
+        16.00f,     // Druid   //?
+        16.00f,     // Monk
+        16.00f,     // Tinker
+        16.00f,     // Demon Hunter
+        16.00f      // Bard
     };
 
     float diminishing = 0.0f, nondiminishing = 0.0f;
@@ -760,7 +786,11 @@ void Player::UpdateParryPercentage()
         0.0f,           // Mage
         0.0f,           // Warlock
         0.0f,           // ??
-        0.0f            // Druid
+        0.0f,           // Druid
+        145.560408f,    // Monk
+        47.003525f,     // Tinker
+        145.560408f,    // Demon Hunter
+        145.560408f     // Bard
     };
 
     // No parry
@@ -806,7 +836,11 @@ void Player::UpdateDodgePercentage()
         150.375940f,    // Mage
         150.375940f,    // Warlock
         0.0f,           // ??
-        116.890707f     // Druid
+        116.890707f,    // Druid
+        145.560408f,    // Monk
+        88.129021f,     // Tinker
+        145.560408f,    // Demon Hunter
+        150.375940f,    // Bard
     };
 
     float diminishing = 0.0f, nondiminishing = 0.0f;

@@ -319,12 +319,6 @@ Unit::Unit(bool isWorldObject) : WorldObject(isWorldObject),
 
     m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_ALIVE);
 
-    m_last_notify_position.Relocate(-5000.0f, -5000.0f, -5000.0f, 0.0f);
-    m_last_notify_mstime = 0;
-    m_delayed_unit_relocation_timer = 0;
-    m_delayed_unit_ai_notify_timer = 0;
-    bRequestForcedVisibilityUpdate = false;
-
     m_applyResilience = false;
     _instantCast = false;
 
@@ -412,32 +406,6 @@ void Unit::Update(uint32 p_time)
 
     if (!IsInWorld())
         return;
-
-    // pussywizard:
-    if (GetTypeId() != TYPEID_PLAYER || (!ToPlayer()->IsBeingTeleported() && !bRequestForcedVisibilityUpdate))
-    {
-        if (m_delayed_unit_relocation_timer)
-        {
-            if (m_delayed_unit_relocation_timer <= p_time)
-            {
-                m_delayed_unit_relocation_timer = 0;
-                //ExecuteDelayedUnitRelocationEvent();
-                FindMap()->i_objectsForDelayedVisibility.insert(this);
-            }
-            else
-                m_delayed_unit_relocation_timer -= p_time;
-        }
-        if (m_delayed_unit_ai_notify_timer)
-        {
-            if (m_delayed_unit_ai_notify_timer <= p_time)
-            {
-                m_delayed_unit_ai_notify_timer = 0;
-                ExecuteDelayedUnitAINotifyEvent();
-            }
-            else
-                m_delayed_unit_ai_notify_timer -= p_time;
-        }
-    }
 
     _UpdateSpells( p_time );
 
@@ -1431,6 +1399,17 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
         damageInfo->absorb = dmgInfo.GetAbsorb();
         damageInfo->resist = dmgInfo.GetResist();
         damageInfo->damage = dmgInfo.GetDamage();
+    }
+
+    // Aleist3r: Hijacked this to apply mage's Icy Propulsion talent proc
+    // probably a bit hacky and there may be better place to do this but hey, at least it works
+    if (crit)
+    {
+        Unit* caster = damageInfo->attacker;
+        if (spellInfo->SpellFamilyName & SPELLFAMILY_MAGE && (spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_MAGE_SINGLETARGET
+            || spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_MAGE_SINGLETARGET || spellInfo->SpellFamilyFlags[2] & SPELLFAMILYFLAG2_MAGE_SINGLETARGET))
+            if (caster->HasAura(1290050) && caster->HasSpellCooldown(12472))   // 1290050 - Icy Propulsion Talent; 12472 - Icy Veins
+                caster->ToPlayer()->ModifySpellCooldown(12472, -1000);
     }
 }
 
@@ -8373,13 +8352,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                             CastCustomSpell(this, triggered_spell_id, &basepoints0, nullptr, nullptr, true, castItem, triggeredByAura, originalCaster);
                             break;
                         }
-                    // Shaman T8 Elemental 4P Bonus
-                    case 64928:
-                        {
-                            basepoints0 = CalculatePct(int32(damage), triggerAmount);
-                            triggered_spell_id = 64930;            // Electrified
-                            break;
-                        }
                     // Shaman T9 Elemental 4P Bonus
                     case 67228:
                         {
@@ -10201,6 +10173,10 @@ void Unit::setPowerType(Powers new_powertype)
             SetMaxPower(POWER_HAPPINESS, uint32(std::ceil(GetCreatePowers(POWER_HAPPINESS) * powerMultiplier)));
             SetPower(POWER_HAPPINESS, uint32(std::ceil(GetCreatePowers(POWER_HAPPINESS) * powerMultiplier)));
             break;
+        case POWER_RUNIC_POWER:
+            SetMaxPower(POWER_RUNIC_POWER, uint32(std::ceil(GetCreatePowers(POWER_RUNIC_POWER) * powerMultiplier)));
+            SetPower(POWER_RUNIC_POWER, 0);
+            break;
     }
 
     if (Player const* player = ToPlayer())
@@ -11440,12 +11416,12 @@ void Unit::SendEnergizeSpellLog(Unit* victim, uint32 spellID, uint32 damage, Pow
 
 void Unit::EnergizeBySpell(Unit* victim, uint32 spellID, uint32 damage, Powers powerType)
 {
-    victim->ModifyPower(powerType, damage, false);
+    int32 gainedPower = victim->ModifyPower(powerType, damage, false);
 
-    if (powerType != POWER_HAPPINESS)
+    if (powerType != POWER_HAPPINESS && gainedPower)
     {
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellID);
-        victim->getHostileRefMgr().threatAssist(this, float(damage) * 0.5f, spellInfo);
+        victim->getHostileRefMgr().threatAssist(this, float(gainedPower) * 0.5f, spellInfo);
     }
 
     SendEnergizeSpellLog(victim, spellID, damage, powerType);
@@ -11698,7 +11674,7 @@ float Unit::SpellPctDamageModsDone(Unit* victim, SpellInfo const* spellProto, Da
             // Ice Lance
             if (spellProto->SpellIconID == 186)
             {
-                if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
+                if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this) || owner->HasAura(1290012))
                 {
                     // Glyph of Ice Lance
                     if (owner->HasAura(56377) && victim->GetLevel() > owner->GetLevel())
@@ -12146,6 +12122,7 @@ float Unit::processDummyAuras(float TakenTotalMod) const
 int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
 {
     int32 DoneAdvertisedBenefit = 0;
+    int32 AdvertisedBenefitPct = 0;
 
     AuraEffectList const& mDamageDone = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE);
     for (AuraEffectList::const_iterator i = mDamageDone.begin(); i != mDamageDone.end(); ++i)
@@ -12156,6 +12133,12 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
             // 0 == any inventory type (not wand then)
             DoneAdvertisedBenefit += (*i)->GetAmount();
 
+    AuraEffectList const& mSpellPower = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_POWER);
+    for (AuraEffectList::const_iterator i = mSpellPower.begin(); i != mSpellPower.end(); ++i)
+        if ((*i)->GetMiscValue() & schoolMask)
+            DoneAdvertisedBenefit += (*i)->GetAmount();
+
+
     if (GetTypeId() == TYPEID_PLAYER)
     {
         // Base value
@@ -12164,12 +12147,32 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
         // Damage bonus from stats
         AuraEffectList const& mDamageDoneOfStatPercent = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT);
         for (AuraEffectList::const_iterator i = mDamageDoneOfStatPercent.begin(); i != mDamageDoneOfStatPercent.end(); ++i)
+            if ((*i)->GetMiscValue() & schoolMask)
+            {
+                // stat used stored in miscValueB for this aura
+                Stats usedStat = Stats((*i)->GetMiscValueB());
+                DoneAdvertisedBenefit += int32(CalculatePct(GetStat(usedStat), (*i)->GetAmount()));
+            }
+
+        AuraEffectList const& mSpellPowerOfStatPercent = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_POWER_OF_STAT_PERCENT);
+        for (AuraEffectList::const_iterator i = mSpellPowerOfStatPercent.begin(); i != mSpellPowerOfStatPercent.end(); ++i)
         {
             if ((*i)->GetMiscValue() & schoolMask)
             {
                 // stat used stored in miscValueB for this aura
                 Stats usedStat = Stats((*i)->GetMiscValueB());
                 DoneAdvertisedBenefit += int32(CalculatePct(GetStat(usedStat), (*i)->GetAmount()));
+            }
+        }
+        // ... and combat rating
+        AuraEffectList const& mSpellPowerByCombatRating = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_POWER_OF_RATING_PERCENT);
+        for (AuraEffectList::const_iterator i = mSpellPowerByCombatRating.begin(); i != mSpellPowerByCombatRating.end(); ++i)
+        {
+            if ((*i)->GetMiscValue() & schoolMask)
+            {
+                // combat rating used stored in miscValueB for this aura; not a bitmask 
+                CombatRating usedRating = CombatRating((*i)->GetMiscValueB());
+                DoneAdvertisedBenefit += int32(CalculatePct(ToPlayer()->GetRatingBonusValue(usedRating), (*i)->GetAmount()));
             }
         }
         // ... and attack power
@@ -12184,9 +12187,16 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
             if ((*i)->GetMiscValue() & schoolMask)
                 DoneAdvertisedBenefit += int32(GetArmor()/(*i)->GetAmount());
     }
+
+    // Spell Power Pct should be added after everything
+    AuraEffectList const& mSpellPowerPct = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_POWER_PCT);
+    for (AuraEffectList::const_iterator i = mSpellPowerPct.begin(); i != mSpellPowerPct.end(); ++i)
+        if ((*i)->GetMiscValue() & schoolMask)
+            AdvertisedBenefitPct += int32(CalculatePct(DoneAdvertisedBenefit, (*i)->GetAmount()));
+
+    DoneAdvertisedBenefit += AdvertisedBenefitPct;
     return DoneAdvertisedBenefit;
 }
-
 int32 Unit::SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask, bool isDoT)
 {
     int32 TakenAdvertisedBenefit = 0;
@@ -12321,7 +12331,7 @@ float Unit::SpellTakenCritChance(Unit const* caster, SpellInfo const* spellProto
                         {
                             // Shatter
                             case 911:
-                                modChance += 16;
+                                modChance += 21;
                                 [[fallthrough]];
                             case 910:
                                 modChance += 17;
@@ -12917,9 +12927,15 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
 int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
 {
     int32 AdvertisedBenefit = 0;
+    int32 AdvertisedBenefitPct = 0;
 
     AuraEffectList const& mHealingDone = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE);
     for (AuraEffectList::const_iterator i = mHealingDone.begin(); i != mHealingDone.end(); ++i)
+        if (!(*i)->GetMiscValue() || ((*i)->GetMiscValue() & schoolMask) != 0)
+            AdvertisedBenefit += (*i)->GetAmount();
+
+    AuraEffectList const& mSpellPower = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_POWER);
+    for (AuraEffectList::const_iterator i = mSpellPower.begin(); i != mSpellPower.end(); ++i)
         if (!(*i)->GetMiscValue() || ((*i)->GetMiscValue() & schoolMask) != 0)
             AdvertisedBenefit += (*i)->GetAmount();
 
@@ -12937,13 +12953,35 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
             Stats usedStat = Stats((*i)->GetSpellInfo()->Effects[(*i)->GetEffIndex()].MiscValue);
             AdvertisedBenefit += int32(CalculatePct(GetStat(usedStat), (*i)->GetAmount()));
         }
-
+        AuraEffectList const& mSpellPowerOfStatPercent = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_POWER_OF_STAT_PERCENT);
+        for (AuraEffectList::const_iterator i = mSpellPowerOfStatPercent.begin(); i != mSpellPowerOfStatPercent.end(); ++i)
+        {
+            // stat used dependent from misc value (stat index)
+            Stats usedStat = Stats((*i)->GetSpellInfo()->Effects[(*i)->GetEffIndex()].MiscValueB);
+            AdvertisedBenefit += int32(CalculatePct(GetStat(usedStat), (*i)->GetAmount()));
+        }
+        // ... and combat rating
+        AuraEffectList const& mSpellPowerOfCombatRating = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_POWER_OF_RATING_PERCENT);
+        for (AuraEffectList::const_iterator i = mSpellPowerOfCombatRating.begin(); i != mSpellPowerOfCombatRating.end(); ++i)
+        {
+            // combat rating used stored in miscValueB for this aura; not a bitmask 
+            CombatRating usedRating = CombatRating((*i)->GetSpellInfo()->Effects[(*i)->GetEffIndex()].MiscValueB);
+            AdvertisedBenefit += int32(CalculatePct(ToPlayer()->GetRatingBonusValue(usedRating), (*i)->GetAmount()));
+        }
         // ... and attack power
         AuraEffectList const& mHealingDonebyAP = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_HEALING_OF_ATTACK_POWER);
         for (AuraEffectList::const_iterator i = mHealingDonebyAP.begin(); i != mHealingDonebyAP.end(); ++i)
             if ((*i)->GetMiscValue() & schoolMask)
                 AdvertisedBenefit += int32(CalculatePct(GetTotalAttackPowerValue(BASE_ATTACK), (*i)->GetAmount()));
     }
+
+    // Spell Power Pct should be added after everything
+    AuraEffectList const& mSpellPowerPct = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_POWER_PCT);
+    for (AuraEffectList::const_iterator i = mSpellPowerPct.begin(); i != mSpellPowerPct.end(); ++i)
+        if ((*i)->GetMiscValue() & schoolMask)
+            AdvertisedBenefitPct += int32(CalculatePct(AdvertisedBenefit, (*i)->GetAmount()));
+
+    AdvertisedBenefit += AdvertisedBenefitPct;
     return AdvertisedBenefit;
 }
 
@@ -14226,6 +14264,9 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
     // additional checks - only PvP case
     if (playerAffectingAttacker && playerAffectingTarget)
     {
+        if (!IsPvP() && bySpell && bySpell->IsAffectingArea() && !bySpell->HasAttribute(SPELL_ATTR5_IGNORE_AREA_EFFECT_PVP_CHECK))
+            return false;
+
         if (target->IsPvP())
             return true;
 
@@ -15813,6 +15854,8 @@ void Unit::SetMaxHealth(uint32 val)
 
 void Unit::SetPower(Powers power, uint32 val, bool withPowerUpdate /*= true*/, bool fromRegenerate /* = false */)
 {
+    ToggleOnPowerPctAuras();
+    
     if (!fromRegenerate && GetPower(power) == val)
     {
         return;
@@ -17946,13 +17989,17 @@ void Unit::SetContestedPvP(Player* attackedPlayer, bool lookForNearContestedGuar
         player->AddUnitState(UNIT_STATE_ATTACK_PLAYER);
         player->SetPlayerFlag(PLAYER_FLAGS_CONTESTED_PVP);
         // call MoveInLineOfSight for nearby contested guards
-        AddToNotify(NOTIFY_AI_RELOCATION);
+        Acore::AIRelocationNotifier notifier(*this);
+        Cell::VisitWorldObjects(this, notifier, GetVisibilityRange());
     }
-    if (!HasUnitState(UNIT_STATE_ATTACK_PLAYER))
+    for (Unit* unit : m_Controlled)
     {
-        AddUnitState(UNIT_STATE_ATTACK_PLAYER);
-        // call MoveInLineOfSight for nearby contested guards
-        AddToNotify(NOTIFY_AI_RELOCATION);
+        if (!unit->HasUnitState(UNIT_STATE_ATTACK_PLAYER))
+        {
+            unit->AddUnitState(UNIT_STATE_ATTACK_PLAYER);
+            Acore::AIRelocationNotifier notifier(*unit);
+            Cell::VisitWorldObjects(this, notifier, GetVisibilityRange());
+        }
     }
 }
 
@@ -19799,7 +19846,7 @@ void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
     }
 }
 
-void Unit::UpdateObjectVisibility(bool forced, bool /*fromUpdate*/)
+void Unit::UpdateObjectVisibility(bool forced)
 {
     if (!forced)
         AddToNotify(NOTIFY_VISIBILITY_CHANGED);
@@ -19807,8 +19854,7 @@ void Unit::UpdateObjectVisibility(bool forced, bool /*fromUpdate*/)
     {
         WorldObject::UpdateObjectVisibility(true);
         Acore::AIRelocationNotifier notifier(*this);
-        float radius = 60.0f;
-        Cell::VisitAllObjects(this, notifier, radius);
+        Cell::VisitAllObjects(this, notifier, GetVisibilityRange());
     }
 }
 
@@ -20646,7 +20692,7 @@ bool Unit::CanSwim() const
     // Mirror client behavior, if this method returns false then client will not use swimming animation and for players will apply gravity as if there was no water
     if (HasUnitFlag(UNIT_FLAG_CANNOT_SWIM))
         return false;
-    if (HasUnitFlag(UNIT_FLAG_POSSESSED)) // is player
+    if (HasUnitFlag(UNIT_FLAG_POSSESSED) || HasUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED)) // is player
         return true;
     if (HasUnitFlag2(UNIT_FLAG2_UNUSED_6))
         return false;
@@ -20814,6 +20860,9 @@ void Unit::SendRemoveFromThreatListOpcode(HostileReference* pHostileReference)
 
 void Unit::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker)
 {
+    if (getClass() == CLASS_BARD)
+        return;
+
     float addRage;
 
     float rageconversion = ((0.0091107836f * GetLevel() * GetLevel()) + 3.225598133f * GetLevel()) + 4.2652911f;
@@ -21165,124 +21214,6 @@ bool ConflagrateAuraStateDelayEvent::Execute(uint64 /*e_time*/, uint32  /*p_time
             m_owner->ModifyAuraState(AURA_STATE_CONFLAGRATE, true);
 
     return true;
-}
-
-void Unit::ExecuteDelayedUnitRelocationEvent()
-{
-    this->RemoveFromNotify(NOTIFY_VISIBILITY_CHANGED);
-    if (!this->IsInWorld() || this->IsDuringRemoveFromWorld())
-        return;
-
-    if (this->HasSharedVision())
-        for (SharedVisionList::const_iterator itr = this->GetSharedVisionList().begin(); itr != this->GetSharedVisionList().end(); ++itr)
-            if (Player* player = (*itr))
-            {
-                if (player->IsOnVehicle(this) || !player->IsInWorld() || player->IsDuringRemoveFromWorld()) // players on vehicles have their own event executed (due to passenger relocation)
-                    continue;
-                WorldObject* viewPoint = player;
-                if (player->m_seer && player->m_seer->IsInWorld())
-                    viewPoint = player->m_seer;
-                if (!viewPoint->IsPositionValid() || !player->IsPositionValid())
-                    continue;
-
-                if (Unit* active = viewPoint->ToUnit())
-                {
-                    //if (active->IsVehicle()) // always check original unit here, last notify position is not relocated
-                    //  active = player;
-
-                    float dx = active->m_last_notify_position.GetPositionX() - active->GetPositionX();
-                    float dy = active->m_last_notify_position.GetPositionY() - active->GetPositionY();
-                    float dz = active->m_last_notify_position.GetPositionZ() - active->GetPositionZ();
-                    float distsq = dx * dx + dy * dy + dz * dz;
-                    float mindistsq = DynamicVisibilityMgr::GetReqMoveDistSq(active->FindMap()->GetEntry()->map_type);
-                    if (distsq < mindistsq)
-                        continue;
-
-                    // this will be relocated below sharedvision!
-                    //active->m_last_notify_position.Relocate(active->GetPositionX(), active->GetPositionY(), active->GetPositionZ());
-                }
-
-                Acore::PlayerRelocationNotifier relocateNoLarge(*player, false); // visit only objects which are not large; default distance
-                Cell::VisitAllObjects(viewPoint, relocateNoLarge, player->GetSightRange() + VISIBILITY_INC_FOR_GOBJECTS);
-                relocateNoLarge.SendToSelf();
-                Acore::PlayerRelocationNotifier relocateLarge(*player, true);    // visit only large objects; maximum distance
-                Cell::VisitAllObjects(viewPoint, relocateLarge, MAX_VISIBILITY_DISTANCE);
-                relocateLarge.SendToSelf();
-            }
-
-    if (Player* player = this->ToPlayer())
-    {
-        WorldObject* viewPoint = player;
-        if (player->m_seer && player->m_seer->IsInWorld())
-            viewPoint = player->m_seer;
-
-        if (viewPoint->GetMapId() != player->GetMapId() || !viewPoint->IsPositionValid() || !player->IsPositionValid())
-            return;
-
-        if (Unit* active = viewPoint->ToUnit())
-        {
-            if (active->IsVehicle())
-                active = player;
-
-            if (!player->GetFarSightDistance())
-            {
-                float dx     = active->m_last_notify_position.GetPositionX() - active->GetPositionX();
-                float dy     = active->m_last_notify_position.GetPositionY() - active->GetPositionY();
-                float dz     = active->m_last_notify_position.GetPositionZ() - active->GetPositionZ();
-                float distsq = dx * dx + dy * dy + dz * dz;
-
-                float mindistsq = DynamicVisibilityMgr::GetReqMoveDistSq(active->FindMap()->GetEntry()->map_type);
-                if (distsq < mindistsq)
-                    return;
-
-                active->m_last_notify_position.Relocate(active->GetPositionX(), active->GetPositionY(), active->GetPositionZ());
-            }
-        }
-
-        Acore::PlayerRelocationNotifier relocateNoLarge(*player, false); // visit only objects which are not large; default distance
-        Cell::VisitAllObjects(viewPoint, relocateNoLarge, player->GetSightRange() + VISIBILITY_INC_FOR_GOBJECTS);
-        relocateNoLarge.SendToSelf();
-
-        if (!player->GetFarSightDistance())
-        {
-            Acore::PlayerRelocationNotifier relocateLarge(*player, true); // visit only large objects; maximum distance
-            Cell::VisitAllObjects(viewPoint, relocateLarge, MAX_VISIBILITY_DISTANCE);
-            relocateLarge.SendToSelf();
-        }
-
-        this->AddToNotify(NOTIFY_AI_RELOCATION);
-    }
-    else if (Creature* unit = this->ToCreature())
-    {
-        if (!unit->IsPositionValid())
-            return;
-
-        float dx = unit->m_last_notify_position.GetPositionX() - unit->GetPositionX();
-        float dy = unit->m_last_notify_position.GetPositionY() - unit->GetPositionY();
-        float dz = unit->m_last_notify_position.GetPositionZ() - unit->GetPositionZ();
-        float distsq = dx * dx + dy * dy + dz * dz;
-        float mindistsq = DynamicVisibilityMgr::GetReqMoveDistSq(unit->FindMap()->GetEntry()->map_type);
-        if (distsq < mindistsq)
-            return;
-
-        unit->m_last_notify_position.Relocate(unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ());
-
-        Acore::CreatureRelocationNotifier relocate(*unit);
-        Cell::VisitAllObjects(unit, relocate, unit->GetVisibilityRange() + VISIBILITY_COMPENSATION);
-
-        this->AddToNotify(NOTIFY_AI_RELOCATION);
-    }
-}
-
-void Unit::ExecuteDelayedUnitAINotifyEvent()
-{
-    this->RemoveFromNotify(NOTIFY_AI_RELOCATION);
-    if (!this->IsInWorld() || this->IsDuringRemoveFromWorld())
-        return;
-
-    Acore::AIRelocationNotifier notifier(*this);
-    float radius = 60.0f;
-    Cell::VisitAllObjects(this, notifier, radius);
 }
 
 void Unit::SetInFront(WorldObject const* target)
@@ -22007,6 +21938,25 @@ void Unit::ToggleCombatAuras(bool startingCombat)
             AddAura(aura->GetTriggerSpell(), this);
         else if (!startingCombat && aura->GetMiscValueB() == 0)
             AddAura(aura->GetTriggerSpell(), this);
+        else
+            RemoveAura(aura->GetTriggerSpell());
+    }
+}
+
+void Unit::ToggleOnPowerPctAuras()
+{
+    auto auras = GetAuraEffectsByType(SPELL_AURA_MOD_TRIGGER_SPELL_ON_POWER_PCT);
+    for (auto aura : auras)
+    {
+        int8 power = aura->GetMiscValue();
+        int32 amount = aura->GetAmount();
+
+        if ((aura->GetMiscValueB() == 0 && (float)GetPowerPct(Powers(power)) < amount)
+            || (aura->GetMiscValueB() == 1 && (float)GetPowerPct(Powers(power)) > amount))
+        {
+            if (!HasAura(aura->GetTriggerSpell()))
+                AddAura(aura->GetTriggerSpell(), this);
+        }
         else
             RemoveAura(aura->GetTriggerSpell());
     }

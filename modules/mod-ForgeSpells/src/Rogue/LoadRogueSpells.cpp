@@ -866,7 +866,7 @@ public:
 
     void Load() override
     {
-        RegisterSpellScript(spell_rog_sinister_echo);
+        /*RegisterSpellScript(spell_rog_sinister_echo);
         RegisterSpellScript(spell_rog_sinister_wounds);
         RegisterSpellScript(spell_rog_sinister_wounds_spell);
         RegisterSpellScript(spell_rog_sinister_sting);
@@ -883,6 +883,6 @@ public:
         RegisterSpellScript(spell_rog_always_ready);
         RegisterSpellScript(spell_rog_wild_cuts_proc);
         RegisterSpellScript(spell_rog_pitch_correction);
-        RegisterSpellScript(spell_rog_awe_and_inspire);
+        RegisterSpellScript(spell_rog_awe_and_inspire);*/
     }
 };

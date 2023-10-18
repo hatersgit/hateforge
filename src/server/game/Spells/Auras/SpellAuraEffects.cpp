@@ -388,6 +388,11 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleNoImmediateEffect,                         //325 SPELL_AURA_MOD_DAMAGE_TAKEN_PCT_BEFORE_BLOCK
     &AuraEffect::HandleNoImmediateEffect,                         //326 SPELL_AURA_ADD_SPELL_BLOCK
     &AuraEffect::HandleNoImmediateEffect,                         //327 SPELL_AURA_MOD_MOVEMENT_SPEED_COMBAT
+    &AuraEffect::HandleAuraModSpellPower,                         //328 SPELL_AURA_MOD_SPELL_POWER
+    &AuraEffect::HandleAuraModSpellPowerPercent,                  //329 SPELL_AURA_MOD_SPELL_POWER_PCT
+    &AuraEffect::HandleAuraModSpellPowerOfStatPercent,            //330 SPELL_AURA_MOD_SPELL_POWER_OF_STAT_PERCENT
+    &AuraEffect::HandleAuraModSpellPowerOfCombatRatingPercent,    //331 SPELL_AURA_MOD_SPELL_POWER_OF_RATING_PERCENT
+    &AuraEffect::HandleAuraModTriggerSpellPowerPercent,           //332 SPELL_AURA_MOD_TRIGGER_SPELL_ON_POWER_PCT
 };
 
 AuraEffect::AuraEffect(Aura* base, uint8 effIndex, int32* baseAmount, Unit* caster):
@@ -4782,6 +4787,9 @@ void AuraEffect::HandleModRating(AuraApplication const* aurApp, uint8 mode, bool
     for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
         if (GetMiscValue() & (1 << rating))
             target->ToPlayer()->ApplyRatingMod(CombatRating(rating), GetAmount(), apply);
+
+    // Aleist3r: ugly hack to actually correctly update SPELL_AURA_MOD_SPELL_POWER_OF_RATING_PERCENT
+    target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
 }
 
 void AuraEffect::HandleModRatingFromStat(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -4798,6 +4806,9 @@ void AuraEffect::HandleModRatingFromStat(AuraApplication const* aurApp, uint8 mo
     for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
         if (GetMiscValue() & (1 << rating))
             target->ToPlayer()->ApplyRatingMod(CombatRating(rating), 0, apply);
+
+    // Aleist3r: ugly hack here as well
+    target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
 }
 
 /********************************/
@@ -4880,6 +4891,62 @@ void AuraEffect::HandleAuraModAttackPowerOfArmor(AuraApplication const* aurApp, 
     if (target->GetTypeId() == TYPEID_PLAYER)
         target->ToPlayer()->UpdateAttackPowerAndDamage(false);
 }
+
+/********************************/
+/***         SPELL POWER      ***/
+/********************************/
+void AuraEffect::HandleAuraModSpellPower(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
+}
+
+void AuraEffect::HandleAuraModSpellPowerPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
+}
+
+void AuraEffect::HandleAuraModSpellPowerOfStatPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
+}
+
+void AuraEffect::HandleAuraModSpellPowerOfCombatRatingPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
+}
+
 /********************************/
 /***        DAMAGE BONUS      ***/
 /********************************/
@@ -7132,6 +7199,28 @@ void AuraEffect::HandleModToggleAuraCombatState(AuraApplication const* aurApp, u
             || (!caster->IsInCombat() && GetMiscValueB() == 0))
             caster->AddAura(GetTriggerSpell(), caster);
         else if (GetAmplitude() != 1)
+            caster->RemoveAura(GetTriggerSpell());
+    }
+    else
+        caster->RemoveAura(GetTriggerSpell());
+}
+
+void AuraEffect::HandleAuraModTriggerSpellPowerPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    auto caster = GetCaster();
+
+    if (apply)
+    {
+        int8 power = GetMiscValue();
+        int32 amount = GetAmount();
+
+        if ((GetMiscValueB() == 0 && (float)(caster->GetPowerPct(Powers(power))) < amount)
+            || (GetMiscValueB() == 1 && (float)(caster->GetPowerPct(Powers(power))) > amount))
+        {
+            if (!caster->HasAura(GetTriggerSpell()))
+                caster->AddAura(GetTriggerSpell(), caster);
+        }
+        else
             caster->RemoveAura(GetTriggerSpell());
     }
     else

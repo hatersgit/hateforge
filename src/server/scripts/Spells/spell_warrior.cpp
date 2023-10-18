@@ -60,7 +60,10 @@ enum WarriorSpells
     SPELL_WARRIOR_VIGILANCE_PROC                    = 50725,
     SPELL_WARRIOR_VIGILANCE_REDIRECT_THREAT         = 59665,
     SPELL_WARRIOR_WHIRLWIND_MAIN                    = 50622,
-    SPELL_WARRIOR_WHIRLWIND_OFF                     = 44949
+    SPELL_WARRIOR_WHIRLWIND_OFF                     = 44949,
+
+    // Duskhaven
+    SPELL_WARRIOR_DEVASTATOR                        = 1040001
 };
 
 enum WarriorSpellIcons
@@ -896,6 +899,36 @@ class spell_warr_retaliation : public AuraScript
     }
 };
 
+// Duskhaven
+class spell_warr_devastator : public SpellScript
+{
+    PrepareSpellScript(spell_warr_devastator);
+
+    bool Validate(SpellInfo const* /*spellEntry*/) override
+    {
+        return ValidateSpellInfo(
+            {
+                SPELL_WARRIOR_DEVASTATOR
+            });
+    }
+
+    void HandleDummy(SpellEffIndex)
+    {
+        Unit* caster = GetCaster();
+        Player* player = caster->ToPlayer();
+
+        if (caster->HasAura(SPELL_WARRIOR_DEVASTATOR))
+        {
+            player->RemoveCategoryCooldown(1209); // Shield Slam
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_warr_devastator::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     RegisterSpellScript(spell_warr_mocking_blow);
@@ -922,4 +955,7 @@ void AddSC_warrior_spell_scripts()
     RegisterSpellScript(spell_warr_vigilance);
     RegisterSpellScript(spell_warr_vigilance_trigger);
     RegisterSpellScript(spell_warr_t3_prot_8p_bonus);
+
+    // Duskhaven
+    RegisterSpellScript(spell_warr_devastator);
 }

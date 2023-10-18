@@ -25,57 +25,57 @@
 
 enum ItemModType
 {
-    ITEM_MOD_MANA                     = 0,
-    ITEM_MOD_HEALTH                   = 1,
-    ITEM_MOD_AGILITY                  = 3,
-    ITEM_MOD_STRENGTH                 = 4,
-    ITEM_MOD_INTELLECT                = 5,
-    ITEM_MOD_SPIRIT                   = 6,
-    ITEM_MOD_STAMINA                  = 7,
-    ITEM_MOD_DEFENSE_SKILL_RATING     = 12,
-    ITEM_MOD_DODGE_RATING             = 13,
-    ITEM_MOD_PARRY_RATING             = 14,
-    ITEM_MOD_BLOCK_RATING             = 15,
-    ITEM_MOD_HIT_MELEE_RATING         = 16,
-    ITEM_MOD_HIT_RANGED_RATING        = 17,
-    ITEM_MOD_HIT_SPELL_RATING         = 18,
-    ITEM_MOD_CRIT_MELEE_RATING        = 19,
-    ITEM_MOD_CRIT_RANGED_RATING       = 20,
-    ITEM_MOD_CRIT_SPELL_RATING        = 21,
-    ITEM_MOD_HIT_TAKEN_MELEE_RATING   = 22,
-    ITEM_MOD_HIT_TAKEN_RANGED_RATING  = 23,
-    ITEM_MOD_HIT_TAKEN_SPELL_RATING   = 24,
-    ITEM_MOD_CRIT_TAKEN_MELEE_RATING  = 25,
-    ITEM_MOD_CRIT_TAKEN_RANGED_RATING = 26,
-    ITEM_MOD_CRIT_TAKEN_SPELL_RATING  = 27,
-    ITEM_MOD_HASTE_MELEE_RATING       = 28,
-    ITEM_MOD_HASTE_RANGED_RATING      = 29,
-    ITEM_MOD_HASTE_SPELL_RATING       = 30,
-    ITEM_MOD_HIT_RATING               = 31,
-    ITEM_MOD_CRIT_RATING              = 32,
-    ITEM_MOD_HIT_TAKEN_RATING         = 33,
-    ITEM_MOD_CRIT_TAKEN_RATING        = 34,
-    ITEM_MOD_RESILIENCE_RATING        = 35,
-    ITEM_MOD_HASTE_RATING             = 36,
-    ITEM_MOD_EXPERTISE_RATING         = 37,
-    ITEM_MOD_ATTACK_POWER             = 38,
-    ITEM_MOD_RANGED_ATTACK_POWER      = 39,
-    //ITEM_MOD_FERAL_ATTACK_POWER     = 40, not in 3.3
-    ITEM_MOD_SPELL_HEALING_DONE       = 41, // deprecated
-    ITEM_MOD_SPELL_DAMAGE_DONE        = 42, // deprecated
-    ITEM_MOD_MANA_REGENERATION        = 43,
-    ITEM_MOD_ARMOR_PENETRATION_RATING = 44,
-    ITEM_MOD_SPELL_POWER              = 45,
-    ITEM_MOD_HEALTH_REGEN             = 46,
-    ITEM_MOD_SPELL_PENETRATION        = 47,
-    ITEM_MOD_BLOCK_VALUE              = 48,
-    ITEM_MOD_THORNS                   = 49,
-    ITEM_MOD_CHALLENGE_MAP_CHALLENGE_MODE_ID = 50,
-    ITEM_MOD_CHALLENGE_KEYSTONE_LEVEL = 60,
+    ITEM_MOD_MANA                             = 0,
+    ITEM_MOD_HEALTH                           = 1,
+    ITEM_MOD_AGILITY                          = 3,
+    ITEM_MOD_STRENGTH                         = 4,
+    ITEM_MOD_INTELLECT                        = 5,
+    ITEM_MOD_SPIRIT                           = 6,
+    ITEM_MOD_STAMINA                          = 7,
+    ITEM_MOD_DEFENSE_SKILL_RATING             = 12,
+    ITEM_MOD_DODGE_RATING                     = 13,
+    ITEM_MOD_PARRY_RATING                     = 14,
+    ITEM_MOD_BLOCK_RATING                     = 15,
+    ITEM_MOD_HIT_MELEE_RATING                 = 16,
+    ITEM_MOD_HIT_RANGED_RATING                = 17,
+    ITEM_MOD_HIT_SPELL_RATING                 = 18,
+    ITEM_MOD_CRIT_MELEE_RATING                = 19,
+    ITEM_MOD_CRIT_RANGED_RATING               = 20,
+    ITEM_MOD_CRIT_SPELL_RATING                = 21,
+    ITEM_MOD_HIT_TAKEN_MELEE_RATING           = 22,
+    ITEM_MOD_HIT_TAKEN_RANGED_RATING          = 23,
+    ITEM_MOD_HIT_TAKEN_SPELL_RATING           = 24,
+    ITEM_MOD_CRIT_TAKEN_MELEE_RATING          = 25,
+    ITEM_MOD_CRIT_TAKEN_RANGED_RATING         = 26,
+    ITEM_MOD_CRIT_TAKEN_SPELL_RATING          = 27,
+    ITEM_MOD_HASTE_MELEE_RATING               = 28,
+    ITEM_MOD_HASTE_RANGED_RATING              = 29,
+    ITEM_MOD_HASTE_SPELL_RATING               = 30,
+    ITEM_MOD_HIT_RATING                       = 31,
+    ITEM_MOD_CRIT_RATING                      = 32,
+    ITEM_MOD_HIT_TAKEN_RATING                 = 33,
+    ITEM_MOD_CRIT_TAKEN_RATING                = 34,
+    ITEM_MOD_RESILIENCE_RATING                = 35,
+    ITEM_MOD_HASTE_RATING                     = 36,
+    ITEM_MOD_EXPERTISE_RATING                 = 37,
+    ITEM_MOD_ATTACK_POWER                     = 38,
+    ITEM_MOD_RANGED_ATTACK_POWER              = 39,
+    //ITEM_MOD_FERAL_ATTACK_POWER             = 40, not in 3.3
+    ITEM_MOD_SPELL_HEALING_DONE               = 41, // deprecated
+    ITEM_MOD_SPELL_DAMAGE_DONE                = 42, // deprecated
+    ITEM_MOD_MANA_REGENERATION                = 43,
+    ITEM_MOD_ARMOR_PENETRATION_RATING         = 44,
+    ITEM_MOD_SPELL_POWER                      = 45,
+    ITEM_MOD_HEALTH_REGEN                     = 46,
+    ITEM_MOD_SPELL_PENETRATION                = 47,
+    ITEM_MOD_BLOCK_VALUE                      = 48,
+    ITEM_MOD_THORNS                           = 49,
+    ITEM_MOD_CHALLENGE_MAP_CHALLENGE_MODE_ID  = 50,
+    ITEM_MOD_CHALLENGE_KEYSTONE_LEVEL         = 60
 
 };
 
-#define MAX_ITEM_MOD                    50
+#define MAX_ITEM_MOD                            61
 
 enum ItemSpelltriggerType
 {
@@ -375,7 +375,7 @@ enum ItemSubclassWeapon
     ITEM_SUBCLASS_WEAPON_POLEARM                = 6,
     ITEM_SUBCLASS_WEAPON_SWORD                  = 7,
     ITEM_SUBCLASS_WEAPON_SWORD2                 = 8,
-    ITEM_SUBCLASS_WEAPON_obsolete               = 9,
+    ITEM_SUBCLASS_WEAPON_WARGLAIVE              = 9,
     ITEM_SUBCLASS_WEAPON_STAFF                  = 10,
     ITEM_SUBCLASS_WEAPON_EXOTIC                 = 11,
     ITEM_SUBCLASS_WEAPON_EXOTIC2                = 12,
@@ -422,10 +422,11 @@ enum ItemSubclassArmor
     ITEM_SUBCLASS_ARMOR_LIBRAM                  = 7,
     ITEM_SUBCLASS_ARMOR_IDOL                    = 8,
     ITEM_SUBCLASS_ARMOR_TOTEM                   = 9,
-    ITEM_SUBCLASS_ARMOR_SIGIL                   = 10
+    ITEM_SUBCLASS_ARMOR_SIGIL                   = 10,
+    ITEM_SUBCLASS_ARMOR_INSTRUMENT              = 11
 };
 
-#define MAX_ITEM_SUBCLASS_ARMOR                   11
+#define MAX_ITEM_SUBCLASS_ARMOR                   12
 
 enum ItemSubclassReagent
 {
@@ -553,10 +554,14 @@ enum ItemSubclassGlyph
     ITEM_SUBCLASS_GLYPH_SHAMAN                  = 7,
     ITEM_SUBCLASS_GLYPH_MAGE                    = 8,
     ITEM_SUBCLASS_GLYPH_WARLOCK                 = 9,
-    ITEM_SUBCLASS_GLYPH_DRUID                   = 11
+    ITEM_SUBCLASS_GLYPH_DEMON_HUNTER            = 10,
+    ITEM_SUBCLASS_GLYPH_DRUID                   = 11,
+    ITEM_SUBCLASS_GLYPH_MONK                    = 12,
+    ITEM_SUBCLASS_GLYPH_BARD                    = 13,
+    ITEM_SUBCLASS_GLYPH_TINKER                  = 14,
 };
 
-#define MAX_ITEM_SUBCLASS_GLYPH                   12
+#define MAX_ITEM_SUBCLASS_GLYPH                   15
 
 const uint32 MaxItemSubclassValues[MAX_ITEM_CLASS] =
 {
@@ -811,7 +816,7 @@ struct ItemTemplate
         const static uint32 item_weapon_skills[MAX_ITEM_SUBCLASS_WEAPON] =
         {
             SKILL_AXES,     SKILL_2H_AXES,  SKILL_BOWS,          SKILL_GUNS,      SKILL_MACES,
-            SKILL_2H_MACES, SKILL_POLEARMS, SKILL_SWORDS,        SKILL_2H_SWORDS, 0,
+            SKILL_2H_MACES, SKILL_POLEARMS, SKILL_SWORDS,        SKILL_2H_SWORDS, SKILL_WARGLAIVES,
             SKILL_STAVES,   0,              0,                   SKILL_FIST_WEAPONS,   0,
             SKILL_DAGGERS,  SKILL_THROWN,   SKILL_ASSASSINATION, SKILL_CROSSBOWS, SKILL_WANDS,
             SKILL_FISHING

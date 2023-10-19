@@ -3024,12 +3024,17 @@ void InstanceMap::Update(const uint32 t_diff, const uint32 s_diff, bool /*thread
     Map::Update(t_diff, s_diff);
 
     if (t_diff)
-        if (instance_data)
+        if (instance_data) {
+            instance_data->UpdateOperations(t_diff);
             instance_data->Update(t_diff);
+        }
 }
 
 void InstanceMap::RemovePlayerFromMap(Player* player, bool remove)
 {
+    if (instance_data)
+        instance_data->OnPlayerExit(player);
+
     // pussywizard: moved m_unloadTimer to InstanceMap::AfterPlayerUnlinkFromMap(), in this function if 2 players run out at the same time the instance won't close
     //if (!m_unloadTimer && m_mapRefMgr.getSize() == 1)
     //    m_unloadTimer = m_unloadWhenEmpty ? MIN_UNLOAD_DELAY : std::max(sWorld->getIntConfig(CONFIG_INSTANCE_UNLOAD_DELAY), (uint32)MIN_UNLOAD_DELAY);
@@ -3514,12 +3519,23 @@ void Map::UpdateEncounterState(EncounterCreditType type, uint32 creditEntry, Uni
         for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
         {
             if (Player* player = i->GetSource())
-                if (Group* grp = player->GetGroup())
+                if (Group* grp = player->GetGroup()) {
                     if (grp->isLFGGroup())
                     {
                         sLFGMgr->FinishDungeon(grp->GetGUID(), dungeonId, this);
                         return;
                     }
+                    else if (IsHeroic())
+                    {
+                        auto map = sObjectMgr->GetDungeonKeyMap();
+                        auto key = map.find(GetId());
+                        if (key != map.end()) {
+                            Map::PlayerList const& players = GetPlayers();
+                            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                                itr->GetSource()->AddChallengeKey(sObjectMgr->GetRandomMythicKey(), 2);
+                        }
+                    }
+                }
         }
     }
 }

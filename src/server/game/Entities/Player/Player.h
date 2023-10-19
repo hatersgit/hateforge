@@ -1423,6 +1423,9 @@ public:
 
     bool AddItem(uint32 itemId, uint32 count);
 
+    // hater: m+
+    bool AddChallengeKey(uint32 challengeId, uint32 challengeLevel/* = 2*/);
+
     /*********************************************************/
     /***                    GOSSIP SYSTEM                  ***/
     /*********************************************************/
@@ -2665,6 +2668,9 @@ public:
     AppearanceContainer transmogrification_appearances;
     PresetMapType presetMap;
     std::string GetDebugInfo() const override;
+
+    // hater: m+
+    BasicEvent* mythicStartCheck = nullptr;
 
  protected:
     // Gamemaster whisper whitelist

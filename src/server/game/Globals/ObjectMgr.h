@@ -41,6 +41,7 @@
 #include <limits>
 #include <map>
 #include <string>
+#include <random>
 
 class Item;
 struct DungeonProgressionRequirements;
@@ -429,6 +430,58 @@ struct AreaTrigger
     float width;
     float height;
     float orientation;
+};
+
+// hater: m+
+struct InstanceDifficultyMultiplier
+{
+    float healthMultiplier;
+    float damageMultiplier;
+};
+
+struct MythicDifficultyScale
+{
+    float mod;
+};
+
+struct MapChallengeModeEntry
+{
+    std::string Name;
+    uint32 ID;
+    uint16 MapID;
+    uint8 Flags;
+    uint32 ExpansionLevel;
+    int16 CriteriaCount[3];
+};
+
+struct WorldSafeLocsEntry
+{
+    uint32 ID = 0;
+    WorldLocation Loc;
+};
+
+struct SpellScalingEntry
+{
+    //uint32    Id;                                         // 0        m_ID
+    int32     CastTimeMin;                                  // 1
+    int32     CastTimeMax;                                  // 2
+    int32     CastTimeMaxLevel;                             // 3
+    int32     ScalingClass;                                 // 4        (index * 100) + charLevel - 1 => gtSpellScaling.dbc
+    float     Multiplier[3];                                // 5-7
+    float     RandomMultiplier[3];                          // 8-10
+    float     OtherMultiplier[3];                           // 11-13
+    float     CoefBase;                                     // 14        some coefficient, mostly 1.0f
+    int32     CoefLevelBase;                                // 15        some level
+};
+
+struct KeyInfo {
+    uint32 itemId;
+    int32 baseTimer;
+};
+
+struct AffixInfo {
+    uint8 tier;
+    int32 timerDiff;
 };
 
 struct BroadcastText
@@ -1453,6 +1506,76 @@ public:
     uint8 GetInstanceSavedGameobjectState(uint32 id, uint32 guid);
     void SetInstanceSavedGameobjectState(uint32 id, uint32 guid, uint8 state);
     void NewInstanceSavedGameobjectState(uint32 id, uint32 guid, uint8 state);
+
+    // hater: m+
+    WorldSafeLocsEntry* GetWorldSafeLoc(uint32 id) const;
+    MapChallengeModeEntry* GetChallengeMode(uint32 id) const;
+    void LoadWorldSafeLocs();
+    void LoadMythicLevelScale();
+    void LoadInstanceDifficultyMultiplier();
+    void LoadMythicMinionValue();
+    void LoadMythicDungeonKeyMap();
+    void LoadMythicAffixes();
+
+    [[nodiscard]] InstanceDifficultyMultiplier const* GetInstanceDifficultyMultiplier(uint32 mapId, uint32 difficultyId) const
+    {
+        auto itr = _instanceDifficultyMultipliers.find(mapId);
+        if (itr == _instanceDifficultyMultipliers.end()) return nullptr;
+        auto sub = itr->second.find(difficultyId);
+        if (sub == itr->second.end()) return nullptr;
+        return sub->second;
+    }
+
+    [[nodiscard]] MythicDifficultyScale const* GetMythicDifficultyScale(uint32 difficulty) const
+    {
+        auto itr = _mythicLevelScales.find(difficulty);
+        if (itr == _mythicLevelScales.end()) return nullptr;
+        return itr->second;
+    }
+
+    [[nodiscard]] float GetMythicMinionValue(uint32 mapId, uint32 unit) const
+    {
+        auto itr = _cacheMythicMinionValues.find(mapId);
+        if (itr == _cacheMythicMinionValues.end()) return 0;
+        auto sub = itr->second.find(unit);
+        if (sub == itr->second.end()) return 0;
+        return sub->second;
+    }
+
+    [[nodiscard]] uint32 GetRandomMythicKey() const
+    {
+        std::random_device rd;
+        std::mt19937 eng(rd());
+        std::uniform_int_distribution<> distr(0, _forgeMythicMaps.size() - 1);
+        auto index = _forgeMythicMaps[distr(eng)];
+
+        return _forgeMythicKeys.at(index)->itemId;
+    }
+
+    std::unordered_map<uint32, KeyInfo*> GetDungeonKeyMap() {
+        return _forgeMythicKeys;
+    }
+
+    boolean AffixExistsAndMatchesTier(uint32 affix, uint8 tier) {
+        auto find = _forgeAffixes.find(affix);
+        if (find != _forgeAffixes.end())
+            return find->second->tier == tier;
+
+        return false;
+    }
+
+    AffixInfo* GetAffix(uint32 affix) {
+        auto find = _forgeAffixes.find(affix);
+        if (find != _forgeAffixes.end())
+            return find->second;
+
+        return nullptr;
+    }
+
+    std::unordered_map<uint8, std::vector<uint32>> GetForgeAffixesByTierMap() {
+        return _forgeAffixTiers;
+    }
+
 private:
     // first free id for selected id type
     uint32 _auctionId; // pussywizard: accessed by a single thread
@@ -1618,6 +1741,20 @@ private:
 
     std::set<uint32> _difficultyEntries[MAX_DIFFICULTY - 1]; // already loaded difficulty 1 value in creatures, used in CheckCreatureTemplate
     std::set<uint32> _hasDifficultyEntries[MAX_DIFFICULTY - 1]; // already loaded creatures with difficulty 1 values, used in CheckCreatureTemplate
+
+    // hater: m+
+    std::unordered_map<uint32, WorldSafeLocsEntry*> _worldSafeLocs;
+    std::unordered_map<uint32, MapChallengeModeEntry*> _cacheChallengeMode;
+    std::unordered_map<uint32, std::unordered_map<uint32, float>> _cacheMythicMinionValues;
+    typedef std::unordered_map<uint32, std::unordered_map<uint32, InstanceDifficultyMultiplier*>> InstanceDifficultyMultiplierContainer;
+    InstanceDifficultyMultiplierContainer _instanceDifficultyMultipliers;
+    typedef std::unordered_map<uint32, MythicDifficultyScale*> MythicDifficultyScaleContainer;
+
+    std::unordered_map<uint32, KeyInfo*> _forgeMythicKeys;
+    MythicDifficultyScaleContainer _mythicLevelScales;
+    std::vector<uint32> _forgeMythicMaps;
+    std::unordered_map<uint32 /*spellid*/, AffixInfo*> _forgeAffixes;
+    std::unordered_map<uint8 /*tier*/, std::vector<uint32 /*spellid*/>> _forgeAffixTiers;
 
     enum CreatureLinkedRespawnType
     {

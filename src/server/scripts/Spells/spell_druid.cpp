@@ -124,10 +124,7 @@ class spell_dru_t10_balance_4p_bonus : public AuraScript
         uint32 triggered_spell_id = 71023;
         SpellInfo const* triggeredSpell = sSpellMgr->GetSpellInfo(triggered_spell_id);
 
-        float dmgRatio;
-        int32 amount = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount()) / triggeredSpell->GetMaxTicks(eventInfo.GetActor(), dmgRatio);
-        if (dmgRatio != 0)
-            amount = amount * dmgRatio;
+        int32 amount = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount()) / triggeredSpell->GetMaxTicks();
 
         eventInfo.GetProcTarget()->CastDelayedSpellWithPeriodicAmount(GetTarget(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE, amount, EFFECT_0);
 
@@ -536,10 +533,8 @@ class spell_dru_innervate : public AuraScript
 
     void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
     {
-        float f;
-
         if (Unit* caster = GetCaster())
-            amount = int32(CalculatePct(caster->GetCreatePowers(POWER_MANA), amount) / aurEff->GetTotalTicks(f, true));
+            amount = int32(CalculatePct(caster->GetCreatePowers(POWER_MANA), amount) / aurEff->GetTotalTicks());
         else
             amount = 0;
     }

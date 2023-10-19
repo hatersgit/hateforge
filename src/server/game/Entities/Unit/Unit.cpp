@@ -14835,7 +14835,12 @@ void Unit::setDeathState(DeathState s, bool despawn)
 
         // players in instance don't have ZoneScript, but they have InstanceScript
         if (ZoneScript* zoneScript = GetZoneScript() ? GetZoneScript() : (ZoneScript*)GetInstanceScript())
+        {
             zoneScript->OnUnitDeath(this);
+
+            if (IsPlayer())
+                zoneScript->OnPlayerDeath(ToPlayer());
+        }
     }
     else if (s == JUST_RESPAWNED)
     {

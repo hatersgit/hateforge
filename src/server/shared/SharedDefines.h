@@ -3130,7 +3130,6 @@ enum SkillType
     SKILL_PET_EXOTIC_RHINO         = 786,
     SKILL_PET_EXOTIC_CORE_HOUND    = 787,
     SKILL_PET_EXOTIC_SPIRIT_BEAST  = 788,
-    SKILL_PET_EXOTIC_SPIRIT_BEAST  = 788,
     SKILL_WARGLAIVES               = 789,
     SKILL_INQUISITION              = 790,
     SKILL_WATCHER                  = 791,

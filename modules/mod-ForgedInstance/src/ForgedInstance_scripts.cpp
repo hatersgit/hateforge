@@ -137,31 +137,7 @@ public:
         return _Modifer_DealDamage(playerVictim, AttackerUnit, damage);
     }
 
-    void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage) override
-    {
-        if (target->IsControlledByPlayer())
-            return;
-
-        damage = _Modifer_DealDamage(target, attacker, damage);
-    }
-
-    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage) override
-    {
-        if (target->IsControlledByPlayer())
-            return;
-
-        damage = _Modifer_DealDamage(target, attacker, damage);
-    }
-
     void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage) override
-    {
-        if (target->IsControlledByPlayer())
-            return;
-
-        damage = _Modifer_DealDamage(target, attacker, damage);
-    }
-
-    void ModifyHealRecieved(Unit* target, Unit* attacker, uint32& damage) override
     {
         if (target->IsControlledByPlayer())
             return;

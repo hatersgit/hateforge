@@ -51,7 +51,6 @@ enum DeathKnightSpells
     SPELL_DK_DEATH_COIL_HEAL                    = 47633,
     SPELL_DK_DEATH_STRIKE_HEAL                  = 45470,
     SPELL_DK_FROST_FEVER                        = 55095,
-    SPELL_DK_SCARLET_FEVER                      = 1150007,
     SPELL_DK_FROST_PRESENCE                     = 48263,
     SPELL_DK_FROST_PRESENCE_TRIGGERED           = 61261,
     SPELL_DK_GHOUL_EXPLODE                      = 47496,
@@ -65,7 +64,6 @@ enum DeathKnightSpells
     SPELL_DK_ITEM_SIGIL_VENGEFUL_HEART          = 64962,
     SPELL_DK_ITEM_T8_MELEE_4P_BONUS             = 64736,
     SPELL_DK_MASTER_OF_GHOULS                   = 52143,
-    SPELL_DK_MASTER_OF_UNDEATH                  = 1150006,
     SPELL_DK_BLOOD_PLAGUE                       = 55078,
     SPELL_DK_RAISE_DEAD_USE_REAGENT             = 48289,
     SPELL_DK_RUNIC_POWER_ENERGIZE               = 49088,
@@ -1737,9 +1735,6 @@ class spell_dk_pestilence : public SpellScript
             // Frost Fever
             if (target->GetAura(SPELL_DK_FROST_FEVER, caster->GetGUID()))
                 caster->CastSpell(hitUnit, SPELL_DK_FROST_FEVER, true);
-            // Scarlet Fever
-            if (target->GetAura(SPELL_DK_SCARLET_FEVER, caster->GetGUID()))
-                caster->CastSpell(hitUnit, SPELL_DK_SCARLET_FEVER, true);
         }
     }
 

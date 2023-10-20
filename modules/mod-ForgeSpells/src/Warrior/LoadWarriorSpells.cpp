@@ -1100,7 +1100,7 @@ public:
 
     void Load() override
     {
-        RegisterSpellScript(spell_warr_sword_and_board);
+        /*RegisterSpellScript(spell_warr_sword_and_board);
         RegisterSpellScript(spell_warr_trigger_sword_and_board);
         RegisterSpellScript(spell_warr_heavy_shield_slam);
         RegisterSpellScript(spell_warr_glad_shield_slam);
@@ -1130,6 +1130,6 @@ public:
         RegisterSpellScript(spell_warr_second_wind);
         RegisterSpellScript(spell_warr_juggernaut);
         RegisterSpellScript(spell_warr_tactician);
-        RegisterSpellScript(spell_sudden_death);
+        RegisterSpellScript(spell_sudden_death);*/
     }
 };

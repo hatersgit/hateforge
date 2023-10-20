@@ -800,12 +800,12 @@ public:
 
     void Load() override
     {
-        RegisterSpellScript(spell_dk_festering_strike);
+        /*RegisterSpellScript(spell_dk_festering_strike);
         RegisterSpellScript(spell_dk_deaths_embrace);
         RegisterSpellScript(spell_dk_plague_scythe);
         RegisterSpellScript(spell_dk_raise_dead);
         RegisterSpellScript(spell_dk_vengeance);
         RegisterSpellScript(spell_dk_scent_of_blood);
-        RegisterSpellScript(spell_dk_bone_shield);
+        RegisterSpellScript(spell_dk_bone_shield);*/
     }
 };

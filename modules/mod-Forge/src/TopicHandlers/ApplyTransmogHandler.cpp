@@ -7,7 +7,7 @@
 #include "ForgeCommonMessage.h"
 #include <ForgeCache.cpp>
 #include <Transmogrification.cpp>
-#include <boost/algorithm/string.hpp>SSS
+#include <boost/algorithm/string.hpp>
 
 class ApplyTransmogHandler : public ForgeTopicHandler
 {

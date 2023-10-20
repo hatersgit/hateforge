@@ -19,7 +19,6 @@
 #define ACORE_INSTANCE_DATA_H
 
 #include "CreatureAI.h"
-#include "ObjectMgr.h"
 #include "World.h"
 #include "ZoneScript.h"
 #include "ChallengeModeCriteria.h"
@@ -68,6 +67,14 @@ enum DoorType
     DOOR_TYPE_PASSAGE       = 1,    // Door can open if encounter is done
     DOOR_TYPE_SPAWN_HOLE    = 2,    // Door can open if encounter is in progress, typically used for spawning places
     MAX_DOOR_TYPES,
+};
+
+enum ChallengeMode
+{
+    GOB_CHALLENGER_DOOR = 239408,
+
+    SPELL_CHALLENGER_MIGHT = 100101,
+    SPELL_CHALLENGER_BURDEN = 100102
 };
 
 struct DoorData

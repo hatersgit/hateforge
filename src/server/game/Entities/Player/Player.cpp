@@ -608,8 +608,11 @@ bool Player::Create(ObjectGuid::LowType guidlow, CharacterCreateInfo* createInfo
     }
     else if (getPowerType() == POWER_RUNIC_POWER)
     {
-        SetPower(POWER_RUNE, 8);
-        SetMaxPower(POWER_RUNE, 8);
+        if (getClass() == CLASS_DEATH_KNIGHT)
+        {
+            SetPower(POWER_RUNE, 8);
+            SetMaxPower(POWER_RUNE, 8);
+        }
         SetPower(POWER_RUNIC_POWER, 0);
         SetMaxPower(POWER_RUNIC_POWER, 1000);
     }
@@ -1799,8 +1802,7 @@ void Player::RegenerateAll()
         }
 
         Regenerate(POWER_RAGE);
-        if (getClass() == CLASS_DEATH_KNIGHT)
-            Regenerate(POWER_RUNIC_POWER);
+        Regenerate(POWER_RUNIC_POWER);
 
         m_regenTimerCount -= 2000;
     }
@@ -1889,8 +1891,16 @@ void Player::Regenerate(Powers power)
             {
                 if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
                 {
-                    float RageDecreaseRate = sWorld->getRate(RATE_POWER_RAGE_LOSS);
-                    addvalue += -20 * RageDecreaseRate;               // 2 rage by tick (= 2 seconds => 1 rage/sec)
+                    if (getClass() == CLASS_BARD)
+                    {
+                        float DiscordDecreaseRate = sWorld->getRate(RATE_POWER_DISCORD_LOSS);
+                        addvalue += -30 * DiscordDecreaseRate;
+                    }
+                    else
+                    {
+                        float RageDecreaseRate = sWorld->getRate(RATE_POWER_RAGE_LOSS);
+                        addvalue += -20 * RageDecreaseRate;               // 2 rage by tick (= 2 seconds => 1 rage/sec)
+                    }
                 }
             }
             break;
@@ -1911,8 +1921,42 @@ void Player::Regenerate(Powers power)
             {
                 if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
                 {
-                    float RunicPowerDecreaseRate = sWorld->getRate(RATE_POWER_RUNICPOWER_LOSS);
-                    addvalue += -30 * RunicPowerDecreaseRate;         // 3 RunicPower by tick
+                    if (getClass() == CLASS_PRIEST)
+                    {
+                        if (GetSpec() == TALENT_TREE_PRIEST_SHADOW)
+                        {
+                            float InsanityDecreaseRate = sWorld->getRate(RATE_POWER_INSANITY_LOSS);
+                            addvalue += -30 * InsanityDecreaseRate;
+                        }
+                        else if (GetSpec() == TALENT_TREE_PRIEST_INQUISITION)
+                        {
+                            float WrathDecreaseRate = sWorld->getRate(RATE_POWER_WRATH_LOSS);
+                            addvalue += -30 * WrathDecreaseRate;
+                        }
+                    }
+                    else if (getClass() == CLASS_TINKER)
+                    {
+                        if (GetSpec() != TALENT_TREE_TINKER_PHYSICIAN)
+                        {
+                            float BatteryGaugeDecreaseRate = sWorld->getRate(RATE_POWER_RUNICPOWER_LOSS);
+                            addvalue += -30 * BatteryGaugeDecreaseRate;
+                        }
+                    }
+                    else if (getClass() == CLASS_DEMON_HUNTER)
+                    {
+                        float FuryDecreaseRate = sWorld->getRate(RATE_POWER_FURY_LOSS);
+                        addvalue += -30 * FuryDecreaseRate;
+                    }
+                    else if (getClass() == CLASS_BARD)
+                    {
+                        float HarmonyDecreaseRate = sWorld->getRate(RATE_POWER_HARMONY_LOSS);
+                        addvalue += -30 * HarmonyDecreaseRate;
+                    }
+                    else
+                    {
+                        float RunicPowerDecreaseRate = sWorld->getRate(RATE_POWER_RUNICPOWER_LOSS);
+                        addvalue += -30 * RunicPowerDecreaseRate;         // 3 RunicPower by tick
+                    }
                 }
             }
             break;
@@ -16517,11 +16561,12 @@ bool Player::HasTankSpec()
         case TALENT_TREE_WARRIOR_PROTECTION:
         case TALENT_TREE_PALADIN_PROTECTION:
         case TALENT_TREE_DEATH_KNIGHT_BLOOD:
+        case TALENT_TREE_SHAMAN_WATCHER:
+        case TALENT_TREE_MONK_FELLOWSHIP:
+        case TALENT_TREE_DRUID_GUARDIAN:
+        case TALENT_TREE_TINKER_VANGUARD:
+        case TALENT_TREE_DEMON_HUNTER_VENGEANCE:
             return true;
-        case TALENT_TREE_DRUID_FERAL_COMBAT:
-            if (GetShapeshiftForm() == FORM_BEAR || GetShapeshiftForm() == FORM_DIREBEAR)
-                return true;
-            break;
         default:
             break;
     }
@@ -16541,10 +16586,10 @@ bool Player::HasMeleeSpec()
         case TALENT_TREE_DEATH_KNIGHT_FROST:
         case TALENT_TREE_DEATH_KNIGHT_UNHOLY:
         case TALENT_TREE_SHAMAN_ENHANCEMENT:
-            return true;
+        case TALENT_TREE_MONK_ZEALOTRY:
         case TALENT_TREE_DRUID_FERAL_COMBAT:
-            if (GetShapeshiftForm() == FORM_CAT)
-                return true;
+        case TALENT_TREE_DEMON_HUNTER_HAVOC:
+            return true;
         default:
             break;
     }
@@ -16555,6 +16600,10 @@ bool Player::HasCasterSpec()
 {
     switch (GetSpec(GetActiveSpec()))
     {
+        case TALENT_TREE_HUNTER_BEAST_MASTERY:
+        case TALENT_TREE_HUNTER_MARKSMANSHIP:
+        case TALENT_TREE_HUNTER_SURVIVAL:
+        case TALENT_TREE_PRIEST_INQUISITION:
         case TALENT_TREE_PRIEST_SHADOW:
         case TALENT_TREE_SHAMAN_ELEMENTAL:
         case TALENT_TREE_MAGE_ARCANE:
@@ -16564,9 +16613,7 @@ bool Player::HasCasterSpec()
         case TALENT_TREE_WARLOCK_DEMONOLOGY:
         case TALENT_TREE_WARLOCK_DESTRUCTION:
         case TALENT_TREE_DRUID_BALANCE:
-        case TALENT_TREE_HUNTER_BEAST_MASTERY:
-        case TALENT_TREE_HUNTER_MARKSMANSHIP:
-        case TALENT_TREE_HUNTER_SURVIVAL:
+        case TALENT_TREE_TINKER_SCRAPPER:
             return true;
         default:
             break;
@@ -16583,6 +16630,8 @@ bool Player::HasHealSpec()
         case TALENT_TREE_PRIEST_HOLY:
         case TALENT_TREE_SHAMAN_RESTORATION:
         case TALENT_TREE_DRUID_RESTORATION:
+        case TALENT_TREE_MONK_RADIANCE:
+        case TALENT_TREE_TINKER_PHYSICIAN:
             return true;
         default:
             break;
@@ -16745,14 +16794,18 @@ std::string Player::GetPlayerName()
 
     switch (getClass())
     {
+        case CLASS_BARD:         color = "|cff007F6B"; break;
         case CLASS_DEATH_KNIGHT: color = "|cffC41F3B"; break;
+        case CLASS_DEMON_HUNTER: color = "|cffA330C9"; break;
         case CLASS_DRUID:        color = "|cffFF7D0A"; break;
         case CLASS_HUNTER:       color = "|cffABD473"; break;
         case CLASS_MAGE:         color = "|cff69CCF0"; break;
+        case CLASS_MONK:         color = "|cffFF6F61"; break;
         case CLASS_PALADIN:      color = "|cffF58CBA"; break;
         case CLASS_PRIEST:       color = "|cffFFFFFF"; break;
         case CLASS_ROGUE:        color = "|cffFFF569"; break;
         case CLASS_SHAMAN:       color = "|cff0070DE"; break;
+        case CLASS_TINKER:       color = "|cffCD7F32"; break;
         case CLASS_WARLOCK:      color = "|cff9482C9"; break;
         case CLASS_WARRIOR:      color = "|cffC79C6E"; break;
     }

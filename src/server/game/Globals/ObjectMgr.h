@@ -685,6 +685,26 @@ struct GossipMenus
     ConditionList   Conditions;
 };
 
+struct WorldSafeLocsEntry
+{
+    uint32 ID = 0;
+    WorldLocation Loc;
+};
+
+struct SpellScalingEntry
+{
+    //uint32    Id;                                         // 0        m_ID
+    int32     CastTimeMin;                                  // 1
+    int32     CastTimeMax;                                  // 2
+    int32     CastTimeMaxLevel;                             // 3
+    int32     ScalingClass;                                 // 4        (index * 100) + charLevel - 1 => gtSpellScaling.dbc
+    float     Multiplier[3];                                // 5-7
+    float     RandomMultiplier[3];                          // 8-10
+    float     OtherMultiplier[3];                           // 11-13
+    float     CoefBase;                                     // 14        some coefficient, mostly 1.0f
+    int32     CoefLevelBase;                                // 15        some level
+};
+
 typedef std::multimap<uint32, GossipMenus> GossipMenusContainer;
 typedef std::pair<GossipMenusContainer::const_iterator, GossipMenusContainer::const_iterator> GossipMenusMapBounds;
 typedef std::pair<GossipMenusContainer::iterator, GossipMenusContainer::iterator> GossipMenusMapBoundsNonConst;
@@ -767,6 +787,16 @@ struct DungeonEncounter
     EncounterCreditType creditType;
     uint32 creditEntry;
     uint32 lastEncounterDungeon;
+};
+
+struct KeyInfo {
+    uint32 itemId;
+    int32 baseTimer;
+};
+
+struct AffixInfo {
+    uint8 tier;
+    int32 timerDiff;
 };
 
 typedef std::list<DungeonEncounter const*> DungeonEncounterList;
@@ -1001,6 +1031,10 @@ public:
         return nullptr;
     }
 
+    // hater: m+
+    WorldSafeLocsEntry* GetWorldSafeLoc(uint32 id) const;
+    MapChallengeModeEntry* GetChallengeMode(uint32 id) const;
+
     void LoadQuests();
     void LoadQuestMoneyRewards();
     void LoadQuestStartersAndEnders()
@@ -1152,6 +1186,14 @@ public:
     void LoadVendors();
     void LoadTrainerSpell();
     void AddSpellToTrainer(uint32 entry, uint32 spell, uint32 spellCost, uint32 reqSkill, uint32 reqSkillValue, uint32 reqLevel, uint32 reqSpell);
+
+    // hater: m+
+    void LoadWorldSafeLocs();
+    void LoadMythicLevelScale();
+    void LoadInstanceDifficultyMultiplier();
+    void LoadMythicMinionValue();
+    void LoadMythicDungeonKeyMap();
+    void LoadMythicAffixes();
 
     std::string GeneratePetName(uint32 entry);
     std::string GeneratePetNameLocale(uint32 entry, LocaleConstant locale);
@@ -1736,6 +1778,20 @@ private:
 
     CacheVendorItemContainer _cacheVendorItemStore;
     CacheTrainerSpellContainer _cacheTrainerSpellStore;
+
+    // hater: m+
+    std::unordered_map<uint32, WorldSafeLocsEntry*> _worldSafeLocs;
+    std::unordered_map<uint32, MapChallengeModeEntry*> _cacheChallengeMode;
+    std::unordered_map<uint32, std::unordered_map<uint32, float>> _cacheMythicMinionValues;
+    typedef std::unordered_map<uint32, std::unordered_map<uint32, InstanceDifficultyMultiplier*>> InstanceDifficultyMultiplierContainer;
+    InstanceDifficultyMultiplierContainer _instanceDifficultyMultipliers;
+    typedef std::unordered_map<uint32, MythicDifficultyScale*> MythicDifficultyScaleContainer;
+
+    std::unordered_map<uint32, KeyInfo*> _forgeMythicKeys;
+    MythicDifficultyScaleContainer _mythicLevelScales;
+    std::vector<uint32> _forgeMythicMaps;
+    std::unordered_map<uint32 /*spellid*/, AffixInfo*> _forgeAffixes;
+    std::unordered_map<uint8 /*tier*/, std::vector<uint32 /*spellid*/>> _forgeAffixTiers;
 
     ServerMailContainer _serverMailStore;
 

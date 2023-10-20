@@ -3038,6 +3038,8 @@ void InstanceMap::RemovePlayerFromMap(Player* player, bool remove)
     // pussywizard: moved m_unloadTimer to InstanceMap::AfterPlayerUnlinkFromMap(), in this function if 2 players run out at the same time the instance won't close
     //if (!m_unloadTimer && m_mapRefMgr.getSize() == 1)
     //    m_unloadTimer = m_unloadWhenEmpty ? MIN_UNLOAD_DELAY : std::max(sWorld->getIntConfig(CONFIG_INSTANCE_UNLOAD_DELAY), (uint32)MIN_UNLOAD_DELAY);
+    if (instance_data)
+        instance_data->OnPlayerExit(player);
     Map::RemovePlayerFromMap(player, remove);
 
     // If remove == true - player already deleted.
@@ -3084,6 +3086,7 @@ void InstanceMap::CreateInstanceScript(bool load, std::string data, uint32 compl
     // initialize should then be called only if load is false
     if (!isOtherAI || !load)
     {
+        // TODO: HATER pull from db store
         instance_data->Initialize();
     }
 

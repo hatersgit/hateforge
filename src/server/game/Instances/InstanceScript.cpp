@@ -1115,9 +1115,3 @@ bool InstanceHasScript(WorldObject const* obj, char const* scriptName)
 
     return false;
 }
-
-void InstanceScript::SpawnChallengeModeRewardChest(Position p) {
-    if (IsChallengeModeStarted()) {
-        GameObject* chest = _challengeOwner->SummonGameObject(GO_REWARD_CHEST, p.GetPositionX(), p.GetPositionY(), p.GetPositionZ(), 0, 0, 0, 0, 0, 0);
-    }
-}

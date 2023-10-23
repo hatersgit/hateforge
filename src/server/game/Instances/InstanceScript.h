@@ -83,14 +83,6 @@ struct DoorData
     DoorType type;
 };
 
-enum ChallengeMode
-{
-    GOB_CHALLENGER_DOOR = 239408,
-
-    SPELL_CHALLENGER_MIGHT = 100101,
-    SPELL_CHALLENGER_BURDEN = 100102
-};
-
 struct BossBoundaryEntry
 {
     uint32 const bossId;

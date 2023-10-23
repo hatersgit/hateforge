@@ -2678,8 +2678,8 @@ public:
 
     void SendSystemMessage(std::string_view msg, bool escapeCharacters = false);
 
+    // hater: xmog
     BasicEvent* pendingTransmogCheck = nullptr;
-    BasicEvent* mythicStartCheck = nullptr;
     typedef std::array<std::unordered_set<uint32>, EQUIPMENT_SLOT_END> AppearanceContainer;
     AppearanceContainer transmogrification_appearances;
     PresetMapType presetMap;

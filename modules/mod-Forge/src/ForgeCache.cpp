@@ -144,7 +144,7 @@ struct ForgeTalentTab
 };
 
 // XMOG
-struct ForgeCharacaterXmog
+struct ForgeCharacterXmog
 {
     std::string name;
     std::unordered_map<uint8, uint32> slottedItems;
@@ -818,7 +818,7 @@ public:
     }
 
     void AddXmogSet(Player* player, uint32 setId, std::string name) {
-        ForgeCharacaterXmog* xmog = new ForgeCharacaterXmog();
+        ForgeCharacterXmog* xmog = new ForgeCharacterXmog();
         xmog->name = name;
 
         auto newSetId = FirstOpenXmogSlot(player);
@@ -904,7 +904,7 @@ private:
     std::vector<uint32 /*guid*/> FlaggedForReset;
 
     // xmog
-    std::unordered_map<uint32 /*char*/, std::unordered_map<uint8 /*setId*/, ForgeCharacaterXmog*>> XmogSets;
+    std::unordered_map<uint32 /*char*/, std::unordered_map<uint8 /*setId*/, ForgeCharacterXmog*>> XmogSets;
     uint8 xmogSlots[14] = { EQUIPMENT_SLOT_HEAD, EQUIPMENT_SLOT_SHOULDERS, EQUIPMENT_SLOT_BODY, EQUIPMENT_SLOT_CHEST,
         EQUIPMENT_SLOT_WAIST, EQUIPMENT_SLOT_LEGS, EQUIPMENT_SLOT_FEET, EQUIPMENT_SLOT_WRISTS, EQUIPMENT_SLOT_HANDS,
         EQUIPMENT_SLOT_BACK, EQUIPMENT_SLOT_MAINHAND, EQUIPMENT_SLOT_OFFHAND, EQUIPMENT_SLOT_RANGED, EQUIPMENT_SLOT_TABARD };
@@ -1116,7 +1116,7 @@ private:
             uint32 ranged = xmogSet[15].Get<uint32>();
             uint32 tabard = xmogSet[16].Get<uint32>();
 
-            ForgeCharacaterXmog* set = new ForgeCharacaterXmog();
+            ForgeCharacterXmog* set = new ForgeCharacterXmog();
             set->name = name;
             set->slottedItems[EQUIPMENT_SLOT_HEAD] = head;
             set->slottedItems[EQUIPMENT_SLOT_SHOULDERS] = shoulders;
@@ -1137,7 +1137,7 @@ private:
         } while (xmogSets->NextRow());
     }
 
-    void SaveXmogSetInternal(Player* player, uint32 set, ForgeCharacaterXmog* xmog) {
+    void SaveXmogSetInternal(Player* player, uint32 set, ForgeCharacterXmog* xmog) {
         auto trans = CharacterDatabase.BeginTransaction();
         trans->Append("INSERT INTO acore_characters.forge_character_transmogsets (guid, setid, setname, head, shoulders, shirt, chest, waist, legs, feet, wrists, hands, back, mh, oh, ranged, tabard) VALUES({}, {}, '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}) on duplicate key update setname = '{}' , head = {}, shoulders = {}, shirt = {}, chest = {}, waist = {}, legs = {}, feet = {}, wrists = {}, hands = {}, back = {}, mh = {}, oh = {}, ranged = {}, tabard = {}",
             player->GetGUID().GetCounter(), set, xmog->name, xmog->slottedItems[EQUIPMENT_SLOT_HEAD], xmog->slottedItems[EQUIPMENT_SLOT_SHOULDERS],

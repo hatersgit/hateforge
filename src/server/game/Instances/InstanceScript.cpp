@@ -16,6 +16,7 @@
  */
 
 #include "InstanceScript.h"
+#include "ChallengeModeMgr.h"
 #include "Creature.h"
 #include "DatabaseEnv.h"
 #include "GameObject.h"
@@ -47,8 +48,6 @@ BossBoundaryData::~BossBoundaryData()
 void InstanceScript::SaveToDB()
 {
     std::string data = GetSaveData();
-    //if (data.empty()) // pussywizard: encounterMask can be updated and theres no reason to not save
-    //    return;
 
     // pussywizard:
     InstanceSave* save = sInstanceSaveMgr->GetInstanceSave(instance->GetInstanceId());
@@ -1100,7 +1099,8 @@ void InstanceScript::CastChallengePlayerSpell(Player* player)
     player->CastCustomSpell(SPELL_CHALLENGER_BURDEN, values, player, TRIGGERED_FULL_MASK);
 }
 
-void InstanceScript::SpawnChallengeModeRewardChest(Position p) {
+void InstanceScript::SpawnChallengeModeRewardChest(Position p)
+{
     if (IsChallengeModeStarted()) {
         GameObject* chest = _challengeOwner->SummonGameObject(GO_REWARD_CHEST, p.GetPositionX(), p.GetPositionY(), p.GetPositionZ(), 0, 0, 0, 0, 0, 0);
     }
@@ -1114,4 +1114,10 @@ bool InstanceHasScript(WorldObject const* obj, char const* scriptName)
     }
 
     return false;
+}
+
+void InstanceScript::SpawnChallengeModeRewardChest(Position p) {
+    if (IsChallengeModeStarted()) {
+        GameObject* chest = _challengeOwner->SummonGameObject(GO_REWARD_CHEST, p.GetPositionX(), p.GetPositionY(), p.GetPositionZ(), 0, 0, 0, 0, 0, 0);
+    }
 }

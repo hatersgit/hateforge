@@ -88,6 +88,11 @@ enum SpellFamilyFlag
 
     /// @todo: Figure out a more accurate name for the following familyflag(s)
     SPELLFAMILYFLAG_SHAMAN_TOTEM_EFFECTS    = 0x04000000,  // Seems to be linked to most totems and some totem effects
+
+    // Mage
+    SPELLFAMILYFLAG_MAGE_SINGLETARGET       = 0x20600833,
+    SPELLFAMILYFLAG1_MAGE_SINGLETARGET      = 0x00009000,
+    SPELLFAMILYFLAG2_MAGE_SINGLETARGET      = 0x000001E0,
 };
 
 #define SPELL_LINKED_MAX_SPELLS  200000

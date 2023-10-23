@@ -302,6 +302,11 @@ public:
     void HandleAuraModRangedAttackPowerOfStatPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleAuraModAttackPowerOfStatPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleAuraModAttackPowerOfArmor(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+    //   spell power
+    void HandleAuraModSpellPower(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+    void HandleAuraModSpellPowerPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+    void HandleAuraModSpellPowerOfStatPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+    void HandleAuraModSpellPowerOfCombatRatingPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     //   damage bonus
     void HandleModDamageDone(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleModDamagePercentDone(AuraApplication const* aurApp, uint8 mode, bool apply) const;
@@ -352,6 +357,7 @@ public:
     void HandleProcTriggerDamageAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
     void HandleRaidProcFromChargeAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
     void HandleRaidProcFromChargeWithValueAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
+    void HandleAuraModTriggerSpellPowerPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
 };
 
 namespace Acore

@@ -1499,8 +1499,8 @@ void Player::UpdatePvP(bool state, bool _override)
 void Player::UpdatePotionCooldown(Spell* spell)
 {
     // no potion used i combat or still in combat
-    if (!GetLastPotionId() || IsInCombat())
-        return;
+    /*if (!GetLastPotionId() || IsInCombat())
+        return;*/
 
     // Call not from spell cast, send cooldown event for item spells if no in
     // combat
@@ -1945,7 +1945,8 @@ void Player::UpdateCharmedAI()
     bool Mages =
         getClassMask() & (1 << (CLASS_MAGE - 1) | 1 << (CLASS_WARLOCK - 1) |
                           1 << (CLASS_DRUID - 1) | 1 << (CLASS_HUNTER - 1) |
-                          1 << (CLASS_PRIEST - 1));
+                          1 << (CLASS_PRIEST - 1) | 1 << (CLASS_BARD - 1) |
+                          1 << (CLASS_TINKER - 1));
 
     // Xinef: charmer type specific actions
     if (charmer->GetTypeId() == TYPEID_PLAYER)

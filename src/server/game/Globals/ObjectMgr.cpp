@@ -2871,47 +2871,43 @@ void ObjectMgr::LoadItemTemplates()
 
         if (dbcitem)
         {
-            if (itemTemplate.Class != dbcitem->ClassID)
+            if (enforceDBCAttributes)
             {
-                LOG_ERROR("sql.sql", "Item (Entry: {}) has wrong Class value ({}), must be ({}).", entry, itemTemplate.Class, dbcitem->ClassID);
-                if (enforceDBCAttributes)
+                if (itemTemplate.Class != dbcitem->ClassID)
+                {
+                    LOG_ERROR("sql.sql", "Item (Entry: {}) has wrong Class value ({}), must be ({}).", entry, itemTemplate.Class, dbcitem->ClassID);
                     itemTemplate.Class = dbcitem->ClassID;
-            }
-            if (itemTemplate.SubClass != dbcitem->SubclassID)
-            {
-                LOG_ERROR("sql.sql", "Item (Entry: {}) has wrong Subclass value ({}) for class {}, must be ({}).", entry, itemTemplate.SubClass, itemTemplate.Class, dbcitem->SubclassID);
-                if (enforceDBCAttributes)
+                }
+                if (itemTemplate.SubClass != dbcitem->SubclassID)
+                {
+                    LOG_ERROR("sql.sql", "Item (Entry: {}) has wrong Subclass value ({}) for class {}, must be ({}).", entry, itemTemplate.SubClass, itemTemplate.Class, dbcitem->SubclassID);
                     itemTemplate.SubClass = dbcitem->SubclassID;
-            }
-            if (itemTemplate.SoundOverrideSubclass != dbcitem->SoundOverrideSubclassID)
-            {
-                LOG_ERROR("sql.sql", "Item (Entry: {}) does not have a correct SoundOverrideSubclass ({}), must be {}.", entry, itemTemplate.SoundOverrideSubclass);
-                if (enforceDBCAttributes)
+                }
+                if (itemTemplate.SoundOverrideSubclass != dbcitem->SoundOverrideSubclassID)
+                {
+                    LOG_ERROR("sql.sql", "Item (Entry: {}) does not have a correct SoundOverrideSubclass ({}), must be {}.", entry, itemTemplate.SoundOverrideSubclass, dbcitem->SoundOverrideSubclassID);
                     itemTemplate.SoundOverrideSubclass = dbcitem->SoundOverrideSubclassID;
-            }
-            if (itemTemplate.Material != dbcitem->Material)
-            {
-                LOG_ERROR("sql.sql", "Item (Entry: {}) does not have a correct material ({}), must be {}.", entry, itemTemplate.Material, dbcitem->Material);
-                if (enforceDBCAttributes)
+                }
+                if (itemTemplate.Material != dbcitem->Material)
+                {
+                    LOG_ERROR("sql.sql", "Item (Entry: {}) does not have a correct material ({}), must be {}.", entry, itemTemplate.Material, dbcitem->Material);
                     itemTemplate.Material = dbcitem->Material;
-            }
-            if (itemTemplate.InventoryType != dbcitem->InventoryType)
-            {
-                LOG_ERROR("sql.sql", "Item (Entry: {}) has wrong InventoryType value ({}), must be {}.", entry, itemTemplate.InventoryType, dbcitem->InventoryType);
-                if (enforceDBCAttributes)
+                }
+                if (itemTemplate.InventoryType != dbcitem->InventoryType)
+                {
+                    LOG_ERROR("sql.sql", "Item (Entry: {}) has wrong InventoryType value ({}), must be {}.", entry, itemTemplate.InventoryType, dbcitem->InventoryType);
                     itemTemplate.InventoryType = dbcitem->InventoryType;
-            }
-            if (itemTemplate.DisplayInfoID != dbcitem->DisplayInfoID)
-            {
-                LOG_ERROR("sql.sql", "Item (Entry: {}) does not have a correct display id ({}), must be {}.", entry, itemTemplate.DisplayInfoID, dbcitem->DisplayInfoID);
-                if (enforceDBCAttributes)
+                }
+                if (itemTemplate.DisplayInfoID != dbcitem->DisplayInfoID)
+                {
+                    LOG_ERROR("sql.sql", "Item (Entry: {}) does not have a correct display id ({}), must be {}.", entry, itemTemplate.DisplayInfoID, dbcitem->DisplayInfoID);
                     itemTemplate.DisplayInfoID = dbcitem->DisplayInfoID;
-            }
-            if (itemTemplate.Sheath != dbcitem->SheatheType)
-            {
-                LOG_ERROR("sql.sql", "Item (Entry: {}) has wrong Sheath ({}), must be {}.", entry, itemTemplate.Sheath, dbcitem->SheatheType);
-                if (enforceDBCAttributes)
+                }
+                if (itemTemplate.Sheath != dbcitem->SheatheType)
+                {
+                    LOG_ERROR("sql.sql", "Item (Entry: {}) has wrong Sheath ({}), must be {}.", entry, itemTemplate.Sheath, dbcitem->SheatheType);
                     itemTemplate.Sheath = dbcitem->SheatheType;
+                }
             }
         }
         else
@@ -7688,8 +7684,8 @@ void ObjectMgr::LoadReputationSpilloverTemplate()
 
     _repSpilloverTemplateStore.clear();                      // for reload case
 
-    uint32 count = 0; //                                0         1        2       3        4       5       6         7        8      9        10       11     12
-    QueryResult result = WorldDatabase.Query("SELECT faction, faction1, rate_1, rank_1, faction2, rate_2, rank_2, faction3, rate_3, rank_3, faction4, rate_4, rank_4 FROM reputation_spillover_template");
+    uint32 count = 0; //                                0         1        2       3        4       5       6         7        8      9        10       11     12        13       14      15       16       17     18
+    QueryResult result = WorldDatabase.Query("SELECT faction, faction1, rate_1, rank_1, faction2, rate_2, rank_2, faction3, rate_3, rank_3, faction4, rate_4, rank_4, faction5, rate_5, rank_5, faction6, rate_6, rank_6 FROM reputation_spillover_template");
 
     if (!result)
     {
@@ -7718,6 +7714,12 @@ void ObjectMgr::LoadReputationSpilloverTemplate()
         repTemplate.faction[3]          = fields[10].Get<uint16>();
         repTemplate.faction_rate[3]     = fields[11].Get<float>();
         repTemplate.faction_rank[3]     = fields[12].Get<uint8>();
+        repTemplate.faction[4]          = fields[13].Get<uint16>();
+        repTemplate.faction_rate[4]     = fields[14].Get<float>();
+        repTemplate.faction_rank[4]     = fields[15].Get<uint8>();
+        repTemplate.faction[5]          = fields[16].Get<uint16>();
+        repTemplate.faction_rate[5]     = fields[17].Get<float>();
+        repTemplate.faction_rank[5]     = fields[18].Get<uint8>();
 
         FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionId);
 

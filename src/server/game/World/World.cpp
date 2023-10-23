@@ -1715,6 +1715,9 @@ void World::SetInitialWorldSettings()
     LOG_INFO("server.loading", "Loading Creature Model Based Info Data...");
     sObjectMgr->LoadCreatureModelInfo();
 
+    LOG_INFO("server.loading", "Loading Creature template outfits...");     // must be before LoadCreatureTemplates
+    sObjectMgr->LoadCreatureOutfits();
+
     LOG_INFO("server.loading", "Loading Creature Custom IDs Config...");
     sObjectMgr->LoadCreatureCustomIDs();
 

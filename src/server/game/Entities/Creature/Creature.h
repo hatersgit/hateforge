@@ -29,6 +29,9 @@
 #include "World.h"
 #include <list>
 
+class CreatureOutfit;
+#include <memory>
+
 class SpellInfo;
 
 class CreatureAI;
@@ -54,6 +57,13 @@ public:
     float GetNativeObjectScale() const override;
     void SetObjectScale(float scale) override;
     void SetDisplayId(uint32 modelId) override;
+    uint32 GetDisplayId() const;
+    void SetDisplayIdRaw(uint32 modelId);
+
+    CreatureOutfit* GetOutfit() { return m_outfit; };
+    void SetOutfit(CreatureOutfit* outfit);
+    void SetMirrorImageFlag(bool on) { if (on) SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_MIRROR_IMAGE); else RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_MIRROR_IMAGE); };
+    void SendMirrorSound(Player* target, uint8 type);
 
     void DisappearAndDie();
 
@@ -150,6 +160,8 @@ public:
         ObjectGuid Target;        // the creature's "real" target while casting
         float Orientation = 0.0f; // the creature's "real" orientation while casting
     } _spellFocusInfo;
+
+    CreatureOutfit* m_outfit = nullptr;
 
     [[nodiscard]] uint32 GetShieldBlockValue() const override
     {

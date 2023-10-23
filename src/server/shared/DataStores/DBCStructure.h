@@ -1407,6 +1407,15 @@ struct NamesProfanityEntry
     //uint32         Language;                              // 2
 };
 
+struct NPCSoundsEntry
+{
+    uint32 Id;
+    uint32 hello;
+    uint32 goodbye;
+    uint32 pissed;
+    uint32 ack;
+};
+
 #define MAX_OVERRIDE_SPELL 10
 
 struct OverrideSpellDataEntry

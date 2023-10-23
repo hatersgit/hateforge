@@ -32,6 +32,7 @@
 #include "Vehicle.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include "CreatureOutfit.h"
 
 void WorldSession::HandleClientCastFlags(WorldPacket& recvPacket, uint8 castFlags, SpellCastTargets& targets)
 {
@@ -654,6 +655,33 @@ void WorldSession::HandleSpellClick(WorldPacket& recvData)
 
     if (!unit)
         return;
+
+    if (Creature* creature = unit->ToCreature())
+    {
+        Player* player = creature->ToPlayer();
+        if (CreatureOutfit* outfit = creature->GetOutfit())
+        {
+            WorldPacket data(SMSG_MIRRORIMAGE_DATA, 68);
+            data << guid;
+            data << uint32(outfit->displayId);  // displayId
+            data << uint8(outfit->race);        // race
+            data << uint8(outfit->gender);      // gender
+            data << uint8(player->getClass());     // class
+        
+            data << uint8(player->GetByteValue(PLAYER_BYTES, 0));   // skin
+            data << uint8(player->GetByteValue(PLAYER_BYTES, 1));   // face
+            data << uint8(player->GetByteValue(PLAYER_BYTES, 2));   // hair
+            data << uint8(player->GetByteValue(PLAYER_BYTES, 3));   // haircolor
+            data << uint8(player->GetByteValue(PLAYER_BYTES_2, 0)); // facialhair
+            data << uint32(player->GetGuildId());                   // unk
+            // item displays
+            for (auto const& slot : ITEM_SLOTS)
+                data << uint32(outfit->outfitdisplays[slot]);
+
+            SendPacket(&data);
+            return;
+        }
+    }
 
     /// @todo: Unit::SetCharmedBy: 28782 is not in world but 0 is trying to charm it! -> crash
     if (!unit->IsInWorld())

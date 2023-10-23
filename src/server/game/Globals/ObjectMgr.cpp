@@ -23,6 +23,7 @@
 #include "Chat.h"
 #include "Common.h"
 #include "CreatureAIFactory.h"
+#include "CreatureOutfit.h"
 #include "Config.h"
 #include "Containers.h"
 #include "DatabaseEnv.h"
@@ -1705,6 +1706,7 @@ void ObjectMgr::LoadCreatureMovementOverrides()
 
 CreatureModelInfo const* ObjectMgr::GetCreatureModelInfo(uint32 modelId) const
 {
+    modelId = GetRealDisplayId(modelId);
     CreatureModelContainer::const_iterator itr = _creatureModelStore.find(modelId);
     if (itr != _creatureModelStore.end())
         return &(itr->second);
@@ -1742,6 +1744,12 @@ void ObjectMgr::ChooseCreatureFlags(const CreatureTemplate* cinfo, uint32& npcfl
 
 CreatureModelInfo const* ObjectMgr::GetCreatureModelRandomGender(uint32* displayID)
 {
+    {
+        uint32 displayid_temp = GetRealDisplayId(*displayID);
+        if (displayid_temp != *displayID)
+            return GetCreatureModelRandomGender(&displayid_temp);
+    }
+
     CreatureModelInfo const* modelInfo = GetCreatureModelInfo(*displayID);
     if (!modelInfo)
         return nullptr;
@@ -8734,6 +8742,183 @@ SkillRangeType GetSkillRangeType(SkillRaceClassInfoEntry const* rcEntry)
     }
 
     return SKILL_RANGE_LEVEL;
+}
+
+void ObjectMgr::LoadNpcSounds()
+{
+    uint32 oldMSTime = getMSTime();
+
+    _npcSounds.clear();                                  // for reload case
+
+    //                                                0      1        2       3    4
+    QueryResult result = WorldDatabase.Query("SELECT id, hello, goodbye, pissed, ack FROM npc_sounds");
+
+    if (!result)
+    {
+        LOG_WARN("server.loading", ">> Loaded 0 NpcSounds. DB table `npc_sounds` is empty!");
+        LOG_INFO("server.loading", " ");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 id = fields[0].Get<uint32>();
+        uint32 hello = fields[1].Get<uint32>();
+        uint32 goodbye = fields[2].Get<uint32>();
+        uint32 pissed = fields[3].Get<uint32>();
+        uint32 ack = fields[4].Get<uint32>();
+
+        NPCSoundsEntry* entry = new NPCSoundsEntry();
+        entry->ack = ack;
+        entry->hello = hello;
+        entry->goodbye = goodbye;
+        entry->pissed = pissed;
+        _npcSounds[id] = entry;
+
+        ++count;
+    } while (result->NextRow());
+
+    LOG_INFO("server.loading", ">> Loaded {} NpcSounds in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", " ");
+}
+
+NPCSoundsEntry* ObjectMgr::GetNpcSounds(uint32 id)
+{
+    auto out = _npcSounds.find(id);
+    if (out != _npcSounds.end())
+        return out->second;
+    
+    return nullptr;
+}
+
+void ObjectMgr::LoadCreatureOutfits()
+{
+    uint32 oldMSTime = getMSTime();
+
+    _creatureOutfitStore.clear();
+
+    QueryResult result = WorldDatabase.Query("SELECT entry, npcsoundsid, race, class, gender, skin, face, hair, haircolor, facialhair, "
+        "head, shoulders, body, chest, waist, "
+        "legs, feet, wrists, hands, back, tabard, "
+        "guildid FROM creature_template_outfits");
+
+    if (!result)
+    {
+        LOG_ERROR("server.loading", ">> Loaded 0 creature outfits. DB table `creature_template_outfits` is empty!");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 i = 0;
+        uint32 entry   = fields[i++].Get<uint32>();
+
+        if (!IsFake(entry))
+        {
+            LOG_ERROR("server.loading", ">> Outfit entry {} in `creature_template_outfits` has too low entry (entry <= {}). Ignoring.", entry, MAX_REAL_MODELID);
+            continue;
+        }
+
+        auto race = fields[i++].Get<uint8>();
+        auto gender = fields[i++].Get<uint8>();
+        CreatureOutfit* co = new CreatureOutfit(race, Gender(gender));
+
+        co->id = entry;
+        co->npcsoundsid = fields[i++].Get<uint32>();
+        if (co->npcsoundsid && !GetNpcSounds(co->npcsoundsid))
+        {
+            LOG_ERROR("server.loading", ">> Outfit entry {} in `creature_template_outfits` has incorrect npcsoundsid ({}). Using 0.", entry, co->npcsoundsid);
+            co->npcsoundsid = 0;
+        } 
+        co->race         = race;
+        const ChrRacesEntry* rEntry = sChrRacesStore.LookupEntry(co->race);
+        if (!rEntry)
+        {
+            LOG_ERROR("server.loading", ">> Outfit entry {} in `creature_template_outfits` has incorrect race ({}).", entry, uint32(co->race));
+            continue;
+        }
+
+        co->Class = fields[i++].Get<uint8>();
+        const ChrClassesEntry* cEntry = sChrClassesStore.LookupEntry(co->Class);
+        if (!cEntry)
+        {
+            LOG_ERROR("server.loading", ">> Outfit entry {} in `creature_template_outfits` has incorrect class ({}).", entry, uint32(co->Class));
+            continue;
+        }
+
+        co->gender       = gender;
+        switch (co->gender)
+        {
+        case GENDER_FEMALE: co->displayId = rEntry->model_f; break;
+        case GENDER_MALE:   co->displayId = rEntry->model_m; break;
+        default:
+            LOG_ERROR("server.loading", ">> Outfit entry {} in `creature_template_outfits` has invalid gender {}", entry, uint32(co->gender));
+            continue;
+        }
+
+        co->skin         = fields[i++].Get<uint8>();
+        co->face         = fields[i++].Get<uint8>();
+        co->hair         = fields[i++].Get<uint8>();
+        co->haircolor    = fields[i++].Get<uint8>();
+        co->facialhair   = fields[i++].Get<uint8>();
+
+        for (EquipmentSlots slot : ITEM_SLOTS)
+        {
+            int32 displayInfo = fields[i++].Get<uint32>();
+            if (displayInfo > 0) // entry
+            {
+                uint32 item_entry = static_cast<uint32>(displayInfo);
+                if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(item_entry))
+                    co->outfitdisplays[slot] = proto->DisplayInfoID;
+                else if (auto * dbcentry = sItemStore.LookupEntry(item_entry))
+                    co->outfitdisplays[slot] = dbcentry->DisplayInfoID;
+                else
+                {
+                    LOG_ERROR("server.loading", ">> Outfit entry {} in `creature_template_outfits` has invalid item entry: {}. Ignoring.", entry, item_entry);
+                    co->outfitdisplays[slot] = 0;
+                }
+            }
+            else // display
+            {
+                co->outfitdisplays[slot] = static_cast<uint32>(-displayInfo);
+            }
+        }
+        co->guild = fields[i++].Get<uint32>();
+
+        _creatureOutfitStore[co->id] = std::move(co);
+
+        ++count;
+    }
+    while (result->NextRow());
+
+    LOG_INFO("server.loading", ">> Loaded {} creature outfits in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+CreatureOutfit* ObjectMgr::GetOutfit(uint32 modelid) const
+{
+    if (IsFake(modelid))
+    {
+        auto const & outfits = GetCreatureOutfitMap();
+        auto it = outfits.find(modelid);
+        if (it != outfits.end())
+            return it->second;
+    }
+    return nullptr;
+}
+
+uint32 ObjectMgr::GetRealDisplayId(uint32 modelid) const
+{
+    if (CreatureOutfit* outfit = GetOutfit(modelid))
+        return outfit->displayId;
+    return modelid;
 }
 
 void ObjectMgr::LoadGameTele()

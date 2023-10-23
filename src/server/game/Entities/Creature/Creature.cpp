@@ -48,6 +48,8 @@
 #include "WaypointMovementGenerator.h"
 #include "World.h"
 #include "WorldPacket.h"
+#include "CreatureOutfit.h"
+#include "DBCStores.h"
 
 /// @todo: this import is not necessary for compilation and marked as unused by the IDE
 //  however, for some reasons removing it would cause a damn linking issue
@@ -313,6 +315,49 @@ void Creature::RemoveFromWorld()
     }
 }
 
+void Creature::SetOutfit(CreatureOutfit* outfit)
+{
+    // Set new outfit
+    if (m_outfit)
+    {
+        // if had old outfit
+        // then delay displayid setting to allow equipment
+        // to change by using invisible model in between
+        SetDisplayId(INVIS_MODEL);
+        m_outfit = outfit;
+    }
+    else
+    {
+        // else set new outfit directly since we change from non-outfit->outfit
+        m_outfit = outfit;
+        SetDisplayId(outfit->displayId);
+    }
+}
+
+void Creature::SendMirrorSound(Player* target, uint8 type)
+{
+    CreatureOutfit* outfit = m_outfit;
+    if (!outfit)
+        return;
+    if (!outfit->npcsoundsid)
+        return;
+    if (auto const* npcsounds = sObjectMgr->GetNpcSounds(outfit->npcsoundsid))
+    {
+        switch (type)
+        {
+        case 0:
+            PlayDistanceSound(npcsounds->hello, target);
+            break;
+        case 1:
+            PlayDistanceSound(npcsounds->goodbye, target);
+            break;
+        case 2:
+            PlayDistanceSound(npcsounds->pissed, target);
+            break;
+        }
+    }
+}
+
 void Creature::DisappearAndDie()
 {
     DestroyForNearbyPlayers();
@@ -518,6 +563,9 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data, bool changele
 
     ReplaceAllUnitFlags(UnitFlags(unit_flags));
     ReplaceAllUnitFlags2(UnitFlags2(cInfo->unit_flags2));
+    bool needsflag = m_outfit && Unit::GetDisplayId() == m_outfit->displayId;
+    if (needsflag)
+        SetMirrorImageFlag(true);
 
     ReplaceAllDynamicFlags(dynamicflags);
 
@@ -608,6 +656,13 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data, bool changele
 
 void Creature::Update(uint32 diff)
 {
+    if (m_outfit && !_changesMask.GetBit(UNIT_FIELD_DISPLAYID) && Unit::GetDisplayId() == INVIS_MODEL)
+    {
+        // has outfit, displayid is invisible and displayid update already sent to clients
+        // set outfit display
+        SetDisplayId(m_outfit->displayId);
+    }
+
     if (IsAIEnabled && TriggerJustRespawned)
     {
         TriggerJustRespawned = false;
@@ -3418,7 +3473,45 @@ void Creature::SetObjectScale(float scale)
     SetFloatValue(UNIT_FIELD_COMBATREACH, combatReach * scale);
 }
 
+uint32 Creature::GetDisplayId() const
+{
+    if (m_outfit && m_outfit->id)
+        return m_outfit->id;
+    return Unit::GetDisplayId();
+}
+
 void Creature::SetDisplayId(uint32 modelId)
+{
+    if (auto const & outfit = sObjectMgr->GetOutfit(modelId))
+    {
+        SetOutfit(outfit);
+        return;
+    }
+    else
+    {
+        if (m_outfit)
+        {
+            // if has outfit
+            if (modelId != m_outfit->displayId)
+            {
+                // and outfit's real modelid doesnt match modelid being set
+                // remove outfit and continue setting the new model
+                m_outfit = new CreatureOutfit(getRace(), Gender(getGender()));
+                SetMirrorImageFlag(false);
+            }
+            else
+            {
+                // outfit's real modelid being set
+                // add flags and continue setting the model
+                SetMirrorImageFlag(true);
+            }
+        }
+    }
+
+    SetDisplayIdRaw(modelId);
+}
+
+void Creature::SetDisplayIdRaw(uint32 modelId)
 {
     Unit::SetDisplayId(modelId);
 

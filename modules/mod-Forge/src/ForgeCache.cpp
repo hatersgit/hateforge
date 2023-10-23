@@ -960,6 +960,9 @@ private:
         sObjectMgr->LoadMythicDungeonKeyMap();
         LOG_INFO("server.load", "Loading m+ affixes...");
         sObjectMgr->LoadMythicAffixes();
+
+        LOG_INFO("server.load", "Loading npc sounds...");
+        sObjectMgr->LoadNpcSounds();
     }
 
     void GetCharacters()

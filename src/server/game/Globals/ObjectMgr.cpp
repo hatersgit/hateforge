@@ -8908,7 +8908,7 @@ CreatureOutfit* ObjectMgr::GetOutfit(uint32 modelid) const
 {
     if (IsFake(modelid))
     {
-        auto const & outfits = GetCreatureOutfitMap();
+        auto outfits = GetCreatureOutfitMap();
         auto it = outfits.find(modelid);
         if (it != outfits.end())
             return it->second;

@@ -265,7 +265,7 @@ private:
 // Add all scripts in one
 void AddForgePlayerMessageHandler()
 {
-    ForgeCache* cache = ForgeCache::get_instance();
+    ForgeCache* cache = ForgeCache::instance();
     ForgeCommonMessage* cm = new ForgeCommonMessage(cache);
 
     new ForgePlayerMessageHandler(cache, cm);

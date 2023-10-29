@@ -156,7 +156,7 @@ class ForgeCache : public DatabaseScript
 public:
     
 
-    static ForgeCache *get_instance()
+    static ForgeCache *instance()
     {
         static ForgeCache* cache;
 
@@ -1592,4 +1592,4 @@ private:
 
 };
 
-#define sForgeCache ForgeCache::get_instance()
+#define sForgeCache ForgeCache::instance()

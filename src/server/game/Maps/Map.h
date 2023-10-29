@@ -165,6 +165,8 @@ enum LiquidStatus
 #define DEFAULT_HEIGHT_SEARCH     50.0f                     // default search distance to find height at nearby locations
 #define MIN_UNLOAD_DELAY      1                             // immediate unload
 
+#define MAP_INVALID_ZONE      0xFFFFFFFF
+
 struct LiquidData
 {
     LiquidData()  = default;
@@ -666,6 +668,10 @@ public:
 
     virtual std::string GetDebugInfo() const;
 
+    // hater: dynamic spawns
+    void UpdatePlayerZoneStats(uint32 oldZone, uint32 newZone);
+    void ApplyDynamicModeRespawnScaling(WorldObject const* obj, ObjectGuid::LowType spawnId, uint32& respawnDelay) const;
+
 private:
     void LoadMapAndVMap(int gx, int gy);
     void LoadVMap(int gx, int gy);
@@ -714,6 +720,8 @@ private:
     void UpdateActiveCells(const float& x, const float& y, const uint32 t_diff);
 
     void SendObjectUpdates();
+
+    std::unordered_map<uint32, uint32> _zonePlayerCountMap;
 
 protected:
     void SetUnloadReferenceLock(GridCoord const& p, bool on) { getNGrid(p.x_coord, p.y_coord)->setUnloadReferenceLock(on); }

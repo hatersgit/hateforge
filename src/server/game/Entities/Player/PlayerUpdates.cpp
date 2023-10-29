@@ -1205,6 +1205,8 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         return;
     }
 
+    GetMap()->UpdatePlayerZoneStats(m_zoneUpdateId ? m_zoneUpdateId : MAP_INVALID_ZONE, newZone ? newZone : MAP_INVALID_ZONE);
+
     if (m_zoneUpdateId != newZone)
     {
         sOutdoorPvPMgr->HandlePlayerLeaveZone(this, m_zoneUpdateId);

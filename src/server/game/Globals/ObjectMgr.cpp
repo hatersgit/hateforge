@@ -8820,8 +8820,7 @@ void ObjectMgr::LoadCreatureOutfits()
     {
         Field* fields = result->Fetch();
 
-        uint32 i = 0;
-        uint32 entry   = fields[i++].Get<uint32>();
+        uint32 entry   = fields[0].Get<uint32>();
 
         if (!IsFake(entry))
         {
@@ -8829,12 +8828,12 @@ void ObjectMgr::LoadCreatureOutfits()
             continue;
         }
 
-        auto race = fields[i++].Get<uint8>();
-        auto gender = fields[i++].Get<uint8>();
+        auto race = fields[2].Get<uint8>();
+        auto gender = fields[4].Get<uint8>();
         CreatureOutfit* co = new CreatureOutfit(race, Gender(gender));
 
         co->id = entry;
-        co->npcsoundsid = fields[i++].Get<uint32>();
+        co->npcsoundsid = fields[1].Get<uint32>();
         if (co->npcsoundsid && !GetNpcSounds(co->npcsoundsid))
         {
             LOG_ERROR("server.loading", ">> Outfit entry {} in `creature_template_outfits` has incorrect npcsoundsid ({}). Using 0.", entry, co->npcsoundsid);
@@ -8848,7 +8847,7 @@ void ObjectMgr::LoadCreatureOutfits()
             continue;
         }
 
-        co->Class = fields[i++].Get<uint8>();
+        co->Class = fields[3].Get<uint8>();
         const ChrClassesEntry* cEntry = sChrClassesStore.LookupEntry(co->Class);
         if (!cEntry)
         {
@@ -8866,15 +8865,16 @@ void ObjectMgr::LoadCreatureOutfits()
             continue;
         }
 
-        co->skin         = fields[i++].Get<uint8>();
-        co->face         = fields[i++].Get<uint8>();
-        co->hair         = fields[i++].Get<uint8>();
-        co->haircolor    = fields[i++].Get<uint8>();
-        co->facialhair   = fields[i++].Get<uint8>();
+        co->skin         = fields[5].Get<uint8>();
+        co->face         = fields[6].Get<uint8>();
+        co->hair         = fields[7].Get<uint8>();
+        co->haircolor    = fields[8].Get<uint8>();
+        co->facialhair   = fields[9].Get<uint8>();
 
+        int i = 10;
         for (EquipmentSlots slot : ITEM_SLOTS)
         {
-            int32 displayInfo = fields[i++].Get<uint32>();
+            int32 displayInfo = fields[i++].Get<int32>();
             if (displayInfo > 0) // entry
             {
                 uint32 item_entry = static_cast<uint32>(displayInfo);
@@ -8890,7 +8890,7 @@ void ObjectMgr::LoadCreatureOutfits()
             }
             else // display
             {
-                co->outfitdisplays[slot] = static_cast<uint32>(-displayInfo);
+                co->outfitdisplays[slot] = -displayInfo;
             }
         }
         co->guild = fields[i++].Get<uint32>();
@@ -8906,13 +8906,13 @@ void ObjectMgr::LoadCreatureOutfits()
 
 CreatureOutfit* ObjectMgr::GetOutfit(uint32 modelid) const
 {
-    if (IsFake(modelid))
-    {
-        auto outfits = GetCreatureOutfitMap();
-        auto it = outfits.find(modelid);
-        if (it != outfits.end())
-            return it->second;
-    }
+    auto modelOutfit = 3000000000 + modelid;
+    auto outfits = GetCreatureOutfitMap();
+
+    auto it = outfits.find(modelOutfit);
+    if (it != outfits.end())
+        return it->second;
+
     return nullptr;
 }
 

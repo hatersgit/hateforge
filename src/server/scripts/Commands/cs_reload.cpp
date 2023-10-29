@@ -171,6 +171,7 @@ public:
             { "waypoint_data",                 HandleReloadWpCommand,                         SEC_ADMINISTRATOR, Console::Yes },
             { "vehicle_accessory",             HandleReloadVehicleAccessoryCommand,           SEC_ADMINISTRATOR, Console::Yes },
             { "vehicle_template_accessory",    HandleReloadVehicleTemplateAccessoryCommand,   SEC_ADMINISTRATOR, Console::Yes },
+            { "creature_template_outfits",     HandleReloadCreatureTemplateOutfitsCommand,    SEC_ADMINISTRATOR, Console::Yes },
         };
         static ChatCommandTable commandTable =
         {
@@ -481,6 +482,13 @@ public:
         }
 
         handler->SendGlobalGMSysMessage("Creature template reloaded.");
+        return true;
+    }
+
+    static bool HandleReloadCreatureTemplateOutfitsCommand(ChatHandler* handler)
+    {
+        sObjectMgr->LoadCreatureOutfits();
+        handler->SendGlobalGMSysMessage("Creature template outfits reloaded.");
         return true;
     }
 

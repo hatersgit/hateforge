@@ -26,11 +26,15 @@ public:
         std::vector<std::string> results;
         boost::algorithm::split(results, iam.message, boost::is_any_of(";"));
 
-        if (results.empty() || results.size() != 2 || !fc->isNumber(results[0]) || !fc->isNumber(results[1]))
+        if (results.empty() || results.size() != 3 || !fc->isNumber(results[0]) || !fc->isNumber(results[1]) || !fc->isNumber(results[2]))
             return;
 
         uint32 tabId = static_cast<uint32>(std::stoul(results[0]));
         uint32 spellId = static_cast<uint32>(std::stoul(results[1]));
+        uint32 nodeType = static_cast<uint32>(std::stoul(results[2]));
+
+        bool choiceNode = nodeType == NodeType::CHOICE;
+
         ForgeTalentTab* tab;
         ForgeCharacterSpec* spec;
         CharacterPointType tabType;
@@ -52,7 +56,12 @@ public:
             }
 
             // check dependants, rank requirements
-            auto talItt = tab->Talents.find(spellId);
+            uint32 choiceId = fc->GetChoiceNodeFromSpell(spellId);
+            if (!choiceId && choiceNode) {
+                iam.player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Attempt to unlearn unknown choice node talent: " + std::to_string(choiceId));
+                return;
+            }
+            auto talItt = choiceNode ? tab->Talents.find(choiceId) : tab->Talents.find(spellId);
 
             if (talItt == tab->Talents.end())
             {
@@ -184,18 +193,6 @@ public:
                 }
             }
 
-            // TODO: FIX
-            //for (auto& exclu : ft->Choices)
-            //{
-            //    auto typeItt = skillTabs.find(exclu);
-
-            //    if (typeItt != skillTabs.end() && typeItt->second->CurrentRank > 0)
-            //    {
-            //        RequirementsNotMet(iam);
-            //        return;
-            //    }
-            //}
-
             auto spellItter = skillTabs.find(ft->SpellId);
             ForgeCharacterTalent* ct = new ForgeCharacterTalent();
 
@@ -204,6 +201,7 @@ public:
                 ct->CurrentRank = 0;
                 ct->SpellId = ft->SpellId;
                 ct->TabId = tabId;
+                ct->type = ft->nodeType;
                 spec->Talents[tabId][ft->SpellId] = ct;
             }
             else
@@ -223,25 +221,39 @@ public:
 
             auto ranksItt = ft->Ranks.find(ct->CurrentRank);
 
-            if (ranksItt != ft->Ranks.end()) {
-                auto spellInfo = sSpellMgr->GetSpellInfo(ranksItt->second);
-                if (!spellInfo->HasAttribute(SPELL_ATTR0_PASSIVE))
-                    iam.player->removeSpell(ranksItt->second, SPEC_MASK_ALL, false);
+            if (!choiceNode)
+                if (ranksItt != ft->Ranks.end()) {
+                    auto spellInfo = sSpellMgr->GetSpellInfo(ranksItt->second);
+                    if (!spellInfo->HasAttribute(SPELL_ATTR0_PASSIVE))
+                        iam.player->removeSpell(ranksItt->second, SPEC_MASK_ALL, false);
+                    else
+                        iam.player->RemoveAura(ranksItt->second);
+                }
                 else
-                    iam.player->RemoveAura(ranksItt->second);
-            }
+                    for (auto s : ft->Choices)
+                        iam.player->removeSpell(s->spellId, SPEC_MASK_ALL, false);
 
             ct->CurrentRank++;
 
             ranksItt = ft->Ranks.find(ct->CurrentRank);
 
-            if (ranksItt != ft->Ranks.end()) {
-                auto spellInfo = sSpellMgr->GetSpellInfo(ranksItt->second);
+            if (choiceNode) {
+                auto spellInfo = sSpellMgr->GetSpellInfo(spellId);
                 if (!spellInfo->HasAttribute(SPELL_ATTR0_PASSIVE))
-                    iam.player->learnSpell(ranksItt->second);
+                    iam.player->learnSpell(spellId);
                 else
-                    iam.player->AddAura(ranksItt->second, iam.player);
+                    iam.player->AddAura(spellId, iam.player);
+
+                spec->ChoiceNodesChosen[choiceId] = spellId;
             }
+            else
+                if (ranksItt != ft->Ranks.end()) {
+                    auto spellInfo = sSpellMgr->GetSpellInfo(ranksItt->second);
+                    if (!spellInfo->HasAttribute(SPELL_ATTR0_PASSIVE))
+                        iam.player->learnSpell(ranksItt->second);
+                    else
+                        iam.player->AddAura(ranksItt->second, iam.player);
+                }
 
             fc->UpdateCharPoints(iam.player, curPoints);
             fc->UpdateCharacterSpec(iam.player, spec);

@@ -100,11 +100,27 @@ public:
                     sfp->Sum += refund;
                     sfp->Max -= refund;
 
-                    auto spellInfo = sSpellMgr->GetSpellInfo(spellId);
-                    if (spellInfo->HasAttribute(SPELL_ATTR0_PASSIVE))
-                        iam.player->RemoveOwnedAura(tab->Talents[spellId]->Ranks[spellItt->second->CurrentRank]);
-                    else
-                        iam.player->removeSpell(tab->Talents[spellId]->Ranks[spellItt->second->CurrentRank], SPEC_MASK_ALL, false);
+                    if (spellItt->second->type == NodeType::CHOICE) {
+                        auto chosen = spec->ChoiceNodesChosen.find(spellId);
+
+                        if (chosen == spec->ChoiceNodesChosen.end()) {
+                            iam.player->SendForgeUIMsg(ForgeTopic::UNLEARN_TALENT_ERROR, "Attempted to forget unknown choice node talent.");
+                            return;
+                        }
+
+                        auto spellInfo = sSpellMgr->GetSpellInfo(chosen->second);
+                        if (spellInfo->HasAttribute(SPELL_ATTR0_PASSIVE))
+                            iam.player->RemoveOwnedAura(chosen->second);
+                        else
+                            iam.player->removeSpell(chosen->second, SPEC_MASK_ALL, false);
+                    }
+                    else {
+                        auto spellInfo = sSpellMgr->GetSpellInfo(spellId);
+                        if (spellInfo->HasAttribute(SPELL_ATTR0_PASSIVE))
+                            iam.player->RemoveOwnedAura(tab->Talents[spellId]->Ranks[spellItt->second->CurrentRank]);
+                        else
+                            iam.player->removeSpell(tab->Talents[spellId]->Ranks[spellItt->second->CurrentRank], SPEC_MASK_ALL, false);
+                    }
 
                     iam.player->UpdateAllStats();
                     spellItt->second->CurrentRank = 0;

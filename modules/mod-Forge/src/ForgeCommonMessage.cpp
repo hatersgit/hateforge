@@ -394,9 +394,9 @@ std::string ForgeCommonMessage::DoBuildRanks(std::unordered_map<uint32, ForgeCha
 {
     int i = 0;
     ForgeTalentTab* tab;
+    ForgeCharacterSpec* fs;
 
-
-    if (fc->TryGetTalentTab(player, tabId, tab))
+    if (fc->TryGetTalentTab(player, tabId, tab) && fc->TryGetCharacterActiveSpec(player, fs))
     {
         for(auto& sp : tab->Talents)
         {
@@ -404,14 +404,21 @@ std::string ForgeCommonMessage::DoBuildRanks(std::unordered_map<uint32, ForgeCha
 
             if (i == 0)
                 delimiter = "";
-
+            
             auto itt = spec.find(sp.first);
 
-            if (itt != spec.end())
-                if (itt->second->CurrentRank == 0 && !CanLearnTalent(player, tabId, sp.second->SpellId))
-                    clientMsg = clientMsg + delimiter + std::to_string(sp.second->SpellId) + "~-1";
+            if (itt != spec.end()) {
+                if (itt->second->type == NodeType::CHOICE)
+                    if (itt->second->CurrentRank == 0 || !CanLearnTalent(player, tabId, sp.second->SpellId))
+                        clientMsg = clientMsg + delimiter + std::to_string(sp.second->SpellId) + "~-1";
+                    else
+                        clientMsg = clientMsg + delimiter + std::to_string(itt->second->SpellId) + "~" + std::to_string(fs->ChoiceNodesChosen.at(itt->second->SpellId));
                 else
-                    clientMsg = clientMsg + delimiter + std::to_string(itt->second->SpellId) + "~" + std::to_string(itt->second->CurrentRank);
+                    if (itt->second->CurrentRank == 0 && !CanLearnTalent(player, tabId, sp.second->SpellId))
+                        clientMsg = clientMsg + delimiter + std::to_string(sp.second->SpellId) + "~-1";
+                    else
+                        clientMsg = clientMsg + delimiter + std::to_string(itt->second->SpellId) + "~" + std::to_string(itt->second->CurrentRank);
+            }
             else if (!CanLearnTalent(player, tabId, sp.second->SpellId))
                 clientMsg = clientMsg + delimiter + std::to_string(sp.second->SpellId) + "~-1";
             else

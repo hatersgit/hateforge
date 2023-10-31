@@ -655,12 +655,10 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool create, bool load)
         }
     }
 
-    m_tickCount = GetTotalTicks();
-
     if (load) // aura loaded from db
     {
         m_tickNumber = m_amplitude ? GetBase()->GetDuration() / m_amplitude : 0;
-        m_periodicTimer = m_amplitude ? GetBase()->GetMaxDuration() / m_tickCount : 0;
+        m_periodicTimer = m_amplitude ? GetBase()->GetMaxDuration() % m_amplitude : 0;
         if (m_spellInfo->HasAttribute(SPELL_ATTR5_EXTRA_INITIAL_PERIOD))
             ++m_tickNumber;
     }
@@ -680,7 +678,7 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool create, bool load)
             if (m_amplitude)
             {
                 if (!GetSpellInfo()->HasAttribute(SPELL_ATTR5_EXTRA_INITIAL_PERIOD))
-                    m_periodicTimer += GetBase()->GetMaxDuration() / m_tickCount;
+                    m_periodicTimer += m_amplitude;
                 else if (caster && caster->IsTotem()) // for totems only ;d
                 {
                     m_periodicTimer = 100; // make it ALMOST instant
@@ -910,11 +908,12 @@ void AuraEffect::Update(uint32 diff, Unit* caster)
 {
     if (m_isPeriodic && (GetBase()->GetDuration() >= 0 || GetBase()->IsPassive() || GetBase()->IsPermanent()))
     {
+        uint32 totalTicks = GetTotalTicks();
 
         m_periodicTimer -= int32(diff);
         while (m_periodicTimer <= 0)
         {
-            if (!GetBase()->IsPermanent() && (m_tickNumber + 1) > m_tickCount)
+            if (!GetBase()->IsPermanent() && (m_tickNumber + 1) > totalTicks)
             {
                 break;
             }
@@ -922,10 +921,7 @@ void AuraEffect::Update(uint32 diff, Unit* caster)
             ++m_tickNumber;
 
             // update before tick (aura can be removed in TriggerSpell or PeriodicTick calls)
-            if (m_tickCount == 0)
-                m_periodicTimer += m_amplitude;
-            else
-                m_periodicTimer += GetBase()->GetMaxDuration() / m_tickCount;
+            m_periodicTimer += m_amplitude;
 
             UpdatePeriodic(caster);
 

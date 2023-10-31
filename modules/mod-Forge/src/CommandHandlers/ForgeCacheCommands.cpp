@@ -48,7 +48,7 @@ public:
     //          Handle + "Something" + Command
     static bool ReloadCache(ChatHandler* handler, char const* args)
     {
-        ForgeCache::get_instance()->ReloadDB();
+        ForgeCache::instance()->ReloadDB();
         //ShopCache::get_instance()->LoadCache();
         //sTransmogrification->Load();
 
@@ -60,7 +60,7 @@ public:
     static bool ForgePoints(ChatHandler* handler, char const* args)
     {
         uint32 amount = static_cast<uint32>(std::stoul(args));
-        ForgeCache::get_instance()->AddCharacterPointsToAllSpecs(handler->getSelectedPlayerOrSelf(), CharacterPointType::FORGE_SKILL_TREE, amount);
+        ForgeCache::instance()->AddCharacterPointsToAllSpecs(handler->getSelectedPlayerOrSelf(), CharacterPointType::FORGE_SKILL_TREE, amount);
         ForgeCommonMessage::get_instance()->SendActiveSpecInfo(handler->getSelectedPlayerOrSelf());
         return true;
     }
@@ -68,7 +68,7 @@ public:
     static bool TalentPoints(ChatHandler* handler, char const* args)
     {
         uint32 amount = static_cast<uint32>(std::stoul(args));
-        ForgeCache::get_instance()->AddCharacterPointsToAllSpecs(handler->getSelectedPlayerOrSelf(), CharacterPointType::TALENT_TREE, amount);
+        ForgeCache::instance()->AddCharacterPointsToAllSpecs(handler->getSelectedPlayerOrSelf(), CharacterPointType::TALENT_TREE, amount);
         ForgeCommonMessage::get_instance()->SendActiveSpecInfo(handler->getSelectedPlayerOrSelf());
         return true;
     }
@@ -76,7 +76,7 @@ public:
     static bool PrestigePoints(ChatHandler* handler, char const* args)
     {
         uint32 amount = static_cast<uint32>(std::stoul(args));
-        ForgeCache::get_instance()->AddCharacterPointsToAllSpecs(handler->getSelectedPlayerOrSelf(), CharacterPointType::PRESTIGE_TREE, amount);
+        ForgeCache::instance()->AddCharacterPointsToAllSpecs(handler->getSelectedPlayerOrSelf(), CharacterPointType::PRESTIGE_TREE, amount);
         ForgeCommonMessage::get_instance()->SendActiveSpecInfo(handler->getSelectedPlayerOrSelf());
         return true;
     }
@@ -84,7 +84,7 @@ public:
     static bool RacialPoints(ChatHandler* handler, char const* args)
     {
         uint32 amount = static_cast<uint32>(std::stoul(args));
-        ForgeCache::get_instance()->AddCharacterPointsToAllSpecs(handler->getSelectedPlayerOrSelf(), CharacterPointType::RACIAL_TREE, amount);
+        ForgeCache::instance()->AddCharacterPointsToAllSpecs(handler->getSelectedPlayerOrSelf(), CharacterPointType::RACIAL_TREE, amount);
         ForgeCommonMessage::get_instance()->SendActiveSpecInfo(handler->getSelectedPlayerOrSelf());
         return true;
     }

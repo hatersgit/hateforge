@@ -20,7 +20,7 @@ public:
     uint8 hair = 0;
     uint8 facialhair = 0;
     uint8 haircolor = 0;
-    std::vector<uint32> outfitdisplays;
+    std::unordered_map<uint32, uint32> outfitdisplays;
     uint32 npcsoundsid = 0;
     uint64 guild = 0;
     uint32 id = 0;

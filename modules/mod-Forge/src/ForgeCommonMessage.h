@@ -14,7 +14,7 @@ public:
         static ForgeCommonMessage* cache;
 
         if (cache == nullptr)
-            cache = new ForgeCommonMessage(ForgeCache::get_instance());
+            cache = new ForgeCommonMessage(ForgeCache::instance());
 
         return cache;
     }

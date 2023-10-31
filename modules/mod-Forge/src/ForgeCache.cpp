@@ -75,6 +75,7 @@ struct ForgeCharacterTalent
     uint32 SpellId;
     uint32 TabId;
     uint8 CurrentRank;
+    uint8 type;
 };
 
 struct ForgeTalentPrereq
@@ -156,7 +157,7 @@ class ForgeCache : public DatabaseScript
 public:
     
 
-    static ForgeCache *get_instance()
+    static ForgeCache *instance()
     {
         static ForgeCache* cache;
 
@@ -559,10 +560,21 @@ public:
 
         for (auto& tabIdKvp : spec->Talents)
             for (auto& tabTypeKvp : tabIdKvp.second)
-                UpdateChacterTalentInternal(acct, charId, trans, spec->Id, tabTypeKvp.second->SpellId, tabTypeKvp.second->TabId, tabTypeKvp.second->CurrentRank);
+                if (tabTypeKvp.second->type == NodeType::CHOICE)
+                    UpdateChacterChoiceNodeInternal(trans, acct, charId, spec->Id, tabTypeKvp.second->TabId, tabTypeKvp.second->SpellId, spec->ChoiceNodesChosen.at(tabTypeKvp.second->SpellId));
+                else
+                    UpdateChacterTalentInternal(acct, charId, trans, spec->Id, tabTypeKvp.second->SpellId, tabTypeKvp.second->TabId, tabTypeKvp.second->CurrentRank);
                 
-
         CharacterDatabase.CommitTransaction(trans);
+    }
+
+    void UpdateChacterChoiceNodeInternal(CharacterDatabaseTransaction trans, uint32 account, uint32 guid, uint32 specId, uint32 tabId, uint32 choiceNodeId, uint32 choiceNodeSelection) {
+        if (TalentTabs[tabId]->TalentType != ACCOUNT_WIDE_TYPE)
+            trans->Append("INSERT INTO `forge_character_node_choices` (`guid`,`spec`,`tabId`,`node`,`choice`) VALUES ({},{},{},{},{}) ON DUPLICATE KEY UPDATE `choice` = {}",
+                guid, specId, choiceNodeId, tabId, choiceNodeSelection, choiceNodeSelection);
+        else
+            trans->Append("INSERT INTO `forge_character_node_choices` (`guid`,`spec`,`tabId`,`node`,`choice`) VALUES ({},{},{},{},{}) ON DUPLICATE KEY UPDATE `choice` = {}",
+                account, ACCOUNT_WIDE_KEY, choiceNodeId, tabId, choiceNodeSelection, choiceNodeSelection);
     }
 
     void UpdateCharacterSpecDetailsOnly(Player* player, ForgeCharacterSpec*& spec)
@@ -571,13 +583,6 @@ public:
         auto trans = CharacterDatabase.BeginTransaction();
         UpdateForgeSpecInternal(player, trans, spec);
 
-        CharacterDatabase.CommitTransaction(trans);
-    }
-
-    void UpdateChacterTalent(Player* player, uint32 spec, uint32 spellId, uint32 tabId, uint8 known)
-    {
-        auto trans = CharacterDatabase.BeginTransaction();
-        UpdateChacterTalentInternal(player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), trans, spec, spellId, tabId, known);
         CharacterDatabase.CommitTransaction(trans);
     }
 
@@ -871,6 +876,15 @@ public:
 
     // choiceNodeId is the id of the node in forge_talents
     std::unordered_map<uint32 /*nodeid*/, std::vector<uint32/*choice spell id*/>> _choiceNodes;
+    std::unordered_map<uint32 /*choice spell id*/, uint32 /*nodeid*/> _choiceNodesRev;
+
+    uint32 GetChoiceNodeFromSpell(uint32 spellId) {
+        auto out = _choiceNodesRev.find(spellId);
+        if (out != _choiceNodesRev.end())
+            return out->second;
+
+        return 0;
+    }
 
 private:
     std::unordered_map<ObjectGuid, uint32> CharacterActiveSpecs;
@@ -1278,6 +1292,7 @@ private:
         QueryResult exclTalents = WorldDatabase.Query("SELECT * FROM forge_talent_choice_nodes");
 
         _choiceNodes.clear();
+        _choiceNodesRev.clear();
 
         if (!exclTalents)
             return;
@@ -1294,6 +1309,7 @@ private:
             choice->spellId = spellChoice;
 
             _choiceNodes[choiceNodeId].push_back(spellChoice);
+            _choiceNodesRev[spellChoice] = choiceNodeId;
 
             ForgeTalent* lt = TalentTabs[talentTabId]->Talents[choiceNodeId];
             if (lt != nullptr)
@@ -1478,6 +1494,7 @@ private:
             {
                 ForgeTalent* ft = TalentTabs[talent->TabId]->Talents[talent->SpellId];
                 ForgeCharacterSpec* spec = CharacterSpecs[characterGuid][specId];
+                talent->type = ft->nodeType;
 
                 spec->Talents[talent->TabId][talent->SpellId] = talent;
             }
@@ -1489,6 +1506,7 @@ private:
                     for (auto& spec : CharacterSpecs[ch])
                     {
                         ForgeTalent* ft = TalentTabs[talent->TabId]->Talents[talent->SpellId];
+                        talent->type = ft->nodeType;
                         spec.second->Talents[talent->TabId][talent->SpellId] = talent;
                     }
             }
@@ -1592,4 +1610,4 @@ private:
 
 };
 
-#define sForgeCache ForgeCache::get_instance()
+#define sForgeCache ForgeCache::instance()

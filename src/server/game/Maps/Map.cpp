@@ -42,6 +42,7 @@
 #include "VMapFactory.h"
 #include "Vehicle.h"
 #include "Weather.h"
+#include "Config.h"
 
 union u_map_magic
 {
@@ -261,6 +262,8 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode, Map* _par
             setNGrid(nullptr, idx, j);
         }
     }
+
+    _zonePlayerCountMap.clear();
 
     //lets initialize visibility distance for map
     Map::InitVisibilityDistance();
@@ -4574,4 +4577,42 @@ std::string InstanceMap::GetDebugInfo() const
         << std::boolalpha
         << "ScriptId: " << GetScriptId() << " ScriptName: " << GetScriptName();
     return sstr.str();
+}
+
+// hater: dynamic spawns
+void Map::ApplyDynamicModeRespawnScaling(WorldObject const* obj, ObjectGuid::LowType spawnId, uint32& respawnDelay) const
+{
+    auto it = _zonePlayerCountMap.find(obj->GetZoneId());
+    
+    if (it == _zonePlayerCountMap.end())
+        return;
+    uint32 const playerCount = it->second;
+    if (!playerCount)
+        return;
+    double const adjustFactor = obj->GetTypeId() == TYPEID_GAMEOBJECT ? sConfigMgr->GetFloatDefault("DynamicSpawn.GameObject.Step", .8) : sConfigMgr->GetFloatDefault("DynamicSpawn.Creature.Step", .8) / playerCount; // graph z/x adjust z to intended scaling and x is player count
+    if (adjustFactor >= 1.0) // nothing to do here
+        return;
+    uint32 const timeMinimum = obj->GetTypeId() == TYPEID_GAMEOBJECT ? sConfigMgr->GetIntDefault("DynamicSpawn.GameObject.Min", 10) : sConfigMgr->GetIntDefault("DynamicSpawn.Creature.Min", 10);
+    if (respawnDelay <= timeMinimum)
+        return;
+
+    respawnDelay = std::max<uint32>(ceil(respawnDelay * adjustFactor), timeMinimum);
+}
+
+void Map::UpdatePlayerZoneStats(uint32 oldZone, uint32 newZone)
+{
+    // Nothing to do if no change
+    if (oldZone == newZone)
+        return;
+
+    if (oldZone != MAP_INVALID_ZONE)
+    {
+        uint32& oldZoneCount = _zonePlayerCountMap[oldZone];
+
+        if (oldZoneCount > 0)
+            --oldZoneCount;
+    }
+
+    if (newZone != MAP_INVALID_ZONE)
+        ++_zonePlayerCountMap[newZone];
 }

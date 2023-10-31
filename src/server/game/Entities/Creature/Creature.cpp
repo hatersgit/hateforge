@@ -711,7 +711,7 @@ void Creature::Update(uint32 diff)
                     }
                     else
                     {
-                        m_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + urand(5, MINUTE); // else copy time from master and add a little
+                        m_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + 5; // else copy time from master and add a little
                     }
                     SaveRespawnTime(); // also save to DB immediately
                 }
@@ -2026,9 +2026,19 @@ void Creature::setDeathState(DeathState s, bool despawn)
     {
         _lastDamagedTime.reset();
 
-        m_corpseRemoveTime = GameTime::GetGameTime().count() + m_corpseDelay;
-        m_respawnTime = GameTime::GetGameTime().count() + m_respawnDelay + m_corpseDelay;
+        auto delay = m_corpseDelay;
+        CreatureTemplate const* cInfo = GetCreatureTemplate();
 
+        if (IsOutdoors() && cInfo->rank < CREATURE_ELITE_RAREELITE)
+            GetMap()->ApplyDynamicModeRespawnScaling(this, GetSpawnId(), delay);
+
+        m_corpseRemoveTime = GameTime::GetGameTime().count() + delay;
+        m_respawnTime = m_corpseRemoveTime + delay;
+
+        // TODO sheck zone stuff
+
+        if (IsDungeonBoss() && !m_respawnDelay)
+            m_respawnTime = std::numeric_limits<time_t>::max();
         // always save boss respawn time at death to prevent crash cheating
         if (GetMap()->IsDungeon() || isWorldBoss() || GetCreatureTemplate()->rank >= CREATURE_ELITE_ELITE)
             SaveRespawnTime();
@@ -3515,7 +3525,7 @@ void Creature::SetDisplayId(uint32 modelId)
             {
                 // and outfit's real modelid doesnt match modelid being set
                 // remove outfit and continue setting the new model
-                m_outfit = new CreatureOutfit(getRace(), Gender(getGender()));
+                m_outfit = new CreatureOutfit(m_outfit->race, Gender(m_outfit->gender));
                 SetMirrorImageFlag(false);
             }
             else

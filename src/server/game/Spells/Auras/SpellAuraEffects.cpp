@@ -5223,11 +5223,11 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                         if (owner_aura)
                         {
                             owner_aura->SetCharges(0);
-                            owner_aura->SetStackAmount(owner_aura->GetSpellInfo()->StackAmount);
+                            owner_aura->SetStackAmount(owner_aura->GetMaxStackAmount());
                             if (pet_aura)
                             {
                                 pet_aura->SetCharges(0);
-                                pet_aura->SetStackAmount(owner_aura->GetSpellInfo()->StackAmount);
+                                pet_aura->SetStackAmount(owner_aura->GetMaxStackAmount());
                             }
                         }
                         break;

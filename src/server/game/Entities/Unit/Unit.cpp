@@ -9482,7 +9482,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                             }
                         }
 
-                        trigger_spell_id = sSpellMgr->GetSpellWithRank(26364, auraSpellInfo->GetRank());
+                        trigger_spell_id = sSpellMgr->GetSpellWithRank(1230169 /*old 26364*/, auraSpellInfo->GetRank());
                     }
                     // Nature's Guardian
                     else if (auraSpellInfo->SpellIconID == 2013)

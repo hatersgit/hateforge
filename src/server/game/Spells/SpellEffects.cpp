@@ -3963,7 +3963,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     case 58590: // Rank 9
                     case 58591: // Rank 10
                         {
-                            int32 basepoints0 = damage;
+                        int32 basepoints0 = CalculatePct(m_caster->GetHealth(), 10); // old: damage; new: 10% HP
                             // Cast Absorb on totems
                             for (uint8 slot = SUMMON_SLOT_TOTEM; slot < MAX_TOTEM_SLOT; ++slot)
                             {

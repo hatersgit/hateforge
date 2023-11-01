@@ -62,6 +62,8 @@ enum ShamanSpells
     SPELL_SHAMAN_STORMSTRIKE                    = 17364,
     SPELL_SHAMAN_LAVA_LASH                      = 60103,
     SPELL_SHAMAN_LIGHTNING_BOLT_OVERLOAD        = 45284,
+
+    SPELL_SHAMAN_FLOW_OF_THE_TIDES              = 999999999, // TODO: use real id
 };
 
 enum ShamanSpellIcons
@@ -470,20 +472,22 @@ class spell_sha_chain_heal : public SpellScript
 
     void HandleHeal(SpellEffIndex /*effIndex*/)
     {
-        if (firstHeal)
-        {
-            // Check if the target has Riptide
-            if (AuraEffect* aurEff = GetHitUnit()->GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_SHAMAN, 0, 0, 0x10, GetCaster()->GetGUID()))
+        if (GetCaster()->HasSpell(SPELL_SHAMAN_FLOW_OF_THE_TIDES)) {
+            if (firstHeal)
             {
-                riptide = true;
-                // Consume it
-                GetHitUnit()->RemoveAura(aurEff->GetBase());
+                // Check if the target has Riptide
+                if (AuraEffect* aurEff = GetHitUnit()->GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_SHAMAN, 0, 0, 0x10, GetCaster()->GetGUID()))
+                {
+                    riptide = true;
+                    // Consume it
+                    GetHitUnit()->RemoveAura(aurEff->GetBase());
+                }
+                firstHeal = false;
             }
-            firstHeal = false;
+            // Riptide increases the Chain Heal effect by 25%
+            if (riptide)
+                SetHitHeal(GetHitHeal() * 1.25f);
         }
-        // Riptide increases the Chain Heal effect by 25%
-        if (riptide)
-            SetHitHeal(GetHitHeal() * 1.25f);
     }
 
     void Register() override

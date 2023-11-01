@@ -947,37 +947,44 @@ private:
             }
         }
 
-        GetCharacters();
-        GetConfig();
-        AddTalentTrees();
-        AddTalentsToTrees();
-        AddTalentPrereqs();
-        AddTalentChoiceNodes();
-        AddTalentRanks();
-        AddTalentUnlearn();
-        AddCharacterSpecs();
-        AddTalentSpent();
-        AddCharacterTalents();
-        AddCharacterChoiceNodes();
+        try {
+            GetCharacters();
+            GetConfig();
+            AddTalentTrees();
+            AddTalentsToTrees();
+            AddTalentPrereqs();
+            AddTalentChoiceNodes();
+            AddTalentRanks();
+            AddTalentUnlearn();
+            AddCharacterSpecs();
+            AddTalentSpent();
+            AddCharacterTalents();
+            AddCharacterChoiceNodes();
 
-        LOG_INFO("server.load", "Loading characters points...");
-        AddCharacterPointsFromDB();
-        AddCharacterClassSpecs();
-        AddCharacterXmogSets();
+            LOG_INFO("server.load", "Loading characters points...");
+            AddCharacterPointsFromDB();
+            AddCharacterClassSpecs();
+            AddCharacterXmogSets();
 
-        LOG_INFO("server.load", "Loading m+ difficulty multipliers...");
-        sObjectMgr->LoadInstanceDifficultyMultiplier();
-        LOG_INFO("server.load", "Loading m+ difficulty level scales...");
-        sObjectMgr->LoadMythicLevelScale();
-        LOG_INFO("server.load", "Loading m+ minion values...");
-        sObjectMgr->LoadMythicMinionValue();
-        LOG_INFO("server.load", "Loading m+ keys...");
-        sObjectMgr->LoadMythicDungeonKeyMap();
-        LOG_INFO("server.load", "Loading m+ affixes...");
-        sObjectMgr->LoadMythicAffixes();
+            LOG_INFO("server.load", "Loading m+ difficulty multipliers...");
+            sObjectMgr->LoadInstanceDifficultyMultiplier();
+            LOG_INFO("server.load", "Loading m+ difficulty level scales...");
+            sObjectMgr->LoadMythicLevelScale();
+            LOG_INFO("server.load", "Loading m+ minion values...");
+            sObjectMgr->LoadMythicMinionValue();
+            LOG_INFO("server.load", "Loading m+ keys...");
+            sObjectMgr->LoadMythicDungeonKeyMap();
+            LOG_INFO("server.load", "Loading m+ affixes...");
+            sObjectMgr->LoadMythicAffixes();
 
-        LOG_INFO("server.load", "Loading npc sounds...");
-        sObjectMgr->LoadNpcSounds();
+            LOG_INFO("server.load", "Loading npc sounds...");
+            sObjectMgr->LoadNpcSounds();
+        }
+        catch (std::exception & ex) {
+            std::string error = ex.what();
+            LOG_ERROR("server.load", "ERROR IN FORGE CACHE BUILD: " + error);
+            throw ex;
+        }
     }
 
     void GetCharacters()

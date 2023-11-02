@@ -886,6 +886,8 @@ public:
         return 0;
     }
 
+    std::unordered_map<uint8 /*level*/, std::unordered_map<uint8/*class*/, std::unordered_map<uint32 /*tabId*/, std::vector<uint32 /*spell*/>>>> _levelClassSpellMap;
+
 private:
     std::unordered_map<ObjectGuid, uint32> CharacterActiveSpecs;
     std::unordered_map<std::string, uint32> CONFIG;
@@ -952,6 +954,7 @@ private:
             GetConfig();
             AddTalentTrees();
             AddTalentsToTrees();
+            AddLevelClassSpellMap();
             AddTalentPrereqs();
             AddTalentChoiceNodes();
             AddTalentRanks();
@@ -1613,6 +1616,27 @@ private:
             PlayerSpellScaleMap[id] = data;
 
         } while (scale->NextRow());
+    }
+
+    void AddLevelClassSpellMap()
+    {
+        _levelClassSpellMap.clear();
+
+        QueryResult mapQuery = WorldDatabase.Query("select `level`,`class`, `tab`, `spell` from `acore_world`.`forge_character_spec_spells` order by `level` asc, `class` asc, `tab` asc, `spell` asc");
+
+        if (!mapQuery)
+            return;
+
+        do
+        {
+            Field* mapFields = mapQuery->Fetch();
+            uint32 level = mapFields[0].Get<uint8>();
+            uint32 classId = mapFields[1].Get<uint32>();
+            uint32 spec = mapFields[2].Get<uint32>();
+            uint32 spell = mapFields[3].Get<uint32>();
+
+            _levelClassSpellMap[level][classId][spec].push_back(spell);
+        } while (mapQuery->NextRow());
     }
 
 };

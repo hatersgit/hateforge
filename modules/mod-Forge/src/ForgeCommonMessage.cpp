@@ -189,8 +189,6 @@ bool ForgeCommonMessage::CanLearnTalent(Player* player, uint32 tabId, uint32 spe
         fc->TryGetTalentTab(player, tabId, tab) &&
         fc->TryGetCharacterActiveSpec(player, spec))
     {
-        if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", false) && (!spec->CharacterSpecTabId || spec->CharacterSpecTabId != tabId /*|| not the class generic tree*/))
-            return false;
 
         ForgeCharacterPoint* curPoints = fc->GetSpecPoints(player, tabType, spec->Id);
 
@@ -231,7 +229,7 @@ bool ForgeCommonMessage::CanLearnTalent(Player* player, uint32 tabId, uint32 spe
             skillTabs = sklTItt->second;
 
         int reqsNotMet = 0;
-
+        bool anyPrereq = false;
         for (auto& preReq : ft->Prereqs)
         {
             if (preReq->RequiredRank == 0)
@@ -247,13 +245,13 @@ bool ForgeCommonMessage::CanLearnTalent(Player* player, uint32 tabId, uint32 spe
 
             if (tabId == preReq->TalentTabId)
             {
-                auto slillItt = skillTabs.find(preReq->Talent);
+                auto skillItt = skillTabs.find(preReq->Talent);
 
-                if (slillItt == skillTabs.end() || preReq->RequiredRank > slillItt->second->CurrentRank)
+                if ((skillItt == skillTabs.end() || preReq->RequiredRank > skillItt->second->CurrentRank) && !anyPrereq)
                 {
-                    reqsNotMet++;
                     continue;
                 }
+                anyPrereq = true;
             }
             else
             {
@@ -302,7 +300,10 @@ bool ForgeCommonMessage::CanLearnTalent(Player* player, uint32 tabId, uint32 spe
             }
         }
 
-        if (reqsNotMet != 0)
+        if (!anyPrereq)
+            reqsNotMet++;
+
+        if (reqsNotMet)
         {
             if (ft->PreReqType == PereqReqirementType::ALL)
             {
@@ -345,7 +346,6 @@ void ForgeCommonMessage::SendTalents(Player* player)
     ForgeCharacterSpec* spec;
     if (fc->TryGetCharacterActiveSpec(player, spec))
     {
-       
         uint32 i = 0;
 
         for (auto tpt : fc->TALENT_POINT_TYPES)
@@ -547,30 +547,5 @@ void ForgeCommonMessage::SendActiveSpecInfo(Player* player)
         }
 
         player->SendForgeUIMsg(ForgeTopic::GET_CHARACTER_SPECS, msg);
-    }
-}
-
-void ForgeCommonMessage::SendSpecSelectInfo(Player* player)
-{
-    
-    std::list<ForgeTalentTab*> tabs;
-    if (fc->TryGetForgeTalentTabs(player, CharacterPointType::TALENT_TREE, tabs))
-    {
-        int i = 0;
-        std::string out = ""; // tabId;iconId;name;description?;spell~spell~spell~mastery?*
-        for (auto tab : tabs)
-        {
-            std::string sep = ";";
-            std::string delim = "*";
-            if (!i)
-                delim = "";
-
-            out += delim + std::to_string(tab->Id) + sep + std::to_string(tab->SpellIconId) + sep
-                + tab->Name + sep + "TODO: hater add descriptions" + sep;
-
-            // get spells from forge_character_spec_spells where level = 10
-        }
-
-        
     }
 }

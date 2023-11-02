@@ -45,7 +45,7 @@ enum class ForgeTopic
     ACTIVATE_SPEC                   = 6,
     PRESTIGE                        = 7,
     TALENT_TREE_LAYOUT              = 8,
-    GET_SHOP_ITEMS                  = 9,
+    PROMPT_CHAR_SPEC                = 9,
     UPDATE_SPEC_ERROR               = 10,
     ACTIVATE_SPEC_ERROR             = 11,
     LEARN_TALENT_ERROR              = 12,

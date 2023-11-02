@@ -155,9 +155,6 @@ public:
                 cm->SendActiveSpecInfo(player);
                 cm->SendTalentTreeLayout(player);
                 cm->SendTalents(player);
-
-                if (!spec->CharacterSpecTabId) // Main spec not selected yet, prompt user
-                    cm->SendSpecSelectInfo(player);
             }
 
             if (currentLevel == 80)

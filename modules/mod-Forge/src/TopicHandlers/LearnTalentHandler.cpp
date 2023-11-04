@@ -74,7 +74,7 @@ public:
             if (fc->TryGetTabPointType(_treeMetaData->TabId, pointType) && fc->TryGetTalentTab(iam.player, _treeMetaData->TabId, tab)) {
                 ForgeCharacterPoint* points = fc->GetSpecPoints(iam.player, pointType, spec->Id);
                 if (VerifyFlatTable(iam.player, points, tab)) {
-                    iam.player->resetSpells();
+                    fc->ForgetTalents(iam.player, spec, pointType);
 
                     for (auto ct : toLearn) {
                         auto ft = tab->Talents[ct->SpellId];

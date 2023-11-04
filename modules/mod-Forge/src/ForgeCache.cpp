@@ -22,7 +22,8 @@ enum CharacterPointType
     RACIAL_TREE = 4,
     SKILL_PAGE = 5,
     PRESTIGE_COUNT = 6,
-    LEVEL_10_TAB = 7
+    LEVEL_10_TAB = 7,
+    PET_TALENT = 8,
 };
 
 enum NodeType
@@ -904,6 +905,30 @@ public:
         std::unordered_map<uint32/*spellId*/, NodeMetaData*> nodeLocation;
     };
     std::unordered_map<uint32 /*tabId*/, TreeMetaData*> _cacheTreeMetaData;
+
+
+    void ForgetTalents(Player* player, ForgeCharacterSpec* spec, CharacterPointType pointType) {
+        
+        if (ACCOUNT_WIDE_TYPE != pointType && pointType != CharacterPointType::TALENT_TREE
+            && pointType != RACIAL_TREE && pointType != PET_TALENT)
+            return;
+
+        std::list<ForgeTalentTab*> tabs;
+        if (TryGetForgeTalentTabs(player, pointType, tabs))
+            for (auto* tab : tabs)
+                for (auto spell : tab->Talents)
+                    for (auto rank : spell.second->Ranks)
+                        if (auto spellInfo = sSpellMgr->GetSpellInfo(rank.second)) {
+
+                            if (spellInfo->HasEffect(SPELL_EFFECT_LEARN_SPELL))
+                                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                                    player->postCheckRemoveSpell(spellInfo->Effects[i].TriggerSpell);
+
+                            player->postCheckRemoveSpell(rank.second);
+                            player->RemoveAura(rank.second);
+                        }
+        
+    }
 
 private:
     std::unordered_map<ObjectGuid, uint32> CharacterActiveSpecs;

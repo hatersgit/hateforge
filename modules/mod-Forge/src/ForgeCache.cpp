@@ -141,7 +141,7 @@ struct ForgeTalentTab
     std::string Background;
     CharacterPointType TalentType;
     uint32 TabIndex;
-    std::unordered_map<uint32, ForgeTalent*> Talents;
+    std::unordered_map<uint32 /*spellId*/, ForgeTalent*> Talents;
 };
 
 // XMOG
@@ -888,6 +888,23 @@ public:
 
     std::unordered_map<uint8 /*level*/, std::unordered_map<uint8/*class*/, std::unordered_map<uint32 /*tabId*/, std::vector<uint32 /*spell*/>>>> _levelClassSpellMap;
 
+    /* hater: cached tree meta data */
+    struct NodeMetaData {
+        uint32 spellId;
+        uint8 row;
+        uint8 col;
+        uint8 pointReq;
+        std::vector<NodeMetaData*> unlocks;
+    };
+    struct TreeMetaData {
+        uint32 TabId;
+        uint8 MaxXDim = 0;
+        uint8 MaxYDim = 0;
+        std::unordered_map<uint8/*row*/, std::unordered_map<uint8 /*col*/, NodeMetaData*>> nodes;
+        std::unordered_map<uint32/*spellId*/, NodeMetaData*> nodeLocation;
+    };
+    std::unordered_map<uint32 /*tabId*/, TreeMetaData*> _cacheTreeMetaData;
+
 private:
     std::unordered_map<ObjectGuid, uint32> CharacterActiveSpecs;
     std::unordered_map<std::string, uint32> CONFIG;
@@ -1234,7 +1251,9 @@ private:
 
     void AddTalentsToTrees()
     {
-        QueryResult talents = WorldDatabase.Query("SELECT * FROM forge_talents");
+        QueryResult talents = WorldDatabase.Query("SELECT * FROM forge_talents order by `talentTabId` asc, `rowIndex` asc, `columnIndex` asc");
+
+        _cacheTreeMetaData.clear();
 
         if (!talents)
             return;
@@ -1259,12 +1278,42 @@ private:
 
             if (tabItt == TalentTabs.end())
             {
-                LOG_ERROR("FORGE.ForgeCache", "Error loading talents, invaild tab id: " + std::to_string(newTalent->TalentTabId));
+                LOG_ERROR("FORGE.ForgeCache", "Error loading talents, invalid tab id: " + std::to_string(newTalent->TalentTabId));
             }
             else
                 tabItt->second->Talents[newTalent->SpellId] = newTalent;
 
+            // get treemeta from struct
+            auto found = _cacheTreeMetaData.find(newTalent->TalentTabId);
+            TreeMetaData* data;
+
+            if (found == _cacheTreeMetaData.end()) {
+                TreeMetaData* tree = new TreeMetaData();
+                tree->MaxXDim = newTalent->ColumnIndex;
+                tree->MaxYDim = newTalent->RowIndex;
+                tree->TabId = newTalent->TalentTabId;
+                _cacheTreeMetaData[tree->TabId] = tree;
+                data = _cacheTreeMetaData[tree->TabId];
+            }
+            else {
+                if (newTalent->RowIndex > found->second->MaxYDim)
+                    found->second->MaxYDim = newTalent->RowIndex;
+                if (newTalent->ColumnIndex > found->second->MaxXDim)
+                    found->second->MaxXDim = newTalent->ColumnIndex;
+
+                data = found->second;
+            }
+            NodeMetaData* node = new NodeMetaData();
+            node->spellId = newTalent->SpellId;
+            node->pointReq = newTalent->TabPointReq;
+            node->col = newTalent->ColumnIndex;
+            node->row = newTalent->RowIndex;
+
+            data->nodes[node->row][node->col] = node;
+            data->nodeLocation[node->spellId] = node;
         } while (talents->NextRow());
+
+        // load meta data
     }
 
     void AddTalentPrereqs()
@@ -1282,17 +1331,27 @@ private:
             newTalent->Talent = talentFields[3].Get<uint32>();
             newTalent->TalentTabId = talentFields[4].Get<uint32>();
             newTalent->RequiredRank = talentFields[5].Get<uint32>();
-            
-            ForgeTalent* lt = TalentTabs[talentFields[2].Get<uint32>()]->Talents[talentFields[1].Get<uint32>()];
+
+            auto reqdSpellId = talentFields[1].Get<uint32>();
+            auto reqSpelltab = talentFields[2].Get<uint32>();
+            ForgeTalent* lt = TalentTabs[reqSpelltab]->Talents[reqdSpellId];
 
             if (lt != nullptr)
-            {
                 lt->Prereqs.push_back(newTalent);
+            else
+                LOG_ERROR("FORGE.ForgeCache", "Error loading AddTalentPrereqs, invaild req id: " + std::to_string(newTalent->reqId));
+
+            auto found = _cacheTreeMetaData.find(reqSpelltab);
+            if (found != _cacheTreeMetaData.end()) {
+                TreeMetaData* tree = found->second;
+                NodeMetaData* node = tree->nodeLocation[reqdSpellId];
+                node->unlocks.push_back(tree->nodeLocation[newTalent->Talent]);
+
+                tree->nodes[node->row][node->col] = node;
+                tree->nodeLocation[node->spellId] = node;
             }
             else
-            {
-                LOG_ERROR("FORGE.ForgeCache", "Error loading AddTalentPrereqs, invaild req id: " + std::to_string(newTalent->reqId));
-            }
+                LOG_ERROR("FORGE.ForgeCache", "Prereq cannot be mapped to existing talent meta data.");
 
         } while (preReqTalents->NextRow());
     }

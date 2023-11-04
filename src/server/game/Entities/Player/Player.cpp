@@ -12209,6 +12209,12 @@ void Player::ApplyEquipCooldown(Item* pItem)
     }
 }
 
+void Player::postCheckRemoveSpell(uint32 spellId) {
+    auto itr = m_spells.find(spellId);
+    if (itr != m_spells.end())
+        m_spells.erase(spellId);
+}
+
 void Player::resetSpells()
 {
     // not need after this call
@@ -12226,7 +12232,7 @@ void Player::resetSpells()
                 spellInfo->Effects[0].Effect != 47 &&
                 spellInfo->Reagent[0] <= 0 &&
                 std::find(PRESTIGE_IGNORE_SPELLS.begin(), PRESTIGE_IGNORE_SPELLS.end(), iter->first) == PRESTIGE_IGNORE_SPELLS.end())
-                removeSpell(iter->first, SPEC_MASK_ALL, false);
+                postCheckRemoveSpell(iter->first);
         }
     }
 

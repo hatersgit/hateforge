@@ -17,9 +17,7 @@ public:
 
         // Strict spec loading for DF like class specs
         if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", false)) {
-            auto level10s = fc->_levelClassSpellMap.find(sConfigMgr->GetIntDefault("Forge.StrictSpecs.TalentLevelReq", 10));
-            if (level10s != fc->_levelClassSpellMap.end())
-                specSpells = level10s->second;
+
         }
     }
 
@@ -29,8 +27,12 @@ public:
         {
             ForgeCharacterSpec* spec;
             if (fc->TryGetCharacterActiveSpec(iam.player, spec)) {
-                if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", false) && !spec->CharacterSpecTabId) // Main spec not selected yet, prompt user
+                if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", false) && !spec->CharacterSpecTabId) { // Main spec not selected yet, prompt user
+                    auto level10s = fc->_levelClassSpellMap.find(sConfigMgr->GetIntDefault("Forge.StrictSpecs.TalentLevelReq", 10));
+                    if (level10s != fc->_levelClassSpellMap.end())
+                        specSpells = level10s->second;
                     SendSpecSelectInfo(iam.player);
+                }
                 else 
                     cm->SendTalents(iam.player);
             }

@@ -888,6 +888,7 @@ public:
     }
 
     std::unordered_map<uint8 /*level*/, std::unordered_map<uint8/*class*/, std::unordered_map<uint32 /*tabId*/, std::vector<uint32 /*spell*/>>>> _levelClassSpellMap;
+    std::unordered_map<uint32 /*class*/, std::unordered_map<uint32 /*tab*/, std::vector<uint32/*spellId*/>>> _specStarterTalents;
 
     /* hater: cached tree meta data */
     struct NodeMetaData {
@@ -905,7 +906,6 @@ public:
         std::unordered_map<uint32/*spellId*/, NodeMetaData*> nodeLocation;
     };
     std::unordered_map<uint32 /*tabId*/, TreeMetaData*> _cacheTreeMetaData;
-
 
     void ForgetTalents(Player* player, ForgeCharacterSpec* spec, CharacterPointType pointType) {
         
@@ -927,7 +927,20 @@ public:
                             player->postCheckRemoveSpell(rank.second);
                             player->RemoveAura(rank.second);
                         }
-        
+        ForgeCharacterPoint* fcp = GetSpecPoints(player, pointType, spec->Id);
+        ForgeCharacterPoint* baseFcp = GetCommonCharacterPoint(player, pointType);
+        fcp->Sum = baseFcp->Sum;
+
+        UpdateCharPoints(player, fcp);
+    }
+
+    void InitSpecForTabId(Player* player, uint32 tabId) {
+        ForgeCharacterSpec* spec;
+        if (TryGetCharacterActiveSpec(player, spec)) {
+            spec->Talents.clear();
+
+            auto starters = GetStarterTalents(player->getClass(), tabId);
+        }
     }
 
 private:
@@ -997,6 +1010,7 @@ private:
             AddTalentTrees();
             AddTalentsToTrees();
             AddLevelClassSpellMap();
+            AddSpecStarterTalents();
             AddTalentPrereqs();
             AddTalentChoiceNodes();
             AddTalentRanks();
@@ -1723,6 +1737,29 @@ private:
         } while (mapQuery->NextRow());
     }
 
+    void AddSpecStarterTalents()
+    {
+        _specStarterTalents.clear();
+
+        QueryResult mapQuery = WorldDatabase.Query("select `class`, `tab`, `spell` from `acore_world`.`forge_character_spec_strarter_talents`");
+
+        if (!mapQuery)
+            return;
+
+        do
+        {
+            Field* mapFields = mapQuery->Fetch();
+            uint32 classId = mapFields[0].Get<uint32>();
+            uint32 spec = mapFields[1].Get<uint32>();
+            uint32 spell = mapFields[2].Get<uint32>();
+
+            _specStarterTalents[classId][spec].push_back(spell);
+        } while (mapQuery->NextRow());
+    }
+
+    std::vector<uint32> GetStarterTalents(uint32 pClass, uint32 tabId) {
+        return _specStarterTalents[pClass][tabId];
+    }
 };
 
 #define sForgeCache ForgeCache::instance()

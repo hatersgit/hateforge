@@ -24,49 +24,50 @@ public:
 
         ForgeCharacterSpec* spec;
         if (fc->TryGetCharacterActiveSpec(iam.player, spec)) {
-
-            if (!spec->CharacterSpecTabId) {
-                iam.player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Attempting to learn talents without first selecting a primary spec.");
-                return;
-            }
-
-            auto tabMetaData = fc->_cacheTreeMetaData.find(spec->CharacterSpecTabId);
-            if (tabMetaData != fc->_cacheTreeMetaData.end())
-                _treeMetaData = tabMetaData->second;
-            else {
-                iam.player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Unknown tab in meta data request, report this to staff.");
-                return;
-            }
-
-            std::vector<std::string> rows;
-            boost::algorithm::split(rows, iam.message, boost::is_any_of(";"));
-            if (rows.empty())
-                return;
-
-            int i = 0;
-            for (auto row : _treeMetaData->nodes) {
-                if (rows.size() == _treeMetaData->nodes.size()) {
-                    std::vector<std::string> cols;
-                    boost::algorithm::split(cols, rows[i], boost::is_any_of("~"));
-                    if (cols.empty())
-                        return;
-
-                    int j = 0;
-                    for (auto col : row.second) {
-                        if (cols.size() == row.second.size()) {
-                            if (!fc->isNumber(cols[j]))
-                                return;
-
-                            _simplifiedTreeMap[row.first][col.first] = static_cast<uint32>(std::stoul(cols[j]));
-                            j++;
-                            continue;
-                        }
-                        return;
-                    }
-                    i++;
-                    continue;
+            if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", false)) {
+                if (!spec->CharacterSpecTabId) {
+                    iam.player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Attempting to learn talents without first selecting a primary spec.");
+                    return;
                 }
-                return;
+
+                auto tabMetaData = fc->_cacheTreeMetaData.find(spec->CharacterSpecTabId);
+                if (tabMetaData != fc->_cacheTreeMetaData.end())
+                    _treeMetaData = tabMetaData->second;
+                else {
+                    iam.player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Unknown tab in meta data request, report this to staff.");
+                    return;
+                }
+
+                std::vector<std::string> rows;
+                boost::algorithm::split(rows, iam.message, boost::is_any_of(";"));
+                if (rows.empty())
+                    return;
+
+                int i = 0;
+                for (auto row : _treeMetaData->nodes) {
+                    if (rows.size() == _treeMetaData->nodes.size()) {
+                        std::vector<std::string> cols;
+                        boost::algorithm::split(cols, rows[i], boost::is_any_of("~"));
+                        if (cols.empty())
+                            return;
+
+                        int j = 0;
+                        for (auto col : row.second) {
+                            if (cols.size() == row.second.size()) {
+                                if (!fc->isNumber(cols[j]))
+                                    return;
+
+                                _simplifiedTreeMap[row.first][col.first] = static_cast<uint32>(std::stoul(cols[j]));
+                                j++;
+                                continue;
+                            }
+                            return;
+                        }
+                        i++;
+                        continue;
+                    }
+                    return;
+                }
             }
 
             CharacterPointType pointType;

@@ -938,7 +938,6 @@ public:
         ForgeCharacterSpec* spec;
         if (TryGetCharacterActiveSpec(player, spec)) {
             spec->Talents.clear();
-
             auto starters = GetStarterTalents(player->getClass(), tabId);
         }
     }

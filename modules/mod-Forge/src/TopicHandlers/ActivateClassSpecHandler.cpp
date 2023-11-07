@@ -69,7 +69,7 @@ private:
     void LearnInitialSpecSpellsAndTalents(Player* player, uint32 tabId) {
         ForgeCharacterSpec* charSpec;
         if (fc->TryGetCharacterActiveSpec(player, charSpec)) {
-            for (int i = 1; i < player->getLevel() + 1; i++) {
+            for (int i = 10; i < player->getLevel() + 1; i++) {
                 auto level = fc->_levelClassSpellMap.find(i);
                 if (level != fc->_levelClassSpellMap.end()) {
                     auto classSpells = level->second.find(player->getClass());
@@ -77,13 +77,15 @@ private:
                         auto spec = classSpells->second.find(tabId);
                         if (spec != classSpells->second.end()) {
                             for (auto spell : spec->second) {
-                                if (auto info = sSpellMgr->GetSpellInfo(spell)) {
-                                    if (info->HasEffect(SPELL_EFFECT_LEARN_SPELL)) {
-                                        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-                                            player->learnSpell(info->Effects[i].TriggerSpell);
+                                if (!player->HasSpell(spell)) {
+                                    if (auto info = sSpellMgr->GetSpellInfo(spell)) {
+                                        if (info->HasEffect(SPELL_EFFECT_LEARN_SPELL)) {
+                                            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                                                player->learnSpell(info->Effects[i].TriggerSpell);
+                                        }
+                                        else
+                                            player->learnSpell(spell, SPEC_MASK_ALL, false);
                                     }
-                                    else
-                                        player->learnSpell(spell, SPEC_MASK_ALL, false);
                                 }
                             }
                         }

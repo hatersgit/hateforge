@@ -815,11 +815,11 @@ void World::LoadConfigSettings(bool reload)
 
     _int_configs[CONFIG_CHARACTER_CREATING_DISABLED_CLASSMASK] = sConfigMgr->GetOption<int32>("CharacterCreating.Disabled.ClassMask", 0);
 
-    _int_configs[CONFIG_CHARACTERS_PER_REALM] = sConfigMgr->GetOption<int32>("CharactersPerRealm", 10);
-    if (_int_configs[CONFIG_CHARACTERS_PER_REALM] < 1 || _int_configs[CONFIG_CHARACTERS_PER_REALM] > 10)
+    _int_configs[CONFIG_CHARACTERS_PER_REALM] = sConfigMgr->GetOption<int32>("CharactersPerRealm", 30);
+    if (_int_configs[CONFIG_CHARACTERS_PER_REALM] > 30)
     {
-        LOG_ERROR("server.loading", "CharactersPerRealm ({}) must be in range 1..10. Set to 10.", _int_configs[CONFIG_CHARACTERS_PER_REALM]);
-        _int_configs[CONFIG_CHARACTERS_PER_REALM] = 10;
+        LOG_ERROR("server.loading", "CharactersPerRealm ({}) must be in range 1..30. Set to 30.", _int_configs[CONFIG_CHARACTERS_PER_REALM]);
+        _int_configs[CONFIG_CHARACTERS_PER_REALM] = 30;
     }
 
     // must be after CONFIG_CHARACTERS_PER_REALM
@@ -1466,16 +1466,8 @@ void World::LoadConfigSettings(bool reload)
     // Prevent players AFK from being logged out
     _int_configs[CONFIG_AFK_PREVENT_LOGOUT] = sConfigMgr->GetOption<int32>("PreventAFKLogout", 0);
 
-    // Unload grids to save memory. Can be disabled if enough memory is available to speed up moving players to new grids.
-    _bool_configs[CONFIG_GRID_UNLOAD] = sConfigMgr->GetOption<bool>("GridUnload", true);
-
     // Preload all grids of all non-instanced maps
     _bool_configs[CONFIG_PRELOAD_ALL_NON_INSTANCED_MAP_GRIDS] = sConfigMgr->GetOption<bool>("PreloadAllNonInstancedMapGrids", false);
-    if (_bool_configs[CONFIG_PRELOAD_ALL_NON_INSTANCED_MAP_GRIDS] && _bool_configs[CONFIG_GRID_UNLOAD])
-    {
-        LOG_ERROR("server.loading", "PreloadAllNonInstancedMapGrids enabled, but GridUnload also enabled. GridUnload must be disabled to enable base map pre-loading. Base map pre-loading disabled");
-        _bool_configs[CONFIG_PRELOAD_ALL_NON_INSTANCED_MAP_GRIDS] = false;
-    }
 
     // ICC buff override
     _int_configs[CONFIG_ICC_BUFF_HORDE] = sConfigMgr->GetOption<int32>("ICC.Buff.Horde", 73822);
@@ -2227,14 +2219,21 @@ void World::SetInitialWorldSettings()
     {
         LOG_INFO("server.loading", "Loading All Grids For All Non-Instanced Maps...");
 
-        sMapMgr->DoForAllMaps([](Map* map)
+        for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
+        {
+            MapEntry const* mapEntry = sMapStore.LookupEntry(i);
+
+            if (mapEntry && !mapEntry->Instanceable())
             {
-                if (!map->Instanceable())
+                Map* map = sMapMgr->CreateBaseMap(mapEntry->MapID);
+
+                if (map)
                 {
                     LOG_INFO("server.loading", ">> Loading All Grids For Map {}", map->GetId());
                     map->LoadAllCells();
                 }
-            });
+            }
+        }
     }
 
     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);

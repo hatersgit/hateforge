@@ -19,109 +19,143 @@ public:
     }
 
     void HandleMessage(ForgeAddonMessage& iam) override {
-        if (iam.message.empty())
+        if (iam.message.empty()) // talentType|tabId?rank~rank~rank;*
             return;
 
         ForgeCharacterSpec* spec;
         if (fc->TryGetCharacterActiveSpec(iam.player, spec)) {
-            if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", false)) {
-                if (!spec->CharacterSpecTabId) {
-                    iam.player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Attempting to learn talents without first selecting a primary spec.");
-                    return;
-                }
+            std::vector<std::string> typeSplit;
+            boost::algorithm::split(typeSplit, iam.message, boost::is_any_of("|"));
+            if (typeSplit.empty() || typeSplit.size() != 2 || !fc->isNumber(typeSplit[0]))
+                return;
 
-                auto tabMetaData = fc->_cacheTreeMetaData.find(spec->CharacterSpecTabId);
-                if (tabMetaData != fc->_cacheTreeMetaData.end())
-                    _treeMetaData = tabMetaData->second;
-                else {
-                    iam.player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Unknown tab in meta data request, report this to staff.");
-                    return;
-                }
+            auto pointType = static_cast<uint32>(std::stoul(typeSplit[0]));
+            if (pointType <= 0 || pointType >= CharacterPointType::PET_TALENT)
+                return;
 
-                std::vector<std::string> rows;
-                boost::algorithm::split(rows, iam.message, boost::is_any_of(";"));
-                if (rows.empty())
+            std::vector<std::string> tabs;
+            boost::algorithm::split(tabs, typeSplit[1], boost::is_any_of("*"));
+            if (tabs.empty())
+                return;
+
+            std::list<ForgeTalentTab*> typeTabs;
+            if (fc->TryGetForgeTalentTabs(iam.player, CharacterPointType(pointType), typeTabs)) {
+                if (typeTabs.size() != tabs.size())
                     return;
 
-                int i = 0;
-                for (auto row : _treeMetaData->nodes) {
-                    if (rows.size() == _treeMetaData->nodes.size()) {
-                        std::vector<std::string> cols;
-                        boost::algorithm::split(cols, rows[i], boost::is_any_of("~"));
-                        if (cols.empty())
+                for (auto tab : tabs) {
+                    std::vector<std::string> tabData;
+                    boost::algorithm::split(tabData, tab, boost::is_any_of("?"));
+                    if (tabData.empty() || tabData.size() != 2 || !fc->isNumber(tabData[0]))
+                        return;
+
+                    auto tabId = static_cast<uint32>(std::stoul(tabData[0]));
+                    CharacterPointType foundType;
+                    ForgeTalentTab* specTab;
+                    if (fc->TryGetTabPointType(tabId, foundType) && fc->TryGetTalentTab(iam.player, tabId, specTab)) {
+                        if (foundType != pointType)
                             return;
 
-                        int j = 0;
-                        for (auto col : row.second) {
-                            if (cols.size() == row.second.size()) {
-                                if (!fc->isNumber(cols[j]))
+                        if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", false)) {
+                            if (!spec->CharacterSpecTabId) {
+                                iam.player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Attempting to learn talents without first selecting a primary spec.");
+                                return;
+                            }
+
+                            if (tabId != spec->CharacterSpecTabId) {
+                                iam.player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Attempting to learn talents outside of selected primary spec.");
+                                return;
+                            }
+                        }
+
+                        auto tabMetaData = fc->_cacheTreeMetaData.find(tabId);
+                        if (tabMetaData != fc->_cacheTreeMetaData.end())
+                            _treeMetaData = tabMetaData->second;
+                        else {
+                            iam.player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Unknown tab (" + std::to_string(tabId) + ") in meta data request, report this to staff.");
+                            return;
+                        }
+
+                        std::vector<std::string> rows;
+                        boost::algorithm::split(rows, iam.message, boost::is_any_of(";"));
+                        if (rows.empty())
+                            return;
+
+                        int i = 0;
+                        for (auto row : _treeMetaData->nodes) {
+                            if (rows.size() == _treeMetaData->nodes.size()) {
+                                std::vector<std::string> cols;
+                                boost::algorithm::split(cols, rows[i], boost::is_any_of("~"));
+                                if (cols.empty())
                                     return;
 
-                                _simplifiedTreeMap[row.first][col.first] = static_cast<uint32>(std::stoul(cols[j]));
-                                j++;
+                                int j = 0;
+                                for (auto col : row.second) {
+                                    if (cols.size() == row.second.size()) {
+                                        if (!fc->isNumber(cols[j]))
+                                            return;
+
+                                        _simplifiedTreeMap[tabId][row.first][col.first] = static_cast<uint32>(std::stoul(cols[j]));
+                                        j++;
+                                        continue;
+                                    }
+                                    return;
+                                }
+                                i++;
                                 continue;
                             }
                             return;
                         }
-                        i++;
-                        continue;
-                    }
-                    return;
-                }
-            }
 
-            CharacterPointType pointType;
-            ForgeTalentTab* tab;
-            if (fc->TryGetTabPointType(_treeMetaData->TabId, pointType) && fc->TryGetTalentTab(iam.player, _treeMetaData->TabId, tab)) {
-                ForgeCharacterPoint* points = fc->GetSpecPoints(iam.player, pointType, spec->Id);
-                if (VerifyFlatTable(iam.player, points, tab)) {
-                    fc->ForgetTalents(iam.player, spec, pointType);
+                        ForgeCharacterPoint* points = fc->GetSpecPoints(iam.player, foundType, spec->Id);
+                        if (VerifyFlatTable(iam.player, points, specTab)) {
+                            fc->ForgetTalents(iam.player, spec, foundType);
 
-                    for (auto ct : toLearn) {
-                        auto ft = tab->Talents[ct->SpellId];
-                        bool choiceNode = ct->type == NodeType::CHOICE;
+                            for (auto ct : toLearn) {
+                                auto ft = specTab->Talents[ct->SpellId];
+                                bool choiceNode = ct->type == NodeType::CHOICE;
 
-                        spec->Talents[tab->Id][ct->SpellId] = ct;
+                                spec->Talents[specTab->Id][ct->SpellId] = ct;
 
-                        spec->PointsSpent[tab->Id] += ft->RankCost * ct->CurrentRank;
-                        points->Sum -= ft->RankCost;
+                                spec->PointsSpent[specTab->Id] += ft->RankCost * ct->CurrentRank;
+                                points->Sum -= ft->RankCost;
 
-                        for (auto s : ft->UnlearnSpells)
-                            iam.player->removeSpell(s, SPEC_MASK_ALL, false);
+                                for (auto s : ft->UnlearnSpells)
+                                    iam.player->removeSpell(s, SPEC_MASK_ALL, false);
 
-                        auto rankedSpell = ft->Ranks[ct->CurrentRank];
-                        if (choiceNode) {
-                            auto spellInfo = sSpellMgr->GetSpellInfo(ct->SpellId);
-                            if (!spellInfo->HasAttribute(SPELL_ATTR0_PASSIVE))
-                                iam.player->learnSpell(ct->SpellId);
-                            else
-                                iam.player->AddAura(ct->SpellId, iam.player);
+                                auto rankedSpell = ft->Ranks[ct->CurrentRank];
+                                if (choiceNode) {
+                                    auto spellInfo = sSpellMgr->GetSpellInfo(ct->SpellId);
+                                    if (!spellInfo->HasAttribute(SPELL_ATTR0_PASSIVE))
+                                        iam.player->learnSpell(ct->SpellId);
+                                    else
+                                        iam.player->AddAura(ct->SpellId, iam.player);
 
-                            uint32 choiceId = fc->GetChoiceNodeFromSpell(ct->SpellId);
-                            spec->ChoiceNodesChosen[choiceId] = ct->SpellId;
-                        }
-                        else {
-                            auto spellInfo = sSpellMgr->GetSpellInfo(rankedSpell);
-                            if (!spellInfo->HasAttribute(SPELL_ATTR0_PASSIVE))
-                                iam.player->learnSpell(rankedSpell);
-                            else
-                                iam.player->AddAura(rankedSpell, iam.player);
+                                    uint32 choiceId = fc->GetChoiceNodeFromSpell(ct->SpellId);
+                                    spec->ChoiceNodesChosen[choiceId] = ct->SpellId;
+                                }
+                                else {
+                                    auto spellInfo = sSpellMgr->GetSpellInfo(rankedSpell);
+                                    if (!spellInfo->HasAttribute(SPELL_ATTR0_PASSIVE))
+                                        iam.player->learnSpell(rankedSpell);
+                                    else
+                                        iam.player->AddAura(rankedSpell, iam.player);
+                                }
+                            }
+                            fc->UpdateCharPoints(iam.player, points);
                         }
                     }
-
-                    fc->UpdateCharPoints(iam.player, points);
-                    fc->UpdateCharacterSpec(iam.player, spec);
-
-                    cm->SendActiveSpecInfo(iam.player);
-                    cm->SendSpecInfo(iam.player);
-                    cm->SendTalents(iam.player, _treeMetaData->TabId);
-
-                    iam.player->SendPlaySpellVisual(179); // 53 SpellCastDirected
-                    iam.player->SendPlaySpellImpact(iam.player->GetGUID(), 362); // 113 EmoteSalute
                 }
+
+                fc->UpdateCharacterSpec(iam.player, spec);
+
+                cm->SendActiveSpecInfo(iam.player);
+                cm->SendSpecInfo(iam.player);
+                cm->SendTalents(iam.player, _treeMetaData->TabId);
+
+                iam.player->SendPlaySpellVisual(179); // 53 SpellCastDirected
+                iam.player->SendPlaySpellImpact(iam.player->GetGUID(), 362); // 113 EmoteSalute
             }
-            else
-                iam.player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Requirements not met");
         }
         else
             iam.player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Attempting to learn talents with an inactive spec.");
@@ -133,12 +167,11 @@ public:
         unlocked.clear();
         ForgeCharacterSpec* spec;
         if (fc->TryGetCharacterActiveSpec(player, spec) && tab->ClassMask == player->getClassMask()) {
-            int spent = 0;
-            for (auto row : _simplifiedTreeMap) {
+            std::unordered_map <uint32 /*tabId*/, uint8 /*spent*/> spend;
+            for (auto row : _simplifiedTreeMap[tab->Id]) {
                 for (auto col : row.second) {
-                    if (row.first > _treeMetaData->MaxYDim || col.first > _treeMetaData->MaxXDim) {
+                    if (row.first > _treeMetaData->MaxYDim || col.first > _treeMetaData->MaxXDim)
                         return false;
-                    }
                     else {
                         auto rowExists = _treeMetaData->nodes.find(row.first);
                         if (rowExists != _treeMetaData->nodes.end()) {
@@ -162,11 +195,11 @@ public:
                                         if (std::find(unlocked.begin(), unlocked.end(), node->spellId) == unlocked.end())
                                             return false;
 
-                                    if (talent->RequiredLevel > player->getLevel() || node->pointReq > spent)
+                                    if (talent->RequiredLevel > player->getLevel() || node->pointReq > spend[tab->Id])
                                         return false;
 
-                                    spent += choiceNode ? talent->RankCost : col.second * talent->RankCost;
-                                    if (spent > points->Max)
+                                    spend[tab->Id] += choiceNode ? talent->RankCost : col.second * talent->RankCost;
+                                    if (spend[tab->Id] > points->Max)
                                         return false;
 
                                     for (auto unlock : node->unlocks)
@@ -195,7 +228,7 @@ private:
     ForgeCache* fc;
 
     ForgeCache::TreeMetaData* _treeMetaData;
-    std::unordered_map<uint8 /*row*/, std::unordered_map<uint8/*col*/, uint32 /*rank*/>> _simplifiedTreeMap;
+    std::unordered_map<uint32 /*tabId*/, std::unordered_map<uint8 /*row*/, std::unordered_map<uint8/*col*/, uint32 /*rank*/>>> _simplifiedTreeMap;
     std::vector<ForgeCharacterTalent*> toLearn = {};
     std::vector<uint32> unlocked = {};
 };

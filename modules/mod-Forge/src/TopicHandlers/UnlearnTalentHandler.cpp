@@ -21,7 +21,6 @@ public:
         UNLEARN_POINT_TYPE[CharacterPointType::FORGE_SKILL_TREE] = 90001;
         UNLEARN_POINT_TYPE[CharacterPointType::PRESTIGE_TREE] = 90001;
         UNLEARN_POINT_TYPE[CharacterPointType::RACIAL_TREE] = 90001;
-        UNLEARN_POINT_TYPE[CharacterPointType::LEVEL_10_TAB] = 999999999;
         UNLEARN_POINT_TYPE[CharacterPointType::PRESTIGE_COUNT] = 999999999;
         UNLEARN_POINT_TYPE[CharacterPointType::SKILL_PAGE] = 999999999;
     }

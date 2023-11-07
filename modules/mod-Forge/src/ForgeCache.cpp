@@ -22,7 +22,7 @@ enum CharacterPointType
     RACIAL_TREE = 4,
     SKILL_PAGE = 5,
     PRESTIGE_COUNT = 6,
-    LEVEL_10_TAB = 7,
+    CLASS_TREE = 7,
     PET_TALENT = 8,
 };
 

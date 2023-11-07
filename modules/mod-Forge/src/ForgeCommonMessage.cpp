@@ -44,13 +44,13 @@ void ForgeCommonMessage::SendTalentTreeLayout(Player* player, uint32 tab)
 
 std::string ForgeCommonMessage::BuildTree(Player* player, CharacterPointType pointType, std::list<ForgeTalentTab*> tabs)
 {
-    int fi = 0;
 
     for (const auto& tab : tabs)
     {
         std::string msg;
+        auto id = tab->TalentType == CharacterPointType::TALENT_TREE ? tab->ClassMask : tab->TalentType == CharacterPointType::PET_TALENT ? CharacterPointType::PET_TALENT : tab->Id;
 
-        msg = msg + std::to_string(tab->Id) + "^" +
+        msg = msg + std::to_string(id) + "^" +
             tab->Name + "^" +
             std::to_string(tab->SpellIconId) + "^" +
             tab->Background + "^" +
@@ -66,7 +66,8 @@ std::string ForgeCommonMessage::BuildTree(Player* player, CharacterPointType poi
             if (i == 0)
                 delimiter = "";
 
-            msg = msg + delimiter + std::to_string(talentKvp.second->SpellId) + "&" +
+            msg = msg + delimiter + std::to_string(tab->Id) + "&" +
+                std::to_string(talentKvp.second->SpellId) + "&" +
                 std::to_string(talentKvp.second->ColumnIndex) + "&" +
                 std::to_string(talentKvp.second->RowIndex) + "&" +
                 std::to_string(talentKvp.second->RankCost) + "&" +
@@ -125,7 +126,6 @@ std::string ForgeCommonMessage::BuildTree(Player* player, CharacterPointType poi
 
             msg = msg + "&" + std::to_string(talentKvp.second->nodeType) + "&";
 
-            // TODO: SET THIS TO BE CHOICE NODE
             for (auto& choice : talentKvp.second->Choices)
             {
                 std::string choiceDel = "!";
@@ -139,9 +139,6 @@ std::string ForgeCommonMessage::BuildTree(Player* player, CharacterPointType poi
 
             i++;
         }
-        
-        fi++;
-
 
         player->SendForgeUIMsg(ForgeTopic::TALENT_TREE_LAYOUT, msg);
     }

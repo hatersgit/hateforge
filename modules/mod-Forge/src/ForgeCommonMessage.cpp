@@ -72,6 +72,7 @@ std::string ForgeCommonMessage::BuildTree(Player* player, CharacterPointType poi
                 std::to_string(talentKvp.second->RowIndex) + "&" +
                 std::to_string(talentKvp.second->RankCost) + "&" +
                 std::to_string(talentKvp.second->RequiredLevel) + "&" +
+                std::to_string(talentKvp.second->TabPointReq) + "&" +
                 std::to_string(talentKvp.second->NumberOfRanks) + "&" +
                 std::to_string((int)talentKvp.second->PreReqType) + "&";
 
@@ -219,9 +220,7 @@ bool ForgeCommonMessage::CanLearnTalent(Player* player, uint32 tabId, uint32 spe
         std::unordered_map<uint32, ForgeCharacterTalent*> skillTabs;
 
         if (sklTItt == spec->Talents.end())
-        {
             skillTabs = spec->Talents[tabId];
-        }
         else
             skillTabs = sklTItt->second;
 
@@ -348,27 +347,27 @@ void ForgeCommonMessage::SendTalents(Player* player)
         for (auto tpt : fc->TALENT_POINT_TYPES)
         {
             std::list<ForgeTalentTab*> tabs;
-
             if (fc->TryGetForgeTalentTabs(player, tpt, tabs))
             {
+                std::string clientMsg;
+                auto tabId = tpt == CharacterPointType::TALENT_TREE ? player->getClassMask() : tpt == CharacterPointType::RACIAL_TREE ? 999900 : tpt == CharacterPointType::PRESTIGE_TREE ? 1980000 : CharacterPointType::PET_TALENT;
                 for (auto* tab : tabs)
                 {
                     std::string delimiter = ";";
 
                     if (i == 0)
                         delimiter = "";
-                    std::string clientMsg;
                     //clientMsg = clientMsg + delimiter + std::to_string(tab->Id) + "^" + std::to_string((int)tab->TalentType) + "^";
-                    clientMsg = std::to_string(tab->Id) + "^" + std::to_string((int)tab->TalentType) + "^";
+                    clientMsg = std::to_string(tabId) + "^" + std::to_string((int)tab->TalentType) + "^";
                     std::unordered_map<uint32, ForgeCharacterTalent*> spec;
                     fc->TryGetCharacterTalents(player, tab->Id, spec);
                     clientMsg = DoBuildRanks(spec, player, clientMsg, tab->Id);
+
                     player->SendForgeUIMsg(ForgeTopic::GET_TALENTS, clientMsg);
                     i++;
                 }
             }
         }
-
         
     }
 }
@@ -400,27 +399,19 @@ std::string ForgeCommonMessage::DoBuildRanks(std::unordered_map<uint32, ForgeCha
     {
         for(auto& sp : tab->Talents)
         {
-            std::string delimiter = "*";
-
-            if (i == 0)
-                delimiter = "";
+            std::string delimiter =  i ? "*" : "";
             
             auto itt = spec.find(sp.first);
 
             if (itt != spec.end()) {
                 if (itt->second->type == NodeType::CHOICE)
-                    if (itt->second->CurrentRank == 0 || !CanLearnTalent(player, tabId, sp.second->SpellId))
-                        clientMsg = clientMsg + delimiter + std::to_string(sp.second->SpellId) + "~-1";
+                    if (itt->second->CurrentRank == 0)
+                        clientMsg = clientMsg + delimiter + std::to_string(sp.second->SpellId) + "~0";
                     else
                         clientMsg = clientMsg + delimiter + std::to_string(itt->second->SpellId) + "~" + std::to_string(fs->ChoiceNodesChosen.at(itt->second->SpellId));
                 else
-                    if (itt->second->CurrentRank == 0 && !CanLearnTalent(player, tabId, sp.second->SpellId))
-                        clientMsg = clientMsg + delimiter + std::to_string(sp.second->SpellId) + "~-1";
-                    else
-                        clientMsg = clientMsg + delimiter + std::to_string(itt->second->SpellId) + "~" + std::to_string(itt->second->CurrentRank);
+                    clientMsg = clientMsg + delimiter + std::to_string(itt->second->SpellId) + "~" + std::to_string(itt->second->CurrentRank);
             }
-            else if (!CanLearnTalent(player, tabId, sp.second->SpellId))
-                clientMsg = clientMsg + delimiter + std::to_string(sp.second->SpellId) + "~-1";
             else
                 clientMsg = clientMsg + delimiter + std::to_string(sp.second->SpellId) + "~0";
 

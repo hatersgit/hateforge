@@ -619,14 +619,6 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
     minDamage = ((weaponMinDamage + baseValue) * basePct + totalValue) * totalPct;
     maxDamage = ((weaponMaxDamage + baseValue) * basePct + totalValue) * totalPct;
 
-    // Aleist3r: new aura, old solution was retarded, hardcoding is probably never a good idea
-    AuraEffectList const& mAPbyStat = GetAuraEffectsByType(SPELL_AURA_MOD_AUTOATTACK_DAMAGE_PCT);
-    for (AuraEffectList::const_iterator i = mAPbyStat.begin(); i != mAPbyStat.end(); ++i)
-    {
-        minDamage += CalculatePct(minDamage, (*i)->GetAmount());
-        maxDamage += CalculatePct(maxDamage, (*i)->GetAmount());
-    }
-
     // pussywizard: crashfix (casting negative to uint => min > max => assertion in urand)
     if (minDamage < 0.0f || minDamage > 1000000000.0f)
         minDamage = 0.0f;

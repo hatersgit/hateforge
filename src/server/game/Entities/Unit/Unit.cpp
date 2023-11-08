@@ -3055,6 +3055,23 @@ uint32 Unit::CalculateDamage(WeaponAttackType attType, bool normalized, bool add
     minDamage = std::max(0.f, minDamage);
     maxDamage = std::max(0.f, maxDamage);
 
+    // Aleist3r: moved this from StatSystem.cpp, probably a better idea to do it in this function
+    AuraEffectList const& mAPbyStat = GetAuraEffectsByType(SPELL_AURA_MOD_AUTOATTACK_DAMAGE_PCT);
+    for (AuraEffectList::const_iterator i = mAPbyStat.begin(); i != mAPbyStat.end(); ++i)
+    {
+        minDamage += CalculatePct(minDamage, (*i)->GetAmount());
+        maxDamage += CalculatePct(maxDamage, (*i)->GetAmount());
+    }
+
+    // Aleist3r: spell aura school damage vs caster needs to be added here as well, otherwise it works only for spells
+    AuraEffectList const& mDamageDoneVersusCaster = GetAuraEffectsByType(SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_VS_CASTER);
+    for (AuraEffectList::const_iterator i = mDamageDoneVersusCaster.begin(); i != mDamageDoneVersusCaster.end(); ++i)
+        if ((*i)->GetCasterGUID() == GetVictim()->GetGUID() && ((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL))
+        {
+            AddPct(minDamage, (*i)->GetAmount());
+            AddPct(maxDamage, (*i)->GetAmount());
+        }
+
     if (minDamage > maxDamage)
     {
         std::swap(minDamage, maxDamage);
@@ -11815,6 +11832,12 @@ float Unit::SpellPctDamageModsDone(Unit* victim, SpellInfo const* spellProto, Da
                         AddPct(DoneTotalMod, aurEff->GetAmount());
             break;
     }
+
+    // damage bonus against caster
+    AuraEffectList const& mDamageDoneVersusCaster = GetAuraEffectsByType(SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_VS_CASTER);
+    for (AuraEffectList::const_iterator i = mDamageDoneVersusCaster.begin(); i != mDamageDoneVersusCaster.end(); ++i)
+        if ((*i)->GetCasterGUID() == victim->GetGUID() && ((*i)->GetMiscValue() & spellProto->GetSchoolMask()))
+            AddPct(DoneTotalMod, (*i)->GetAmount());
 
     return DoneTotalMod;
 }

@@ -397,6 +397,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleModRatingFromRating,                       //334 SPELL_AURA_MOD_RATING_OF_RATING_PCT
     &AuraEffect::HandleNoImmediateEffect,                         //335 SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER
     &AuraEffect::HandleNoImmediateEffect,                         //336 SPELL_AURA_MOD_AUTOATTACK_DAMAGE_PCT
+    &AuraEffect::HandleNoImmediateEffect,                         //337 SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_VS_CASTER implemented in Unit::SpellPctDamageModsDone
 };
 
 AuraEffect::AuraEffect(Aura* base, uint8 effIndex, int32* baseAmount, Unit* caster):

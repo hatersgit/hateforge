@@ -12206,7 +12206,7 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
     for (AuraEffectList::const_iterator i = mSpellPowerPct.begin(); i != mSpellPowerPct.end(); ++i)
         if ((*i)->GetMiscValue() & schoolMask)
             AdvertisedBenefitPct += int32(CalculatePct(DoneAdvertisedBenefit, (*i)->GetAmount()))
-            += int32(CalculatePct(ToPlayer()->GetBaseSpellPowerBonus(), (*i)->GetAmount()));
+            + int32(CalculatePct(ToPlayer()->GetBaseSpellPowerBonus(), (*i)->GetAmount()));
 
     DoneAdvertisedBenefit += AdvertisedBenefitPct;
     return DoneAdvertisedBenefit;

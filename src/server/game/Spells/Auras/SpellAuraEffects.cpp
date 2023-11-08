@@ -393,6 +393,10 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleAuraModSpellPowerOfStatPercent,            //330 SPELL_AURA_MOD_SPELL_POWER_OF_STAT_PERCENT
     &AuraEffect::HandleAuraModSpellPowerOfCombatRatingPercent,    //331 SPELL_AURA_MOD_SPELL_POWER_OF_RATING_PERCENT
     &AuraEffect::HandleAuraModTriggerSpellPowerPercent,           //332 SPELL_AURA_MOD_TRIGGER_SPELL_ON_POWER_PCT
+    &AuraEffect::HandleModRatingPercent,                          //333 SPELL_AURA_MOD_RATING_PCT
+    &AuraEffect::HandleModRatingFromRating,                       //334 SPELL_AURA_MOD_RATING_OF_RATING_PCT
+    &AuraEffect::HandleNoImmediateEffect,                         //335 SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER
+    &AuraEffect::HandleNoImmediateEffect,                         //336 SPELL_AURA_MOD_AUTOATTACK_DAMAGE_PCT
 };
 
 AuraEffect::AuraEffect(Aura* base, uint8 effIndex, int32* baseAmount, Unit* caster):
@@ -4803,6 +4807,59 @@ void AuraEffect::HandleModRatingFromStat(AuraApplication const* aurApp, uint8 mo
             target->ToPlayer()->ApplyRatingMod(CombatRating(rating), 0, apply);
 
     // Aleist3r: ugly hack here as well
+    target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
+}
+
+void AuraEffect::HandleModRatingPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
+        if (GetMiscValue() & (1 << rating))
+        {
+            float mult = target->ToPlayer()->GetRatingMultiplier(CombatRating(rating));
+            float amount = GetAmount() / mult;
+            target->ToPlayer()->ApplyRatingMod(CombatRating(rating), amount, apply);
+        }
+
+    // Aleist3r: ugly hack again
+    target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
+}
+
+void AuraEffect::HandleModRatingFromRating(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    float ratingBase = 0;
+    float ratingMod = 0;
+
+    for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
+        if (GetMiscValueB() & (1 << rating))
+        {
+            float mult = target->ToPlayer()->GetRatingMultiplier(CombatRating(rating));
+            ratingBase += target->ToPlayer()->GetRatingBonusValue(CombatRating(rating)) / mult;
+        }
+
+    for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
+        if (GetMiscValue() & (1 << rating))
+        {
+            ratingMod = CalculatePct(ratingBase, GetAmount());
+            target->ToPlayer()->ApplyRatingMod(CombatRating(rating), ratingMod, apply);
+        }
+
+    // Aleist3r: ugly hack, my old friend
     target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
 }
 

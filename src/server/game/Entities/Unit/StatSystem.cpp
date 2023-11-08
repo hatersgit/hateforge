@@ -616,19 +616,16 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
     //     weaponMaxDamage += GetAmmoDPS() * attackSpeedMod;
     // }
 
-    float damageMinAdd = 0.0f;
-    float damageMaxAdd = 0.0f;
+    minDamage = ((weaponMinDamage + baseValue) * basePct + totalValue) * totalPct;
+    maxDamage = ((weaponMaxDamage + baseValue) * basePct + totalValue) * totalPct;
 
-    if (HasAura(1040001))
+    // Aleist3r: new aura, old solution was retarded, hardcoding is probably never a good idea
+    AuraEffectList const& mAPbyStat = GetAuraEffectsByType(SPELL_AURA_MOD_AUTOATTACK_DAMAGE_PCT);
+    for (AuraEffectList::const_iterator i = mAPbyStat.begin(); i != mAPbyStat.end(); ++i)
     {
-        AuraEffect const* aurEff = GetAuraEffect(1040001, EFFECT_1);
-        float damagePercent = (aurEff->GetAmount()) * 0.01f;
-        damageMinAdd = ((weaponMinDamage + baseValue) * basePct + totalValue) * totalPct * damagePercent;
-        damageMaxAdd = ((weaponMaxDamage + baseValue) * basePct + totalValue) * totalPct * damagePercent;
+        minDamage += CalculatePct(minDamage, (*i)->GetAmount());
+        maxDamage += CalculatePct(maxDamage, (*i)->GetAmount());
     }
-
-    minDamage = ((weaponMinDamage + baseValue) * basePct + totalValue) * totalPct + damageMinAdd;
-    maxDamage = ((weaponMaxDamage + baseValue) * basePct + totalValue) * totalPct + damageMaxAdd;
 
     // pussywizard: crashfix (casting negative to uint => min > max => assertion in urand)
     if (minDamage < 0.0f || minDamage > 1000000000.0f)

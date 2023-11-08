@@ -1813,7 +1813,7 @@ public:
     void UpdateHeight(float newZ);
 
     void KnockbackFrom(float x, float y, float speedXY, float speedZ);
-    void JumpTo(float speedXY, float speedZ, bool forward = true);
+    void JumpTo(float speedXY, float speedZ, bool forward = true, int32 directional = 0);
     void JumpTo(WorldObject* obj, float speedZ);
 
     void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint32 TransitTime, SplineFlags sf = SPLINEFLAG_WALK_MODE); // pussywizard: need to just send packet, with no movement/spline

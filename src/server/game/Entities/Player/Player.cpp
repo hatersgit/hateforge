@@ -17016,8 +17016,9 @@ void Player::UpdateOperations()
 {
     for (auto spell : timedDelayedOperations) {
         auto timer = spell.second;
-        auto diff = timer.first - getMSTime();
-
+        uint64 time = getMSTime();
+        auto diff = timer.first - time;
+       
         if (diff < 0)
         {
             timer.second();

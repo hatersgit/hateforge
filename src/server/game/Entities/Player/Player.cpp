@@ -17014,26 +17014,28 @@ void Player::AddNewSpellCharges(flag96 classMask, uint8 maxCharges, uint8 curren
 
 void Player::UpdateOperations()
 {
-    for (auto spell : timedDelayedOperations) {
-        auto timer = spell.second;
-        uint64 time = getMSTime();
-        auto diff = timer.first - time;
-       
-        if (diff < 0)
+    if (!timedDelayedOperations.empty()) {
+        std::vector<uint32> toDelete = {};
+        for (auto spell : timedDelayedOperations) {
+            auto timer = spell.second;
+            int32 diff = timer.first - getMSTime();
+
+            if (diff < 0)
+            {
+                timer.second();
+                timer.second = nullptr;
+            }
+
+            if (timer.second == nullptr) {
+                timedDelayedOperations.erase(spell.first);
+            }
+        }
+
+        if (timedDelayedOperations.empty() && !emptyWarned)
         {
-            timer.second();
-            timer.second = nullptr;
+            emptyWarned = true;
+            LastOperationCalled();
         }
-
-        if (timer.second == nullptr) {
-            timedDelayedOperations.erase(spell.first);
-        }
-    }
-
-    if (timedDelayedOperations.empty() && !emptyWarned)
-    {
-        emptyWarned = true;
-        LastOperationCalled();
     }
 }
 

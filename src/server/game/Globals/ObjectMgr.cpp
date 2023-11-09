@@ -10650,7 +10650,7 @@ void ObjectMgr::LoadSpellChargeMap()
 
     if (!result)
     {
-        LOG_ERROR("sql.sql", ">> Loaded 0 charges. DB table `forge_spell_charges` is empty.");
+        LOG_ERROR("sql.sql", ">> Loaded 0 charges. DB table `forge_spell_charge` is empty.");
         LOG_INFO("server.loading", " ");
         return;
     }
@@ -10675,7 +10675,7 @@ void ObjectMgr::LoadSpellChargeMap()
         }
     } while (result->NextRow());
 
-    LOG_INFO("server.loading", ">> Loaded {} charges from forge_spell_charges in {} ms", _forgeMythicMaps.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded {} charges from forge_spell_charge in {} ms", _forgeMythicMaps.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadWorldSafeLocs()

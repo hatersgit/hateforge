@@ -2695,10 +2695,10 @@ public:
     BasicEvent* mythicStartCheck = nullptr;
 
     // hater: timed events on player
-    void AddTimedDelayedOperation(uint32 spellId, uint64 timeout, std::function<void()>&& function)
+    void AddTimedDelayedOperation(uint32 spellId, int32 timeout, std::function<void()>&& function)
     {
         emptyWarned = false;
-        timedDelayedOperations[spellId] = std::pair<uint64, std::function<void()>>(timeout, function);
+        timedDelayedOperations[spellId] = std::pair<int32, std::function<void()>>(timeout, function);
     }
 
     /// Called after last delayed operation was deleted
@@ -3072,7 +3072,7 @@ private:
     Seconds m_creationTime;
 
     // hater: timed events on player
-    std::unordered_map<uint32/*spellId*/, std::pair<uint64, std::function<void()>>>    timedDelayedOperations;   ///< Delayed operations
+    std::unordered_map<uint32/*spellId*/, std::pair<int32, std::function<void()>>>    timedDelayedOperations;   ///< Delayed operations
     bool                                                    emptyWarned;              ///< Warning when there are no more delayed operations
 };
 

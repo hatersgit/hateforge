@@ -1777,7 +1777,7 @@ void AuraEffect::HandleSpiritOfRedemption(AuraApplication const* aurApp, uint8 m
     // die at aura end
     else if (target->IsAlive())
         // call functions which may have additional effects after chainging state of unit
-        target->setDeathState(JUST_DIED);
+        target->setDeathState(DeathState::JustDied);
 
     // xinef: damage immunity spell, not needed because of 93 aura (adds non_attackable state)
     // xinef: probably blizzard added it just in case in wotlk (id > 46000)
@@ -5223,11 +5223,11 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                         if (owner_aura)
                         {
                             owner_aura->SetCharges(0);
-                            owner_aura->SetStackAmount(owner_aura->GetSpellInfo()->StackAmount);
+                            owner_aura->SetStackAmount(owner_aura->GetMaxStackAmount());
                             if (pet_aura)
                             {
                                 pet_aura->SetCharges(0);
-                                pet_aura->SetStackAmount(owner_aura->GetSpellInfo()->StackAmount);
+                                pet_aura->SetStackAmount(owner_aura->GetMaxStackAmount());
                             }
                         }
                         break;

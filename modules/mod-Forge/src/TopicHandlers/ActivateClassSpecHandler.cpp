@@ -18,87 +18,82 @@ public:
 
     void HandleMessage(ForgeAddonMessage& iam) override
     {
-        uint32 id = static_cast<uint32>(std::stoul(iam.message));
-        ForgeCharacterSpec* spec;
 
-        if (fc->TryGetCharacterActiveSpec(iam.player, spec))
-        {
-            if (spec->CharacterSpecTabId == id)
-            {
-                iam.player->SendForgeUIMsg(ForgeTopic::ACTIVATE_SPEC_ERROR, "Class specialization already active");
+        if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", false)) {
+            if (!fc->isNumber(iam.message))
                 return;
-            }
 
-            auto reqLevel = fc->GetConfig("ReqiredSpecializationLevel", 10);
+            uint32 tabId = static_cast<uint32>(std::stoul(iam.message));
+            ForgeCharacterSpec* spec;
 
-            if (iam.player->getLevel() < reqLevel)
+            if (fc->TryGetCharacterActiveSpec(iam.player, spec))
             {
-                iam.player->SendForgeUIMsg(ForgeTopic::ACTIVATE_SPEC_ERROR, "You must be level " + std::to_string(reqLevel) + " to pick a class specialization");
-                return;
-            }
-
-            for (auto& tab : spec->Talents)
-            {
-                CharacterPointType cpt;
-                ForgeTalentTab* ftt;
-
-                if (fc->TryGetTabPointType(tab.first, cpt) && fc->TryGetTalentTab(iam.player, tab.first, ftt))
-                {
-                    for (auto t : tab.second)
+                    if (spec->CharacterSpecTabId == tabId)
                     {
-                        switch (cpt)
-                        {
-                        case CharacterPointType::TALENT_TREE:
-
-                            spec->PointsSpent[ftt->Id] = 0;
-
-                            iam.player->removeSpell(ftt->Talents[t.second->SpellId]->Ranks[t.second->CurrentRank], SPEC_MASK_ALL, false); // Remove all spells.
-                            t.second->CurrentRank = 0; // only remove talents here.
-
-                            break;
-                        case CharacterPointType::LEVEL_10_TAB:
-                            if (spec->CharacterSpecTabId == tab.first)
-                            {
-                                iam.player->removeSpell(t.second->SpellId, SPEC_MASK_ALL, false);
-                            }
-
-                            for (auto& s : ftt->Talents)
-                            {
-                                if (s.second->ColumnIndex == id)
-                                    iam.player->learnSpell(t.second->SpellId, false, false);
-                            }
-                            break;
-                        default:
-                            break;
-                        }
+                        iam.player->SendForgeUIMsg(ForgeTopic::ACTIVATE_SPEC_ERROR, "Class specialization already active");
+                        return;
                     }
-                }
+
+                    auto reqLevel = fc->GetConfig("ReqiredSpecializationLevel", 10);
+                    if (iam.player->getLevel() < reqLevel)
+                    {
+                        iam.player->SendForgeUIMsg(ForgeTopic::ACTIVATE_SPEC_ERROR, "You must be level " + std::to_string(reqLevel) + " to pick a class specialization");
+                        return;
+                    }
+
+                    ForgeTalentTab* tab;
+                    if (fc->TryGetTalentTab(iam.player, tabId, tab)) {
+                        fc->ForgetTalents(iam.player, spec, TALENT_TREE);
+                        spec->CharacterSpecTabId = tabId;
+                        LearnInitialSpecSpellsAndTalents(iam.player, tabId);
+
+                        fc->UpdateCharacterSpec(iam.player, spec);
+                        cm->SendSpecInfo(iam.player);
+                        cm->SendTalents(iam.player);
+
+                        iam.player->SendPlaySpellVisual(179); // 53 SpellCastDirected
+                        iam.player->SendPlaySpellImpact(iam.player->GetGUID(), 362); // 113 EmoteSalute
+                    }
+                    else
+                        iam.player->SendForgeUIMsg(ForgeTopic::ACTIVATE_CLASS_SPEC_ERROR, "Invalid tab id for class.");
             }
-
-            spec->CharacterSpecTabId = id;
-
-            cm->ApplyKnownForgeSpells(iam.player);
-
-            ForgeCharacterPoint* fcp = fc->GetSpecPoints(iam.player, CharacterPointType::TALENT_TREE, spec->Id);
-            ForgeCharacterPoint* baseFcp = fc->GetCommonCharacterPoint(iam.player, CharacterPointType::TALENT_TREE);
-
-            fcp->Sum = baseFcp->Sum;
-
-            fc->UpdateCharPoints(iam.player, fcp);
-            fc->UpdateCharacterSpec(iam.player, spec);
-
-            cm->SendSpecInfo(iam.player);
-            cm->SendTalents(iam.player);
-
-            iam.player->SendPlaySpellVisual(179); // 53 SpellCastDirected
-            iam.player->SendPlaySpellImpact(iam.player->GetGUID(), 362); // 113 EmoteSalute
         }
         else
             iam.player->SendForgeUIMsg(ForgeTopic::ACTIVATE_CLASS_SPEC_ERROR, "Unknown Spec");
     }
 
 private:
-
     ForgeCache* fc;
     ForgeCommonMessage* cm;
+
+    void LearnInitialSpecSpellsAndTalents(Player* player, uint32 tabId) {
+        ForgeCharacterSpec* charSpec;
+        if (fc->TryGetCharacterActiveSpec(player, charSpec)) {
+            for (int i = 10; i < player->getLevel() + 1; i++) {
+                auto level = fc->_levelClassSpellMap.find(i);
+                if (level != fc->_levelClassSpellMap.end()) {
+                    auto classSpells = level->second.find(player->getClass());
+                    if (classSpells != level->second.end()) {
+                        auto spec = classSpells->second.find(tabId);
+                        if (spec != classSpells->second.end()) {
+                            for (auto spell : spec->second) {
+                                if (!player->HasSpell(spell)) {
+                                    if (auto info = sSpellMgr->GetSpellInfo(spell)) {
+                                        if (info->HasEffect(SPELL_EFFECT_LEARN_SPELL)) {
+                                            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                                                player->learnSpell(info->Effects[i].TriggerSpell);
+                                        }
+                                        else
+                                            player->learnSpell(spell, SPEC_MASK_ALL, false);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        fc->InitSpecForTabId(player, tabId);
+    }
 };

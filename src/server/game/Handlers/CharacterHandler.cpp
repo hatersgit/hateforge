@@ -405,7 +405,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
             acctCharCount = uint64(fields[0].Get<double>());
         }
 
-        if (acctCharCount >= static_cast<uint64>(sWorld->getIntConfig(CONFIG_CHARACTERS_PER_ACCOUNT)))
+        if (acctCharCount >= static_cast<uint64>(50))
         {
             SendCharCreate(CHAR_CREATE_ACCOUNT_LIMIT);
             return;

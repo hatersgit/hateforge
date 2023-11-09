@@ -28,6 +28,7 @@ public:
     void SendTalentTreeLayout(Player*, uint32);
     void SendSpecInfo(Player*);
     void SendActiveSpecInfo(Player* player);
+    void SendSpecSelectInfo(Player* player);
     std::string BuildTree(Player*, CharacterPointType pointType, std::list<ForgeTalentTab*> tabs);
     void ApplyKnownForgeSpells(Player*);
     bool CanLearnTalent(Player*, uint32, uint32);

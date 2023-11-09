@@ -1012,6 +1012,18 @@ bool Aura::ModCharges(int32 num, AuraRemoveMode removeMode)
     return false;
 }
 
+uint32 Aura::GetMaxStackAmount()
+{
+    uint32 maxStackAmount = GetSpellInfo()->StackAmount;
+
+    if (GetCaster() && GetCaster()->IsPlayer())
+    {
+        Player* playerCaster = GetCaster()->ToPlayer();
+        playerCaster->ApplySpellMod(GetSpellInfo()->Id, SPELLMOD_STACK_AMOUNT, maxStackAmount);
+    }
+
+    return maxStackAmount;
+}
 void Aura::SetStackAmount(uint8 stackAmount)
 {
     m_stackAmount = stackAmount;
@@ -1038,18 +1050,21 @@ void Aura::SetStackAmount(uint8 stackAmount)
     SetNeedClientUpdateForTargets();
 }
 
+
+
 bool Aura::ModStackAmount(int32 num, AuraRemoveMode removeMode, bool periodicReset /*= false*/)
 {
     int32 stackAmount = m_stackAmount + num;
+    uint32 maxStackAmount = GetMaxStackAmount();
 
     // limit the stack amount (only on stack increase, stack amount may be changed manually)
-    if ((num > 0) && (stackAmount > int32(m_spellInfo->StackAmount)))
+    if ((num > 0) && (stackAmount > int32(maxStackAmount)))
     {
         // not stackable aura - set stack amount to 1
-        if (!m_spellInfo->StackAmount)
+        if (!maxStackAmount)
             stackAmount = 1;
         else
-            stackAmount = m_spellInfo->StackAmount;
+            stackAmount = maxStackAmount;
     }
     // we're out of stacks, remove
     else if (stackAmount <= 0)
@@ -1058,7 +1073,7 @@ bool Aura::ModStackAmount(int32 num, AuraRemoveMode removeMode, bool periodicRes
         return true;
     }
 
-    bool refresh = stackAmount >= GetStackAmount() && (m_spellInfo->StackAmount || !m_spellInfo->HasAttribute(SPELL_ATTR1_AURA_UNIQUE));
+    bool refresh = stackAmount >= GetStackAmount() && (maxStackAmount || !m_spellInfo->HasAttribute(SPELL_ATTR1_AURA_UNIQUE));
 
     // Update stack amount
     if (refresh)
@@ -1075,7 +1090,6 @@ bool Aura::ModStackAmount(int32 num, AuraRemoveMode removeMode, bool periodicRes
                     if (SpellModifier* mod = aurEff->GetSpellModifier())
                         mod->charges = GetCharges();
     }
-
     SetStackAmount(stackAmount);
 
     SetNeedClientUpdateForTargets();

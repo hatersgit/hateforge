@@ -189,6 +189,7 @@ bool ForgeCommonMessage::CanLearnTalent(Player* player, uint32 tabId, uint32 spe
         fc->TryGetTalentTab(player, tabId, tab) &&
         fc->TryGetCharacterActiveSpec(player, spec))
     {
+
         ForgeCharacterPoint* curPoints = fc->GetSpecPoints(player, tabType, spec->Id);
 
         if (curPoints->Sum == 0)
@@ -228,7 +229,7 @@ bool ForgeCommonMessage::CanLearnTalent(Player* player, uint32 tabId, uint32 spe
             skillTabs = sklTItt->second;
 
         int reqsNotMet = 0;
-
+        bool anyPrereq = false;
         for (auto& preReq : ft->Prereqs)
         {
             if (preReq->RequiredRank == 0)
@@ -244,13 +245,13 @@ bool ForgeCommonMessage::CanLearnTalent(Player* player, uint32 tabId, uint32 spe
 
             if (tabId == preReq->TalentTabId)
             {
-                auto slillItt = skillTabs.find(preReq->Talent);
+                auto skillItt = skillTabs.find(preReq->Talent);
 
-                if (slillItt == skillTabs.end() || preReq->RequiredRank > slillItt->second->CurrentRank)
+                if ((skillItt == skillTabs.end() || preReq->RequiredRank > skillItt->second->CurrentRank) && !anyPrereq)
                 {
-                    reqsNotMet++;
                     continue;
                 }
+                anyPrereq = true;
             }
             else
             {
@@ -299,7 +300,10 @@ bool ForgeCommonMessage::CanLearnTalent(Player* player, uint32 tabId, uint32 spe
             }
         }
 
-        if (reqsNotMet != 0)
+        if (!anyPrereq)
+            reqsNotMet++;
+
+        if (reqsNotMet)
         {
             if (ft->PreReqType == PereqReqirementType::ALL)
             {
@@ -342,7 +346,6 @@ void ForgeCommonMessage::SendTalents(Player* player)
     ForgeCharacterSpec* spec;
     if (fc->TryGetCharacterActiveSpec(player, spec))
     {
-       
         uint32 i = 0;
 
         for (auto tpt : fc->TALENT_POINT_TYPES)

@@ -22,7 +22,8 @@ enum CharacterPointType
     RACIAL_TREE = 4,
     SKILL_PAGE = 5,
     PRESTIGE_COUNT = 6,
-    LEVEL_10_TAB = 7
+    LEVEL_10_TAB = 7,
+    PET_TALENT = 8,
 };
 
 enum NodeType
@@ -141,7 +142,7 @@ struct ForgeTalentTab
     std::string Background;
     CharacterPointType TalentType;
     uint32 TabIndex;
-    std::unordered_map<uint32, ForgeTalent*> Talents;
+    std::unordered_map<uint32 /*spellId*/, ForgeTalent*> Talents;
 };
 
 // XMOG
@@ -886,6 +887,61 @@ public:
         return 0;
     }
 
+    std::unordered_map<uint8 /*level*/, std::unordered_map<uint8/*class*/, std::unordered_map<uint32 /*tabId*/, std::vector<uint32 /*spell*/>>>> _levelClassSpellMap;
+    std::unordered_map<uint32 /*class*/, std::unordered_map<uint32 /*tab*/, std::vector<uint32/*spellId*/>>> _specStarterTalents;
+
+    /* hater: cached tree meta data */
+    struct NodeMetaData {
+        uint32 spellId;
+        uint8 row;
+        uint8 col;
+        uint8 pointReq;
+        std::vector<NodeMetaData*> unlocks;
+    };
+    struct TreeMetaData {
+        uint32 TabId;
+        uint8 MaxXDim = 0;
+        uint8 MaxYDim = 0;
+        std::unordered_map<uint8/*row*/, std::unordered_map<uint8 /*col*/, NodeMetaData*>> nodes;
+        std::unordered_map<uint32/*spellId*/, NodeMetaData*> nodeLocation;
+    };
+    std::unordered_map<uint32 /*tabId*/, TreeMetaData*> _cacheTreeMetaData;
+
+    void ForgetTalents(Player* player, ForgeCharacterSpec* spec, CharacterPointType pointType) {
+        
+        if (ACCOUNT_WIDE_TYPE != pointType && pointType != CharacterPointType::TALENT_TREE
+            && pointType != RACIAL_TREE && pointType != PET_TALENT)
+            return;
+
+        std::list<ForgeTalentTab*> tabs;
+        if (TryGetForgeTalentTabs(player, pointType, tabs))
+            for (auto* tab : tabs)
+                for (auto spell : tab->Talents)
+                    for (auto rank : spell.second->Ranks)
+                        if (auto spellInfo = sSpellMgr->GetSpellInfo(rank.second)) {
+
+                            if (spellInfo->HasEffect(SPELL_EFFECT_LEARN_SPELL))
+                                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                                    player->postCheckRemoveSpell(spellInfo->Effects[i].TriggerSpell);
+
+                            player->postCheckRemoveSpell(rank.second);
+                            player->RemoveAura(rank.second);
+                        }
+        ForgeCharacterPoint* fcp = GetSpecPoints(player, pointType, spec->Id);
+        ForgeCharacterPoint* baseFcp = GetCommonCharacterPoint(player, pointType);
+        fcp->Sum = baseFcp->Sum;
+
+        UpdateCharPoints(player, fcp);
+    }
+
+    void InitSpecForTabId(Player* player, uint32 tabId) {
+        ForgeCharacterSpec* spec;
+        if (TryGetCharacterActiveSpec(player, spec)) {
+            spec->Talents.clear();
+            auto starters = GetStarterTalents(player->getClass(), tabId);
+        }
+    }
+
 private:
     std::unordered_map<ObjectGuid, uint32> CharacterActiveSpecs;
     std::unordered_map<std::string, uint32> CONFIG;
@@ -947,37 +1003,46 @@ private:
             }
         }
 
-        GetCharacters();
-        GetConfig();
-        AddTalentTrees();
-        AddTalentsToTrees();
-        AddTalentPrereqs();
-        AddTalentChoiceNodes();
-        AddTalentRanks();
-        AddTalentUnlearn();
-        AddCharacterSpecs();
-        AddTalentSpent();
-        AddCharacterTalents();
-        AddCharacterChoiceNodes();
+        try {
+            GetCharacters();
+            GetConfig();
+            AddTalentTrees();
+            AddTalentsToTrees();
+            AddLevelClassSpellMap();
+            AddSpecStarterTalents();
+            AddTalentPrereqs();
+            AddTalentChoiceNodes();
+            AddTalentRanks();
+            AddTalentUnlearn();
+            AddCharacterSpecs();
+            AddTalentSpent();
+            AddCharacterTalents();
+            AddCharacterChoiceNodes();
 
-        LOG_INFO("server.load", "Loading characters points...");
-        AddCharacterPointsFromDB();
-        AddCharacterClassSpecs();
-        AddCharacterXmogSets();
+            LOG_INFO("server.load", "Loading characters points...");
+            AddCharacterPointsFromDB();
+            AddCharacterClassSpecs();
+            AddCharacterXmogSets();
 
-        LOG_INFO("server.load", "Loading m+ difficulty multipliers...");
-        sObjectMgr->LoadInstanceDifficultyMultiplier();
-        LOG_INFO("server.load", "Loading m+ difficulty level scales...");
-        sObjectMgr->LoadMythicLevelScale();
-        LOG_INFO("server.load", "Loading m+ minion values...");
-        sObjectMgr->LoadMythicMinionValue();
-        LOG_INFO("server.load", "Loading m+ keys...");
-        sObjectMgr->LoadMythicDungeonKeyMap();
-        LOG_INFO("server.load", "Loading m+ affixes...");
-        sObjectMgr->LoadMythicAffixes();
+            LOG_INFO("server.load", "Loading m+ difficulty multipliers...");
+            sObjectMgr->LoadInstanceDifficultyMultiplier();
+            LOG_INFO("server.load", "Loading m+ difficulty level scales...");
+            sObjectMgr->LoadMythicLevelScale();
+            LOG_INFO("server.load", "Loading m+ minion values...");
+            sObjectMgr->LoadMythicMinionValue();
+            LOG_INFO("server.load", "Loading m+ keys...");
+            sObjectMgr->LoadMythicDungeonKeyMap();
+            LOG_INFO("server.load", "Loading m+ affixes...");
+            sObjectMgr->LoadMythicAffixes();
 
-        LOG_INFO("server.load", "Loading npc sounds...");
-        sObjectMgr->LoadNpcSounds();
+            LOG_INFO("server.load", "Loading npc sounds...");
+            sObjectMgr->LoadNpcSounds();
+        }
+        catch (std::exception & ex) {
+            std::string error = ex.what();
+            LOG_ERROR("server.load", "ERROR IN FORGE CACHE BUILD: " + error);
+            throw ex;
+        }
     }
 
     void GetCharacters()
@@ -1224,7 +1289,9 @@ private:
 
     void AddTalentsToTrees()
     {
-        QueryResult talents = WorldDatabase.Query("SELECT * FROM forge_talents");
+        QueryResult talents = WorldDatabase.Query("SELECT * FROM forge_talents order by `talentTabId` asc, `rowIndex` asc, `columnIndex` asc");
+
+        _cacheTreeMetaData.clear();
 
         if (!talents)
             return;
@@ -1249,12 +1316,42 @@ private:
 
             if (tabItt == TalentTabs.end())
             {
-                LOG_ERROR("FORGE.ForgeCache", "Error loading talents, invaild tab id: " + std::to_string(newTalent->TalentTabId));
+                LOG_ERROR("FORGE.ForgeCache", "Error loading talents, invalid tab id: " + std::to_string(newTalent->TalentTabId));
             }
             else
                 tabItt->second->Talents[newTalent->SpellId] = newTalent;
 
+            // get treemeta from struct
+            auto found = _cacheTreeMetaData.find(newTalent->TalentTabId);
+            TreeMetaData* data;
+
+            if (found == _cacheTreeMetaData.end()) {
+                TreeMetaData* tree = new TreeMetaData();
+                tree->MaxXDim = newTalent->ColumnIndex;
+                tree->MaxYDim = newTalent->RowIndex;
+                tree->TabId = newTalent->TalentTabId;
+                _cacheTreeMetaData[tree->TabId] = tree;
+                data = _cacheTreeMetaData[tree->TabId];
+            }
+            else {
+                if (newTalent->RowIndex > found->second->MaxYDim)
+                    found->second->MaxYDim = newTalent->RowIndex;
+                if (newTalent->ColumnIndex > found->second->MaxXDim)
+                    found->second->MaxXDim = newTalent->ColumnIndex;
+
+                data = found->second;
+            }
+            NodeMetaData* node = new NodeMetaData();
+            node->spellId = newTalent->SpellId;
+            node->pointReq = newTalent->TabPointReq;
+            node->col = newTalent->ColumnIndex;
+            node->row = newTalent->RowIndex;
+
+            data->nodes[node->row][node->col] = node;
+            data->nodeLocation[node->spellId] = node;
         } while (talents->NextRow());
+
+        // load meta data
     }
 
     void AddTalentPrereqs()
@@ -1272,17 +1369,27 @@ private:
             newTalent->Talent = talentFields[3].Get<uint32>();
             newTalent->TalentTabId = talentFields[4].Get<uint32>();
             newTalent->RequiredRank = talentFields[5].Get<uint32>();
-            
-            ForgeTalent* lt = TalentTabs[talentFields[2].Get<uint32>()]->Talents[talentFields[1].Get<uint32>()];
+
+            auto reqdSpellId = talentFields[1].Get<uint32>();
+            auto reqSpelltab = talentFields[2].Get<uint32>();
+            ForgeTalent* lt = TalentTabs[reqSpelltab]->Talents[reqdSpellId];
 
             if (lt != nullptr)
-            {
                 lt->Prereqs.push_back(newTalent);
+            else
+                LOG_ERROR("FORGE.ForgeCache", "Error loading AddTalentPrereqs, invaild req id: " + std::to_string(newTalent->reqId));
+
+            auto found = _cacheTreeMetaData.find(reqSpelltab);
+            if (found != _cacheTreeMetaData.end()) {
+                TreeMetaData* tree = found->second;
+                NodeMetaData* node = tree->nodeLocation[reqdSpellId];
+                node->unlocks.push_back(tree->nodeLocation[newTalent->Talent]);
+
+                tree->nodes[node->row][node->col] = node;
+                tree->nodeLocation[node->spellId] = node;
             }
             else
-            {
-                LOG_ERROR("FORGE.ForgeCache", "Error loading AddTalentPrereqs, invaild req id: " + std::to_string(newTalent->reqId));
-            }
+                LOG_ERROR("FORGE.ForgeCache", "Prereq cannot be mapped to existing talent meta data.");
 
         } while (preReqTalents->NextRow());
     }
@@ -1608,6 +1715,50 @@ private:
         } while (scale->NextRow());
     }
 
+    void AddLevelClassSpellMap()
+    {
+        _levelClassSpellMap.clear();
+
+        QueryResult mapQuery = WorldDatabase.Query("select `level`,`class`, `tab`, `spell` from `acore_world`.`forge_character_spec_spells` order by `level` asc, `class` asc, `tab` asc, `spell` asc");
+
+        if (!mapQuery)
+            return;
+
+        do
+        {
+            Field* mapFields = mapQuery->Fetch();
+            uint32 level = mapFields[0].Get<uint8>();
+            uint32 classId = mapFields[1].Get<uint32>();
+            uint32 spec = mapFields[2].Get<uint32>();
+            uint32 spell = mapFields[3].Get<uint32>();
+
+            _levelClassSpellMap[level][classId][spec].push_back(spell);
+        } while (mapQuery->NextRow());
+    }
+
+    void AddSpecStarterTalents()
+    {
+        _specStarterTalents.clear();
+
+        QueryResult mapQuery = WorldDatabase.Query("select `class`, `tab`, `spell` from `acore_world`.`forge_character_spec_strarter_talents`");
+
+        if (!mapQuery)
+            return;
+
+        do
+        {
+            Field* mapFields = mapQuery->Fetch();
+            uint32 classId = mapFields[0].Get<uint32>();
+            uint32 spec = mapFields[1].Get<uint32>();
+            uint32 spell = mapFields[2].Get<uint32>();
+
+            _specStarterTalents[classId][spec].push_back(spell);
+        } while (mapQuery->NextRow());
+    }
+
+    std::vector<uint32> GetStarterTalents(uint32 pClass, uint32 tabId) {
+        return _specStarterTalents[pClass][tabId];
+    }
 };
 
 #define sForgeCache ForgeCache::instance()

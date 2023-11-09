@@ -147,6 +147,7 @@ public:
     bool DropCharge(AuraRemoveMode removeMode = AURA_REMOVE_BY_DEFAULT) { return ModCharges(-1, removeMode); }
 
     uint8 GetStackAmount() const { return m_stackAmount; }
+    uint32 GetMaxStackAmount();
     void SetStackAmount(uint8 num);
     bool ModStackAmount(int32 num, AuraRemoveMode removeMode = AURA_REMOVE_BY_DEFAULT, bool periodicReset = false);
 

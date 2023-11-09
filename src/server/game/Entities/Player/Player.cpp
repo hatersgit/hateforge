@@ -17014,31 +17014,20 @@ void Player::AddNewSpellCharges(flag96 classMask, uint8 maxCharges, uint8 curren
 
 void Player::UpdateOperations(uint32 const diff)
 {
-    for (auto itr = timedDelayedOperations.begin(); itr != timedDelayedOperations.end(); itr++)
-    {
-        itr->first -= diff;
+    for (auto spell : timedDelayedOperations) {
+        auto timer = spell.second;
 
-        if (itr->first < 0)
+        timer.first -= diff;
+        if (timer.first < 0)
         {
-            itr->second();
-            itr->second = nullptr;
+            timer.second();
+            timer.second = nullptr;
         }
-    }
 
-    uint32 timedDelayedOperationCountToRemove = std::count_if(std::begin(timedDelayedOperations), std::end(timedDelayedOperations), [](const std::pair<int32, std::function<void()>>& pair) -> bool
-        {
-            return pair.second == nullptr;
-        });
+        if (timer.second == nullptr) {
+            timedDelayedOperations.erase(spell.first);
+        }
 
-    for (uint32 i = 0; i < timedDelayedOperationCountToRemove; i++)
-    {
-        auto itr = std::find_if(std::begin(timedDelayedOperations), std::end(timedDelayedOperations), [](const std::pair<int32, std::function<void()>>& p_Pair) -> bool
-            {
-                return p_Pair.second == nullptr;
-            });
-
-        if (itr != std::end(timedDelayedOperations))
-            timedDelayedOperations.erase(itr);
     }
 
     if (timedDelayedOperations.empty() && !emptyWarned)
@@ -17046,6 +17035,12 @@ void Player::UpdateOperations(uint32 const diff)
         emptyWarned = true;
         LastOperationCalled();
     }
+}
+
+void Player::RemoveOperationIfExists(uint32 spellId) {
+    auto existing = timedDelayedOperations.find(spellId);
+    if (existing != timedDelayedOperations.end())
+        timedDelayedOperations.erase(spellId);
 }
 
 std::string Player::GetDebugInfo() const

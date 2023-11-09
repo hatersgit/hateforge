@@ -5551,6 +5551,16 @@ void Spell::TakeRunePower(bool didHit)
             player->ModifyPower(POWER_RUNIC_POWER, int32(rp));
 }
 
+void TriggerChargeRegen(SpellChargeEntry* charge, Player* player) {
+    player->RemoveOperationIfExists(charge->SpellId); // casting the spell before a charge is replenished resets cd
+    player->AddTimedDelayedOperation(charge->SpellId, charge->rechargeTime, [player, charge]() {
+        player->AddItem(charge->chargeItem, 1);
+        auto chargeCount = player->GetItemCount(charge->chargeItem);
+        if (chargeCount < charge->maxCharges)
+            TriggerChargeRegen(charge, player);
+        });
+}
+
 void Spell::TakeReagents()
 {
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -5599,10 +5609,9 @@ void Spell::TakeReagents()
         p_caster->DestroyItemCount(itemid, itemcount, true);
 
         // hater: charge system
-        //if (auto charged = sObjectMgr->TryGetChargeEntry(m_spellInfo)) {
-        //    p_caster->AddTimedDelayedOperation();
-        //    
-        //}    
+        if (auto charged = sObjectMgr->TryGetChargeEntry(m_spellInfo->SpellFamilyFlags)) {
+            TriggerChargeRegen(charged, p_caster);
+        }
     }
 }
 

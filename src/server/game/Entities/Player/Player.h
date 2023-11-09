@@ -2695,16 +2695,17 @@ public:
     BasicEvent* mythicStartCheck = nullptr;
 
     // hater: timed events on player
-    void AddTimedDelayedOperation(uint32 timeout, std::function<void()>&& function)
+    void AddTimedDelayedOperation(uint32 spellId, uint32 timeout, std::function<void()>&& function)
     {
         emptyWarned = false;
-        timedDelayedOperations.push_back(std::pair<uint32, std::function<void()>>(timeout, function));
+        timedDelayedOperations[spellId] = std::pair<uint32, std::function<void()>>(timeout, function);
     }
 
     /// Called after last delayed operation was deleted
     /// Do whatever you want
     virtual void LastOperationCalled() { }
     void UpdateOperations(uint32 const diff);
+    void RemoveOperationIfExists(uint32 spell);
 
  protected:
     // Gamemaster whisper whitelist
@@ -3071,7 +3072,7 @@ private:
     Seconds m_creationTime;
 
     // hater: timed events on player
-    std::vector<std::pair<int32, std::function<void()>>>    timedDelayedOperations;   ///< Delayed operations
+    std::unordered_map<uint32/*spellId*/, std::pair<int32, std::function<void()>>>    timedDelayedOperations;   ///< Delayed operations
     bool                                                    emptyWarned;              ///< Warning when there are no more delayed operations
 };
 

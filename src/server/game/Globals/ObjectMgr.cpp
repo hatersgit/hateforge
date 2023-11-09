@@ -10646,7 +10646,7 @@ void ObjectMgr::LoadSpellChargeMap()
 
     _chargeSpellMap.clear();
 
-    QueryResult result = WorldDatabase.Query("SELECT * FROM forge_spell_charges");
+    QueryResult result = WorldDatabase.Query("SELECT * FROM forge_spell_charge");
 
     if (!result)
     {
@@ -10664,11 +10664,11 @@ void ObjectMgr::LoadSpellChargeMap()
         uint32 item = fields[2].Get<uint32>();
         uint8 max = fields[3].Get<uint8>();
 
-        SpellChargeEntry charge;
-        charge.chargeItem = item;
-        charge.SpellId = spell;
-        charge.rechargeTime = timer;
-        charge.maxCharges = max;
+        SpellChargeEntry* charge = new SpellChargeEntry();
+        charge->chargeItem = item;
+        charge->SpellId = spell;
+        charge->rechargeTime = timer;
+        charge->maxCharges = max;
 
         if (auto info = sSpellMgr->GetSpellInfo(spell)) {
             _chargeSpellMap[info->SpellFamilyFlags] = charge;

@@ -1525,6 +1525,15 @@ public:
     // hater: charges
     void LoadSpellChargeMap();
 
+    [[nodiscard]] SpellChargeEntry* TryGetChargeEntry(flag96 flags) const
+    {
+        auto itr = _chargeSpellMap.find(flags);
+        if (itr != _chargeSpellMap.end())
+            return itr->second;
+
+        return nullptr;
+    }
+
     [[nodiscard]] InstanceDifficultyMultiplier const* GetInstanceDifficultyMultiplier(uint32 mapId, uint32 difficultyId) const
     {
         auto itr = _instanceDifficultyMultipliers.find(mapId);
@@ -1770,7 +1779,7 @@ private:
     std::unordered_map<uint32, NPCSoundsEntry*> _npcSounds;
 
     // hater: charges
-    typedef std::map<flag96, SpellChargeEntry> SpellChargeMap;
+    typedef std::map<flag96, SpellChargeEntry*> SpellChargeMap;
     SpellChargeMap _chargeSpellMap;
 
     enum CreatureLinkedRespawnType

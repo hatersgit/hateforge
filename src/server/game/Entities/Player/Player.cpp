@@ -17012,13 +17012,13 @@ void Player::AddNewSpellCharges(flag96 classMask, uint8 maxCharges, uint8 curren
     aura->SetCharges(charge.maxcharges);
 }
 
-void Player::UpdateOperations(uint32 const diff)
+void Player::UpdateOperations()
 {
     for (auto spell : timedDelayedOperations) {
         auto timer = spell.second;
+        auto diff = timer.first - getMSTime();
 
-        timer.first -= diff;
-        if (timer.first < 0)
+        if (diff < 0)
         {
             timer.second();
             timer.second = nullptr;
@@ -17027,7 +17027,6 @@ void Player::UpdateOperations(uint32 const diff)
         if (timer.second == nullptr) {
             timedDelayedOperations.erase(spell.first);
         }
-
     }
 
     if (timedDelayedOperations.empty() && !emptyWarned)

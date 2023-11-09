@@ -414,7 +414,7 @@ void Player::Update(uint32 p_time)
     }
 
     // hater: run timed events on player
-    UpdateOperations(p_time);
+    UpdateOperations();
 }
 
 void Player::UpdateMirrorTimers()

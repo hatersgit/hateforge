@@ -5553,7 +5553,7 @@ void Spell::TakeRunePower(bool didHit)
 
 void TriggerChargeRegen(SpellChargeEntry* charge, Player* player) {
     player->RemoveOperationIfExists(charge->SpellId); // casting the spell before a charge is replenished resets cd
-    player->AddTimedDelayedOperation(charge->SpellId, charge->rechargeTime, [player, charge]() {
+    player->AddTimedDelayedOperation(charge->SpellId, getMSTime()+charge->rechargeTime, [player, charge]() {
         player->AddItem(charge->chargeItem, 1);
         auto chargeCount = player->GetItemCount(charge->chargeItem);
         if (chargeCount < charge->maxCharges)

@@ -1037,6 +1037,9 @@ private:
 
             LOG_INFO("server.load", "Loading npc sounds...");
             sObjectMgr->LoadNpcSounds();
+
+            LOG_INFO("server.load", "Loadint spell charges...");
+            sObjectMgr->LoadSpellChargeMap();
         }
         catch (std::exception & ex) {
             std::string error = ex.what();

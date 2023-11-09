@@ -414,6 +414,10 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
     m_isInstantFlightOn = true;
 
     _wasOutdoor = true;
+
+    // hater: timed events on player
+    std::vector<std::pair<int32, std::function<void()>>>    timedDelayedOperations;   ///< Delayed operations
+    bool                                                    emptyWarned;              ///< Warning when there are no more delayed operations
     sScriptMgr->OnConstructPlayer(this);
 }
 
@@ -17006,6 +17010,42 @@ void Player::AddNewSpellCharges(flag96 classMask, uint8 maxCharges, uint8 curren
     auto aura = AddAura(charge.chargeaura, this);
     aura->SetUsingCharges(true);
     aura->SetCharges(charge.maxcharges);
+}
+
+void Player::UpdateOperations(uint32 const diff)
+{
+    for (auto itr = timedDelayedOperations.begin(); itr != timedDelayedOperations.end(); itr++)
+    {
+        itr->first -= diff;
+
+        if (itr->first < 0)
+        {
+            itr->second();
+            itr->second = nullptr;
+        }
+    }
+
+    uint32 timedDelayedOperationCountToRemove = std::count_if(std::begin(timedDelayedOperations), std::end(timedDelayedOperations), [](const std::pair<int32, std::function<void()>>& pair) -> bool
+        {
+            return pair.second == nullptr;
+        });
+
+    for (uint32 i = 0; i < timedDelayedOperationCountToRemove; i++)
+    {
+        auto itr = std::find_if(std::begin(timedDelayedOperations), std::end(timedDelayedOperations), [](const std::pair<int32, std::function<void()>>& p_Pair) -> bool
+            {
+                return p_Pair.second == nullptr;
+            });
+
+        if (itr != std::end(timedDelayedOperations))
+            timedDelayedOperations.erase(itr);
+    }
+
+    if (timedDelayedOperations.empty() && !emptyWarned)
+    {
+        emptyWarned = true;
+        LastOperationCalled();
+    }
 }
 
 std::string Player::GetDebugInfo() const

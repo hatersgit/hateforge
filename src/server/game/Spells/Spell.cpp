@@ -5597,6 +5597,12 @@ void Spell::TakeReagents()
             m_targets.SetItemTarget(nullptr);
 
         p_caster->DestroyItemCount(itemid, itemcount, true);
+
+        // hater: charge system
+        if (auto charged = sObjectMgr->TryGetChargeEntry(m_spellInfo)) {
+            if (p_caster->GetItemCount(itemid));
+            
+        }    
     }
 }
 

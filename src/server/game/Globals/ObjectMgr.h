@@ -764,6 +764,14 @@ static constexpr uint32 MAX_QUEST_MONEY_REWARDS = 10;
 typedef std::array<uint32, MAX_QUEST_MONEY_REWARDS> QuestMoneyRewardArray;
 typedef std::unordered_map<uint32, QuestMoneyRewardArray> QuestMoneyRewardStore;
 
+// hater: charge system
+struct SpellChargeEntry {
+    uint32 SpellId;
+    uint32 rechargeTime;
+    uint32 chargeItem;
+    uint8 maxCharges;
+};
+
 class PlayerDumpReader;
 
 class ObjectMgr
@@ -1514,6 +1522,9 @@ public:
     void LoadMythicDungeonKeyMap();
     void LoadMythicAffixes();
 
+    // hater: charges
+    void LoadSpellChargeMap();
+
     [[nodiscard]] InstanceDifficultyMultiplier const* GetInstanceDifficultyMultiplier(uint32 mapId, uint32 difficultyId) const
     {
         auto itr = _instanceDifficultyMultipliers.find(mapId);
@@ -1571,6 +1582,14 @@ public:
 
     std::unordered_map<uint8, std::vector<uint32>> GetForgeAffixesByTierMap() {
         return _forgeAffixTiers;
+    }
+
+    SpellChargeEntry* TryGetChargeEntry(const SpellInfo* info) {
+        auto charge = _chargeSpellMap.find(info->SpellFamilyFlags);
+        if (charge != _chargeSpellMap.end())
+            return charge->second;
+
+        return nullptr;
     }
 
 private:
@@ -1757,6 +1776,9 @@ private:
 
     // hater: dressup
     std::unordered_map<uint32, NPCSoundsEntry*> _npcSounds;
+
+    // hater: charges
+    std::unordered_map<flag96, SpellChargeEntry* > _chargeSpellMap;
 
     enum CreatureLinkedRespawnType
     {

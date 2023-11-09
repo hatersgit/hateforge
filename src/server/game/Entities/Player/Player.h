@@ -2694,6 +2694,18 @@ public:
     // hater: m+
     BasicEvent* mythicStartCheck = nullptr;
 
+    // hater: timed events on player
+    void AddTimedDelayedOperation(uint32 timeout, std::function<void()>&& function)
+    {
+        emptyWarned = false;
+        timedDelayedOperations.push_back(std::pair<uint32, std::function<void()>>(timeout, function));
+    }
+
+    /// Called after last delayed operation was deleted
+    /// Do whatever you want
+    virtual void LastOperationCalled() { }
+    void UpdateOperations(uint32 const diff);
+
  protected:
     // Gamemaster whisper whitelist
     WhisperListContainer WhisperList;
@@ -3057,6 +3069,10 @@ private:
     PlayerSettingMap m_charSettingsMap;
 
     Seconds m_creationTime;
+
+    // hater: timed events on player
+    std::vector<std::pair<int32, std::function<void()>>>    timedDelayedOperations;   ///< Delayed operations
+    bool                                                    emptyWarned;              ///< Warning when there are no more delayed operations
 };
 
 void AddItemsSetItem(Player* player, Item* item);

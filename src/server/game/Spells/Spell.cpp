@@ -5599,10 +5599,10 @@ void Spell::TakeReagents()
         p_caster->DestroyItemCount(itemid, itemcount, true);
 
         // hater: charge system
-        if (auto charged = sObjectMgr->TryGetChargeEntry(m_spellInfo)) {
-            if (p_caster->GetItemCount(itemid));
-            
-        }    
+        //if (auto charged = sObjectMgr->TryGetChargeEntry(m_spellInfo)) {
+        //    p_caster->AddTimedDelayedOperation();
+        //    
+        //}    
     }
 }
 

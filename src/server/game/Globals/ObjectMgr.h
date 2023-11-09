@@ -1584,14 +1584,6 @@ public:
         return _forgeAffixTiers;
     }
 
-    SpellChargeEntry* TryGetChargeEntry(const SpellInfo* info) {
-        auto charge = _chargeSpellMap.find(info->SpellFamilyFlags);
-        if (charge != _chargeSpellMap.end())
-            return charge->second;
-
-        return nullptr;
-    }
-
 private:
     // first free id for selected id type
     uint32 _auctionId; // pussywizard: accessed by a single thread
@@ -1778,7 +1770,8 @@ private:
     std::unordered_map<uint32, NPCSoundsEntry*> _npcSounds;
 
     // hater: charges
-    std::unordered_map<flag96, SpellChargeEntry* > _chargeSpellMap;
+    typedef std::map<flag96, SpellChargeEntry> SpellChargeMap;
+    SpellChargeMap _chargeSpellMap;
 
     enum CreatureLinkedRespawnType
     {

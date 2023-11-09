@@ -616,19 +616,8 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
     //     weaponMaxDamage += GetAmmoDPS() * attackSpeedMod;
     // }
 
-    float damageMinAdd = 0.0f;
-    float damageMaxAdd = 0.0f;
-
-    if (HasAura(1040001))
-    {
-        AuraEffect const* aurEff = GetAuraEffect(1040001, EFFECT_1);
-        float damagePercent = (aurEff->GetAmount()) * 0.01f;
-        damageMinAdd = ((weaponMinDamage + baseValue) * basePct + totalValue) * totalPct * damagePercent;
-        damageMaxAdd = ((weaponMaxDamage + baseValue) * basePct + totalValue) * totalPct * damagePercent;
-    }
-
-    minDamage = ((weaponMinDamage + baseValue) * basePct + totalValue) * totalPct + damageMinAdd;
-    maxDamage = ((weaponMaxDamage + baseValue) * basePct + totalValue) * totalPct + damageMaxAdd;
+    minDamage = ((weaponMinDamage + baseValue) * basePct + totalValue) * totalPct;
+    maxDamage = ((weaponMaxDamage + baseValue) * basePct + totalValue) * totalPct;
 
     // pussywizard: crashfix (casting negative to uint => min > max => assertion in urand)
     if (minDamage < 0.0f || minDamage > 1000000000.0f)

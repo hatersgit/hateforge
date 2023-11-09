@@ -5079,8 +5079,18 @@ void Spell::EffectLeapBack(SpellEffIndex effIndex)
 
     float speedxy = m_spellInfo->Effects[effIndex].MiscValue / 10.0f;
     float speedz = damage / 10.0f;
+    int32 directional = m_spellInfo->Effects[effIndex].MiscValueB;
+
+    if (directional == 1)
+    {
+        if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_WALKING))
+            speedxy = m_caster->GetSpeed(MOVE_WALK);
+        else
+            speedxy = m_caster->GetSpeed(MOVE_RUN);
+    }
+
     //1891: Disengage
-    m_caster->JumpTo(speedxy, speedz, m_spellInfo->SpellFamilyName != SPELLFAMILY_HUNTER);
+    m_caster->JumpTo(speedxy, speedz, m_spellInfo->SpellFamilyName != SPELLFAMILY_HUNTER, directional);
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {

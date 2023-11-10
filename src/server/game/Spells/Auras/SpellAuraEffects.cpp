@@ -7226,3 +7226,20 @@ void AuraEffect::HandleAuraModTriggerSpellPowerPercent(AuraApplication const* au
     else
         caster->RemoveAura(GetTriggerSpell());
 }
+
+void AuraEffect::HandleAuraAddCharges(AuraApplication* aurApp, uint8 mode, bool apply)
+{
+    auto caster = GetCaster();
+
+    if (apply)
+    {
+        auto player = caster->ToPlayer();
+        int32 chargesAdded = GetAmount();
+        
+        if (auto chargeable = player->GetChargedSpell(m_spellInfo->SpellFamilyFlags)) {
+            
+        }
+    }
+    else
+        caster->RemoveAura(GetTriggerSpell());
+}

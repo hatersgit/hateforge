@@ -353,6 +353,10 @@ void ForgeCommonMessage::SendTalents(Player* player)
                 auto tabId = tpt == CharacterPointType::TALENT_TREE ? player->getClassMask() : tpt == CharacterPointType::RACIAL_TREE ? 999900 : tpt == CharacterPointType::PRESTIGE_TREE ? 1980000 : CharacterPointType::PET_TALENT;
                 for (auto* tab : tabs)
                 {
+                    if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", false))
+                        if (spec->CharacterSpecTabId != tab->Id)
+                            continue;
+
                     std::string delimiter = ";";
 
                     if (i == 0)

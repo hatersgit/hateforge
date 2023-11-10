@@ -16866,176 +16866,27 @@ uint32 Player::GetSpellCooldownDelay(uint32 spell_id) const
     return uint32(itr != m_spellCooldowns.end() && itr->second.end > getMSTime() ? itr->second.end - getMSTime() : 0);
 }
 
-void Player::UpdateChargeCooldown(const SpellInfo* spellInfo, SpellEffIndex chargeAuraIndex)
-{
-    auto effect = spellInfo->GetEffect(chargeAuraIndex);
-    auto id = effect.SpellClassMask;
-    auto now = getMSTime();
-
-    auto spellCharges = m_spellCharges.find(id);
-    if (spellCharges != m_spellCharges.end())
-    {
-        SpellCharge charge = spellCharges->second;
-        if (charge.end != 0 && charge.end <= now && charge.charges < charge.maxcharges)
-        {
-            // incriment charges
-            charge.charges += 1;
-
-            // calculate next cooldown
-            if (charge.charges == charge.maxcharges)
-                charge.end = 0;
-            else
-                charge.end = now + charge.maxduration;
-
-            // update charge aura
-            AddAura(charge.chargeaura, this);
-        }
-    }
-    else
-        AddNewSpellCharges(id, effect.MiscValueB, effect.MiscValueB, effect.MiscValue, 0, effect.TriggerSpell);
-}
-
-void Player::UpdateChargeCooldowns()
-{
-    auto now = getMSTime();
-
-    for (auto spellCharge : m_spellCharges)
-    {
-        SpellCharge charge = spellCharge.second;
-        if (charge.end <= now && charge.charges < charge.maxcharges)
-        {
-            // incriment charges
-            charge.charges += 1;
-
-            // calculate next cooldown
-            if (charge.charges == charge.maxcharges)
-                charge.end = 0;
-            else
-                charge.end = now + charge.maxduration;
-
-            AddAura(charge.chargeaura, this);
-            m_spellCharges[spellCharge.first] = charge;
-        }
-    }
-}
-
-bool Player::ConsumeSpellCharge(uint32 spell_id)
-{
-    auto spellInfo = sSpellMgr->GetSpellInfo(spell_id);
-    auto spellCharges = m_spellCharges.find(spellInfo->SpellFamilyFlags);
-    if (spellCharges != m_spellCharges.end())
-    {
-        SpellCharge charge = spellCharges->second;
-        if (charge.charges > 0)
-        {
-            // incriment charges
-            charge.charges -= 1;
-
-            auto now = getMSTime();
-            // calculate next cooldown if charges were full
-            if (charge.end == 0)
-                charge.end = now + charge.maxduration;
-
-            RemoveAura(charge.chargeaura);
-
-            // update aura
-            if (charge.charges == 0)
-            {
-                WorldPacket data;
-                BuildCooldownPacket(data, SPELL_COOLDOWN_FLAG_NONE, spell_id, charge.end - now);
-                SendDirectMessage(&data);
-            }
-            else
-                for (int i = 0; i < charge.charges; i++)
-                    AddAura(charge.chargeaura, this);
-
-            m_spellCharges[spellCharges->first] = charge;
-
-            return true;
-        }
-    }
-
-    return false;
-}
-
-// looks for auras and known spells and adds spell charges that do not exist
-void Player::InitializeSpellCharges()
-{
-    auto spellChargeAuras = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_CHARGES);
-
-    // add missing
-    for (auto spellChargeEffect : spellChargeAuras)
-    {
-        auto eff = spellChargeEffect->GetSpellInfo()->GetEffects()[spellChargeEffect->GetEffIndex()];
-
-        auto spellCharges = m_spellCharges.find(eff.SpellClassMask);
-        if (spellCharges == m_spellCharges.end())
-            AddNewSpellCharges(eff.SpellClassMask, eff.MiscValueB, eff.MiscValueB, eff.MiscValue, 0, eff.TriggerSpell);
-    }
-
-    auto spells = GetKnownSpells();
-
-    for (auto pSpell : spells)
-    {
-        auto spell = sSpellMgr->GetSpellInfo(pSpell.first);
-        auto spellCharge = m_spellCharges.find(spell->SpellFamilyFlags);
-
-        if (spellCharge == m_spellCharges.end())
-            for (auto eff : spell->Effects)
-                if (eff.ApplyAuraName == SPELL_AURA_MOD_SPELL_CHARGES && eff.Effect == 0)
-                    AddNewSpellCharges(spell->SpellFamilyFlags, eff.MiscValueB, eff.MiscValueB, eff.MiscValue, 0, eff.TriggerSpell);
-    }
-}
-
-// adds if does not exists
-void Player::AddNewSpellCharges(SpellEffectInfo spellEff, flag96 classMask)
-{
-    auto spellCharges = m_spellCharges.find(classMask);
-    if (spellCharges == m_spellCharges.end())
-        AddNewSpellCharges(classMask, spellEff.MiscValueB, spellEff.MiscValueB, spellEff.MiscValue, 0, spellEff.TriggerSpell);
-}
-
-// adds or updates existing
-void Player::AddNewSpellCharges(flag96 classMask, uint8 maxCharges, uint8 currentCharges, uint32 maxDuration, uint32 currentDuration, uint32 chargeAura)
-{
-    SpellCharge charge;
-    charge.maxcharges = maxCharges;
-    charge.chargeaura = chargeAura;
-    charge.maxduration = maxDuration;
-    charge.charges = currentCharges;
-    charge.end = getMSTime() + currentDuration;
-
-    m_spellCharges[classMask] = std::move(charge);
-
-    auto aura = AddAura(charge.chargeaura, this);
-    aura->SetUsingCharges(true);
-    aura->SetCharges(charge.maxcharges);
-}
-
 void Player::UpdateOperations()
 {
-    if (!timedDelayedOperations.empty()) {
-        std::vector<uint32> toDelete = {};
-        for (auto spell : timedDelayedOperations) {
-            auto timer = spell.second;
-            int32 diff = timer.first - getMSTime();
+    std::vector<uint32> toDelete = {};
+    for (auto spell : timedDelayedOperations) {
+        auto timer = spell.second;
+        int32 diff = timer.first - getMSTime();
 
-            if (diff < 0)
-            {
-                timer.second();
-                timer.second = nullptr;
-            }
-
-            if (timer.second == nullptr) {
-                timedDelayedOperations.erase(spell.first);
-            }
-        }
-
-        if (timedDelayedOperations.empty() && !emptyWarned)
+        if (diff < 0)
         {
-            emptyWarned = true;
-            LastOperationCalled();
+            timer.second();
+            toDelete.push_back(spell.first);
         }
+    }
+
+    for (auto spell : toDelete)
+        timedDelayedOperations.erase(spell);
+
+    if (timedDelayedOperations.empty() && !emptyWarned)
+    {
+        emptyWarned = true;
+        LastOperationCalled();
     }
 }
 
@@ -17043,6 +16894,10 @@ void Player::RemoveOperationIfExists(uint32 spellId) {
     auto existing = timedDelayedOperations.find(spellId);
     if (existing != timedDelayedOperations.end())
         timedDelayedOperations.erase(spellId);
+}
+
+uint8 GetSpellCharges(flag96 key) {
+    if ()
 }
 
 std::string Player::GetDebugInfo() const

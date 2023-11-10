@@ -16896,10 +16896,6 @@ void Player::RemoveOperationIfExists(uint32 spellId) {
         timedDelayedOperations.erase(spellId);
 }
 
-uint8 GetSpellCharges(flag96 key) {
-    if ()
-}
-
 std::string Player::GetDebugInfo() const
 {
     std::stringstream sstr;

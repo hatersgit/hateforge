@@ -2706,7 +2706,9 @@ public:
     virtual void LastOperationCalled() { }
     void UpdateOperations();
     void RemoveOperationIfExists(uint32 spell);
-    uint8 GetSpellCharges(flag96);
+
+
+    std::unordered_map<flag96/*spellId*/, uint8 /*charges*/> _SpellCharges;
 
  protected:
     // Gamemaster whisper whitelist
@@ -3073,7 +3075,6 @@ private:
     Seconds m_creationTime;
 
     // hater: timed events on player | charges
-    std::unordered_map<flag96/*spellId*/, uint8 /*charges*/> _SpellCharges;
     std::unordered_map<uint32/*spellId*/, std::pair<int32, std::function<void()>>>    timedDelayedOperations;   ///< Delayed operations
     bool                                                    emptyWarned;              ///< Warning when there are no more delayed operations
 };

@@ -5551,14 +5551,17 @@ void Spell::TakeRunePower(bool didHit)
             player->ModifyPower(POWER_RUNIC_POWER, int32(rp));
 }
 
-void TriggerChargeRegen(SpellChargeEntry* charge, Player* player) {
-    player->RemoveOperationIfExists(charge->SpellId); // casting the spell before a charge is replenished resets cd
-    player->AddTimedDelayedOperation(charge->SpellId, getMSTime()+charge->rechargeTime, [player, charge]() {
-        player->AddItem(charge->chargeItem, 1);
-        auto chargeCount = player->GetItemCount(charge->chargeItem);
-        if (chargeCount < charge->maxCharges)
-            TriggerChargeRegen(charge, player);
-        });
+void TriggerChargeRegen(Player* player, SpellInfo* info) {
+    if (auto charged = sObjectMgr->TryGetChargeEntry(info->SpellFamilyFlags)) {
+        player->RemoveOperationIfExists(charged->SpellId); // casting the spell before a charge is replenished resets cd
+        player->AddTimedDelayedOperation(charged->SpellId, getMSTime() + charged->rechargeTime, [player, charged, info]() {
+            auto addedCharges = player->_SpellCharges.at(info->SpellFamilyFlags);
+            player->AddItem(charged->chargeItem, 1);
+            auto chargeCount = player->GetItemCount(charged->chargeItem);
+            if (chargeCount < charged->maxCharges + addedCharges)
+                TriggerChargeRegen(player, info);
+            });
+    }
 }
 
 void Spell::TakeReagents()
@@ -5609,9 +5612,7 @@ void Spell::TakeReagents()
         p_caster->DestroyItemCount(itemid, itemcount, true);
 
         // hater: charge system
-        if (auto charged = sObjectMgr->TryGetChargeEntry(m_spellInfo->SpellFamilyFlags)) {
-            TriggerChargeRegen(charged, p_caster);
-        }
+        TriggerChargeRegen(p_caster, (SpellInfo*)m_spellInfo);
     }
 }
 

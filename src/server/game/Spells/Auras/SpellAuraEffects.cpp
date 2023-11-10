@@ -7231,15 +7231,18 @@ void AuraEffect::HandleAuraAddCharges(AuraApplication* aurApp, uint8 mode, bool 
 {
     auto caster = GetCaster();
 
-    if (apply)
-    {
-        auto player = caster->ToPlayer();
-        int32 chargesAdded = GetAmount();
-        
-        if (auto chargeable = player->GetChargedSpell(m_spellInfo->SpellFamilyFlags)) {
-            
+    auto player = caster->ToPlayer();
+    int32 chargesAdded = GetAmount();
+    auto chargeable = player->_SpellCharges.find(m_spellInfo->SpellFamilyFlags);
+    if (chargeable != player->_SpellCharges.end()) {
+        if (auto ChargeEntry = sObjectMgr->TryGetChargeEntry(m_spellInfo->SpellFamilyFlags)) {
+            if (apply)
+            {
+                chargeable->second = ChargeEntry->maxCharges + chargesAdded;
+            }
+            else {
+                chargeable->second = ChargeEntry->maxCharges;
+            }
         }
     }
-    else
-        caster->RemoveAura(GetTriggerSpell());
 }

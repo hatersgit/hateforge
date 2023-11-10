@@ -10640,6 +10640,44 @@ void ObjectMgr::LoadMythicAffixes()
     LOG_INFO("server.loading", ">> Loaded {} instances from forge_mythic_affixes in {} ms", _forgeMythicMaps.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
+void ObjectMgr::LoadSpellChargeMap()
+{
+    uint32 oldMSTime = getMSTime();
+
+    _chargeSpellMap.clear();
+
+    QueryResult result = WorldDatabase.Query("SELECT * FROM forge_spell_charge");
+
+    if (!result)
+    {
+        LOG_ERROR("sql.sql", ">> Loaded 0 charges. DB table `forge_spell_charge` is empty.");
+        LOG_INFO("server.loading", " ");
+        return;
+    }
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 spell = fields[0].Get<uint32>();
+        uint32 timer = fields[1].Get<uint32>();
+        uint32 item = fields[2].Get<uint32>();
+        uint8 max = fields[3].Get<uint8>();
+
+        SpellChargeEntry* charge = new SpellChargeEntry();
+        charge->chargeItem = item;
+        charge->SpellId = spell;
+        charge->rechargeTime = timer;
+        charge->maxCharges = max;
+
+        if (auto info = sSpellMgr->GetSpellInfo(spell)) {
+            _chargeSpellMap[info->SpellFamilyFlags] = charge;
+        }
+    } while (result->NextRow());
+
+    LOG_INFO("server.loading", ">> Loaded {} charges from forge_spell_charge in {} ms", _forgeMythicMaps.size(), GetMSTimeDiffToNow(oldMSTime));
+}
+
 void ObjectMgr::LoadWorldSafeLocs()
 {
     uint32 oldMSTime = getMSTime();

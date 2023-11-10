@@ -412,6 +412,9 @@ void Player::Update(uint32 p_time)
         SetHasDelayedTeleport(false);
         TeleportTo(teleportStore_dest, teleportStore_options);
     }
+
+    // hater: run timed events on player
+    UpdateOperations();
 }
 
 void Player::UpdateMirrorTimers()

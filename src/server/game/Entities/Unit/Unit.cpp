@@ -4619,8 +4619,20 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator& i, AuraRemoveMode removeMo
         auto spellInfo = aura->GetSpellInfo();
 
         for (auto eff : spellInfo->GetEffects())
-            if (eff.ApplyAuraName == SPELL_AURA_MOD_SPELL_CHARGES)
-                ToPlayer()->RemoveSpellCharges(eff.SpellClassMask);
+            if (eff.ApplyAuraName == SPELL_AURA_MOD_SPELL_CHARGES) {
+                if (auto charged = sObjectMgr->TryGetChargeEntry(spellInfo->SpellFamilyFlags)) {
+                    Player* player = ToPlayer();
+                    player->RemoveOperationIfExists(charged->SpellId);
+
+                    auto chargeCount = player->GetItemCount(charged->chargeItem);
+                    if (chargeCount > charged->maxCharges) {
+                        player->DestroyItemCount(charged->chargeItem, chargeCount - charged->maxCharges, false, false);
+                    }
+                    else if (chargeCount < charged->maxCharges) {
+                        player->AddItem(charged->chargeItem, charged->maxCharges - chargeCount);
+                    }
+                }
+            }
     }
 
     ++m_removedAurasCount;

@@ -2213,6 +2213,9 @@ void World::SetInitialWorldSettings()
     LOG_INFO("server.loading", "Load Channels...");
     ChannelMgr::LoadChannels();
 
+    LOG_INFO("server.loading", "Loading spell charges...");
+    sObjectMgr->LoadSpellChargeMap();
+
     sScriptMgr->OnBeforeWorldInitialized();
 
     if (sWorld->getBoolConfig(CONFIG_PRELOAD_ALL_NON_INSTANCED_MAP_GRIDS))

@@ -362,6 +362,9 @@ public:
     void HandleRaidProcFromChargeAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
     void HandleRaidProcFromChargeWithValueAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
     void HandleAuraModTriggerSpellPowerPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+
+    // hater: charges
+    void HandleAuraAddCharges(AuraApplication* aurApp, uint8 mode, bool apply);
 };
 
 namespace Acore

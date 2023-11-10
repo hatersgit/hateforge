@@ -514,7 +514,7 @@ class spell_mage_cold_snap : public SpellScript
             if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && (spellInfo->GetSchoolMask() & SPELL_SCHOOL_MASK_FROST)
                 && ((spellInfo->SpellFamilyFlags[0] & 0x240) || (spellInfo->SpellFamilyFlags[1] & 0x81)) && spellInfo->GetRecoveryTime() > 0)
             {
-                SpellCooldowns::iterator citr = caster->GetSpellCooldownMap().find(spellInfo->Id);
+                auto citr = caster->GetSpellCooldownMap().find(spellInfo->Id);
                 if (citr != caster->GetSpellCooldownMap().end() && citr->second.needSendToClient)
                     caster->RemoveSpellCooldown(spellInfo->Id, true);
                 else

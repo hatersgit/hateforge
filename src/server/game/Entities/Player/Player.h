@@ -248,21 +248,6 @@ enum TrainerSpellState
     TRAINER_SPELL_GREEN_DISABLED = 10                       // custom value, not send to client: formally green but learn not allowed
 };
 
-struct SpellCharge
-{
-    uint32 end;
-    uint16 category;
-    uint32 itemid;
-    uint32 maxduration;
-    uint8 charges;
-    uint8 maxcharges;
-    uint32 chargeaura;
-    bool sendToSpectator : 1;
-    bool needSendToClient : 1;
-};
-
-typedef std::map<flag96, SpellCharge> SpellCharges;
-
 enum ActionButtonUpdateState
 {
     ACTIONBUTTON_UNCHANGED = 0,
@@ -1804,10 +1789,6 @@ public:
     PlayerSpellMap&       GetSpellMap()       { return m_spells; }
 
     [[nodiscard]] SpellCooldowns const& GetSpellCooldownMap() const { return m_spellCooldowns; }
-    SpellCooldowns&       GetSpellCooldownMap()       { return m_spellCooldowns; }
-
-    [[nodiscard]] SpellCharges const& GetSpellChargesMap() const { return m_spellCharges; }
-    SpellCharges& GetSpellChargesMap() { return m_spellCharges; }
 
     void AddSpellMod(SpellModifier* mod, bool apply);
     bool IsAffectedBySpellmod(SpellInfo const* spellInfo, SpellModifier* mod, Spell* spell = nullptr);
@@ -1826,22 +1807,14 @@ public:
     [[nodiscard]] bool HasSpellCooldown(uint32 spell_id) const override;
     [[nodiscard]] bool HasSpellItemCooldown(uint32 spell_id, uint32 itemid) const override;
     [[nodiscard]] uint32 GetSpellCooldownDelay(uint32 spell_id) const;
-    void UpdateChargeCooldown(const SpellInfo* spellInfo, SpellEffIndex chargeAuraIndex);
-    void UpdateChargeCooldowns();
-    bool ConsumeSpellCharge(uint32 spell_id);
-    void InitializeSpellCharges();
-    void AddNewSpellCharges(SpellEffectInfo spellEff, flag96 classMask);
-    void AddNewSpellCharges(flag96 classMask, uint8 maxCharges, uint8 currentCharges, uint32 maxDuration, uint32 currentDuration, uint32 chargeAura);
     void AddCategoryCooldowns(const SpellInfo* spellInfo, int32 recoveryTime, bool sendCooldowns = true);
     void AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 itemId, Spell* spell = nullptr, bool infinityCooldown = false);
     void AddSpellCooldown(uint32 spell_id, uint32 itemid, uint32 end_time, bool needSendToClient = false, bool forceSendToSpectator = false) override;
     void _AddSpellCooldown(uint32 spell_id, uint16 categoryId, uint32 itemid, uint32 end_time, bool needSendToClient = false, bool forceSendToSpectator = false);
     void ModifySpellCooldown(uint32 spellId, int32 cooldown);
     void ModifySpellCooldowns(int32 cooldown);
-    void ModifySpellCharges(int32 cooldown);
     void SendCooldownEvent(SpellInfo const* spellInfo, uint32 itemId = 0, Spell* spell = nullptr, bool setCooldown = true);
     void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs) override;
-    void RemoveSpellCharges(flag96 familyFlags);
     void RemoveSpellCooldown(uint32 spell_id, bool update = false);
     void SendClearCooldown(uint32 spell_id, Unit* target);
     SpellInfo* GetLatestSpellEffect(uint32 SpellId, uint32 enchanceId);
@@ -1856,8 +1829,6 @@ public:
     void RemoveAllSpellCooldownWithoutIds(std::vector<uint32> ids);
     void _LoadSpellCooldowns(PreparedQueryResult result);
     void _SaveSpellCooldowns(CharacterDatabaseTransaction trans, bool logout);
-    void _LoadSpellCharges(PreparedQueryResult result);
-    void _SaveSpellCharges(CharacterDatabaseTransaction trans, bool logout);
     uint32 GetLastPotionId() { return m_lastPotionId; }
     void SetLastPotionId(uint32 item_id) { m_lastPotionId = item_id; }
     void UpdatePotionCooldown(Spell* spell = nullptr);
@@ -2217,7 +2188,6 @@ public:
     //End of PvP System
 
     [[nodiscard]] inline SpellCooldowns GetSpellCooldowns() const { return m_spellCooldowns; }
-    [[nodiscard]] inline SpellCharges GetSpellCharges() const { return m_spellCharges; }
 
     void SetDrunkValue(uint8 newDrunkValue, uint32 itemId = 0);
     [[nodiscard]] uint8 GetDrunkValue() const { return GetByteValue(PLAYER_BYTES_3, 1); }
@@ -2707,9 +2677,6 @@ public:
     void UpdateOperations();
     void RemoveOperationIfExists(uint32 spell);
 
-
-    std::unordered_map<flag96/*spellId*/, uint8 /*charges*/> _SpellCharges;
-
  protected:
     // Gamemaster whisper whitelist
     WhisperListContainer WhisperList;
@@ -3045,8 +3012,6 @@ private:
     ReputationMgr*  m_reputationMgr;
 
     SpellCooldowns m_spellCooldowns;
-
-    SpellCharges m_spellCharges;
 
     uint32 m_ChampioningFaction;
 

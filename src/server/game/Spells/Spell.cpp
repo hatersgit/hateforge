@@ -5555,10 +5555,9 @@ void TriggerChargeRegen(Player* player, SpellInfo* info) {
     if (auto charged = sObjectMgr->TryGetChargeEntry(info->SpellFamilyFlags)) {
         player->RemoveOperationIfExists(charged->SpellId); // casting the spell before a charge is replenished resets cd
         player->AddTimedDelayedOperation(charged->SpellId, getMSTime() + charged->rechargeTime, [player, charged, info]() {
-            auto addedCharges = player->_SpellCharges.at(info->SpellFamilyFlags);
             player->AddItem(charged->chargeItem, 1);
             auto chargeCount = player->GetItemCount(charged->chargeItem);
-            if (chargeCount < charged->maxCharges + addedCharges)
+            if (chargeCount < charged->maxCharges)
                 TriggerChargeRegen(player, info);
             });
     }
@@ -5624,7 +5623,6 @@ void Spell::TakeCharges()
 
     Player* p_caster = m_caster->ToPlayer();
 
-    p_caster->ConsumeSpellCharge(m_spellInfo->Id);
 }
 
 void Spell::HandleThreatSpells()

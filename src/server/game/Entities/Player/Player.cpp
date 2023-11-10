@@ -3359,10 +3359,10 @@ void Player::learnSpell(uint32 spellId, bool temporary /*= false*/, bool learnFr
 
         // add spell charges for this spell when learned
         auto spellInfo = sSpellMgr->GetSpellInfo(spellId);
-        if (spellInfo)
+        /*if (spellInfo)
             for (auto eff : spellInfo->GetEffects())
-                if (eff.ApplyAuraName == SPELL_AURA_MOD_SPELL_CHARGES)
-                    AddNewSpellCharges(eff, spellInfo->SpellFamilyFlags);
+                if (eff.ApplyAuraName == SPELL_AURA_MOD_SPELL_CHARGES)*/
+                    // TODO: AddNewSpellCharges(eff, spellInfo->SpellFamilyFlags);
     }
 
     // pussywizard: rank stuff at the end!
@@ -3478,12 +3478,6 @@ void Player::removeSpell(uint32 spell_id, uint8 removeSpecMask, bool onlyTempora
         {
             SetSkill(spellLearnSkill->skill, 0, 0, 0);
             // remove spell charges for this spell when learned
-            for (auto eff : spellInfo->GetEffects())
-                if (eff.ApplyAuraName == SPELL_AURA_MOD_SPELL_CHARGES)
-                    if (eff.Effect == 0)
-                        RemoveSpellCharges(spellInfo->SpellFamilyFlags);
-                    else if (eff.Effect == SPELL_EFFECT_APPLY_AURA)
-                        RemoveSpellCharges(eff.SpellClassMask);
         }
         else // pussywizard: search previous ranks
         {
@@ -3498,12 +3492,6 @@ void Player::removeSpell(uint32 spell_id, uint8 removeSpecMask, bool onlyTempora
             {
                 SetSkill(spellLearnSkill->skill, 0, 0, 0);
                 // remove spell charges for this spell when learned
-                for (auto eff : spellInfo->GetEffects())
-                    if (eff.ApplyAuraName == SPELL_AURA_MOD_SPELL_CHARGES)
-                        if (eff.Effect == 0)
-                            RemoveSpellCharges(spellInfo->SpellFamilyFlags);
-                        else if (eff.Effect == SPELL_EFFECT_APPLY_AURA)
-                            RemoveSpellCharges(eff.SpellClassMask);
             }
             else // pussywizard: set to prev skill setting values
             {
@@ -3599,33 +3587,9 @@ void Player::RemoveSpellCooldown(uint32 spell_id, bool update /* = false */)
     m_spellCooldowns.erase(spell_id);
 
     auto spellInfo = sSpellMgr->GetSpellInfo(spell_id);
-    auto spellCharge = m_spellCharges.find(spellInfo->SpellFamilyFlags);
-    if (spellCharge != m_spellCharges.end())
-    {
-        if (spellCharge->second.charges < spellCharge->second.maxcharges)
-        {
-            // incriment charges
-            spellCharge->second.charges += 1;
-
-            // calculate next cooldown
-            if (spellCharge->second.charges == spellCharge->second.maxcharges)
-                spellCharge->second.end = 0;
-        }
-    }
-    m_spellCharges.erase(spellInfo->SpellFamilyFlags);
 
     if (update)
         SendClearCooldown(spell_id, this);
-}
-
-// removes the charge systems from a spell
-void Player::RemoveSpellCharges(flag96 familyFlags)
-{
-    auto spellCharge = m_spellCharges.find(familyFlags);
-    if (spellCharge != m_spellCharges.end())
-        RemoveAura(spellCharge->second.chargeaura);
-
-    m_spellCharges.erase(familyFlags);
 }
 
 void Player::RemoveCategoryCooldown(uint32 cat)
@@ -3782,84 +3746,6 @@ void Player::_SaveSpellCooldowns(CharacterDatabaseTransaction trans, bool logout
     if (!first_round)
         trans->Append(ss.str().c_str());
 
-     _SaveSpellCharges(trans, logout);
-}
-
-void Player::_LoadSpellCharges(PreparedQueryResult result)
-{
-    // some cooldowns can be already set at aura loading...
-    if (result)
-    {
-        time_t curTime = GameTime::GetGameTime().count();
-        
-        do
-        {
-            Field* fields = result->Fetch();
-            uint32 classMask0 = fields[0].Get<uint32>();
-            uint32 classMask1 = fields[1].Get<uint32>();
-            uint32 classMask2 = fields[2].Get<uint32>();
-            uint16 maxCharges = fields[3].Get<uint32>();
-            uint32 currentCharges = fields[4].Get<uint32>();
-            uint32 maxDuration = fields[5].Get<uint32>();
-            uint32 currentDuration = fields[6].Get<uint32>();
-            uint32 chargeAura = fields[7].Get<uint32>();
-
-            uint32 tmpTime = currentDuration;
-            while (tmpTime <= curTime && currentCharges < maxCharges)
-            {
-                currentCharges++;
-                tmpTime += maxDuration;
-
-                if (tmpTime > curTime)
-                    break;
-                else
-                    currentDuration += maxDuration;
-            }
-
-            if (currentCharges == maxCharges)
-                currentDuration = 0;
-            else
-                currentDuration = (currentDuration - curTime) * IN_MILLISECONDS;
-
-            AddNewSpellCharges(flag96(classMask0, classMask1, classMask2), maxCharges, currentCharges, maxDuration, currentDuration, chargeAura);
-        } while (result->NextRow());
-    }
-    // borrow this event to make sure all of your spells have their charges
-    InitializeSpellCharges();
-}
-
-void Player::_SaveSpellCharges(CharacterDatabaseTransaction trans, bool logout)
-{
-    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_SPELL_CHARGES);
-    stmt->SetData(0, GetGUID().GetCounter());
-    trans->Append(stmt);
-
-    bool first_round = true;
-    std::ostringstream ss;
-
-    time_t curTime = GameTime::GetGameTime().count();
-    uint32 curMSTime = GameTime::GetGameTimeMS().count();
-    uint32 infTime = curMSTime + infinityCooldownDelayCheck;
-
-    for (SpellCharges::iterator itr = m_spellCharges.begin(); itr != m_spellCharges.end();)
-    {
-        if (first_round)
-        {
-            ss << "INSERT INTO character_spell_charges (guid, classMask0, classMask1, classMask2, maxCharges, currentCharges, maxDuration, currentDuration, chargeAura) VALUES ";
-            first_round = false;
-        }
-        // next new/changed record prefix
-        else
-            ss << ',';
-
-        uint64 cooldown = uint64(((itr->second.end - curMSTime) / IN_MILLISECONDS) + curTime);
-        ss << '(' << GetGUID().GetCounter() << ',' << itr->first.operator[](0) << ',' << itr->first.operator[](1) << ',' << itr->first.operator[](2) << ',' << uint32(itr->second.maxcharges) << ","
-            << uint32(itr->second.charges) << ',' << itr->second.maxduration << ',' << (itr->second.maxcharges == itr->second.charges ? 0 : cooldown) << ',' << itr->second.chargeaura << ')';
-        ++itr;
-    }
-    // if something changed execute
-    if (!first_round)
-        trans->Append(ss.str().c_str());
 }
 
 uint32 Player::resetTalentsCost() const
@@ -16837,11 +16723,6 @@ bool Player::IsSummonAsSpectator() const
 
 bool Player::HasSpellCooldown(uint32 spell_id) const
 {
-    auto spellInfo = sSpellMgr->GetSpellInfo(spell_id);
-    auto spellCharges = m_spellCharges.find(spellInfo->SpellFamilyFlags);
-    if (spellCharges != m_spellCharges.end())
-        return spellCharges->second.charges == 0;
-
     SpellCooldowns::const_iterator itr = m_spellCooldowns.find(spell_id);
     return itr != m_spellCooldowns.end() && itr->second.end > getMSTime();
 }
@@ -16854,14 +16735,6 @@ bool Player::HasSpellItemCooldown(uint32 spell_id, uint32 itemid) const
 
 uint32 Player::GetSpellCooldownDelay(uint32 spell_id) const
 {
-    auto spellInfo = sSpellMgr->GetSpellInfo(spell_id);
-    auto spellCharges = m_spellCharges.find(spellInfo->SpellFamilyFlags);
-    if (spellCharges != m_spellCharges.end())
-        if (spellCharges->second.charges > 0)
-            return 0;
-        else
-            return uint32(spellCharges->second.end > getMSTime() ? spellCharges->second.end - getMSTime() : 0);
-
     SpellCooldowns::const_iterator itr = m_spellCooldowns.find(spell_id);
     return uint32(itr != m_spellCooldowns.end() && itr->second.end > getMSTime() ? itr->second.end - getMSTime() : 0);
 }

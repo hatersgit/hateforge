@@ -4586,11 +4586,11 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator& i, AuraRemoveMode removeMo
                     player->RemoveOperationIfExists(charged->SpellId);
 
                     auto chargeCount = player->GetItemCount(charged->chargeItem);
-                    if (chargeCount > charged->maxCharges) {
-                        player->DestroyItemCount(charged->chargeItem, chargeCount - charged->maxCharges, false, false);
+                    if (chargeCount > charged->baseCharges) {
+                        player->DestroyItemCount(charged->chargeItem, chargeCount - charged->baseCharges, false, false);
                     }
-                    else if (chargeCount < charged->maxCharges) {
-                        player->AddItem(charged->chargeItem, charged->maxCharges - chargeCount);
+                    else if (chargeCount < charged->baseCharges) {
+                        player->AddItem(charged->chargeItem, charged->baseCharges - chargeCount);
                     }
                 }
             }

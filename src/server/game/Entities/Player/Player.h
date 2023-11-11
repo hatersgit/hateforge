@@ -2676,7 +2676,10 @@ public:
     virtual void LastOperationCalled() { }
     void UpdateOperations();
     void RemoveOperationIfExists(uint32 spell);
+    bool OperationInProgress(uint32 spell);
 
+    std::map<flag96, int> _spellCharges;
+    uint8 CalculateSpellMaxCharges(flag96);
  protected:
     // Gamemaster whisper whitelist
     WhisperListContainer WhisperList;

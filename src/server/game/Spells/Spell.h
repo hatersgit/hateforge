@@ -471,7 +471,6 @@ public:
     void TakeRunePower(bool didHit);
     void TakeReagents();
     void TakeCastItem();
-    void TakeCharges();
 
     SpellCastResult CheckCast(bool strict);
     SpellCastResult CheckPetCast(Unit* target);

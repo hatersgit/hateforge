@@ -3949,7 +3949,6 @@ void Spell::_cast(bool skipCheck)
         // Powers have to be taken before SendSpellGo
         TakePower();
         TakeReagents();                                         // we must remove reagents before HandleEffects to allow place crafted item in same slot
-        TakeCharges();
     }
     else if (Item* targetItem = m_targets.GetItemTarget())
     {
@@ -5553,11 +5552,16 @@ void Spell::TakeRunePower(bool didHit)
 
 void TriggerChargeRegen(Player* player, SpellInfo* info) {
     if (auto charged = sObjectMgr->TryGetChargeEntry(info->SpellFamilyFlags)) {
-        player->RemoveOperationIfExists(charged->SpellId); // casting the spell before a charge is replenished resets cd
         player->AddTimedDelayedOperation(charged->SpellId, getMSTime() + charged->rechargeTime, [player, charged, info]() {
-            player->AddItem(charged->chargeItem, 1);
+            uint32 noSpaceForCount = 0;
+            ItemPosCountVec dest;
+            InventoryResult msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, charged->chargeItem, 1, &noSpaceForCount);
+            player->StoreNewItem(dest, charged->chargeItem, true);
+
             auto chargeCount = player->GetItemCount(charged->chargeItem);
-            if (chargeCount < charged->maxCharges)
+            auto maxCharges = charged->baseCharges + player->CalculateSpellMaxCharges(info->SpellFamilyFlags);
+
+            if (chargeCount < maxCharges)
                 TriggerChargeRegen(player, info);
             });
     }
@@ -5613,16 +5617,6 @@ void Spell::TakeReagents()
         // hater: charge system
         TriggerChargeRegen(p_caster, (SpellInfo*)m_spellInfo);
     }
-}
-
-void Spell::TakeCharges()
-{
-    if (m_caster->GetTypeId() != TYPEID_PLAYER
-        || m_CastItem || m_triggeredByAuraSpell)
-        return;
-
-    Player* p_caster = m_caster->ToPlayer();
-
 }
 
 void Spell::HandleThreatSpells()

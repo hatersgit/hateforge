@@ -769,7 +769,7 @@ struct SpellChargeEntry {
     uint32 SpellId;
     uint32 rechargeTime;
     uint32 chargeItem;
-    uint8 maxCharges;
+    uint8 baseCharges;
 };
 
 class PlayerDumpReader;

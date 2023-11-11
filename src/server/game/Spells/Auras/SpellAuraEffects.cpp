@@ -382,7 +382,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleNoImmediateEffect,                         //319 SPELL_AURA_MOD_WEAPON_SCHOOL_DAMAGE_EFFECT
     &AuraEffect::HandleNoImmediateEffect,                         //320 SPELL_AURA_PROC_ADD_DURATION  implemented in Unit::ProcDamageAndSpellFor
     &AuraEffect::HandleNoImmediateEffect,                         //321 SPELL_AURA_MOD_CRITICAL_BLOCK_PCT
-    &AuraEffect::HandleNoImmediateEffect,                         //322 SPELL_AURA_MOD_SPELL_CHARGES
+    &AuraEffect::HandleAuraAddCharges,                            //322 SPELL_AURA_MOD_SPELL_CHARGES
     &AuraEffect::HandleModTriggerSpellOnStacksSelf,               //323 SPELL_AURA_MOD_TRIGGER_SPELL_ON_STACKS_ON_SELF
     &AuraEffect::HandleModTriggerSpellOnStacksTarget,             //324 SPELL_AURA_MOD_TRIGGER_SPELL_ON_STACKS_ON_TARGET 
     &AuraEffect::HandleNoImmediateEffect,                         //325 SPELL_AURA_MOD_DAMAGE_TAKEN_PCT_BEFORE_BLOCK
@@ -7285,22 +7285,22 @@ void AuraEffect::HandleAuraModTriggerSpellPowerPercent(AuraApplication const* au
         caster->RemoveAura(GetTriggerSpell());
 }
 
-void AuraEffect::HandleAuraAddCharges(AuraApplication* aurApp, uint8 mode, bool apply)
+void AuraEffect::HandleAuraAddCharges(AuraApplication const* aurApp, uint8 mode, bool apply) const
 {
     auto caster = GetCaster();
 
     auto player = caster->ToPlayer();
-   /* int32 chargesAdded = GetAmount();
-    auto chargeable = player->_SpellCharges.find(m_spellInfo->SpellFamilyFlags);
-    if (chargeable != player->_SpellCharges.end()) {
-        if (auto ChargeEntry = sObjectMgr->TryGetChargeEntry(m_spellInfo->SpellFamilyFlags)) {
-            if (apply)
-            {
-                chargeable->second = ChargeEntry->maxCharges + chargesAdded;
-            }
-            else {
-                chargeable->second = ChargeEntry->maxCharges;
-            }
+
+    uint32 chargesAdded = GetAmount();
+
+    auto data = GetSpellInfo()->GetEffect(SpellEffIndex(GetEffIndex()));
+    if (auto ChargeEntry = sObjectMgr->TryGetChargeEntry(data.SpellClassMask)) {
+        if (apply)
+        {
+            player->_spellCharges[data.SpellClassMask] = ChargeEntry->baseCharges + chargesAdded;
         }
-    }*/
+        else {
+            player->_spellCharges.erase(data.SpellClassMask);
+        }
+    }
 }

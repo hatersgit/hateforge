@@ -364,7 +364,7 @@ public:
     void HandleAuraModTriggerSpellPowerPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
 
     // hater: charges
-    void HandleAuraAddCharges(AuraApplication* aurApp, uint8 mode, bool apply);
+    void HandleAuraAddCharges(AuraApplication const* aurApp, uint8 mode, bool apply) const;
 };
 
 namespace Acore

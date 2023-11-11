@@ -10662,13 +10662,13 @@ void ObjectMgr::LoadSpellChargeMap()
         uint32 spell = fields[0].Get<uint32>();
         uint32 timer = fields[1].Get<uint32>();
         uint32 item = fields[2].Get<uint32>();
-        uint8 max = fields[3].Get<uint8>();
+        uint8 base = fields[3].Get<uint8>();
 
         SpellChargeEntry* charge = new SpellChargeEntry();
         charge->chargeItem = item;
         charge->SpellId = spell;
         charge->rechargeTime = timer;
-        charge->maxCharges = max;
+        charge->baseCharges = base;
 
         if (auto info = sSpellMgr->GetSpellInfo(spell)) {
             _chargeSpellMap[info->SpellFamilyFlags] = charge;

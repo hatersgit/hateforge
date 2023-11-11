@@ -9935,68 +9935,68 @@ void Player::ApplySpellMod(SpellInfo const* spellInfo, SpellModOp op, T& baseval
     int32 totalflat = 0;
 
     auto calculateSpellMod = [&](SpellModifier* mod)
-    {
-        // xinef: temporary pets cannot use charged mods of owner, needed for mirror image QQ they should use their own auras
-        if (temporaryPet && mod->charges != 0)
         {
-            return;
-        }
-
-        if (mod->type == SPELLMOD_FLAT)
-        {
-            // xinef: do not allow to consume more than one 100% crit increasing spell
-            if (mod->op == SPELLMOD_CRITICAL_CHANCE && totalflat >= 100)
+            // xinef: temporary pets cannot use charged mods of owner, needed for mirror image QQ they should use their own auras
+            if (temporaryPet && mod->charges != 0)
             {
                 return;
             }
 
-            int32 flatValue = mod->value;
+            if (mod->type == SPELLMOD_FLAT)
+            {
+                // xinef: do not allow to consume more than one 100% crit increasing spell
+                if (mod->op == SPELLMOD_CRITICAL_CHANCE && totalflat >= 100)
+                {
+                    return;
+                }
 
-            // SPELL_MOD_THREAT - divide by 100 (in packets we send threat * 100)
-            if (mod->op == SPELLMOD_THREAT)
+                int32 flatValue = mod->value;
+
+                // SPELL_MOD_THREAT - divide by 100 (in packets we send threat * 100)
+                if (mod->op == SPELLMOD_THREAT)
+                {
+                    flatValue /= 100;
+                }
+
+                totalflat += flatValue;
+            }
+            else if (mod->type == SPELLMOD_PCT)
             {
-                flatValue /= 100;
+                // skip percent mods for null basevalue (most important for spell mods with charges)
+                if (basevalue == T(0) || totalmul == 0.0f)
+                {
+                    return;
+                }
+
+                // special case (skip > 10sec spell casts for instant cast setting)
+                if (mod->op == SPELLMOD_CASTING_TIME && basevalue >= T(10000) && mod->value <= -100)
+                {
+                    return;
+                }
+                // xinef: special exception for surge of light, dont affect crit chance if previous mods were not applied
+                else if (mod->op == SPELLMOD_CRITICAL_CHANCE && spell && !HasSpellMod(mod, spell))
+                {
+                    return;
+                }
+                // xinef: special case for backdraft gcd reduce with backlast time reduction, dont affect gcd if cast time was not applied
+                else if (mod->op == SPELLMOD_GLOBAL_COOLDOWN && spell && !HasSpellMod(mod, spell))
+                {
+                    return;
+                }
+
+                // xinef: those two mods should be multiplicative (Glyph of Renew)
+                if (mod->op == SPELLMOD_DAMAGE || mod->op == SPELLMOD_DOT)
+                {
+                    totalmul *= CalculatePct(1.0f, 100.0f + mod->value);
+                }
+                else
+                {
+                    totalmul += CalculatePct(1.0f, mod->value);
+                }
             }
 
-            totalflat += flatValue;
-        }
-        else if (mod->type == SPELLMOD_PCT)
-        {
-            // skip percent mods for null basevalue (most important for spell mods with charges)
-            if (basevalue == T(0) || totalmul == 0.0f)
-            {
-                return;
-            }
-
-            // special case (skip > 10sec spell casts for instant cast setting)
-            if (mod->op == SPELLMOD_CASTING_TIME && basevalue >= T(10000) && mod->value <= -100)
-            {
-                return;
-            }
-            // xinef: special exception for surge of light, dont affect crit chance if previous mods were not applied
-            else if (mod->op == SPELLMOD_CRITICAL_CHANCE && spell && !HasSpellMod(mod, spell))
-            {
-                return;
-            }
-            // xinef: special case for backdraft gcd reduce with backlast time reduction, dont affect gcd if cast time was not applied
-            else if (mod->op == SPELLMOD_GLOBAL_COOLDOWN && spell && !HasSpellMod(mod, spell))
-            {
-                return;
-            }
-
-            // xinef: those two mods should be multiplicative (Glyph of Renew)
-            if (mod->op == SPELLMOD_DAMAGE || mod->op == SPELLMOD_DOT)
-            {
-                totalmul *= CalculatePct(1.0f, 100.0f + mod->value);
-            }
-            else
-            {
-                totalmul += CalculatePct(1.0f, mod->value);
-            }
-        }
-
-        DropModCharge(mod, spell);
-    };
+            DropModCharge(mod, spell);
+        };
 
     // Drop charges for triggering spells instead of triggered ones
     if (m_spellModTakingSpell)
@@ -10045,6 +10045,13 @@ void Player::ApplySpellMod(SpellInfo const* spellInfo, SpellModOp op, T& baseval
     {
         diff = (float)basevalue * (totalmul - 1.0f) + (float)totalflat;
     }
+
+    if (op == SPELLMOD_CHARGES)
+        if (auto charged = sObjectMgr->TryGetChargeEntry(spellInfo->SpellFamilyFlags)) {
+            auto playerCharges = _spellCharges.find(spellInfo->SpellFamilyFlags);
+            if (playerCharges != _spellCharges.end())
+                playerCharges->second += diff;
+        }
 
     basevalue = T((float)basevalue + diff);
 }
@@ -16753,8 +16760,15 @@ void Player::UpdateOperations()
         }
     }
 
-    for (auto spell : toDelete)
-        timedDelayedOperations.erase(spell);
+    for (auto spell : toDelete) {
+        auto info = sSpellMgr->GetSpellInfo(spell);
+        auto charged = sObjectMgr->TryGetChargeEntry(info->SpellFamilyFlags);
+        auto chargeCount = GetItemCount(charged->chargeItem);
+        auto maxCharges = charged->baseCharges + CalculateSpellMaxCharges(info->SpellFamilyFlags);
+
+        if (chargeCount == maxCharges)
+            timedDelayedOperations.erase(spell);
+    }
 
     if (timedDelayedOperations.empty() && !emptyWarned)
     {
@@ -16763,10 +16777,30 @@ void Player::UpdateOperations()
     }
 }
 
-void Player::RemoveOperationIfExists(uint32 spellId) {
+bool Player::OperationInProgress(uint32 spellId) {
     auto existing = timedDelayedOperations.find(spellId);
-    if (existing != timedDelayedOperations.end())
+    return existing != timedDelayedOperations.end();
+}
+
+void Player::RemoveOperationIfExists(uint32 spellId) {
+    if (OperationInProgress(spellId))
         timedDelayedOperations.erase(spellId);
+}
+
+uint8 Player::CalculateSpellMaxCharges(flag96 spell) {
+    uint8 out = 0;
+
+    auto chargeAuras = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_CHARGES);
+    for (auto aura : chargeAuras)
+        if (aura->GetSpellInfo()->CheckFamilyFlagsApply(spell, SpellEffIndex(aura->GetEffIndex())))
+            out += aura->GetAmount();
+
+    auto found = _spellCharges.find(spell);
+    if (found != _spellCharges.end())
+        if (found->second != out)
+            _spellCharges[spell] = out;
+
+    return _spellCharges[spell];
 }
 
 std::string Player::GetDebugInfo() const

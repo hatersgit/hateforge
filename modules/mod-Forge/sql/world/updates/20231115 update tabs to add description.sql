@@ -1,0 +1,1 @@
+Alter table `acore_world`.`forge_talent_tabs` add `description` VARCHAR(255) after `background`;

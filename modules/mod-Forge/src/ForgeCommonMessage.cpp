@@ -48,15 +48,11 @@ std::string ForgeCommonMessage::BuildTree(Player* player, CharacterPointType poi
     for (const auto& tab : tabs)
     {
         std::string msg;
-        auto id = !sConfigMgr->GetBoolDefault("Forge.StrictSpecs", false) && tab->TalentType == CharacterPointType::TALENT_TREE ? tab->ClassMask : tab->TalentType == CharacterPointType::PET_TALENT ? CharacterPointType::PET_TALENT : tab->Id;
-        if (sConfigMgr->GetBoolDefault("", false)) {
-            id = tab->Id;
-        }
 
-        msg = msg + std::to_string(id) + "^" +
+        msg = msg + std::to_string(tab->Id) + "^" +
             tab->Name + "^" +
             std::to_string(tab->SpellIconId) + "^" +
-            tab->Background + "^" +
+            tab->Background + "^" + tab->Description + "^" +
             std::to_string((int)tab->TalentType) + "^" +
             std::to_string(tab->TabIndex) + "^";
 

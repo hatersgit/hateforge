@@ -140,6 +140,8 @@ struct ForgeTalentTab
     std::string Name;
     uint32 SpellIconId;
     std::string Background;
+    std::string Description;
+    uint8 Role;
     CharacterPointType TalentType;
     uint32 TabIndex;
     std::unordered_map<uint32 /*spellId*/, ForgeTalent*> Talents;
@@ -1258,8 +1260,10 @@ private:
             newTab->Name = talentFields[3].Get<std::string>();
             newTab->SpellIconId = talentFields[4].Get<uint32>();
             newTab->Background = talentFields[5].Get<std::string>();
-            newTab->TalentType = (CharacterPointType)talentFields[6].Get<uint8>();
-            newTab->TabIndex = talentFields[7].Get<uint32>();
+            newTab->Description = talentFields[6].Get<std::string>();
+            newTab->Role = talentFields[7].Get<uint8>();
+            newTab->TalentType = (CharacterPointType)talentFields[8].Get<uint8>();
+            newTab->TabIndex = talentFields[9].Get<uint32>();
 
             for (auto& race : RaceAndClassTabMap)
             {

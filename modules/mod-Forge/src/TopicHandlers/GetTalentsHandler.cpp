@@ -63,7 +63,7 @@ private:
                 std::string sep = ";";
                 std::string delim = i ? "*" : "";
 
-                out += delim + std::to_string(tab->Id) + sep + std::to_string(tab->SpellIconId) + sep
+                out += delim + std::to_string(tab->Id) + sep + tab->SpellIconId + sep
                     + tab->Name + sep + "TODO add descriptions" + sep;
 
                 auto pClass = specSpells.find(player->getClass());

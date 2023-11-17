@@ -199,6 +199,11 @@ DynamicObject* ObjectAccessor::GetDynamicObject(WorldObject const& u, ObjectGuid
     return u.GetMap()->GetDynamicObject(guid);
 }
 
+AreaTrigger* ObjectAccessor::GetAreaTrigger(WorldObject const& u, ObjectGuid const& guid)
+{
+    return u.GetMap()->GetAreaTrigger(guid);
+}
+
 Unit* ObjectAccessor::GetUnit(WorldObject const& u, ObjectGuid const guid)
 {
     if (guid.IsPlayer())

@@ -35,6 +35,11 @@ struct Position
     Position& operator=(const Position&) = default;
     Position& operator=(Position&&) = default;
 
+    struct XY;
+    struct XYZ;
+    struct XYZO;
+    struct PackedXYZ;
+
     struct PositionXYStreamer
     {
         explicit PositionXYStreamer(Position& pos) : Pos(&pos) { }
@@ -327,5 +332,28 @@ ByteBuffer& operator<<(ByteBuffer& buf, Position::PositionXYZStreamer const& str
 ByteBuffer& operator >> (ByteBuffer& buf, Position::PositionXYZStreamer const& streamer);
 ByteBuffer& operator<<(ByteBuffer& buf, Position::PositionXYZOStreamer const& streamer);
 ByteBuffer& operator >> (ByteBuffer& buf, Position::PositionXYZOStreamer const& streamer);
+
+template<class Tag>
+struct TaggedPosition
+{
+    TaggedPosition(float x = 0.0f, float y = 0.0f, float z = 0.0f, float o = 0.0f) : Pos(x, y, z, o) { }
+    TaggedPosition(Position const& pos) : Pos(pos) { }
+
+    TaggedPosition& operator=(Position const& pos)
+    {
+        Pos.Relocate(pos);
+        return *this;
+    }
+
+    operator Position() const { return Pos; }
+
+    friend bool operator==(TaggedPosition const& left, TaggedPosition const& right) { return left.Pos == right.Pos; }
+    friend bool operator!=(TaggedPosition const& left, TaggedPosition const& right) { return left.Pos != right.Pos; }
+
+    friend ByteBuffer& operator<<(ByteBuffer& buf, TaggedPosition const& tagged) { return buf << Position::ConstStreamer<Tag>(tagged.Pos); }
+    friend ByteBuffer& operator>>(ByteBuffer& buf, TaggedPosition& tagged) { return buf >> Position::Streamer<Tag>(tagged.Pos); }
+
+    Position Pos;
+};
 
 #endif // ACore_game_Position_h__

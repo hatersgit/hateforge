@@ -2241,6 +2241,19 @@ public:
     void RemoveGameObject(uint32 spellid, bool del);
     void RemoveAllGameObjects();
 
+    // AreaTrigger management
+    void _RegisterAreaTrigger(AreaTrigger* areaTrigger);
+    void _UnregisterAreaTrigger(AreaTrigger* areaTrigger);
+    AreaTrigger* GetAreaTrigger(uint32 spellId) const;
+    std::vector<AreaTrigger*> GetAreaTriggers(uint32 spellId) const;
+    void RemoveAreaTrigger(uint32 spellId);
+    void RemoveAreaTrigger(AuraEffect const* aurEff);
+    void RemoveAllAreaTriggers();
+
+    bool IsCreature() {
+        return GetTypeId() == TYPEID_UNIT;
+    }
+
     void ModifyAuraState(AuraStateType flag, bool apply);
     uint32 BuildAuraStateUpdateForTarget(Unit* target) const;
     bool HasAuraState(AuraStateType flag, SpellInfo const* spellProto = nullptr, Unit const* Caster = nullptr) const;
@@ -2550,6 +2563,9 @@ protected:
     typedef GuidList GameObjectList;
     GameObjectList m_gameObj;
     uint32 m_transform;
+
+    typedef std::vector<AreaTrigger*> AreaTriggerList;
+    std::unordered_map<ObjectGuid, uint32/*spellId*/> m_areaTriggers;
 
     Spell* m_currentSpells[CURRENT_MAX_SPELL];
 

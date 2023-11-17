@@ -50,7 +50,7 @@ std::string ForgeCommonMessage::BuildTree(Player* player, CharacterPointType poi
         std::string msg;
 
         msg = msg + std::to_string(tab->Id) + "^" +
-            tab->Name + "^" + tab->SpellIconId + "^" +
+            tab->Name + "^" + std::to_string(tab->SpellIconId) + "^" +
             tab->Background + "^" + tab->Description +
             "^" + std::to_string(tab->Role) + "^" +
             std::to_string((int)tab->TalentType) + "^" +

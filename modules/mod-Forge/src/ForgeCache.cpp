@@ -138,7 +138,7 @@ struct ForgeTalentTab
     uint32 ClassMask;
     uint32 RaceMask;
     std::string Name;
-    std::string SpellIconId;
+    uint32 SpellIconId;
     std::string Background;
     std::string Description;
     uint8 Role;
@@ -1258,7 +1258,7 @@ private:
             newTab->ClassMask = talentFields[1].Get<uint32>();
             newTab->RaceMask = talentFields[2].Get<uint32>();
             newTab->Name = talentFields[3].Get<std::string>();
-            newTab->SpellIconId = talentFields[4].Get<std::string>();
+            newTab->SpellIconId = talentFields[4].Get<uint32>();
             newTab->Background = talentFields[5].Get<std::string>();
             newTab->Description = talentFields[6].Get<std::string>();
             newTab->Role = talentFields[7].Get<uint8>();
@@ -1279,6 +1279,8 @@ private:
                     if (classBit != 0 || newTab->ClassMask == 0)
                     {
                         RaceAndClassTabMap[race.first][wowClass.first].insert(newTab->Id);
+                        SpellToTalentTabMap[newTab->SpellIconId] = newTab->Id;
+                        TalentTabToSpellMap[newTab->Id] = newTab->SpellIconId;
                         CharacterPointTypeToTalentTabIds[newTab->TalentType].insert(newTab->Id);
                     }
                 }

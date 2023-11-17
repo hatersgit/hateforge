@@ -957,10 +957,10 @@ private:
     std::unordered_map<CharacterPointType, ForgeCharacterPoint*> MaxPointDefaults;
     std::unordered_map < uint32, std::unordered_map<uint32, ForgeCharacterPoint*>> AccountWidePoints;
     // skillid
-    std::unordered_map<std::string, uint32> SpellToTalentTabMap;
+    std::unordered_map<uint32, uint32> SpellToTalentTabMap;
 
     // skillid
-    std::unordered_map<uint32, std::string> TalentTabToSpellMap;
+    std::unordered_map<uint32, uint32> TalentTabToSpellMap;
     std::unordered_map<CharacterPointType, std::unordered_set<uint32>> CharacterPointTypeToTalentTabIds;
 
     // Race, class, tabtype
@@ -1279,8 +1279,6 @@ private:
                     if (classBit != 0 || newTab->ClassMask == 0)
                     {
                         RaceAndClassTabMap[race.first][wowClass.first].insert(newTab->Id);
-                        SpellToTalentTabMap[newTab->SpellIconId] = newTab->Id;
-                        TalentTabToSpellMap[newTab->Id] = newTab->SpellIconId;
                         CharacterPointTypeToTalentTabIds[newTab->TalentType].insert(newTab->Id);
                     }
                 }

@@ -133,7 +133,7 @@ std::string ForgeCommonMessage::BuildTree(Player* player, CharacterPointType poi
 
             for (auto& preReq : talentKvp.second->UnlearnSpells)
             {
-                std::string reqDel = "¶";
+                std::string reqDel = "`";
 
                 if (j == 0)
                     reqDel = "";

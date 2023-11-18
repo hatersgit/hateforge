@@ -56,6 +56,25 @@ std::string ForgeCommonMessage::BuildTree(Player* player, CharacterPointType poi
             std::to_string((int)tab->TalentType) + "^" +
             std::to_string(tab->TabIndex) + "^";
 
+        auto level10s = fc->_levelClassSpellMap.find(sConfigMgr->GetIntDefault("Forge.StrictSpecs.TalentLevelReq", 10));
+        if (level10s != fc->_levelClassSpellMap.end()) {
+            auto pClass = level10s->second.find(player->getClass());
+            if (pClass != level10s->second.end())
+            {
+                auto spec = pClass->second.find(tab->Id);
+                if (spec != pClass->second.end()) {
+                    auto spells = spec->second;
+                    int j = 0;
+                    for (auto spell : spells) {
+                        auto spellSep = j ? "§" : "";
+                        msg += spellSep + std::to_string(spell);
+                        j++;
+                    }
+                    msg += "^";
+                }
+            }
+        }
+
         int i = 0;
 
         for (auto& talentKvp : tab->Talents)
@@ -114,7 +133,7 @@ std::string ForgeCommonMessage::BuildTree(Player* player, CharacterPointType poi
 
             for (auto& preReq : talentKvp.second->UnlearnSpells)
             {
-                std::string reqDel = "`";
+                std::string reqDel = "¶";
 
                 if (j == 0)
                     reqDel = "";

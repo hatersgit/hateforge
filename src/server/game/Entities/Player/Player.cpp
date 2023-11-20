@@ -9629,14 +9629,14 @@ void Player::SendForgeUIMsg(std::string topic, std::string message) {
 
         for (std::size_t i = 0; i < msgParts.size(); ++i)
         {
-            std::string msg = topic + "}" + std::to_string(i + 1) + "}" + sizeStr + "ƒ" + msgParts[i];
+            std::string msg = topic + "}" + std::to_string(i + 1) + "}" + sizeStr + "|" + msgParts[i];
             msg = MSG_TYPE_FORGE + "\t" + msg;
             Whisper(msg, LANG_ADDON, this);
         }
     }
     else
     {
-        message = topic + "ƒ" + message;
+        message = topic + "|" + message;
         message = MSG_TYPE_FORGE + "\t" + message;
         Whisper(message, LANG_ADDON, this);
     }

@@ -34,7 +34,7 @@ void TopicRouter::Route(Player* player, uint32& type, uint32& lang, std::string&
         if (addonType != MSG_TYPE_FORGE)
             return;
 
-        int delimeterIndex = msg.find(':');
+        int delimeterIndex = msg.find('ƒ');
 
         if (delimeterIndex == std::string::npos)
             return;

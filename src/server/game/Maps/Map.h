@@ -426,7 +426,6 @@ public:
     void MoveAllCreaturesInMoveList();
     void MoveAllGameObjectsInMoveList();
     void MoveAllDynamicObjectsInMoveList();
-    void MoveAllAreaTriggersInMoveList();
     void RemoveAllObjectsInRemoveList();
     virtual void RemoveAllPlayers();
 
@@ -521,7 +520,7 @@ public:
     GameObject* SummonGameObject(uint32 entry, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime, bool checkTransport = true);
     GameObject* SummonGameObject(uint32 entry, Position const& pos, float rotation0 = 0.0f, float rotation1 = 0.0f, float rotation2 = 0.0f, float rotation3 = 0.0f, uint32 respawnTime = 100, bool checkTransport = true);
     void SummonCreatureGroup(uint8 group, std::list<TempSummon*>* list = nullptr);
-    AreaTrigger* GetAreaTrigger(ObjectGuid const& guid);
+
     Corpse* GetCorpse(ObjectGuid const guid);
     Creature* GetCreature(ObjectGuid const guid);
     GameObject* GetGameObject(ObjectGuid const guid);
@@ -684,7 +683,6 @@ private:
     bool CreatureCellRelocation(Creature* creature, Cell new_cell);
     bool GameObjectCellRelocation(GameObject* go, Cell new_cell);
     bool DynamicObjectCellRelocation(DynamicObject* go, Cell new_cell);
-    bool AreaTriggerCellRelocation(AreaTrigger* at, Cell new_cell);
 
     template<class T> void InitializeObject(T* obj);
     void AddCreatureToMoveList(Creature* c, float x, float y, float z, float ang);
@@ -693,8 +691,6 @@ private:
     void RemoveGameObjectFromMoveList(GameObject* go);
     void AddDynamicObjectToMoveList(DynamicObject* go, float x, float y, float z, float ang);
     void RemoveDynamicObjectFromMoveList(DynamicObject* go);
-    void AddAreaTriggerToMoveList(AreaTrigger* at, float x, float y, float z, float ang);
-    void RemoveAreaTriggerFromMoveList(AreaTrigger* at);
 
     bool _creatureToMoveLock;
     std::vector<Creature*> _creaturesToMove;
@@ -704,9 +700,6 @@ private:
 
     bool _dynamicObjectsToMoveLock;
     std::vector<DynamicObject*> _dynamicObjectsToMove;
-
-    bool _areaTriggersToMoveLock;
-    std::vector<AreaTrigger*> _areaTriggersToMove;
 
     [[nodiscard]] bool IsGridLoaded(const GridCoord&) const;
     void EnsureGridCreated_i(const GridCoord&);

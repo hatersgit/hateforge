@@ -420,6 +420,20 @@ struct AreaTriggerTeleport
     float  target_Orientation;
 };
 
+struct AreaTrigger
+{
+    uint32 entry;
+    uint32 map;
+    float x;
+    float y;
+    float z;
+    float radius;
+    float length;
+    float width;
+    float height;
+    float orientation;
+};
+
 // hater: m+
 struct InstanceDifficultyMultiplier
 {

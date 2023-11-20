@@ -2283,11 +2283,6 @@ GameObject* Map::SummonGameObject(uint32 entry, Position const& pos, float rotat
     return SummonGameObject(entry, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), rotation0, rotation1, rotation2, rotation3, respawnTime, checkTransport);
 }
 
-AreaTrigger* Map::GetAreaTrigger(ObjectGuid const& guid)
-{
-    return _objectsStore.Find<AreaTrigger>(guid);
-}
-
 void WorldObject::SetZoneScript()
 {
     if (Map* map = FindMap())

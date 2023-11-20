@@ -1550,67 +1550,6 @@ bool Map::DynamicObjectCellRelocation(DynamicObject* go, Cell new_cell)
     return false;
 }
 
-bool Map::AreaTriggerCellRelocation(AreaTrigger* at, Cell new_cell)
-{
-    Cell const& old_cell = at->GetCurrentCell();
-    if (!old_cell.DiffGrid(new_cell))                       // in same grid
-    {
-        // if in same cell then none do
-        if (old_cell.DiffCell(new_cell))
-        {
-#ifdef ACORE_DEBUG
-            LOG_DEBUG("maps", "AreaTrigger (%s) moved in grid[%u, %u] from cell[%u, %u] to cell[%u, %u].", at->GetGUID().ToString().c_str(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.CellX(), new_cell.CellY());
-#endif
-
-            at->RemoveFromGrid();
-            AddToGrid(at, new_cell);
-        }
-        else
-        {
-#ifdef ACORE_DEBUG
-            LOG_DEBUG("maps", "AreaTrigger (%s) moved in same grid[%u, %u]cell[%u, %u].", at->GetGUID().ToString().c_str(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY());
-#endif
-        }
-
-        return true;
-    }
-
-    // in diff. grids but active AreaTrigger
-    if (at->isActiveObject())
-    {
-        EnsureGridLoadedForActiveObject(new_cell, at);
-
-#ifdef ACORE_DEBUG
-        LOG_DEBUG("maps", "Active AreaTrigger (%s) moved from grid[%u, %u]cell[%u, %u] to grid[%u, %u]cell[%u, %u].", at->GetGUID().ToString().c_str(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
-#endif
-
-        at->RemoveFromGrid();
-        AddToGrid(at, new_cell);
-
-        return true;
-    }
-
-    // in diff. loaded grid normal AreaTrigger
-    if (IsGridLoaded(GridCoord(new_cell.GridX(), new_cell.GridY())))
-    {
-#ifdef ACORE_DEBUG
-        LOG_DEBUG("maps", "AreaTrigger (%s) moved from grid[%u, %u]cell[%u, %u] to grid[%u, %u]cell[%u, %u].", at->GetGUID().ToString().c_str(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
-#endif
-
-        at->RemoveFromGrid();
-        EnsureGridCreated(GridCoord(new_cell.GridX(), new_cell.GridY()));
-        AddToGrid(at, new_cell);
-
-        return true;
-    }
-
-    // fail to move: normal AreaTrigger attempt move to unloaded grid
-#ifdef ACORE_DEBUG
-    LOG_DEBUG("maps", "AreaTrigger (%s) attempted to move from grid[%u, %u]cell[%u, %u] to unloaded grid[%u, %u]cell[%u, %u].", at->GetGUID().ToString().c_str(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
-#endif
-    return false;
-}
-
 bool Map::CreatureRespawnRelocation(Creature* c, bool diffGridOnly)
 {
     float resp_x, resp_y, resp_z, resp_o;

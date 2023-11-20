@@ -365,6 +365,13 @@ private:
     T_FLAGS m_flags;
 };
 
+enum MapObjectCellMoveState
+{
+    MAP_OBJECT_CELL_MOVE_NONE, //not in move list
+    MAP_OBJECT_CELL_MOVE_ACTIVE, //in move list
+    MAP_OBJECT_CELL_MOVE_INACTIVE, //in move list but should not move
+};
+
 class MovableMapObject
 {
     friend class Map; //map for moving creatures

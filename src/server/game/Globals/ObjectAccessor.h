@@ -76,7 +76,6 @@ namespace ObjectAccessor
     Player* GetPlayer(Map const*, ObjectGuid const guid);
     Player* GetPlayer(WorldObject const&, ObjectGuid const guid);
     Creature* GetCreatureOrPetOrVehicle(WorldObject const&, ObjectGuid const);
-    AreaTrigger* GetAreaTrigger(WorldObject const, ObjectGuid const);
 
     // these functions return objects if found in whole world
     // ACCESS LIKE THAT IS NOT THREAD SAFE

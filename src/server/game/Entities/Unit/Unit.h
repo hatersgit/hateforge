@@ -18,6 +18,7 @@
 #ifndef __UNIT_H
 #define __UNIT_H
 
+#include "AreaTrigger.h"
 #include "EventProcessor.h"
 #include "EnumFlag.h"
 #include "FollowerRefMgr.h"
@@ -2234,6 +2235,15 @@ public:
     DynamicObject* GetDynObject(uint32 spellId);
     bool RemoveDynObject(uint32 spellId);
     void RemoveAllDynObjects();
+
+    // AreaTrigger management
+    void _RegisterAreaTrigger(AreaTrigger* areaTrigger);
+    void _UnregisterAreaTrigger(AreaTrigger* areaTrigger);
+    AreaTrigger* GetAreaTrigger(uint32 spellId);
+    std::vector<AreaTrigger*> GetAreaTriggers(uint32 spellId);
+    void RemoveAreaTrigger(uint32 spellId);
+    void RemoveAreaTrigger(AuraEffect* aurEff);
+    void RemoveAllAreaTriggers();
 
     [[nodiscard]] GameObject* GetGameObject(uint32 spellId) const;
     void AddGameObject(GameObject* gameObj);

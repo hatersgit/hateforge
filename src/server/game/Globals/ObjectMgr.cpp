@@ -6639,27 +6639,27 @@ void ObjectMgr::LoadAreaTriggers()
 
         ++count;
 
-        AreaTrigger at;
+        AreaTrigger* at = new AreaTrigger();
 
-        at.entry = fields[0].Get<uint32>();
-        at.map = fields[1].Get<uint32>();
-        at.x = fields[2].Get<float>();
-        at.y = fields[3].Get<float>();
-        at.z = fields[4].Get<float>();
-        at.radius = fields[5].Get<float>();
-        at.length = fields[6].Get<float>();
-        at.width = fields[7].Get<float>();
-        at.height = fields[8].Get<float>();
-        at.orientation = fields[9].Get<float>();
+        at->entry = fields[0].Get<uint32>();
+        at->map = fields[1].Get<uint32>();
+        at->x = fields[2].Get<float>();
+        at->y = fields[3].Get<float>();
+        at->z = fields[4].Get<float>();
+        at->radius = fields[5].Get<float>();
+        at->length = fields[6].Get<float>();
+        at->width = fields[7].Get<float>();
+        at->height = fields[8].Get<float>();
+        at->orientation = fields[9].Get<float>();
 
-        MapEntry const* mapEntry = sMapStore.LookupEntry(at.map);
+        MapEntry const* mapEntry = sMapStore.LookupEntry(at->map);
         if (!mapEntry)
         {
-            LOG_ERROR("sql.sql", "Area trigger (ID:{}) map (ID: {}) does not exist in `Map.dbc`.", at.entry, at.map);
+            LOG_ERROR("sql.sql", "Area trigger (ID:{}) map (ID: {}) does not exist in `Map.dbc`.", at->entry, at->map);
             continue;
         }
 
-        _areaTriggerStore[at.entry] = at;
+        _areaTriggerStore[at->entry] = at;
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded {} Area Trigger Definitions in {} ms", count, GetMSTimeDiffToNow(oldMSTime));

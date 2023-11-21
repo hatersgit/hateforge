@@ -84,7 +84,7 @@ private:
                                                 player->learnSpell(info->Effects[i].TriggerSpell);
                                         }
                                         else
-                                            player->learnSpell(spell, SPEC_MASK_ALL, false);
+                                            player->learnSpell(spell);
                                     }
                                 }
                             }

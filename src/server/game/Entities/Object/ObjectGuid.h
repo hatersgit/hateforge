@@ -38,7 +38,8 @@ enum TypeID
     TYPEID_PLAYER        = 4,
     TYPEID_GAMEOBJECT    = 5,
     TYPEID_DYNAMICOBJECT = 6,
-    TYPEID_CORPSE        = 7
+    TYPEID_CORPSE        = 7,
+    TYPEID_AREATRIGGER   = 8,
 };
 
 #define NUM_CLIENT_OBJECT_TYPES             8

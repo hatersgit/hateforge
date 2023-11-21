@@ -71,6 +71,9 @@ enum HunterSpells
     SPELL_LOCK_AND_LOAD_TRIGGER                     = 56453,
     SPELL_LOCK_AND_LOAD_MARKER                      = 67544,
     SPELL_HUNTER_PET_LEGGINGS_OF_BEAST_MASTERY      = 38297, // Leggings of Beast Mastery
+
+    SPELL_HUNTER_KILL_COMMAND_ATTACK                = 1600001,
+    SPELL_HUNTER_KILL_COMMAND_PROC                  = 1600003,
 };
 
 class spell_hun_check_pet_los : public SpellScript
@@ -1353,6 +1356,48 @@ class spell_hun_target_self_and_pet : public SpellScript
     }
 };
 
+class spell_hun_kill_command : public SpellScript
+{
+    PrepareSpellScript(spell_hun_kill_command);
+
+    SpellCastResult CheckCast()
+    {
+        Unit* caster = GetCaster();
+        if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+            return SPELL_FAILED_NO_VALID_TARGETS;
+
+        if (!caster->HasAura(SPELL_HUNTER_KILL_COMMAND_PROC))
+            return SPELL_FAILED_SPELL_UNAVAILABLE;
+
+        Pet* pet = caster->ToPlayer()->GetPet();
+        if (!pet)
+            return SPELL_FAILED_NO_PET;
+
+        if (!pet->IsAlive())
+        {
+            SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_PET_IS_DEAD);
+            return SPELL_FAILED_CUSTOM_ERROR;
+        }
+
+        return SPELL_CAST_OK;
+    }
+
+    void HandleCast()
+    {
+        Player* caster = GetCaster()->ToPlayer();
+        Creature* pet = caster->GetPet()->ToCreature();
+        caster->CastSpell(caster, SPELL_HUNTER_KILL_COMMAND_ATTACK, TRIGGERED_FULL_MASK);
+        pet->AI()->OwnerAttacked(GetExplTargetUnit());
+        caster->GetAura(SPELL_HUNTER_KILL_COMMAND_PROC)->Remove();
+    }
+
+    void Register() override
+    {
+        OnCheckCast += SpellCheckCastFn(spell_hun_kill_command::CheckCast);
+        OnCast += SpellCastFn(spell_hun_kill_command::HandleCast);
+    }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     RegisterSpellScript(spell_hun_check_pet_los);
@@ -1384,4 +1429,5 @@ void AddSC_hunter_spell_scripts()
     RegisterSpellScript(spell_hun_intimidation);
     RegisterSpellScript(spell_hun_bestial_wrath);
     RegisterSpellScript(spell_hun_target_self_and_pet);
+    RegisterSpellScript(spell_hun_kill_command);
 }

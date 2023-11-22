@@ -60,7 +60,7 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
     }
 
     //                                                      0   1     2      3      4      5      6      7      8      9
-    if (QueryResult templates = WorldDatabase.Query("SELECT Id, Type, Flags, Data0, Data1, Data2, Data3, Data4, Data5, ScriptName FROM `areatrigger_template`"))
+    if (QueryResult templates = WorldDatabase.Query("SELECT Id, Type, Flags, Data0, Data1, Data2, Data3, Data4, Data5 FROM `areatrigger_template`"))
     {
         do
         {
@@ -82,7 +82,6 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
             for (uint8 i = 0; i < MAX_AREATRIGGER_ENTITY_DATA; ++i)
                 areaTriggerTemplate.DefaultDatas.Data[i] = fields[3 + i].Get<float>();
 
-            areaTriggerTemplate.ScriptId = sObjectMgr->GetScriptId(fields[9].Get<std::string>());
             areaTriggerTemplate.PolygonVertices = std::move(verticesByAreaTrigger[areaTriggerTemplate.Id]);
             areaTriggerTemplate.PolygonVerticesTarget = std::move(verticesTargetByAreaTrigger[areaTriggerTemplate.Id]);
             areaTriggerTemplate.Actions = std::move(actionsByAreaTrigger[areaTriggerTemplate.Id]);
@@ -93,7 +92,7 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
     }
 
     //                                                                  0            1              2            3             4             5              6       7          8                  9             10
-    if (QueryResult areatriggerSpellMiscs = WorldDatabase.Query("SELECT SpellMiscId, AreaTriggerId, MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, TimeToTarget, TimeToTargetScale FROM `areatrigger_create_properties`"))
+    if (QueryResult areatriggerSpellMiscs = WorldDatabase.Query("SELECT Id, AreaTriggerId, MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, TimeToTarget, TimeToTargetScale, ScriptName FROM `areatrigger_create_properties`"))
     {
         do
         {

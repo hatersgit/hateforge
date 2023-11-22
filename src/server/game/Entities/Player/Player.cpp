@@ -16803,6 +16803,22 @@ uint8 Player::CalculateSpellMaxCharges(flag96 spell) {
     return _spellCharges[spell];
 }
 
+
+void Player::TriggerChargeRegen(flag96 flag) {
+    if (auto charged = sObjectMgr->TryGetChargeEntry(flag)) {
+        auto chargeCount = GetItemCount(charged->chargeItem);
+        auto maxCharges = charged->baseCharges + CalculateSpellMaxCharges(flag);
+        if (chargeCount < maxCharges)
+            AddTimedDelayedOperation(charged->SpellId, getMSTime() + charged->rechargeTime, [this, charged, flag]() {
+                uint32 noSpaceForCount = 0;
+                ItemPosCountVec dest;
+                InventoryResult msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, charged->chargeItem, 1, &noSpaceForCount);
+                StoreNewItem(dest, charged->chargeItem, true);
+                TriggerChargeRegen(flag);
+            });
+    }
+}
+
 std::string Player::GetDebugInfo() const
 {
     std::stringstream sstr;

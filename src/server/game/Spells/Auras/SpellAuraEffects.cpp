@@ -7241,6 +7241,7 @@ void AuraEffect::HandleAuraAddCharges(AuraApplication const* aurApp, uint8 mode,
         if (apply)
         {
             player->_spellCharges[data.SpellClassMask] = ChargeEntry->baseCharges + chargesAdded;
+            player->TriggerChargeRegen(data.SpellClassMask);
         }
         else {
             player->_spellCharges.erase(data.SpellClassMask);

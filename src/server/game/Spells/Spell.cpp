@@ -5550,23 +5550,6 @@ void Spell::TakeRunePower(bool didHit)
             player->ModifyPower(POWER_RUNIC_POWER, int32(rp));
 }
 
-void TriggerChargeRegen(Player* player, SpellInfo* info) {
-    if (auto charged = sObjectMgr->TryGetChargeEntry(info->SpellFamilyFlags)) {
-        player->AddTimedDelayedOperation(charged->SpellId, getMSTime() + charged->rechargeTime, [player, charged, info]() {
-            uint32 noSpaceForCount = 0;
-            ItemPosCountVec dest;
-            InventoryResult msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, charged->chargeItem, 1, &noSpaceForCount);
-            player->StoreNewItem(dest, charged->chargeItem, true);
-
-            auto chargeCount = player->GetItemCount(charged->chargeItem);
-            auto maxCharges = charged->baseCharges + player->CalculateSpellMaxCharges(info->SpellFamilyFlags);
-
-            if (chargeCount < maxCharges)
-                TriggerChargeRegen(player, info);
-            });
-    }
-}
-
 void Spell::TakeReagents()
 {
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -5615,7 +5598,7 @@ void Spell::TakeReagents()
         p_caster->DestroyItemCount(itemid, itemcount, true);
 
         // hater: charge system
-        TriggerChargeRegen(p_caster, (SpellInfo*)m_spellInfo);
+        p_caster->TriggerChargeRegen(m_spellInfo->SpellFamilyFlags);
     }
 }
 

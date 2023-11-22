@@ -72,6 +72,7 @@ enum class HighGuid
     Mo_Transport   = 0x1FC0,                      // blizz 1FC0 (for GAMEOBJECT_TYPE_MO_TRANSPORT)
     Instance       = 0x1F40,                      // blizz 1F40
     Group          = 0x1F50,
+    AreaTrigger    = 0xfff0,
 };
 
 template<HighGuid high>
@@ -107,6 +108,7 @@ GUID_TRAIT_MAP_SPECIFIC(HighGuid::Pet)
 GUID_TRAIT_MAP_SPECIFIC(HighGuid::GameObject)
 GUID_TRAIT_MAP_SPECIFIC(HighGuid::DynamicObject)
 GUID_TRAIT_MAP_SPECIFIC(HighGuid::Corpse)
+GUID_TRAIT_MAP_SPECIFIC(HighGuid::AreaTrigger)
 
 class ObjectGuid;
 class PackedGuid;

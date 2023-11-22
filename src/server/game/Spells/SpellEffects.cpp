@@ -6204,7 +6204,7 @@ void Spell::EffectActivateSpec(SpellEffIndex /*effIndex*/)
 
     if (Player* player = unitTarget->ToPlayer())
     {
-        player->ActivateSpec(damage - 1); // damage is 1 or 2, spec is 0 or 1
+        player->SetSpecActivationAllowed(true);
     }
 }
 

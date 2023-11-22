@@ -393,6 +393,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleAuraModSpellPowerOfStatPercent,            //330 SPELL_AURA_MOD_SPELL_POWER_OF_STAT_PERCENT
     &AuraEffect::HandleAuraModSpellPowerOfCombatRatingPercent,    //331 SPELL_AURA_MOD_SPELL_POWER_OF_RATING_PERCENT
     &AuraEffect::HandleAuraModTriggerSpellPowerPercent,           //332 SPELL_AURA_MOD_TRIGGER_SPELL_ON_POWER_PCT
+    &AuraEffect::HandleCreateAreaTrigger,                         //333 SPELL_AURA_AREA_TRIGGER
 };
 
 AuraEffect::AuraEffect(Aura* base, uint8 effIndex, int32* baseAmount, Unit* caster):
@@ -7244,5 +7245,21 @@ void AuraEffect::HandleAuraAddCharges(AuraApplication const* aurApp, uint8 mode,
         else {
             player->_spellCharges.erase(data.SpellClassMask);
         }
+    }
+}
+
+void AuraEffect::HandleCreateAreaTrigger(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_REAL))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (Unit* caster = GetCaster())
+    {
+        if (apply)
+            AreaTrigger::CreateAreaTrigger(GetMiscValue(), caster, target, GetSpellInfo(), *target, GetBase()->GetDuration(), m_spellInfo->SpellVisual, ObjectGuid::Empty, this);
+        //else
+           // caster->RemoveAreaTrigger(this);
     }
 }

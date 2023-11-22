@@ -339,6 +339,7 @@ public:
     void HandleModTriggerSpellOnStacksSelf(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleModTriggerSpellOnStacksTarget(AuraApplication const* aurApp, uint8 mode, bool apply) const; 
     void HandleModToggleAuraCombatState(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+    void HandleCreateAreaTrigger(AuraApplication const* aurApp, uint8 mode, bool apply) const;
 
     // aura effect periodic tick handlers
     void HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const;

@@ -393,6 +393,7 @@ enum AuraType
     SPELL_AURA_MOD_SPELL_POWER_OF_STAT_PERCENT              = 330,
     SPELL_AURA_MOD_SPELL_POWER_OF_RATING_PERCENT            = 331,
     SPELL_AURA_MOD_TRIGGER_SPELL_ON_POWER_PCT               = 332,
+    SPELL_AURA_AREA_TRIGGER                                 = 333,
     TOTAL_AURAS
 };
 

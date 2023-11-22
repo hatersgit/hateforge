@@ -59,58 +59,6 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
         LOG_INFO("server.loading", ">> Loaded 0 AreaTrigger templates actions. DB table `areatrigger_template_actions` is empty.");
     }
 
-    //                                                     0              1    2         3         4               5
-    if (QueryResult vertices = WorldDatabase.Query("SELECT AreaTriggerId, Idx, VerticeX, VerticeY, VerticeTargetX, VerticeTargetY FROM `areatrigger_template_polygon_vertices` ORDER BY `AreaTriggerId`, `Idx`"))
-    {
-        do
-        {
-            Field* verticeFields = vertices->Fetch();
-            uint32 areaTriggerId = verticeFields[0].Get<uint32>();
-
-            verticesByAreaTrigger[areaTriggerId].emplace_back(verticeFields[2].Get<float>(), verticeFields[3].Get<float>());
-
-            if (!verticeFields[4].IsNull() && !verticeFields[5].IsNull())
-                verticesTargetByAreaTrigger[areaTriggerId].emplace_back(verticeFields[4].Get<float>(), verticeFields[5].Get<float>());
-            else if (verticeFields[4].IsNull() != verticeFields[5].IsNull())
-                LOG_ERROR("sql.sql", "Table `areatrigger_template_polygon_vertices` has listed invalid target vertices (AreaTrigger: %u, Index: %u).", areaTriggerId, verticeFields[1].Get<uint32>());
-        } while (vertices->NextRow());
-    }
-    else
-    {
-        LOG_INFO("server.loading", ">> Loaded 0 AreaTrigger templates polygon vertices. DB table `areatrigger_template_polygon_vertices` is empty.");
-    }
-
-    //                                                    0            1  2  3
-    if (QueryResult splines = WorldDatabase.Query("SELECT SpellMiscId, X, Y, Z FROM `spell_areatrigger_splines` ORDER BY `SpellMiscId`, `Idx`"))
-    {
-        do
-        {
-            Field* splineFields = splines->Fetch();
-            uint32 spellMiscId = splineFields[0].Get<uint32>();
-            splinesBySpellMisc[spellMiscId].emplace_back(splineFields[1].Get<float>(), splineFields[2].Get<float>(), splineFields[3].Get<float>());
-        } while (splines->NextRow());
-    }
-    else
-    {
-        LOG_INFO("server.loading", ">> Loaded 0 AreaTrigger templates splines. DB table `spell_areatrigger_splines` is empty.");
-    }
-
-    //                                                          0            1  2  3  4        5        6
-    if (QueryResult rollpitchyaws = WorldDatabase.Query("SELECT SpellMiscId, X, Y, Z, TargetX, TargetY, TargetZ FROM `spell_areatrigger_rollpitchyaw` ORDER BY `SpellMiscId`"))
-    {
-        do
-        {
-            Field* rollpitchyawFields = rollpitchyaws->Fetch();
-            uint32 spellMiscId = rollpitchyawFields[0].Get<uint32>();
-            rollpitchyawBySpellMisc[spellMiscId].emplace_back(rollpitchyawFields[1].Get<float>(), rollpitchyawFields[2].Get<float>(), rollpitchyawFields[3].Get<float>());
-            rollpitchyawBySpellMisc[spellMiscId].emplace_back(rollpitchyawFields[4].Get<float>(), rollpitchyawFields[5].Get<float>(), rollpitchyawFields[6].Get<float>());
-        } while (rollpitchyaws->NextRow());
-    }
-    else
-    {
-        LOG_INFO("server.loading", ">> Loaded 0 AreaTrigger templates Roll Pitch Yaw. DB table `spell_areatrigger_rollpitchyaw` is empty.");
-    }
-
     //                                                      0   1     2      3      4      5      6      7      8      9
     if (QueryResult templates = WorldDatabase.Query("SELECT Id, Type, Flags, Data0, Data1, Data2, Data3, Data4, Data5, ScriptName FROM `areatrigger_template`"))
     {
@@ -145,7 +93,7 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
     }
 
     //                                                                  0            1              2            3             4             5              6       7          8                  9             10
-    if (QueryResult areatriggerSpellMiscs = WorldDatabase.Query("SELECT SpellMiscId, AreaTriggerId, MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, TimeToTarget, TimeToTargetScale FROM `spell_areatrigger`"))
+    if (QueryResult areatriggerSpellMiscs = WorldDatabase.Query("SELECT SpellMiscId, AreaTriggerId, MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, TimeToTarget, TimeToTargetScale FROM `areatrigger_create_properties`"))
     {
         do
         {
@@ -201,50 +149,6 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
     else
     {
         LOG_INFO("server.loading", ">> Loaded 0 Spell AreaTrigger templates. DB table `spell_areatrigger` is empty.");
-    }
-
-    //                                                                  0            1           2             3                4             5        6                 7
-    if (QueryResult circularMovementInfos = WorldDatabase.Query("SELECT SpellMiscId, StartDelay, CircleRadius, BlendFromRadius, InitialAngle, ZOffset, CounterClockwise, CanLoop FROM `spell_areatrigger_circular` ORDER BY `SpellMiscId`"))
-    {
-        do
-        {
-            Field* circularMovementInfoFields = circularMovementInfos->Fetch();
-            uint32 spellMiscId = circularMovementInfoFields[0].Get<uint32>();
-
-            auto atSpellMiscItr = _areaTriggerTemplateSpellMisc.find(spellMiscId);
-            if (atSpellMiscItr == _areaTriggerTemplateSpellMisc.end())
-            {
-                LOG_ERROR("sql.sql", "Table `spell_areatrigger_circular` reference invalid SpellMiscId %u", spellMiscId);
-                continue;
-            }
-
-            AreaTriggerOrbitInfo& orbitInfo = atSpellMiscItr->second.OrbitInfo;
-
-            orbitInfo.StartDelay = circularMovementInfoFields[1].Get<uint32>();
-
-#define VALIDATE_AND_SET_FLOAT(Float, Value) \
-            orbitInfo.Float = Value; \
-            if (!std::isfinite(orbitInfo.Float)) \
-            { \
-                LOG_ERROR("sql.sql", "Table `spell_areatrigger_circular` has listed areatrigger (MiscId: %u) with invalid " #Float " (%f), set to 0!", \
-                    spellMiscId, orbitInfo.Float); \
-                orbitInfo.Float = 0.0f; \
-            }
-
-            VALIDATE_AND_SET_FLOAT(Radius, circularMovementInfoFields[2].Get<float>());
-            VALIDATE_AND_SET_FLOAT(BlendFromRadius, circularMovementInfoFields[3].Get<float>());
-            VALIDATE_AND_SET_FLOAT(InitialAngle, circularMovementInfoFields[4].Get<float>());
-            VALIDATE_AND_SET_FLOAT(ZOffset, circularMovementInfoFields[5].Get<float>());
-
-#undef VALIDATE_AND_SET_FLOAT
-
-            orbitInfo.CounterClockwise = circularMovementInfoFields[6].Get<bool>();
-            orbitInfo.CanLoop = circularMovementInfoFields[7].Get<bool>();
-        } while (circularMovementInfos->NextRow());
-    }
-    else
-    {
-        LOG_INFO("server.loading", ">> Loaded 0 AreaTrigger templates circular movement infos. DB table `spell_areatrigger_circular` is empty.");
     }
 
     LOG_INFO("server.loading", ">> Loaded {} spell areatrigger templates in %u ms.", _areaTriggerTemplateStore.size(), GetMSTimeDiffToNow(oldMSTime));

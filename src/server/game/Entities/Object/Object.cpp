@@ -140,6 +140,12 @@ void Object::_Create(ObjectGuid::LowType guidlow, uint32 entry, HighGuid guidhig
     m_PackGUID.Set(guid);
 }
 
+void Object::_Create(ObjectGuid const& guid)
+{
+    m_objectUpdated = false;
+    SetGuidValue(OBJECT_FIELD_GUID, guid);
+}
+
 std::string Object::_ConcatFields(uint16 startIndex, uint16 size) const
 {
     std::ostringstream ss;

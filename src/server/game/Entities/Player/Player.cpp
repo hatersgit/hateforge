@@ -16762,12 +16762,17 @@ void Player::UpdateOperations()
 
     for (auto spell : toDelete) {
         auto info = sSpellMgr->GetSpellInfo(spell);
-        auto charged = sObjectMgr->TryGetChargeEntry(info->SpellFamilyFlags);
-        auto chargeCount = GetItemCount(charged->chargeItem);
-        auto maxCharges = charged->baseCharges + CalculateSpellMaxCharges(info->SpellFamilyFlags);
+        if (auto charged = sObjectMgr->TryGetChargeEntry(info->SpellFamilyFlags)) {
+            auto chargeCount = GetItemCount(charged->chargeItem);
+            auto maxCharges = charged->baseCharges + CalculateSpellMaxCharges(info->SpellFamilyFlags);
 
-        if (chargeCount == maxCharges)
+            if (chargeCount == maxCharges)
+                timedDelayedOperations.erase(spell);
+        }
+        else {
             timedDelayedOperations.erase(spell);
+        }
+
     }
 
     if (timedDelayedOperations.empty() && !emptyWarned)

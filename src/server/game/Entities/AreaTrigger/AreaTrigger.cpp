@@ -87,7 +87,8 @@ bool AreaTrigger::Create(uint32 spellMiscId, Unit* caster, Unit* target, SpellIn
     }
 
     _areaTriggerTemplate = _areaTriggerMiscTemplate->Template;
-    WorldObject::_Create(caster->GetMap()->GenerateLowGuid<HighGuid::DynamicObject>(), HighGuid::DynamicObject, caster->GetPhaseMask());
+    auto templateId = GetTemplate() ? GetTemplate()->Id : 0;
+    Object::_Create(ObjectGuid::Create<HighGuid::DynamicObject>(templateId, caster->GetMap()->GenerateLowGuid<HighGuid::DynamicObject>()));
 
     UpdatePositionData();
 

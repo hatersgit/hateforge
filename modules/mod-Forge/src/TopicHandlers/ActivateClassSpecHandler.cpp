@@ -19,7 +19,7 @@ public:
     void HandleMessage(ForgeAddonMessage& iam) override
     {
 
-        if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", false)) {
+        if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", true)) {
             if (!fc->isNumber(iam.message))
                 return;
 

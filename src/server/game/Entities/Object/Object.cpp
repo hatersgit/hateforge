@@ -142,6 +142,8 @@ void Object::_Create(ObjectGuid::LowType guidlow, uint32 entry, HighGuid guidhig
 
 void Object::_Create(ObjectGuid const& guid)
 {
+    if (!m_uint32Values) _InitValues();
+
     m_objectUpdated = false;
     SetGuidValue(OBJECT_FIELD_GUID, guid);
 }

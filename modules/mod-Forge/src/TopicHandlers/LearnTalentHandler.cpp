@@ -24,6 +24,8 @@ public:
 
         ForgeCharacterSpec* spec;
         if (fc->TryGetCharacterActiveSpec(iam.player, spec)) {
+
+
             std::vector<std::string> typeSplit;
             boost::algorithm::split(typeSplit, iam.message, boost::is_any_of("|"));
             if (typeSplit.empty() || typeSplit.size() != 2 || !fc->isNumber(typeSplit[0]))

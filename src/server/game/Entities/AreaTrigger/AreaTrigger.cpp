@@ -26,10 +26,12 @@ AreaTrigger::AreaTrigger() : WorldObject(false), _aurEff(nullptr),
 _duration(0), _totalDuration(0), _timeSinceCreated(0), _periodicProcTimer(0), _basePeriodicProcTimer(0),
 _previousCheckOrientation(std::numeric_limits<float>::infinity()),
 _isBeingRemoved(false), _isRemoved(false), _reachedDestination(false), _lastSplineIndex(0), _movementTime(0),
-_areaTriggerTemplate(nullptr), _areaTriggerMiscTemplate(nullptr), _spawnId(0), _guidScriptId(0), _ai()
+_areaTriggerTemplate(nullptr), _areaTriggerMiscTemplate(nullptr), _spawnId(0), _guidScriptId(0), _ai(), m_areaTriggerData(new AreaTriggerDataState())
 {
     m_objectType |= TYPEMASK_GAMEOBJECT;
     m_objectTypeId = TYPEID_AREATRIGGER;
+
+    m_valuesCount = DYNAMICOBJECT_END;
 }
 
 AreaTrigger::~AreaTrigger()
@@ -184,7 +186,7 @@ bool AreaTrigger::Create(uint32 spellMiscId, Unit* caster, Unit* target, SpellIn
 
     //caster->_RegisterAreaTrigger(this);
 
-    _ai->OnCreate();
+    //_ai->OnCreate();
 
     return true;
 }
@@ -293,7 +295,7 @@ void AreaTrigger::SetDuration(int32 newDuration)
     _totalDuration = newDuration;
 
     // negative duration (permanent areatrigger) sent as 0
-    AreaTrigger::m_areaTriggerData->Duration = std::max(newDuration, 0);
+    m_areaTriggerData->Duration = std::max(newDuration, 0);
 }
 
 void AreaTrigger::_UpdateDuration(int32 newDuration)
@@ -301,7 +303,7 @@ void AreaTrigger::_UpdateDuration(int32 newDuration)
     _duration = newDuration;
 
     // should be sent in object create packets only
-    AreaTrigger::m_areaTriggerData->Duration = _duration;
+    m_areaTriggerData->Duration = _duration;
 }
 
 float AreaTrigger::GetProgress() const

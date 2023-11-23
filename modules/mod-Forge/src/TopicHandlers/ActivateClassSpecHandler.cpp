@@ -49,15 +49,15 @@ public:
                 auto info = sSpellMgr->GetSpellInfo(ACTIVATE_SPEC_SPELL);
                 iam.player->SetSpecActivationAllowed(false);
                 iam.player->CastSpell(iam.player, info);
-                iam.player->AddTimedDelayedOperation(ACTIVATE_SPEC_SPELL, info->GetDuration()+100, [iam, spec, tabId, this](){
+                iam.player->AddTimedDelayedOperation(ACTIVATE_SPEC_SPELL, info->CastTimeEntry->CastTime+100, [iam, spec, tabId, this](){
                     if (iam.player->GetSpecActivationAllowed()) {
                         ForgeTalentTab* tab;
                         if (fc->TryGetTalentTab(iam.player, tabId, tab)) {
                             fc->ForgetTalents(iam.player, spec, TALENT_TREE);
                             spec->CharacterSpecTabId = tabId;
                             LearnInitialSpecSpellsAndTalents(iam.player, tabId);
-
-                            fc->UpdateCharacterSpec(iam.player, spec);
+                            CharacterDatabase.Query("update acore_characters.forge_character_specs set charspec = {}, active = 1 where guid = {}", tabId, iam.player->GetGUID().GetCounter());
+                            
                             cm->SendSpecInfo(iam.player);
                             cm->SendTalents(iam.player);
 

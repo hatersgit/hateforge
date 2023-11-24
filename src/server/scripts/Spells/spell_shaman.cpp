@@ -72,6 +72,11 @@ enum ShamanSpellIcons
     SHAMAN_ICON_ID_SHAMAN_LAVA_FLOW             = 3087
 };
 
+enum SpellHelpers
+{
+    SPELL_MAGE_TEMPORAL_DISPLACEMENT            = 1280002
+};
+
 class spell_sha_totem_of_wrath : public SpellScript
 {
     PrepareSpellScript(spell_sha_totem_of_wrath);
@@ -436,13 +441,14 @@ class spell_sha_bloodlust : public SpellScript
 
     bool Validate(SpellInfo const* /*spellInfo*/) override
     {
-        return ValidateSpellInfo({ SPELL_SHAMAN_SATED, SPELL_SHAMAN_EXHAUSTION });
+        return ValidateSpellInfo({ SPELL_SHAMAN_SATED, SPELL_SHAMAN_EXHAUSTION, SPELL_MAGE_TEMPORAL_DISPLACEMENT });
     }
 
     void RemoveInvalidTargets(std::list<WorldObject*>& targets)
     {
         targets.remove_if(Acore::UnitAuraCheck(true, SPELL_SHAMAN_SATED));
         targets.remove_if(Acore::UnitAuraCheck(true, SPELL_SHAMAN_EXHAUSTION));
+        targets.remove_if(Acore::UnitAuraCheck(true, SPELL_MAGE_TEMPORAL_DISPLACEMENT));
     }
 
     void ApplyDebuff()
@@ -828,13 +834,14 @@ class spell_sha_heroism : public SpellScript
 
     bool Validate(SpellInfo const* /*spellInfo*/) override
     {
-        return ValidateSpellInfo({ SPELL_SHAMAN_EXHAUSTION, SPELL_SHAMAN_SATED });
+        return ValidateSpellInfo({ SPELL_SHAMAN_EXHAUSTION, SPELL_SHAMAN_SATED, SPELL_MAGE_TEMPORAL_DISPLACEMENT });
     }
 
     void RemoveInvalidTargets(std::list<WorldObject*>& targets)
     {
         targets.remove_if(Acore::UnitAuraCheck(true, SPELL_SHAMAN_EXHAUSTION));
         targets.remove_if(Acore::UnitAuraCheck(true, SPELL_SHAMAN_SATED));
+        targets.remove_if(Acore::UnitAuraCheck(true, SPELL_MAGE_TEMPORAL_DISPLACEMENT));
     }
 
     void ApplyDebuff()

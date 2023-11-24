@@ -1043,7 +1043,8 @@ enum SpellEffects
     SPELL_EFFECT_TALENT_SPEC_SELECT                 = 162,
     SPELL_EFFECT_163                                = 163,
     SPELL_EFFECT_REMOVE_AURA                        = 164,
-    TOTAL_SPELL_EFFECTS                             = 165
+    SPELL_EFFECT_LEARN_TRANSMOG_SET                 = 165,
+    TOTAL_SPELL_EFFECTS                             = 166
 };
 
 // EnumUtils: DESCRIBE THIS
@@ -3138,14 +3139,14 @@ enum SkillType
     SKILL_ZEALOTRY                 = 794,
     SKILL_GUARDIAN                 = 795,
     SKILL_PHYSICIAN                = 796,
-    SKILL_SCRAPPER                 = 797,
+    SKILL_SCRAPPER                 = 797,   // Technician
     SKILL_VANGUARD                 = 798,
-    SKILL_ANGUISH                  = 799,
+    SKILL_ANGUISH                  = 799,   // Unused for now
     SKILL_HAVOC                    = 800,
     SKILL_VENGEANCE                = 801,
-    SKILL_BLADESONG                = 802,
-    SKILL_INSPIRATION              = 803,
-    SKILL_SONGWEAVER               = 804
+    SKILL_BLADESONG                = 802,   // Unused for now
+    SKILL_INSPIRATION              = 803,   // Melody
+    SKILL_SONGWEAVER               = 804    // Rhapsody
 };
 
 #define MAX_SKILL_TYPE               805

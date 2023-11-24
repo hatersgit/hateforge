@@ -48,8 +48,9 @@ public:
 
                 auto info = sSpellMgr->GetSpellInfo(ACTIVATE_SPEC_SPELL);
                 iam.player->SetSpecActivationAllowed(false);
+                iam.player->RemoveOperationIfExists(ACTIVATE_SPEC_SPELL);
                 iam.player->CastSpell(iam.player, info);
-                iam.player->AddTimedDelayedOperation(ACTIVATE_SPEC_SPELL, info->CastTimeEntry->CastTime+100, [iam, spec, tabId, this](){
+                iam.player->AddTimedDelayedOperation(ACTIVATE_SPEC_SPELL, getMSTime() + info->CastTimeEntry->CastTime+100, [iam, spec, tabId, this](){
                     if (iam.player->GetSpecActivationAllowed()) {
                         ForgeTalentTab* tab;
                         if (fc->TryGetTalentTab(iam.player, tabId, tab)) {

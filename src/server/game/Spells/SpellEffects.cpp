@@ -6196,9 +6196,6 @@ void Spell::EffectSpecCount(SpellEffIndex /*effIndex*/)
 
 void Spell::EffectActivateSpec(SpellEffIndex /*effIndex*/)
 {
-    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
-        return;
-
     if (!unitTarget)
         return;
 

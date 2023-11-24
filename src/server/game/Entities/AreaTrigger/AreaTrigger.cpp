@@ -22,7 +22,7 @@
 #include "UpdateData.h"
 #include <G3D/AABox.h>
 
-AreaTrigger::AreaTrigger() : WorldObject(false), _aurEff(nullptr),
+AreaTrigger::AreaTrigger() : WorldObject(false), MovableMapObject(), _aurEff(nullptr),
 _duration(0), _totalDuration(0), _timeSinceCreated(0), _periodicProcTimer(0), _basePeriodicProcTimer(0),
 _previousCheckOrientation(std::numeric_limits<float>::infinity()),
 _isBeingRemoved(false), _isRemoved(false), _reachedDestination(false), _lastSplineIndex(0), _movementTime(0),
@@ -176,13 +176,16 @@ bool AreaTrigger::Create(uint32 spellMiscId, Unit* caster, Unit* target, SpellIn
     if (HasOrbit())
         Relocate(CalculateOrbitPosition());
 
-    //if (!GetMap()->AddToMap(this))
-    //{
-    //    // Returning false will cause the object to be deleted - remove from transport
-    //    if (transport)
-    //        transport->RemovePassenger(this);
-    //    return false;
-    //}
+    //if (IsWorldObject())
+    //    setActive(true);    //must before add to map to be put in world container
+
+    ////if (!GetMap()->AddToMap(this, true))
+    ////{
+    ////    // Returning false will cause the object to be deleted - remove from transport
+    ////    if (transport)
+    ////        transport->RemovePassenger(this);
+    ////    return false;
+    ////}
 
     //caster->_RegisterAreaTrigger(this);
 

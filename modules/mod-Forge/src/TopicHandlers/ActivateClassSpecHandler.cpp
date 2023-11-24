@@ -56,7 +56,7 @@ public:
                             fc->ForgetTalents(iam.player, spec, TALENT_TREE);
                             spec->CharacterSpecTabId = tabId;
                             LearnInitialSpecSpellsAndTalents(iam.player, tabId);
-                            CharacterDatabase.Query("update acore_characters.forge_character_specs set charspec = {}, active = 1 where guid = {}", tabId, iam.player->GetGUID().GetCounter());
+                            CharacterDatabase.Execute("update acore_characters.forge_character_specs set charspec = {}, active = 1 where guid = {}", tabId, iam.player->GetGUID().GetCounter());
                             
                             cm->SendSpecInfo(iam.player);
                             cm->SendTalents(iam.player);
@@ -66,9 +66,11 @@ public:
                         }
                         else
                             iam.player->SendForgeUIMsg(ForgeTopic::ACTIVATE_CLASS_SPEC_ERROR, "Invalid tab id for class.");
+
+                        iam.player->SetSpecActivationAllowed(false);
+                        iam.player->SendForgeUIMsg(ForgeTopic::ACTIVATE_CLASS_SPEC, "0");
                     }
                     });
-                iam.player->SetSpecActivationAllowed(false);
             }
         }
         else

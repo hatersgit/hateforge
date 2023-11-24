@@ -68,7 +68,7 @@ struct AreaTriggerDataState
     ObjectGuid CreatingEffectGUID;
 };
 
-class AreaTrigger : public WorldObject, public GridObject<AreaTrigger>
+class AreaTrigger : public WorldObject, public GridObject<AreaTrigger>, public MovableMapObject
 {
     public:
         AreaTrigger();

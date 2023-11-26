@@ -818,6 +818,19 @@ public:
     [[nodiscard]] virtual bool OnTrigger(Player* /*player*/, AreaTrigger const* /*trigger*/) { return false; }
 };
 
+class AreaTriggerEntityScript : public ScriptObject
+{
+protected:
+
+    AreaTriggerEntityScript(char const* name);
+
+public:
+
+    // Called when a AreaTriggerAI object is needed for the areatrigger.
+    virtual AreaTriggerAI* GetAI(AreaTrigger* /*at*/) const { return nullptr; }
+};
+
+
 class OnlyOnceAreaTriggerScript : public AreaTriggerScript
 {
     using AreaTriggerScript::AreaTriggerScript;
@@ -2274,6 +2287,7 @@ public: /* GameObjectScript */
     GameObjectAI* GetGameObjectAI(GameObject* go);
     void OnGameObjectAddWorld(GameObject* go);
     void OnGameObjectRemoveWorld(GameObject* go);
+    AreaTriggerAI* GetAreaTriggerAI(AreaTrigger* at);
 
 public: /* AreaTriggerScript */
     bool OnAreaTrigger(Player* player, AreaTrigger const* trigger);
@@ -2814,6 +2828,15 @@ class GenericGameObjectScript : public GameObjectScript
         GameObjectAI* GetAI(GameObject* me) const override { return new AI(me); }
 };
 #define RegisterGameObjectAI(ai_name) new GenericGameObjectScript<ai_name>(#ai_name)
+
+template <class AI>
+class GenericAreaTriggerEntityScript : public AreaTriggerEntityScript
+{
+public:
+    GenericAreaTriggerEntityScript(char const* name) : AreaTriggerEntityScript(name) { }
+    AreaTriggerAI* GetAI(AreaTrigger* at) const override { return new AI(at); }
+};
+#define RegisterAreaTriggerAI(ai_name) new GenericAreaTriggerEntityScript<ai_name>(#ai_name)
 
 // Cannot be used due gob scripts not working like this
 template <class AI, AI* (*AIFactory)(GameObject*)> class FactoryGameObjectScript : public GameObjectScript

@@ -19,6 +19,7 @@
 #include "CellImpl.h"
 #include "Corpse.h"
 #include "GridNotifiers.h"
+#include "AreaTriggerDataStore.h"
 #include "Creature.h"
 #include "DynamicObject.h"
 #include "GameObject.h"
@@ -189,6 +190,13 @@ void ObjectGridLoader::Visit(CreatureMapType& m)
     LoadHelper(cell_guids.creatures, cellCoord, m, i_creatures, i_map);
 }
 
+void ObjectGridLoader::Visit(AreaTriggerMapType& m)
+{
+    CellCoord cellCoord = i_cell.GetCellCoord();
+    CellObjectGuids const& cell_guids = sObjectMgr->GetCellObjectGuids(i_map->GetId(), i_map->GetDifficulty(), cellCoord.GetId());
+    LoadHelper(cell_guids.areatriggers, cellCoord, m, i_areaTriggers, i_map);
+}
+
 void ObjectWorldLoader::Visit(CorpseMapType& /*m*/)
 {
     CellCoord cellCoord = i_cell.GetCellCoord();
@@ -213,6 +221,7 @@ void ObjectGridLoader::LoadN(void)
     i_gameObjects = 0;
     i_creatures = 0;
     i_corpses = 0;
+    i_areaTriggers = 0;
     i_cell.data.Part.cell_y = 0;
     for (uint32 x = 0; x < MAX_NUMBER_OF_CELLS; ++x)
     {
@@ -235,7 +244,7 @@ void ObjectGridLoader::LoadN(void)
             }
         }
     }
-    LOG_DEBUG("maps", "{} GameObjects, {} Creatures, and {} Corpses/Bones loaded for grid {} on map {}", i_gameObjects, i_creatures, i_corpses, i_grid.GetGridId(), i_map->GetId());
+    LOG_DEBUG("maps", "{} GameObjects, {} Creatures, {} Corpses/Bones, and {} areatriggers loaded for grid {} on map {}", i_gameObjects, i_creatures, i_corpses, i_areaTriggers, i_grid.GetGridId(), i_map->GetId());
 }
 
 template<class T>
@@ -278,8 +287,10 @@ void ObjectGridCleaner::Visit(GridRefMgr<T>& m)
 template void ObjectGridUnloader::Visit(CreatureMapType&);
 template void ObjectGridUnloader::Visit(GameObjectMapType&);
 template void ObjectGridUnloader::Visit(DynamicObjectMapType&);
+template void ObjectGridUnloader::Visit(AreaTriggerMapType&);
 
 template void ObjectGridCleaner::Visit(CreatureMapType&);
 template void ObjectGridCleaner::Visit<GameObject>(GameObjectMapType&);
 template void ObjectGridCleaner::Visit<DynamicObject>(DynamicObjectMapType&);
 template void ObjectGridCleaner::Visit<Corpse>(CorpseMapType&);
+template void ObjectGridCleaner::Visit<AreaTrigger>(AreaTriggerMapType&);

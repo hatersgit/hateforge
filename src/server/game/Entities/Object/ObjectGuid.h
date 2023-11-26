@@ -54,6 +54,7 @@ enum TypeMask
     TYPEMASK_GAMEOBJECT     = 0x0020,
     TYPEMASK_DYNAMICOBJECT  = 0x0040,
     TYPEMASK_CORPSE         = 0x0080,
+    TYPEMASK_AREATRIGGER    = 0x0100,
     TYPEMASK_SEER           = TYPEMASK_PLAYER | TYPEMASK_UNIT | TYPEMASK_DYNAMICOBJECT
 };
 
@@ -72,6 +73,7 @@ enum class HighGuid
     Mo_Transport   = 0x1FC0,                      // blizz 1FC0 (for GAMEOBJECT_TYPE_MO_TRANSPORT)
     Instance       = 0x1F40,                      // blizz 1F40
     Group          = 0x1F50,
+    AreaTrigger    = 0xff00,
 };
 
 template<HighGuid high>
@@ -107,6 +109,7 @@ GUID_TRAIT_MAP_SPECIFIC(HighGuid::Pet)
 GUID_TRAIT_MAP_SPECIFIC(HighGuid::GameObject)
 GUID_TRAIT_MAP_SPECIFIC(HighGuid::DynamicObject)
 GUID_TRAIT_MAP_SPECIFIC(HighGuid::Corpse)
+GUID_TRAIT_MAP_SPECIFIC(HighGuid::AreaTrigger)
 
 class ObjectGuid;
 class PackedGuid;
@@ -195,6 +198,7 @@ class ObjectGuid
                 case HighGuid::Corpse:       return TYPEID_CORPSE;
                 case HighGuid::Mo_Transport: return TYPEID_GAMEOBJECT;
                 case HighGuid::Vehicle:      return TYPEID_UNIT;
+                case HighGuid::AreaTrigger:  return TYPEID_AREATRIGGER;
                 // unknown
                 case HighGuid::Instance:
                 case HighGuid::Group:
@@ -227,6 +231,7 @@ class ObjectGuid
                 case HighGuid::Mo_Transport:
                 case HighGuid::Instance:
                 case HighGuid::Group:
+                case HighGuid::AreaTrigger:
                     return false;
                 case HighGuid::GameObject:
                 case HighGuid::Transport:

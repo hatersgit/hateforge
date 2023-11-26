@@ -458,6 +458,12 @@ DynamicObjectScript::DynamicObjectScript(const char* name)
     ScriptRegistry<DynamicObjectScript>::AddScript(this);
 }
 
+AreaTriggerEntityScript::AreaTriggerEntityScript(char const* name)
+    : ScriptObject(name)
+{
+    ScriptRegistry<AreaTriggerEntityScript>::AddScript(this);
+}
+
 TransportScript::TransportScript(const char* name)
     : ScriptObject(name)
 {

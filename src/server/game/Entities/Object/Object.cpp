@@ -208,7 +208,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
     if (flags & UPDATEFLAG_STATIONARY_POSITION)
     {
         // UPDATETYPE_CREATE_OBJECT2 dynamic objects, corpses...
-        if (isType(TYPEMASK_DYNAMICOBJECT) || isType(TYPEMASK_CORPSE) || isType(TYPEMASK_PLAYER))
+        if (isType(TYPEMASK_DYNAMICOBJECT) || isType(TYPEMASK_CORPSE) || isType(TYPEMASK_PLAYER) || isType(TYPEMASK_AREATRIGGER))
             updatetype = UPDATETYPE_CREATE_OBJECT2;
 
         // UPDATETYPE_CREATE_OBJECT2 for pets...
@@ -448,6 +448,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
             case TYPEID_GAMEOBJECT:
             case TYPEID_DYNAMICOBJECT:
             case TYPEID_CORPSE:
+            case TYPEID_AREATRIGGER:
                 *data << uint32(GetGUID().GetCounter());
                 break;
             //! Unit, Player and default here are sending wrong values.
@@ -470,10 +471,12 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     // 0x4
     if (flags & UPDATEFLAG_HAS_TARGET)
     {
-        if (Unit* victim = unit->GetVictim())
-            *data << victim->GetPackGUID();
-        else
-            *data << uint8(0);
+        if (unit) {
+            if (Unit* victim = unit->GetVictim())
+                *data << victim->GetPackGUID();
+            else
+                *data << uint8(0);
+        }
     }
 
     // 0x2
@@ -603,6 +606,7 @@ uint32 Object::GetUpdateFieldData(Player const* target, uint32*& flags) const
                 visibleFlag |= UF_FLAG_OWNER;
             break;
         case TYPEID_DYNAMICOBJECT:
+        case TYPEID_AREATRIGGER:
             flags = DynamicObjectUpdateFieldFlags;
             if (((DynamicObject*)this)->GetCasterGUID() == target->GetGUID())
                 visibleFlag |= UF_FLAG_OWNER;

@@ -237,3 +237,22 @@ GameObjectAI* ScriptMgr::GetGameObjectAI(GameObject* go)
     auto tempScript = ScriptRegistry<GameObjectScript>::GetScriptById(go->GetScriptId());
     return tempScript ? tempScript->GetAI(go) : nullptr;
 }
+
+AreaTriggerAI* ScriptMgr::GetAreaTriggerAI(AreaTrigger* areatrigger)
+{
+    ASSERT(areatrigger);
+
+    auto retAI = GetReturnAIScript<AreaTriggerEntityScript, AreaTriggerAI>([areatrigger](AreaTriggerEntityScript* script)
+        {
+            return script->GetAI(areatrigger);
+        });
+
+    if (retAI)
+    {
+        return retAI;
+    }
+
+    auto tempScript = ScriptRegistry<AreaTriggerEntityScript>::GetScriptById(areatrigger->GetScriptId());
+    return tempScript ? tempScript->GetAI(areatrigger) : nullptr;
+}
+

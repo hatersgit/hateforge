@@ -85,6 +85,7 @@ class AreaTrigger : public WorldObject, public GridObject<AreaTrigger>, public M
         AreaTriggerAI* AI() { return _ai.get(); }
 
     private:
+        bool AddToMap(AreaTrigger* obj);
         bool Create(uint32 spellMiscId, Unit* caster, Unit* target, SpellInfo const* spell, Position const& pos, int32 duration, std::array<uint32, 2> spellVisual, ObjectGuid const& castId, AuraEffect const* aurEff, AreaTriggerOrbitInfo* customOrbitInfo = nullptr);
     public:
         static AreaTrigger* CreateAreaTrigger(uint32 spellMiscId, Unit* caster, Unit* target, SpellInfo const* spell, Position const& pos, int32 duration, std::array<uint32, 2> spellVisual, ObjectGuid const& castId = ObjectGuid::Empty, AuraEffect const* aurEff = nullptr);

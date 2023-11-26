@@ -28,10 +28,12 @@ _previousCheckOrientation(std::numeric_limits<float>::infinity()),
 _isBeingRemoved(false), _isRemoved(false), _reachedDestination(false), _lastSplineIndex(0), _movementTime(0),
 _areaTriggerTemplate(nullptr), _areaTriggerMiscTemplate(nullptr), _spawnId(0), _guidScriptId(0), _ai(), m_areaTriggerData(new AreaTriggerDataState())
 {
-    m_objectType |= TYPEMASK_GAMEOBJECT;
+    m_objectType |= TYPEMASK_AREATRIGGER;
     m_objectTypeId = TYPEID_AREATRIGGER;
 
     m_valuesCount = DYNAMICOBJECT_END;
+
+    m_updateFlag = UPDATEFLAG_STATIONARY_POSITION | UPDATEFLAG_AREATRIGGER;
 }
 
 AreaTrigger::~AreaTrigger()
@@ -90,7 +92,7 @@ bool AreaTrigger::Create(uint32 spellMiscId, Unit* caster, Unit* target, SpellIn
 
     _areaTriggerTemplate = _areaTriggerMiscTemplate->Template;
     auto templateId = GetTemplate() ? GetTemplate()->Id : 0;
-    Object::_Create(ObjectGuid::Create<HighGuid::DynamicObject>(templateId, caster->GetMap()->GenerateLowGuid<HighGuid::DynamicObject>()));
+    Object::_Create(ObjectGuid::Create<HighGuid::AreaTrigger>(templateId, caster->GetMap()->GenerateLowGuid<HighGuid::AreaTrigger>()));
 
     UpdatePositionData();
 
@@ -176,20 +178,20 @@ bool AreaTrigger::Create(uint32 spellMiscId, Unit* caster, Unit* target, SpellIn
     if (HasOrbit())
         Relocate(CalculateOrbitPosition());
 
-    //if (IsWorldObject())
-    //    setActive(true);    //must before add to map to be put in world container
+    if (IsWorldObject())
+        setActive(true);    //must before add to map to be put in world container
 
-    ////if (!GetMap()->AddToMap(this, true))
-    ////{
-    ////    // Returning false will cause the object to be deleted - remove from transport
-    ////    if (transport)
-    ////        transport->RemovePassenger(this);
-    ////    return false;
-    ////}
+    if (!GetMap()->AddATToMap(this))
+    {
+        // Returning false will cause the object to be deleted - remove from transport
+        if (transport)
+            transport->RemovePassenger(this);
+        return false;
+    }
 
     //caster->_RegisterAreaTrigger(this);
 
-    //_ai->OnCreate();
+    _ai->OnCreate();
 
     return true;
 }
@@ -935,14 +937,14 @@ void AreaTrigger::DebugVisualizePosition()
 }
 
 void AreaTrigger::AI_Initialize()
-{/*
+{
     AI_Destroy();
     AreaTriggerAI* ai = sScriptMgr->GetAreaTriggerAI(this);
     if (!ai)
         ai = new NullAreaTriggerAI(this);
 
     _ai.reset(ai);
-    _ai->OnInitialize();*/
+    _ai->OnInitialize();
 }
 
 void AreaTrigger::AI_Destroy()

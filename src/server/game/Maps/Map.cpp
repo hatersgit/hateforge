@@ -334,6 +334,15 @@ void Map::AddToGrid(DynamicObject* obj, Cell const& cell)
 }
 
 template<>
+void Map::AddToGrid(AreaTrigger* obj, Cell const& cell)
+{
+    NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
+    grid->GetGridType(cell.CellX(), cell.CellY()).AddGridObject(obj);
+
+    obj->SetCurrentCell(cell);
+}
+
+template<>
 void Map::AddToGrid(Corpse* obj, Cell const& cell)
 {
     NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
@@ -717,6 +726,51 @@ bool Map::AddToMap(MotionTransport* obj, bool /*checkTransport*/)
         }
     }
 
+    return true;
+}
+
+bool Map::AddATToMap(AreaTrigger* at) {
+    //TODO: Needs clean up. An object should not be added to map twice.
+    if (at->IsInWorld())
+    {
+        ASSERT(at->IsInGrid());
+        at->UpdateObjectVisibility(true);
+        return true;
+    }
+
+    CellCoord cellCoord = Acore::ComputeCellCoord(at->GetPositionX(), at->GetPositionY());
+    //It will create many problems (including crashes) if an object is not added to grid after creation
+    //The correct way to fix it is to make AddToMap return false and delete the object if it is not added to grid
+    //But now AddToMap is used in too many places, I will just see how many ASSERT failures it will cause
+    ASSERT(cellCoord.IsCoordValid());
+    if (!cellCoord.IsCoordValid())
+    {
+        LOG_ERROR("maps", "Map::AddToMap: Object {} has invalid coordinates X:{} Y:{} grid cell [{}:{}]",
+            at->GetGUID().ToString(), at->GetPositionX(), at->GetPositionY(), cellCoord.x_coord, cellCoord.y_coord);
+        return false; //Should delete object
+    }
+
+    Cell cell(cellCoord);
+    if (at->isActiveObject())
+        EnsureGridLoadedForActiveObject(cell, at);
+    else
+        EnsureGridCreated(GridCoord(cell.GridX(), cell.GridY()));
+
+    AddToGrid(at, cell);
+    LOG_DEBUG("maps", "Object {} enters grid[{}, {}]", at->GetGUID().ToString(), cell.GridX(), cell.GridY());
+
+    //Must already be set before AddToMap. Usually during obj->Create.
+    at->SetMap(this);
+    at->AddToWorld();
+
+    InitializeObject(at);
+
+    if (at->isActiveObject())
+        AddToActive(at);
+
+    //something, such as vehicle, needs to be update immediately
+    //also, trigger needs to cast spell, if not update, cannot see visual
+    at->UpdateObjectVisibility(true);
     return true;
 }
 
@@ -3156,6 +3210,9 @@ void Map::RemoveAllObjectsInRemoveList()
                 }
             case TYPEID_DYNAMICOBJECT:
                 RemoveFromMap((DynamicObject*)obj, true);
+                break;
+            case TYPEID_AREATRIGGER:
+                RemoveFromMap((AreaTrigger*)obj, true);
                 break;
             case TYPEID_GAMEOBJECT:
             {

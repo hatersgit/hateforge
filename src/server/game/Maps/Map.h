@@ -60,6 +60,7 @@ class Transport;
 class StaticTransport;
 class MotionTransport;
 class PathGenerator;
+class AreaTrigger;
 
 enum WeatherState : uint32;
 
@@ -336,6 +337,8 @@ public:
     virtual void AfterPlayerUnlinkFromMap();
     template<class T> bool AddToMap(T*, bool checkTransport = false);
     template<class T> void RemoveFromMap(T*, bool);
+
+    bool AddATToMap(AreaTrigger* at);
 
     void VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<Acore::ObjectUpdater, GridTypeMapContainer>& gridVisitor,
         TypeContainerVisitor<Acore::ObjectUpdater, WorldTypeMapContainer>& worldVisitor);

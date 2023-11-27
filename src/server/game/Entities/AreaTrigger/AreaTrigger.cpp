@@ -57,8 +57,8 @@ void AreaTrigger::RemoveFromWorld()
     {
         _isRemoved = true;
 
-        /*if (Unit* caster = GetCaster())
-            caster->_UnregisterAreaTrigger(this);*/
+        if (Unit* caster = GetCaster())
+            caster->_UnregisterAreaTrigger(this);
 
         // Handle removal of all units, calling OnUnitExit & deleting auras if needed
         HandleUnitEnterExit({});
@@ -66,7 +66,7 @@ void AreaTrigger::RemoveFromWorld()
         _ai->OnRemove();
 
         WorldObject::RemoveFromWorld();
-        //GetMap()->GetObjectsStore().Remove<AreaTrigger>(GetGUID());
+        GetMap()->GetObjectsStore().Remove<AreaTrigger>(GetGUID());
     }
 }
 
@@ -189,7 +189,7 @@ bool AreaTrigger::Create(uint32 spellMiscId, Unit* caster, Unit* target, SpellIn
         return false;
     }
 
-    //caster->_RegisterAreaTrigger(this);
+    caster->_RegisterAreaTrigger(this);
 
     _ai->OnCreate();
 
@@ -252,8 +252,7 @@ void AreaTrigger::Update(uint32 diff)
     else if (GetTemplate()->HasFlag(AREATRIGGER_FLAG_HAS_ATTACHED))
     {
         if (Unit* target = GetTarget())
-            return;
-            //GetMap()->AreaTriggerRelocation(this, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation());
+            GetMap()->AreaTriggerRelocation(this, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation());
     }
     else
         UpdateSplinePosition(diff);
@@ -911,18 +910,17 @@ float AreaTrigger::GetCurrentTimePercent()
     if (currentTimePercent <= 0.f)
         return 0.0f;
 
-    /*
-    if (GetMiscTemplate() && GetMiscTemplate()->MoveCurveId)
-    {
-        float progress = sDB2Manager.GetCurveValueAt(GetMiscTemplate()->MoveCurveId, currentTimePercent);
-        if (progress < 0.f || progress > 1.f)
-        {
-            LOG_ERROR("entities.areatrigger", "AreaTrigger (Id: %u, SpellMiscId: %u) has wrong progress (%f) caused by curve calculation (MoveCurveId: %u)",
-                GetTemplate()->Id, GetMiscTemplate()->MiscId, progress, GetMiscTemplate()->MorphCurveId);
-        }
-        else
-            currentTimePercent = progress;
-    }*/
+    //if (GetMiscTemplate() && GetMiscTemplate()->MoveCurveId)
+    //{
+    //    float progress = sDB2Manager.GetCurveValueAt(GetMiscTemplate()->MoveCurveId, currentTimePercent);
+    //    if (progress < 0.f || progress > 1.f)
+    //    {
+    //        LOG_ERROR("entities.areatrigger", "AreaTrigger (Id: %u, SpellMiscId: %u) has wrong progress (%f) caused by curve calculation (MoveCurveId: %u)",
+    //            GetTemplate()->Id, GetMiscTemplate()->MiscId, progress, GetMiscTemplate()->MorphCurveId);
+    //    }
+    //    else
+    //        currentTimePercent = progress;
+    //}
 
     // currentTimePercent must be between 0.f and 1.f
     return std::max(0.f, std::min(currentTimePercent, 1.f));

@@ -216,6 +216,10 @@ public:
 
     virtual bool OnTeleportUnreacheablePlayer(Player* /*player*/) { return false; }
 
+    // Called when the creature successfully registers an areatrigger
+    virtual void JustRegisteredAreaTrigger(AreaTrigger* /*areaTrigger*/) { }
+    virtual void JustUnregisteredAreaTrigger(AreaTrigger* /*areaTrigger*/) { }
+
 protected:
     virtual void MoveInLineOfSight(Unit* /*who*/);
 

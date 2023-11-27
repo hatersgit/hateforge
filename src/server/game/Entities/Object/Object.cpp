@@ -2312,6 +2312,11 @@ void WorldObject::SetZoneScript()
     }
 }
 
+AreaTrigger* Map::GetAreaTrigger(ObjectGuid const& guid)
+{
+    return _objectsStore.Find<AreaTrigger>(guid);
+}
+
 void WorldObject::ClearZoneScript()
 {
     m_zoneScript = nullptr;

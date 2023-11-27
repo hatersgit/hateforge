@@ -351,7 +351,6 @@ void ForgeCommonMessage::SendTalents(Player* player)
             if (fc->TryGetForgeTalentTabs(player, tpt, tabs))
             {
                 std::string clientMsg;
-                auto tabId = tpt == CharacterPointType::TALENT_TREE ? player->getClassMask() : tpt == CharacterPointType::RACIAL_TREE ? 999900 : tpt == CharacterPointType::PRESTIGE_TREE ? 1980000 : CharacterPointType::PET_TALENT;
                 for (auto* tab : tabs)
                 {
                     if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", false))
@@ -363,7 +362,7 @@ void ForgeCommonMessage::SendTalents(Player* player)
                     if (i == 0)
                         delimiter = "";
                     //clientMsg = clientMsg + delimiter + std::to_string(tab->Id) + "^" + std::to_string((int)tab->TalentType) + "^";
-                    clientMsg = std::to_string(tabId) + "^" + std::to_string((int)tab->TalentType) + "^";
+                    clientMsg = std::to_string(tab->Id) + "^" + std::to_string((int)tab->TalentType) + "^";
                     std::unordered_map<uint32, ForgeCharacterTalent*> spec;
                     fc->TryGetCharacterTalents(player, tab->Id, spec);
                     clientMsg = DoBuildRanks(spec, player, clientMsg, tab->Id);

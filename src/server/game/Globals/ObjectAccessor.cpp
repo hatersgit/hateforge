@@ -31,6 +31,7 @@
 #include "Player.h"
 #include "Transport.h"
 #include "Vehicle.h"
+#include "AreaTrigger.h"
 
 template<class T>
 void HashMapHolder<T>::Insert(T* o)
@@ -197,6 +198,11 @@ Transport* ObjectAccessor::GetTransport(WorldObject const& u, ObjectGuid const g
 DynamicObject* ObjectAccessor::GetDynamicObject(WorldObject const& u, ObjectGuid const guid)
 {
     return u.GetMap()->GetDynamicObject(guid);
+}
+
+AreaTrigger* ObjectAccessor::GetAreaTrigger(WorldObject const& u, ObjectGuid const guid)
+{
+    return u.GetMap()->GetAreaTrigger(guid);
 }
 
 Unit* ObjectAccessor::GetUnit(WorldObject const& u, ObjectGuid const guid)

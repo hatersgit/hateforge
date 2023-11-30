@@ -6448,6 +6448,76 @@ void Unit::RemoveAllGameObjects()
     }
 }
 
+void Unit::_RegisterAreaTrigger(AreaTrigger* areaTrigger)
+{
+    m_areaTriggers[areaTrigger->GetGUID()] = areaTrigger->GetSpellId();
+    if (IsCreature() && IsAIEnabled)
+        ToCreature()->AI()->JustRegisteredAreaTrigger(areaTrigger);
+}
+
+void Unit::_UnregisterAreaTrigger(AreaTrigger* areaTrigger)
+{
+    m_areaTriggers.erase(areaTrigger->GetGUID());
+    if (IsCreature() && IsAIEnabled)
+        ToCreature()->AI()->JustUnregisteredAreaTrigger(areaTrigger);
+}
+
+AreaTrigger* Unit::GetAreaTrigger(uint32 spellId)
+{
+    std::vector<AreaTrigger*> areaTriggers = GetAreaTriggers(spellId);
+    return areaTriggers.empty() ? nullptr : areaTriggers.front();
+}
+
+std::vector<AreaTrigger*> Unit::GetAreaTriggers(uint32 spellId)
+{
+    std::vector<AreaTrigger*> areaTriggers;
+    for (auto itr : m_areaTriggers)
+        if (itr.second == spellId)
+            if (AreaTrigger* at = ObjectAccessor::GetAreaTrigger(*this, itr.first))
+                areaTriggers.push_back(at);
+
+    return areaTriggers;
+}
+
+void Unit::RemoveAreaTrigger(uint32 spellId)
+{
+    if (m_areaTriggers.empty())
+        return;
+
+    auto areatriggers = m_areaTriggers;
+    for (auto itr : areatriggers)
+        if (itr.second == spellId)
+            if (AreaTrigger* areaTrigger = ObjectAccessor::GetAreaTrigger(*this, itr.first))
+                areaTrigger->Remove();
+}
+
+void Unit::RemoveAreaTrigger(AuraEffect* aurEff)
+{
+    if (m_areaTriggers.empty())
+        return;
+
+    auto areatriggers = m_areaTriggers;
+    for (auto itr : areatriggers)
+    {
+        if (AreaTrigger* areaTrigger = ObjectAccessor::GetAreaTrigger(*this, itr.first))
+        {
+            if (areaTrigger->GetAuraEffect() == aurEff)
+            {
+                areaTrigger->Remove();
+                break; // There can only be one AreaTrigger per AuraEffect
+            }
+        }
+    }
+}
+
+void Unit::RemoveAllAreaTriggers()
+{
+    auto areatriggers = m_areaTriggers;
+    for (auto itr : areatriggers)
+        if (AreaTrigger* at = ObjectAccessor::GetAreaTrigger(*this, itr.first))
+            at->Remove();
+}
+
 void Unit::SendSpellNonMeleeReflectLog(SpellNonMeleeDamage* log, Unit* attacker)
 {
     // Xinef: function for players only, placed in unit because of cosmetics

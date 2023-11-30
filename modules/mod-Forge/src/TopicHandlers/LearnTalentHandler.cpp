@@ -24,6 +24,8 @@ public:
 
         ForgeCharacterSpec* spec;
         if (fc->TryGetCharacterActiveSpec(iam.player, spec)) {
+
+
             std::vector<std::string> typeSplit;
             boost::algorithm::split(typeSplit, iam.message, boost::is_any_of("|"));
             if (typeSplit.empty() || typeSplit.size() != 2 || !fc->isNumber(typeSplit[0]))
@@ -56,7 +58,7 @@ public:
                         if (foundType != pointType)
                             return;
 
-                        if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", false)) {
+                        if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", true)) {
                             if (!spec->CharacterSpecTabId) {
                                 iam.player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Attempting to learn talents without first selecting a primary spec.");
                                 return;

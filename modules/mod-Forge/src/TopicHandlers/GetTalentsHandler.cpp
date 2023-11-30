@@ -27,7 +27,7 @@ public:
         {
             ForgeCharacterSpec* spec;
             if (fc->TryGetCharacterActiveSpec(iam.player, spec)) {
-                if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", false) && !spec->CharacterSpecTabId) { // Main spec not selected yet, prompt user
+                if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", true) && !spec->CharacterSpecTabId) { // Main spec not selected yet, prompt user
                     auto level10s = fc->_levelClassSpellMap.find(sConfigMgr->GetIntDefault("Forge.StrictSpecs.TalentLevelReq", 10));
                     if (level10s != fc->_levelClassSpellMap.end())
                         specSpells = level10s->second;

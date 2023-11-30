@@ -351,19 +351,14 @@ void ForgeCommonMessage::SendTalents(Player* player)
             if (fc->TryGetForgeTalentTabs(player, tpt, tabs))
             {
                 std::string clientMsg;
-                auto tabId = tpt == CharacterPointType::TALENT_TREE ? player->getClassMask() : tpt == CharacterPointType::RACIAL_TREE ? 999900 : tpt == CharacterPointType::PRESTIGE_TREE ? 1980000 : CharacterPointType::PET_TALENT;
                 for (auto* tab : tabs)
                 {
-                    if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", false))
-                        if (spec->CharacterSpecTabId != tab->Id)
-                            continue;
-
                     std::string delimiter = ";";
 
                     if (i == 0)
                         delimiter = "";
                     //clientMsg = clientMsg + delimiter + std::to_string(tab->Id) + "^" + std::to_string((int)tab->TalentType) + "^";
-                    clientMsg = std::to_string(tabId) + "^" + std::to_string((int)tab->TalentType) + "^";
+                    clientMsg = std::to_string(tab->Id) + "^" + std::to_string((int)tab->TalentType) + "^";
                     std::unordered_map<uint32, ForgeCharacterTalent*> spec;
                     fc->TryGetCharacterTalents(player, tab->Id, spec);
                     clientMsg = DoBuildRanks(spec, player, clientMsg, tab->Id);
@@ -376,7 +371,6 @@ void ForgeCommonMessage::SendTalents(Player* player)
         
     }
 }
-
 
 void ForgeCommonMessage::SendXmogSet(Player* player, uint8 setId) {
     std::string clientMsg = std::to_string(setId) + "^";
@@ -540,5 +534,42 @@ void ForgeCommonMessage::SendActiveSpecInfo(Player* player)
         }
 
         player->SendForgeUIMsg(ForgeTopic::GET_CHARACTER_SPECS, msg);
+    }
+}
+
+std::string ForgeCommonMessage::EncodeTalentString(Player* player) {
+    std::string export_str = "";
+    ForgeCharacterSpec* spec;
+
+    if (fc->TryGetCharacterActiveSpec(player, spec))
+    {
+        auto talents = spec->Talents.find(spec->CharacterSpecTabId);
+        if (talents != spec->Talents.end()) {
+            if (talents->second.empty())
+                return export_str;
+
+            size_t head = 0;
+            size_t byte = 0;
+            auto put_bit = [&export_str, &head, &byte, this](size_t bits, unsigned value) {
+                for (size_t i = 0; i < bits; i++)
+                {
+                    size_t bit = head % byte_size;
+                    byte += (value >> i & 0b1) << bit;
+                    if (bit == byte_size - 1)
+                    {
+                        export_str += base64_char[byte];
+                        byte = 0;
+                    }
+                    head++;
+                }
+                };
+
+            put_bit(version_bits, LOADOUT_SERIALIZATION_VERSION);
+            put_bit(spec_bits, static_cast<unsigned>(spec->CharacterSpecTabId));
+            put_bit(tree_bits, 0);
+
+            //std::map<unsigned, std::vector<std::pair<const trait_data_t*, unsigned>>> tree_nodes;
+
+        }
     }
 }

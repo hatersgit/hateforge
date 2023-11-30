@@ -334,6 +334,15 @@ void Map::AddToGrid(DynamicObject* obj, Cell const& cell)
 }
 
 template<>
+void Map::AddToGrid(AreaTrigger* obj, Cell const& cell)
+{
+    NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
+    grid->GetGridType(cell.CellX(), cell.CellY()).AddGridObject(obj);
+
+    obj->SetCurrentCell(cell);
+}
+
+template<>
 void Map::AddToGrid(Corpse* obj, Cell const& cell)
 {
     NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
@@ -717,6 +726,51 @@ bool Map::AddToMap(MotionTransport* obj, bool /*checkTransport*/)
         }
     }
 
+    return true;
+}
+
+bool Map::AddATToMap(AreaTrigger* at) {
+    //TODO: Needs clean up. An object should not be added to map twice.
+    if (at->IsInWorld())
+    {
+        ASSERT(at->IsInGrid());
+        at->UpdateObjectVisibility(true);
+        return true;
+    }
+
+    CellCoord cellCoord = Acore::ComputeCellCoord(at->GetPositionX(), at->GetPositionY());
+    //It will create many problems (including crashes) if an object is not added to grid after creation
+    //The correct way to fix it is to make AddToMap return false and delete the object if it is not added to grid
+    //But now AddToMap is used in too many places, I will just see how many ASSERT failures it will cause
+    ASSERT(cellCoord.IsCoordValid());
+    if (!cellCoord.IsCoordValid())
+    {
+        LOG_ERROR("maps", "Map::AddToMap: Object {} has invalid coordinates X:{} Y:{} grid cell [{}:{}]",
+            at->GetGUID().ToString(), at->GetPositionX(), at->GetPositionY(), cellCoord.x_coord, cellCoord.y_coord);
+        return false; //Should delete object
+    }
+
+    Cell cell(cellCoord);
+    if (at->isActiveObject())
+        EnsureGridLoadedForActiveObject(cell, at);
+    else
+        EnsureGridCreated(GridCoord(cell.GridX(), cell.GridY()));
+
+    AddToGrid(at, cell);
+    LOG_DEBUG("maps", "Object {} enters grid[{}, {}]", at->GetGUID().ToString(), cell.GridX(), cell.GridY());
+
+    //Must already be set before AddToMap. Usually during obj->Create.
+    at->SetMap(this);
+    at->AddToWorld();
+
+    InitializeObject(at);
+
+    if (at->isActiveObject())
+        AddToActive(at);
+
+    //something, such as vehicle, needs to be update immediately
+    //also, trigger needs to cast spell, if not update, cannot see visual
+    at->UpdateObjectVisibility(true);
     return true;
 }
 
@@ -1165,6 +1219,39 @@ void Map::DynamicObjectRelocation(DynamicObject* dynObj, float x, float y, float
     }
 }
 
+void Map::AreaTriggerRelocation(AreaTrigger* at, float x, float y, float z, float orientation)
+{
+    Cell integrity_check(at->GetPositionX(), at->GetPositionY());
+    Cell old_cell = at->GetCurrentCell();
+
+    ASSERT(integrity_check == old_cell);
+    Cell new_cell(x, y);
+
+    if (!getNGrid(new_cell.GridX(), new_cell.GridY()))
+        return;
+
+    // delay areatrigger move for grid/cell to grid/cell moves
+    if (old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell))
+    {
+#ifdef ACORE_DEBUG
+        TC_LOG_DEBUG("maps", "AreaTrigger (%s) added to moving list from grid[%u, %u]cell[%u, %u] to grid[%u, %u]cell[%u, %u].", at->GetGUID().ToString().c_str(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
+#endif
+        AddAreaTriggerToMoveList(at, x, y, z, orientation);
+        // in diffcell/diffgrid case notifiers called at finishing move at in Map::MoveAllAreaTriggersInMoveList
+    }
+    else
+    {
+        at->Relocate(x, y, z, orientation);
+        at->UpdateShape();
+        at->UpdateObjectVisibility(false);
+        RemoveAreaTriggerFromMoveList(at);
+    }
+
+    old_cell = at->GetCurrentCell();
+    integrity_check = Cell(at->GetPositionX(), at->GetPositionY());
+    ASSERT(integrity_check == old_cell);
+}
+
 void Map::AddCreatureToMoveList(Creature* c, float x, float y, float z, float ang)
 {
     if (_creatureToMoveLock) //can this happen?
@@ -1220,6 +1307,25 @@ void Map::RemoveDynamicObjectFromMoveList(DynamicObject* dynObj)
 
     if (dynObj->_moveState == MAP_OBJECT_CELL_MOVE_ACTIVE)
         dynObj->_moveState = MAP_OBJECT_CELL_MOVE_INACTIVE;
+}
+
+void Map::AddAreaTriggerToMoveList(AreaTrigger* at, float x, float y, float z, float ang)
+{
+    if (_areaTriggersToMoveLock) //can this happen?
+        return;
+
+    if (at->_moveState == MAP_OBJECT_CELL_MOVE_NONE)
+        _areaTriggersToMove.push_back(at);
+    at->SetNewCellPosition(x, y, z, ang);
+}
+
+void Map::RemoveAreaTriggerFromMoveList(AreaTrigger* at)
+{
+    if (_areaTriggersToMoveLock) //can this happen?
+        return;
+
+    if (at->_moveState == MAP_OBJECT_CELL_MOVE_ACTIVE)
+        at->_moveState = MAP_OBJECT_CELL_MOVE_INACTIVE;
 }
 
 void Map::MoveAllCreaturesInMoveList()
@@ -3156,6 +3262,9 @@ void Map::RemoveAllObjectsInRemoveList()
                 }
             case TYPEID_DYNAMICOBJECT:
                 RemoveFromMap((DynamicObject*)obj, true);
+                break;
+            case TYPEID_AREATRIGGER:
+                RemoveFromMap((AreaTrigger*)obj, true);
                 break;
             case TYPEID_GAMEOBJECT:
             {

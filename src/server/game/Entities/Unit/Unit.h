@@ -18,6 +18,7 @@
 #ifndef __UNIT_H
 #define __UNIT_H
 
+#include "AreaTrigger.h"
 #include "EventProcessor.h"
 #include "EnumFlag.h"
 #include "FollowerRefMgr.h"
@@ -1349,6 +1350,8 @@ public:
     UnitAI* GetAI() { return i_AI; }
     void SetAI(UnitAI* newAI) { i_AI = newAI; }
 
+    bool IsCreature() { return GetTypeId() == TYPEID_UNIT; }
+
     void AddToWorld() override;
     void RemoveFromWorld() override;
 
@@ -2248,6 +2251,15 @@ public:
     void RemoveGameObject(uint32 spellid, bool del);
     void RemoveAllGameObjects();
 
+    // AreaTrigger management
+    void _RegisterAreaTrigger(AreaTrigger* areaTrigger);
+    void _UnregisterAreaTrigger(AreaTrigger* areaTrigger);
+    AreaTrigger* GetAreaTrigger(uint32 spellId);
+    std::vector<AreaTrigger*> GetAreaTriggers(uint32 spellId);
+    void RemoveAreaTrigger(uint32 spellId);
+    void RemoveAreaTrigger(AuraEffect* aurEff);
+    void RemoveAllAreaTriggers();
+
     void ModifyAuraState(AuraStateType flag, bool apply);
     uint32 BuildAuraStateUpdateForTarget(Unit* target) const;
     bool HasAuraState(AuraStateType flag, SpellInfo const* spellProto = nullptr, Unit const* Caster = nullptr) const;
@@ -2556,6 +2568,10 @@ protected:
 
     typedef GuidList GameObjectList;
     GameObjectList m_gameObj;
+
+    typedef std::vector<AreaTrigger*> AreaTriggerList;
+    std::unordered_map<ObjectGuid, uint32/*spellId*/> m_areaTriggers;
+
     uint32 m_transform;
 
     Spell* m_currentSpells[CURRENT_MAX_SPELL];

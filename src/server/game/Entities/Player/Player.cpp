@@ -16972,12 +16972,17 @@ void Player::UpdateOperations()
 
     for (auto spell : toDelete) {
         auto info = sSpellMgr->GetSpellInfo(spell);
-        auto charged = sObjectMgr->TryGetChargeEntry(info->SpellFamilyFlags);
-        auto chargeCount = GetItemCount(charged->chargeItem);
-        auto maxCharges = charged->baseCharges + CalculateSpellMaxCharges(info->SpellFamilyFlags);
+        if (auto charged = sObjectMgr->TryGetChargeEntry(info->SpellFamilyFlags)) {
+            auto chargeCount = GetItemCount(charged->chargeItem);
+            auto maxCharges = charged->baseCharges + CalculateSpellMaxCharges(info->SpellFamilyFlags);
 
-        if (chargeCount == maxCharges)
+            if (chargeCount == maxCharges)
+                timedDelayedOperations.erase(spell);
+        }
+        else {
             timedDelayedOperations.erase(spell);
+        }
+
     }
 
     if (timedDelayedOperations.empty() && !emptyWarned)
@@ -17011,6 +17016,22 @@ uint8 Player::CalculateSpellMaxCharges(flag96 spell) {
             _spellCharges[spell] = out;
 
     return _spellCharges[spell];
+}
+
+
+void Player::TriggerChargeRegen(flag96 flag) {
+    if (auto charged = sObjectMgr->TryGetChargeEntry(flag)) {
+        auto chargeCount = GetItemCount(charged->chargeItem);
+        auto maxCharges = charged->baseCharges + CalculateSpellMaxCharges(flag);
+        if (chargeCount < maxCharges)
+            AddTimedDelayedOperation(charged->SpellId, getMSTime() + charged->rechargeTime, [this, charged, flag]() {
+                uint32 noSpaceForCount = 0;
+                ItemPosCountVec dest;
+                InventoryResult msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, charged->chargeItem, 1, &noSpaceForCount);
+                StoreNewItem(dest, charged->chargeItem, true);
+                TriggerChargeRegen(flag);
+            });
+    }
 }
 
 std::string Player::GetDebugInfo() const

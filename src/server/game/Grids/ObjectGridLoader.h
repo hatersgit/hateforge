@@ -32,13 +32,14 @@ class ObjectGridLoader
 
 public:
     ObjectGridLoader(NGridType& grid, Map* map, const Cell& cell)
-        : i_cell(cell), i_grid(grid), i_map(map), i_gameObjects(0), i_creatures(0), i_corpses (0)
+        : i_cell(cell), i_grid(grid), i_map(map), i_gameObjects(0), i_creatures(0), i_corpses(0), i_areaTriggers(0)
     {}
 
     void Visit(GameObjectMapType& m);
     void Visit(CreatureMapType& m);
     void Visit(CorpseMapType&) const {}
     void Visit(DynamicObjectMapType&) const {}
+    void Visit(AreaTriggerMapType& m);
 
     void LoadN(void);
 
@@ -51,6 +52,7 @@ private:
     uint32 i_gameObjects;
     uint32 i_creatures;
     uint32 i_corpses;
+    uint32 i_areaTriggers;
 };
 
 //Stop the creatures before unloading the NGrid

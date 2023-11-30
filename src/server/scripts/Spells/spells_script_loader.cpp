@@ -40,7 +40,7 @@ void AddSpellsScripts()
 {
     //AddSC_bard_spell_scripts();
     AddSC_deathknight_spell_scripts();
-    //AddSC_demonhunter_spell_scripts();
+    AddSC_dh_spell_scripts();
     AddSC_druid_spell_scripts();
     AddSC_generic_spell_scripts();
     AddSC_hunter_spell_scripts();

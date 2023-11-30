@@ -392,13 +392,12 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleAuraModSpellPowerPercent,                  //329 SPELL_AURA_MOD_SPELL_POWER_PCT
     &AuraEffect::HandleAuraModSpellPowerOfStatPercent,            //330 SPELL_AURA_MOD_SPELL_POWER_OF_STAT_PERCENT
     &AuraEffect::HandleAuraModSpellPowerOfCombatRatingPercent,    //331 SPELL_AURA_MOD_SPELL_POWER_OF_RATING_PERCENT
-    &AuraEffect::HandleAuraModTriggerSpellPowerPercent,           //332 SPELL_AURA_MOD_TRIGGER_SPELL_ON_POWER_PCT
     &AuraEffect::HandleModRatingPercent,                          //333 SPELL_AURA_MOD_RATING_PCT
     &AuraEffect::HandleModRatingFromRating,                       //334 SPELL_AURA_MOD_RATING_OF_RATING_PCT
     &AuraEffect::HandleNoImmediateEffect,                         //335 SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER
     &AuraEffect::HandleNoImmediateEffect,                         //336 SPELL_AURA_MOD_AUTOATTACK_DAMAGE_PCT
     &AuraEffect::HandleNoImmediateEffect,                         //337 SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_VS_CASTER implemented in Unit::SpellPctDamageModsDone
-    &AuraEffect::HandleNULL,                                      //338 SPELL_AURA_AREA_TRIGGER
+    &AuraEffect::HandleCreateAreaTrigger,                         //338 SPELL_AURA_AREA_TRIGGER
     &AuraEffect::HandleNoImmediateEffect,                         //339 SPELL_AURA_MOD_ARMOR_PENETRATION
     &AuraEffect::HandleNoImmediateEffect,                         //340 SPELL_AURA_KNOCKBACK_IMMUNITY
     &AuraEffect::HandleNoImmediateEffect,                         //341 SPELL_AURA_ADD_MASTERY_PCT_TO_SPELL_EFFECT implemented in AuraEffect::CalculateSpellMod()
@@ -7382,9 +7381,26 @@ void AuraEffect::HandleAuraAddCharges(AuraApplication const* aurApp, uint8 mode,
         if (apply)
         {
             player->_spellCharges[data.SpellClassMask] = ChargeEntry->baseCharges + chargesAdded;
+            player->TriggerChargeRegen(data.SpellClassMask);
         }
         else {
             player->_spellCharges.erase(data.SpellClassMask);
         }
+    }
+}
+
+void AuraEffect::HandleCreateAreaTrigger(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_REAL))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (Unit* caster = GetCaster())
+    {
+        if (apply)
+            AreaTrigger::CreateAreaTrigger(GetMiscValue(), caster, target, GetSpellInfo(), *target, GetBase()->GetDuration(), m_spellInfo->SpellVisual, ObjectGuid::Empty, this);
+        //else
+           // caster->RemoveAreaTrigger(this);
     }
 }

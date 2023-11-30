@@ -18,6 +18,7 @@
 #ifndef _OBJECTMGR_H
 #define _OBJECTMGR_H
 
+#include "AreaTrigger.h"
 #include "Bag.h"
 #include "ConditionMgr.h"
 #include "Corpse.h"
@@ -420,20 +421,6 @@ struct AreaTriggerTeleport
     float  target_Orientation;
 };
 
-struct AreaTrigger
-{
-    uint32 entry;
-    uint32 map;
-    float x;
-    float y;
-    float z;
-    float radius;
-    float length;
-    float width;
-    float height;
-    float orientation;
-};
-
 // hater: m+
 struct InstanceDifficultyMultiplier
 {
@@ -520,6 +507,7 @@ struct CellObjectGuids
 {
     CellGuidSet creatures;
     CellGuidSet gameobjects;
+    CellGuidSet areatriggers;
 };
 
 typedef std::unordered_map<uint32/*cell_id*/, CellObjectGuids> CellObjectGuidsMap;
@@ -789,7 +777,7 @@ public:
 
     typedef std::unordered_map<uint32, Quest*> QuestMap;
 
-    typedef std::unordered_map<uint32, AreaTrigger> AreaTriggerContainer;
+    typedef std::unordered_map<uint32, AreaTrigger*> AreaTriggerContainer;
 
     typedef std::unordered_map<uint32, AreaTriggerTeleport> AreaTriggerTeleportContainer;
 
@@ -912,7 +900,7 @@ public:
     {
         AreaTriggerContainer::const_iterator itr = _areaTriggerStore.find(trigger);
         if (itr != _areaTriggerStore.end())
-            return &itr->second;
+            return itr->second;
         return nullptr;
     }
 

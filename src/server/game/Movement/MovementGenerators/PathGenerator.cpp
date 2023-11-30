@@ -89,6 +89,10 @@ bool PathGenerator::CalculatePath(float x, float y, float z, float destX, float 
     return true;
 }
 
+bool PathGenerator::CalculatePath(Position src, Position dest, bool forceDest) {
+    return CalculatePath(src.GetPositionX(), src.GetPositionY(), src.GetPositionZ(), dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), forceDest);
+}
+
 dtPolyRef PathGenerator::GetPathPolyByPosition(dtPolyRef const* polyPath, uint32 polyPathSize, float const* point, float* distance) const
 {
     if (!polyPath || !polyPathSize)

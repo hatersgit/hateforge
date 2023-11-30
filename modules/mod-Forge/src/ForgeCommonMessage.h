@@ -37,9 +37,22 @@ public:
     std::string SendCollections(Player*, uint32, std::string);*/
     void SendXmogSet(Player*, uint8 /*set id*/);
     void SendXmogSets(Player*);
-private:
 
+    std::string EncodeTalentString(Player* player);
+    void DecodeTalentString(std::string talent_str);
+private:
     std::string DoBuildRanks(std::unordered_map<uint32, ForgeCharacterTalent*>& spec, Player* player, std::string clientMsg, uint32 tabId);
+
+    // hater: talent string encoding
+    const std::string base64_char = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    const unsigned LOADOUT_SERIALIZATION_VERSION = 1;
+    const size_t version_bits = 8;    // serialization version
+    const size_t spec_bits = 16;   // specialization id
+    const size_t tree_bits = 128;  // C_Traits.GetTreeHash(), optionally can be 0-filled
+    const size_t rank_bits = 6;    // ranks purchased if node is partially filled
+    const size_t choice_bits = 2;    // choice index, 0-based
+    // hardcoded value from Interface/SharedXML/ExportUtil.lua
+    const size_t byte_size = 6;
 };
 
 

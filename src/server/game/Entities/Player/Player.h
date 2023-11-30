@@ -2685,6 +2685,16 @@ public:
 
     std::map<flag96, int> _spellCharges;
     uint8 CalculateSpellMaxCharges(flag96);
+    void TriggerChargeRegen(flag96 flag);
+
+    bool GetSpecActivationAllowed() {
+        return specActivationAllowed;
+    }
+
+    void SetSpecActivationAllowed(bool allow) {
+        specActivationAllowed = allow;
+    }
+
  protected:
     // Gamemaster whisper whitelist
     WhisperListContainer WhisperList;
@@ -3050,6 +3060,8 @@ private:
     // hater: timed events on player | charges
     std::unordered_map<uint32/*spellId*/, std::pair<int32, std::function<void()>>>    timedDelayedOperations;   ///< Delayed operations
     bool                                                    emptyWarned;              ///< Warning when there are no more delayed operations
+
+    bool specActivationAllowed = false;
 };
 
 void AddItemsSetItem(Player* player, Item* item);

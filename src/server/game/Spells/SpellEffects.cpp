@@ -236,8 +236,9 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectSpecCount,                                //161 SPELL_EFFECT_TALENT_SPEC_COUNT        second talent spec (learn/revert)
     &Spell::EffectActivateSpec,                             //162 SPELL_EFFECT_TALENT_SPEC_SELECT       activate primary/secondary spec
     &Spell::EffectNULL,                                     //163 unused
-    &Spell::EffectRemoveAura,                               //164 SPELL_EFFECT_REMOVE_AURA
+    &Spell::EffectNULL,
     &Spell::EffectLearnTransmogSet,                         //165 SPELL_EFFECT_LEARN_TRANSMOG_SET
+    &Spell::EffectCreateAreaTrigger,                        //166 SPELL_EFFECT_CREATE_AREATRIGGER
 };
 
 wEffect WeaponAndSchoolDamageEffects[TOTAL_WEAPON_DAMAGE_EFFECTS] =
@@ -6229,15 +6230,12 @@ void Spell::EffectSpecCount(SpellEffIndex /*effIndex*/)
 
 void Spell::EffectActivateSpec(SpellEffIndex /*effIndex*/)
 {
-    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
-        return;
-
     if (!unitTarget)
         return;
 
     if (Player* player = unitTarget->ToPlayer())
     {
-        player->ActivateSpec(damage - 1); // damage is 1 or 2, spec is 0 or 1
+        player->SetSpecActivationAllowed(true);
     }
 }
 
@@ -6285,6 +6283,19 @@ void Spell::EffectRemoveAura(SpellEffIndex effIndex)
         return;
     // there may be need of specifying casterguid of removed auras
     unitTarget->RemoveAurasDueToSpell(m_spellInfo->Effects[effIndex].TriggerSpell);
+}
+
+void Spell::EffectCreateAreaTrigger(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
+        return;
+
+    if (!m_targets.HasDst())
+        return;
+
+    int32 duration = GetSpellInfo()->GetDuration();
+    
+    AreaTrigger::CreateAreaTrigger(m_spellInfo->GetEffect(effIndex).MiscValue, GetCaster(), nullptr, GetSpellInfo(), destTarget->GetPosition(), duration, m_spellInfo->SpellVisual, ObjectGuid::Empty);
 }
 
 void Spell::EffectLearnTransmogSet(SpellEffIndex effIndex)

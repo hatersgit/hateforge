@@ -2,6 +2,7 @@
 #define OUT
 
 #include <string>
+#include "AreaTriggerDataStore.h"
 #include "ScriptMgr.h"
 #include "Player.h"
 #include "Config.h"
@@ -1040,6 +1041,8 @@ private:
 
             LOG_INFO("server.load", "Loading npc sounds...");
             sObjectMgr->LoadNpcSounds();
+
+            sAreaTriggerDataStore->LoadAreaTriggerTemplates();
         }
         catch (std::exception & ex) {
             std::string error = ex.what();

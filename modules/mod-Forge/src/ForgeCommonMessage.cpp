@@ -353,10 +353,6 @@ void ForgeCommonMessage::SendTalents(Player* player)
                 std::string clientMsg;
                 for (auto* tab : tabs)
                 {
-                    if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", false))
-                        if (spec->CharacterSpecTabId != tab->Id)
-                            continue;
-
                     std::string delimiter = ";";
 
                     if (i == 0)

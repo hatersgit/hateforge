@@ -2094,6 +2094,35 @@ Rate.Energy            = 1
 Rate.Loyalty           = 1
 
 #
+#    Duskhaven custom power rates
+#    Rate.BatteryGauge.Income
+#    Rate.BatteryGauge.Loss
+#    Rate.Discord.Income
+#    Rate.Discord.Loss
+#    Rate.Fury.Income
+#    Rate.Fury.Loss
+#    Rate.Harmony.Income
+#    Rate.Harmony.Loss
+#    Rate.Insanity.Income
+#    Rate.Insanity.Loss
+#    Rate.Wrath.Income
+#    Rate.Wrath.Loss
+#        Default:     1
+
+Rate.BatteryGauge.Income	= 1
+Rate.BatteryGauge.Loss 		= 1
+Rate.Discord.Income    		= 1
+Rate.Discord.Loss      		= 1
+Rate.Fury.Income       		= 1
+Rate.Fury.Loss         		= 1
+Rate.Harmony.Income    		= 1
+Rate.Harmony.Loss      		= 1
+Rate.Insanity.Income   		= 1
+Rate.Insanity.Loss     		= 1
+Rate.Wrath.Income	   		= 1
+Rate.Wrath.Loss		   		= 1
+
+#
 #    Rate.Rest.InGame
 #    Rate.Rest.Offline.InTavernOrCity
 #    Rate.Rest.Offline.InWilderness

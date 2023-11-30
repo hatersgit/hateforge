@@ -5322,7 +5322,212 @@ float Player::GetRatingMultiplier(CombatRating cr) const
     if (!Rating || !classRating)
         return 1.0f;                                        // By default use minimum coefficient (not must be called)
 
+    if (cr == CR_MASTERY)
+        return GetMasteryMultiplier();
+
     return classRating->ratio / Rating->ratio;
+}
+
+float Player::GetMasteryMultiplier() const
+{
+    uint32 masteryRating = 0;
+    uint32 spec = 0;
+
+    switch (getClass())
+    {
+        case CLASS_WARRIOR:
+            if (spec == TALENT_TREE_WARRIOR_ARMS)
+            {
+                masteryRating = 20;
+                break;
+            }
+            else if (spec == TALENT_TREE_WARRIOR_PROTECTION)
+            {
+                masteryRating = 15;      // Uhh... no idea what number, setting to 15 for now
+                break;
+            }
+            masteryRating = 10;
+            break;
+        case CLASS_PALADIN:
+            if (spec == TALENT_TREE_PALADIN_HOLY)
+            {
+                masteryRating = 15;
+                break;
+            }
+            else if (spec == TALENT_TREE_PALADIN_PROTECTION)
+            {
+                masteryRating = 15;
+                break;
+            }
+            masteryRating = 15;
+            break;
+        case CLASS_HUNTER:
+            if (spec == TALENT_TREE_HUNTER_MARKSMANSHIP)
+            {
+                masteryRating = 15;
+                break;
+            }
+            else if (spec == TALENT_TREE_HUNTER_SURVIVAL)
+            {
+                masteryRating = 20;
+                break;
+            }
+            masteryRating = 25;
+            break;
+        case CLASS_ROGUE:           // Setting all of it to temp 15 per 1%
+            if (spec == TALENT_TREE_ROGUE_COMBAT)
+            {
+                masteryRating = 15;
+                break;
+            }
+            else if (spec == TALENT_TREE_ROGUE_SUBTLETY)
+            {
+                masteryRating = 15;
+                break;
+            }
+            masteryRating = 15;
+            break;
+        case CLASS_PRIEST:          // Setting all of it to temp 15 per 1%
+            if (spec == TALENT_TREE_PRIEST_DISCIPLINE)
+            {
+                masteryRating = 15;
+                break;
+            }
+            else if (spec == TALENT_TREE_PRIEST_HOLY)
+            {
+                masteryRating = 15;
+                break;
+            }
+            else if (spec == TALENT_TREE_PRIEST_INQUISITION)
+            {
+                masteryRating = 15;
+                break;
+            }
+            masteryRating = 15;
+            break;
+        case CLASS_DEATH_KNIGHT:    // Setting all of it to temp 15 per 1%
+            if (spec == TALENT_TREE_DEATH_KNIGHT_BLOOD)
+            {
+                masteryRating = 15;
+                break;
+            }
+            else if (spec == TALENT_TREE_DEATH_KNIGHT_UNHOLY)
+            {
+                masteryRating = 15;
+                break;
+            }
+            masteryRating = 15;
+            break;
+        case CLASS_SHAMAN:          // Setting all of it to temp 15 per 1%
+            if (spec == TALENT_TREE_SHAMAN_ELEMENTAL)
+            {
+                masteryRating = 15;
+                break;
+            }
+            else if (spec == TALENT_TREE_SHAMAN_RESTORATION)
+            {
+                masteryRating = 15;
+                break;
+            }
+            else if (spec == TALENT_TREE_SHAMAN_WATCHER)
+            {
+                masteryRating = 15;
+                break;
+            }
+            masteryRating = 15;
+            break;
+        case CLASS_MAGE:
+            if (spec == TALENT_TREE_MAGE_ARCANE)
+            {
+                masteryRating = 15;      // Temp 15
+                break;
+            }
+            else if (spec == TALENT_TREE_MAGE_FIRE)
+            {
+                masteryRating = 28;
+                break;
+            }
+            masteryRating = 15;         // Temp 15
+            break;
+        case CLASS_WARLOCK:
+            if (spec == TALENT_TREE_WARLOCK_AFFLICTION)
+            {
+                masteryRating = 15;
+                break;
+            }
+            else if (spec == TALENT_TREE_WARLOCK_DESTRUCTION)
+            {
+                masteryRating = 15;
+                break;
+            }
+            masteryRating = 15;         // And this unlike other two is temp 15
+            break;
+        case CLASS_DEMON_HUNTER:
+            if (spec == TALENT_TREE_DEMON_HUNTER_VENGEANCE)
+            {
+                masteryRating = 15;
+                break;
+            }
+            masteryRating = 20;
+            break;
+        case CLASS_DRUID:           // Setting all of it to temp 15 per 1%
+            if (spec == TALENT_TREE_DRUID_FERAL_COMBAT)
+            {
+                masteryRating = 15;
+                break;
+            }
+            else if (spec == TALENT_TREE_DRUID_GUARDIAN)
+            {
+                masteryRating = 15;
+                break;
+            }
+            else if (spec == TALENT_TREE_DRUID_RESTORATION)
+            {
+                masteryRating = 15;
+                break;
+            }
+            masteryRating = 15;
+            break;
+        case CLASS_MONK:
+            if (spec == TALENT_TREE_MONK_FELLOWSHIP)
+            {
+                masteryRating = 30;
+                break;
+            }
+            else if (spec == TALENT_TREE_MONK_RADIANCE)
+            {
+                masteryRating = 10;
+                break;
+            }
+            masteryRating = 25;
+            break;
+        case CLASS_BARD:            // Setting all of it to temp 15 per 1%
+            if (spec == TALENT_TREE_BARD_INSPIRATION) // Aleist3r: CBA to change it since spec names changed - should be Melody
+            {
+                masteryRating = 15;
+                break;
+            }
+            masteryRating = 15;
+            break;
+        case CLASS_TINKER:          // Setting all of it to temp 15 per 1%
+            if (spec == TALENT_TREE_TINKER_PHYSICIAN)
+            {
+                masteryRating = 15;
+                break;
+            }
+            else if (spec == TALENT_TREE_TINKER_VANGUARD)
+            {
+                masteryRating = 15;
+                break;
+            }
+            masteryRating = 15;
+            break;
+        default:
+            masteryRating = 15;
+            break;
+    } 
+
+    return float(1 / (masteryRating / (61 - GetLevel())));
 }
 
 float Player::GetRatingBonusValue(CombatRating cr) const
@@ -6816,15 +7021,6 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
             case ITEM_MOD_BLOCK_RATING:
                 ApplyRatingMod(CR_BLOCK, int32(val), apply);
                 break;
-            case ITEM_MOD_HIT_MELEE_RATING:
-                ApplyRatingMod(CR_HIT_MELEE, int32(val), apply);
-                break;
-            case ITEM_MOD_HIT_RANGED_RATING:
-                ApplyRatingMod(CR_HIT_RANGED, int32(val), apply);
-                break;
-            case ITEM_MOD_HIT_SPELL_RATING:
-                ApplyRatingMod(CR_HIT_SPELL, int32(val), apply);
-                break;
             case ITEM_MOD_CRIT_MELEE_RATING:
                 ApplyRatingMod(CR_CRIT_MELEE, int32(val), apply);
                 break;
@@ -6861,11 +7057,6 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
             case ITEM_MOD_HASTE_SPELL_RATING:
                 ApplyRatingMod(CR_HASTE_SPELL, int32(val), apply);
                 break;
-            case ITEM_MOD_HIT_RATING:
-                ApplyRatingMod(CR_HIT_MELEE, int32(val), apply);
-                ApplyRatingMod(CR_HIT_RANGED, int32(val), apply);
-                ApplyRatingMod(CR_HIT_SPELL, int32(val), apply);
-                break;
             case ITEM_MOD_CRIT_RATING:
                 ApplyRatingMod(CR_CRIT_MELEE, int32(val), apply);
                 ApplyRatingMod(CR_CRIT_RANGED, int32(val), apply);
@@ -6887,24 +7078,18 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
                 ApplyRatingMod(CR_HASTE_RANGED, int32(val), apply);
                 ApplyRatingMod(CR_HASTE_SPELL, int32(val), apply);
                 break;
-            case ITEM_MOD_EXPERTISE_RATING:
-                ApplyRatingMod(CR_EXPERTISE, int32(val), apply);
-                break;
             case ITEM_MOD_ATTACK_POWER:
                 HandleStatModifier(UNIT_MOD_ATTACK_POWER, TOTAL_VALUE, float(val), apply);
                 HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_VALUE, float(val), apply);
                 break;
-            case ITEM_MOD_RANGED_ATTACK_POWER:
-                HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_VALUE, float(val), apply);
-                break;
+            //case ITEM_MOD_RANGED_ATTACK_POWER:
+            //    HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_VALUE, float(val), apply);
+            //    break;
             //            case ITEM_MOD_FERAL_ATTACK_POWER:
             //                ApplyFeralAPBonus(int32(val), apply);
             //                break;
             case ITEM_MOD_MANA_REGENERATION:
                 ApplyManaRegenBonus(int32(val), apply);
-                break;
-            case ITEM_MOD_ARMOR_PENETRATION_RATING:
-                ApplyRatingMod(CR_ARMOR_PENETRATION, int32(val), apply);
                 break;
             case ITEM_MOD_SPELL_POWER:
                 ApplySpellPowerBonus(int32(val), apply);
@@ -6918,12 +7103,37 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
             case ITEM_MOD_BLOCK_VALUE:
                 HandleBaseModValue(SHIELD_BLOCK_VALUE, FLAT_MOD, float(val), apply);
                 break;
-            /// @deprecated item mods
-            case ITEM_MOD_SPELL_HEALING_DONE:
-            case ITEM_MOD_SPELL_DAMAGE_DONE:
-                break;
             case ITEM_MOD_THORNS:
                 HandleStatModifier(UNIT_MOD_THORNS, TOTAL_VALUE, float(val), apply);
+                break;
+            case ITEM_MOD_SPEED:
+                ApplyRatingMod(CR_SPEED, int32(val), apply);
+                break;
+            case ITEM_MOD_LIFESTEAL:
+                ApplyRatingMod(CR_LIFESTEAL, int32(val), apply);
+                break;
+            case ITEM_MOD_AVOIDANCE:
+                ApplyRatingMod(CR_AVOIDANCE, int32(val), apply);
+                break;
+            case ITEM_MOD_MASTERY:
+                ApplyRatingMod(CR_MASTERY, int32(val), apply);
+                break;
+            case ITEM_MOD_MULTISTRIKE:
+                ApplyRatingMod(CR_MULTISTRIKE, int32(val), apply);
+                break;
+            case ITEM_MOD_AGI_STR_INT:
+                HandleStatModifier(ClassSpecDependantUnitMod(), BASE_VALUE, float(val), apply);
+                ApplyStatBuffMod(ClassSpecDependantMainStat(), float(val), apply);
+                break;
+            /// @deprecated item mods
+            //case ITEM_MOD_HIT_MELEE_RATING:
+            //case ITEM_MOD_HIT_RANGED_RATING:
+            //case ITEM_MOD_HIT_SPELL_RATING:
+            case ITEM_MOD_HIT_RATING:
+            //case ITEM_MOD_EXPERTISE_RATING:
+            //case ITEM_MOD_SPELL_HEALING_DONE:
+            //case ITEM_MOD_SPELL_DAMAGE_DONE:
+            //case ITEM_MOD_ARMOR_PENETRATION_RATING:
                 break;
         }
     }

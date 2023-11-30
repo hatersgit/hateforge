@@ -236,8 +236,9 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectSpecCount,                                //161 SPELL_EFFECT_TALENT_SPEC_COUNT        second talent spec (learn/revert)
     &Spell::EffectActivateSpec,                             //162 SPELL_EFFECT_TALENT_SPEC_SELECT       activate primary/secondary spec
     &Spell::EffectNULL,                                     //163 unused
-    &Spell::EffectRemoveAura,                               //164 SPELL_EFFECT_REMOVE_AURA
-    &Spell::EffectCreateAreaTrigger,                        //165 SPELL_EFFECT_CREATE_AREATRIGGER
+    &Spell::EffectNULL,
+    &Spell::EffectLearnTransmogSet,                         //165 SPELL_EFFECT_LEARN_TRANSMOG_SET
+    &Spell::EffectCreateAreaTrigger,                        //166 SPELL_EFFECT_CREATE_AREATRIGGER
 };
 
 wEffect WeaponAndSchoolDamageEffects[TOTAL_WEAPON_DAMAGE_EFFECTS] =
@@ -2685,6 +2686,14 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
             if (owner->GetAura(56249))
                 owner->CastCustomSpell(owner, 19658, &heal_amount, nullptr, nullptr, true);
     }
+
+    //Improved Tranquilizing Shot
+    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellInfo->Id == 19801)
+    {
+        if (Unit* owner = m_caster->GetOwner())
+            if (owner->GetAura(1600017))
+                owner->CastSpell(owner, 1600018, TRIGGERED_FULL_MASK);
+    }    
 }
 
 void Spell::EffectDualWield(SpellEffIndex /*effIndex*/)
@@ -3964,7 +3973,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     case 58590: // Rank 9
                     case 58591: // Rank 10
                         {
-                            int32 basepoints0 = damage;
+                        int32 basepoints0 = CalculatePct(m_caster->GetHealth(), 10); // old: damage; new: 10% HP
                             // Cast Absorb on totems
                             for (uint8 slot = SUMMON_SLOT_TOTEM; slot < MAX_TOTEM_SLOT; ++slot)
                             {
@@ -5021,6 +5030,20 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
     if (!unitTarget)
         return;
 
+    bool knockbackImmune = false;
+
+    Unit::AuraApplicationMap& auraMap = unitTarget->GetAppliedAuras();
+    for (Unit::AuraApplicationMap::iterator iter = auraMap.begin(); iter != auraMap.end();)
+    {
+        AuraApplication* aurApp = iter->second;
+        Aura* aura = aurApp->GetBase();
+        if (aura->HasEffectType(SPELL_AURA_KNOCKBACK_IMMUNITY))
+            knockbackImmune = true;
+    }
+
+    if (knockbackImmune)
+        return;
+
     // Xinef: allow entry specific spells to skip those checks
     if (m_spellInfo->Effects[effIndex].TargetA.GetCheckType() != TARGET_CHECK_ENTRY && m_spellInfo->Effects[effIndex].TargetB.GetCheckType() != TARGET_CHECK_ENTRY)
     {
@@ -5080,8 +5103,18 @@ void Spell::EffectLeapBack(SpellEffIndex effIndex)
 
     float speedxy = m_spellInfo->Effects[effIndex].MiscValue / 10.0f;
     float speedz = damage / 10.0f;
+    int32 directional = m_spellInfo->Effects[effIndex].MiscValueB;
+
+    if (directional == 1)
+    {
+        if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_WALKING))
+            speedxy = m_caster->GetSpeed(MOVE_WALK);
+        else
+            speedxy = m_caster->GetSpeed(MOVE_RUN);
+    }
+
     //1891: Disengage
-    m_caster->JumpTo(speedxy, speedz, m_spellInfo->SpellFamilyName != SPELLFAMILY_HUNTER);
+    m_caster->JumpTo(speedxy, speedz, m_spellInfo->SpellFamilyName != SPELLFAMILY_HUNTER, directional);
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
@@ -6263,6 +6296,34 @@ void Spell::EffectCreateAreaTrigger(SpellEffIndex effIndex)
     int32 duration = GetSpellInfo()->GetDuration();
     
     AreaTrigger::CreateAreaTrigger(m_spellInfo->GetEffect(effIndex).MiscValue, GetCaster(), nullptr, GetSpellInfo(), destTarget->GetPosition(), duration, m_spellInfo->SpellVisual, ObjectGuid::Empty);
+}
+
+void Spell::EffectLearnTransmogSet(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+        return;
+
+    if (!unitTarget)
+        return;
+
+    Player* player = unitTarget->ToPlayer();
+
+    if (!player)
+        return;
+
+    uint32 setId = m_spellInfo->Effects[effIndex].MiscValue;
+
+    if (!sItemSetStore.LookupEntry(setId))
+    {
+        LOG_ERROR("spells.effect", "EffectLearnTransmogSet: Set (Id: {}) not exist in spell {}.", setId, m_spellInfo->Id);
+        return;
+    }
+
+    ItemSetEntry const* setEntry = sItemSetStore.LookupEntry(setId);
+
+    for (uint32 i = 0; i < MAX_ITEM_SET_ITEMS; ++i)
+        if (setEntry->itemId[i])
+            Transmogrification::instance().AddToCollection(player, sObjectMgr->GetItemTemplate(setEntry->itemId[i]));
 }
 
 void Spell::EffectCastButtons(SpellEffIndex effIndex)

@@ -392,8 +392,18 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleAuraModSpellPowerPercent,                  //329 SPELL_AURA_MOD_SPELL_POWER_PCT
     &AuraEffect::HandleAuraModSpellPowerOfStatPercent,            //330 SPELL_AURA_MOD_SPELL_POWER_OF_STAT_PERCENT
     &AuraEffect::HandleAuraModSpellPowerOfCombatRatingPercent,    //331 SPELL_AURA_MOD_SPELL_POWER_OF_RATING_PERCENT
-    &AuraEffect::HandleAuraModTriggerSpellPowerPercent,           //332 SPELL_AURA_MOD_TRIGGER_SPELL_ON_POWER_PCT
-    &AuraEffect::HandleCreateAreaTrigger,                         //333 SPELL_AURA_AREA_TRIGGER
+    &AuraEffect::HandleModRatingPercent,                          //333 SPELL_AURA_MOD_RATING_PCT
+    &AuraEffect::HandleModRatingFromRating,                       //334 SPELL_AURA_MOD_RATING_OF_RATING_PCT
+    &AuraEffect::HandleNoImmediateEffect,                         //335 SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER
+    &AuraEffect::HandleNoImmediateEffect,                         //336 SPELL_AURA_MOD_AUTOATTACK_DAMAGE_PCT
+    &AuraEffect::HandleNoImmediateEffect,                         //337 SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_VS_CASTER implemented in Unit::SpellPctDamageModsDone
+    &AuraEffect::HandleCreateAreaTrigger,                         //338 SPELL_AURA_AREA_TRIGGER
+    &AuraEffect::HandleNoImmediateEffect,                         //339 SPELL_AURA_MOD_ARMOR_PENETRATION
+    &AuraEffect::HandleNoImmediateEffect,                         //340 SPELL_AURA_KNOCKBACK_IMMUNITY
+    &AuraEffect::HandleNoImmediateEffect,                         //341 SPELL_AURA_ADD_MASTERY_PCT_TO_SPELL_EFFECT implemented in AuraEffect::CalculateSpellMod()
+    &AuraEffect::HandleModRatingPercent,                          //342 SPELL_AURA_MOD_RATING_FROM_ALL_SOURCES_BY_PCT visual only, implemented in Player::UpdateRating()
+    &AuraEffect::HandleNoImmediateEffect,                         //343 SPELL_AURA_MOD_RECOVERY_RATE implemented in AuraEffect::PeriodicTick
+    &AuraEffect::HandleNoImmediateEffect,                         //341 SPELL_AURA_ADD_MASTERY_RATING_TO_SPELL_EFFECT implemented in AuraEffect::CalculateSpellMod()
 };
 
 AuraEffect::AuraEffect(Aura* base, uint8 effIndex, int32* baseAmount, Unit* caster):
@@ -612,6 +622,9 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool create, bool load)
             if (!m_amplitude)
                 m_amplitude = 1 * IN_MILLISECONDS;
             [[fallthrough]]; /// @todo: Not sure whether the fallthrough was a mistake (forgetting a break) or intended. This should be double-checked.
+        case SPELL_AURA_MOD_RECOVERY_RATE:
+            m_amplitude = 0.1f * IN_MILLISECONDS;
+            [[fallthrough]];
         case SPELL_AURA_PERIODIC_DAMAGE:
         case SPELL_AURA_PERIODIC_HEAL:
         case SPELL_AURA_OBS_MOD_HEALTH:
@@ -708,6 +721,70 @@ void AuraEffect::CalculateSpellMod()
                 m_spellmod->charges = GetBase()->GetCharges();
             }
             m_spellmod->value = GetAmount();
+            m_spellmod->exvalue = GetMiscValueB();
+            break;
+        case SPELL_AURA_ADD_MASTERY_PCT_TO_SPELL_EFFECT:
+            if (!m_spellmod)
+            {
+                m_spellmod = new SpellModifier(GetBase());
+
+                m_spellmod->type = SPELLMOD_FLAT;
+                m_spellmod->spellId = GetId();
+                m_spellmod->mask = GetSpellInfo()->Effects[GetEffIndex()].SpellClassMask;
+                m_spellmod->charges = GetBase()->GetCharges();
+
+                int32 tempMisc = GetMiscValue();
+
+                switch (tempMisc)
+                {
+                    case 2:
+                        m_spellmod->op = SpellModOp(SPELLMOD_EFFECT2);
+                        break;
+                    case 3:
+                        m_spellmod->op = SpellModOp(SPELLMOD_EFFECT3);
+                        break;
+                    case 4:
+                        m_spellmod->op = SpellModOp(SPELLMOD_ALL_EFFECTS);
+                        break;
+                    case 1:
+                    default:
+                        m_spellmod->op = SpellModOp(SPELLMOD_EFFECT1);
+                        break;
+                }
+            }
+            m_spellmod->value = GetCaster()->GetUInt32Value(static_cast<uint16>(PLAYER_FIELD_COMBAT_RATING_1) + CR_MASTERY);
+            m_spellmod->exvalue = GetMiscValueB();
+            break;
+        case SPELL_AURA_ADD_MASTERY_RATING_TO_SPELL_EFFECT:
+            if (!m_spellmod)
+            {
+                m_spellmod = new SpellModifier(GetBase());
+
+                m_spellmod->type = SPELLMOD_FLAT;
+                m_spellmod->spellId = GetId();
+                m_spellmod->mask = GetSpellInfo()->Effects[GetEffIndex()].SpellClassMask;
+                m_spellmod->charges = GetBase()->GetCharges();
+
+                int32 tempMisc = GetMiscValue();
+
+                switch (tempMisc)
+                {
+                case 2:
+                    m_spellmod->op = SpellModOp(SPELLMOD_EFFECT2);
+                    break;
+                case 3:
+                    m_spellmod->op = SpellModOp(SPELLMOD_EFFECT3);
+                    break;
+                case 4:
+                    m_spellmod->op = SpellModOp(SPELLMOD_ALL_EFFECTS);
+                    break;
+                case 1:
+                default:
+                    m_spellmod->op = SpellModOp(SPELLMOD_EFFECT1);
+                    break;
+                }
+            }
+            m_spellmod->value = GetCaster()->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
             m_spellmod->exvalue = GetMiscValueB();
             break;
         default:
@@ -1176,6 +1253,9 @@ void AuraEffect::PeriodicTick(AuraApplication* aurApp, Unit* caster) const
             break;
         case SPELL_AURA_POWER_BURN:
             HandlePeriodicPowerBurnAuraTick(target, caster);
+            break;
+        case SPELL_AURA_MOD_RECOVERY_RATE:
+            HandlePeriodicCooldownRecoveryTick(aurApp, caster);
             break;
         default:
             break;
@@ -3797,6 +3877,7 @@ void AuraEffect::HandleModMechanicImmunity(AuraApplication const* aurApp, uint8 
         case 59752: // Every Man for Himself
         case 65547: // PvP trinket for Faction Champions (ToC 25)
         case 53490: // Bullheaded
+        case 1600025:
         case 46227: // Medalion of Immunity
             mechanic = IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
             target->RemoveAurasByType(SPELL_AURA_PREVENTS_FLEEING); // xinef: Patch 2.3.0 PvP Trinkets: Insignia of the Alliance, Insignia of the Horde, Medallion of the Alliance, and Medallion of the Horde now clear the debuff from Judgement of Justice.
@@ -4804,6 +4885,44 @@ void AuraEffect::HandleModRatingFromStat(AuraApplication const* aurApp, uint8 mo
             target->ToPlayer()->ApplyRatingMod(CombatRating(rating), 0, apply);
 
     // Aleist3r: ugly hack here as well
+    target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
+}
+
+void AuraEffect::HandleModRatingPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    // Recalculate ratings
+    for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
+        if (GetMiscValue() & (1 << rating))
+            target->ToPlayer()->ApplyRatingMod(CombatRating(rating), 0, apply);
+
+    // Aleist3r: ugly hack again
+    target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
+}
+
+void AuraEffect::HandleModRatingFromRating(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    // Recalculate
+    for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
+        if (GetMiscValue() & (1 << rating))
+            target->ToPlayer()->ApplyRatingMod(CombatRating(rating), 0, apply);
+
+    // Aleist3r: ugly hack, my old friend
     target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
 }
 
@@ -7025,6 +7144,27 @@ void AuraEffect::HandlePeriodicPowerBurnAuraTick(Unit* target, Unit* caster) con
 
     DamageInfo dmgInfo(damageInfo, DOT);
     Unit::ProcDamageAndSpell(caster, damageInfo.target, procAttacker, procVictim, procEx, damageInfo.damage, BASE_ATTACK, spellProto, nullptr, GetEffIndex(), nullptr, &dmgInfo);
+}
+
+void AuraEffect::HandlePeriodicCooldownRecoveryTick(AuraApplication* aurApp, Unit* caster) const
+{
+    Unit* target = aurApp->GetTarget();
+
+    if (!caster && (!target || target->GetTypeId() != TYPEID_PLAYER))
+        return;
+
+    SpellInfo const* auraSpell = GetBase()->GetSpellInfo();
+    flag96 spellMask = auraSpell->Effects[GetEffIndex()].SpellClassMask;
+    int32 amount = -(auraSpell->Effects[GetEffIndex()].CalcBaseValue(GetBaseAmount()));
+    Player* player = target->ToPlayer();
+    SpellCooldowns const spellCDs = player->GetSpellCooldowns();
+
+    for (SpellCooldowns::const_iterator itr = spellCDs.begin(); itr != spellCDs.end(); ++itr)
+    {
+        SpellInfo const* cdSpell = sSpellMgr->GetSpellInfo(itr->first);
+        if (cdSpell && cdSpell->SpellFamilyName == auraSpell->SpellFamilyName && (cdSpell->SpellFamilyFlags & spellMask))
+            player->ModifySpellCooldown(cdSpell->Id, amount);
+    }
 }
 
 void AuraEffect::HandleProcTriggerSpellAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo)

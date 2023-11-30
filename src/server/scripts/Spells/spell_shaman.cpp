@@ -62,12 +62,19 @@ enum ShamanSpells
     SPELL_SHAMAN_STORMSTRIKE                    = 17364,
     SPELL_SHAMAN_LAVA_LASH                      = 60103,
     SPELL_SHAMAN_LIGHTNING_BOLT_OVERLOAD        = 45284,
+
+    SPELL_SHAMAN_FLOW_OF_THE_TIDES              = 999999999, // TODO: use real id
 };
 
 enum ShamanSpellIcons
 {
     SHAMAN_ICON_ID_RESTORATIVE_TOTEMS           = 338,
     SHAMAN_ICON_ID_SHAMAN_LAVA_FLOW             = 3087
+};
+
+enum SpellHelpers
+{
+    SPELL_MAGE_TEMPORAL_DISPLACEMENT            = 1280002
 };
 
 class spell_sha_totem_of_wrath : public SpellScript
@@ -434,13 +441,14 @@ class spell_sha_bloodlust : public SpellScript
 
     bool Validate(SpellInfo const* /*spellInfo*/) override
     {
-        return ValidateSpellInfo({ SPELL_SHAMAN_SATED, SPELL_SHAMAN_EXHAUSTION });
+        return ValidateSpellInfo({ SPELL_SHAMAN_SATED, SPELL_SHAMAN_EXHAUSTION, SPELL_MAGE_TEMPORAL_DISPLACEMENT });
     }
 
     void RemoveInvalidTargets(std::list<WorldObject*>& targets)
     {
         targets.remove_if(Acore::UnitAuraCheck(true, SPELL_SHAMAN_SATED));
         targets.remove_if(Acore::UnitAuraCheck(true, SPELL_SHAMAN_EXHAUSTION));
+        targets.remove_if(Acore::UnitAuraCheck(true, SPELL_MAGE_TEMPORAL_DISPLACEMENT));
     }
 
     void ApplyDebuff()
@@ -470,20 +478,22 @@ class spell_sha_chain_heal : public SpellScript
 
     void HandleHeal(SpellEffIndex /*effIndex*/)
     {
-        if (firstHeal)
-        {
-            // Check if the target has Riptide
-            if (AuraEffect* aurEff = GetHitUnit()->GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_SHAMAN, 0, 0, 0x10, GetCaster()->GetGUID()))
+        if (GetCaster()->HasSpell(SPELL_SHAMAN_FLOW_OF_THE_TIDES)) {
+            if (firstHeal)
             {
-                riptide = true;
-                // Consume it
-                GetHitUnit()->RemoveAura(aurEff->GetBase());
+                // Check if the target has Riptide
+                if (AuraEffect* aurEff = GetHitUnit()->GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_SHAMAN, 0, 0, 0x10, GetCaster()->GetGUID()))
+                {
+                    riptide = true;
+                    // Consume it
+                    GetHitUnit()->RemoveAura(aurEff->GetBase());
+                }
+                firstHeal = false;
             }
-            firstHeal = false;
+            // Riptide increases the Chain Heal effect by 25%
+            if (riptide)
+                SetHitHeal(GetHitHeal() * 1.25f);
         }
-        // Riptide increases the Chain Heal effect by 25%
-        if (riptide)
-            SetHitHeal(GetHitHeal() * 1.25f);
     }
 
     void Register() override
@@ -824,13 +834,14 @@ class spell_sha_heroism : public SpellScript
 
     bool Validate(SpellInfo const* /*spellInfo*/) override
     {
-        return ValidateSpellInfo({ SPELL_SHAMAN_EXHAUSTION, SPELL_SHAMAN_SATED });
+        return ValidateSpellInfo({ SPELL_SHAMAN_EXHAUSTION, SPELL_SHAMAN_SATED, SPELL_MAGE_TEMPORAL_DISPLACEMENT });
     }
 
     void RemoveInvalidTargets(std::list<WorldObject*>& targets)
     {
         targets.remove_if(Acore::UnitAuraCheck(true, SPELL_SHAMAN_EXHAUSTION));
         targets.remove_if(Acore::UnitAuraCheck(true, SPELL_SHAMAN_SATED));
+        targets.remove_if(Acore::UnitAuraCheck(true, SPELL_MAGE_TEMPORAL_DISPLACEMENT));
     }
 
     void ApplyDebuff()

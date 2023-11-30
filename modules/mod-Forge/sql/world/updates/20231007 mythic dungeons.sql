@@ -75,7 +75,7 @@ CREATE TABLE `acore_world`.`forge_mythic_criteria` (
 INSERT INTO acore_world.forge_mythic_criteria (id, `instance`, `type`, value) VALUES(1, 389, 0, 11520);
 INSERT INTO acore_world.forge_mythic_criteria (id, `instance`, `type`, value) VALUES(2, 389, 1, 5);
 
-DELETE FROM acore_world.itemrandomsuffix_dbc where ID in (102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150)
+DELETE FROM acore_world.itemrandomsuffix_dbc where ID in (102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150);
 INSERT INTO acore_world.itemrandomsuffix_dbc (ID, Name_Lang_enUS, Name_Lang_enGB, Name_Lang_koKR, Name_Lang_frFR, Name_Lang_deDE, Name_Lang_enCN, Name_Lang_zhCN, Name_Lang_enTW, Name_Lang_zhTW, Name_Lang_esES, Name_Lang_esMX, Name_Lang_ruRU, Name_Lang_ptPT, Name_Lang_ptBR, Name_Lang_itIT, Name_Lang_Unk, Name_Lang_Mask, InternalName, Enchantment_1, Enchantment_2, Enchantment_3, Enchantment_4, Enchantment_5, AllocationPct_1, AllocationPct_2, AllocationPct_3, AllocationPct_4, AllocationPct_5) 
 VALUES 
 (102, '+2' , NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 16712190, 'm+2' , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),

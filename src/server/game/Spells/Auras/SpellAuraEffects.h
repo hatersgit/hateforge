@@ -296,6 +296,8 @@ public:
     //   combat rating
     void HandleModRating(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleModRatingFromStat(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+    void HandleModRatingPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+    void HandleModRatingFromRating(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     //   attack power
     void HandleAuraModAttackPower(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleAuraModRangedAttackPower(AuraApplication const* aurApp, uint8 mode, bool apply) const;
@@ -353,6 +355,7 @@ public:
     void HandleObsModPowerAuraTick(Unit* target, Unit* caster) const;
     void HandlePeriodicEnergizeAuraTick(Unit* target, Unit* caster) const;
     void HandlePeriodicPowerBurnAuraTick(Unit* target, Unit* caster) const;
+    void HandlePeriodicCooldownRecoveryTick(AuraApplication* aurApp, Unit* caster) const;
 
     // aura effect proc handlers
     void HandleProcTriggerSpellAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);

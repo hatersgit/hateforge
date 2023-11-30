@@ -58,7 +58,7 @@ public:
                         if (foundType != pointType)
                             return;
 
-                        if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", false)) {
+                        if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", true)) {
                             if (!spec->CharacterSpecTabId) {
                                 iam.player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Attempting to learn talents without first selecting a primary spec.");
                                 return;

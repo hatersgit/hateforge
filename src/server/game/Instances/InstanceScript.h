@@ -382,7 +382,7 @@ private:
     uint32 _challengeModeStartTime;
     uint32 _challengeModeDeathCount;
     Optional<Position> _challengeModeDoorPosition;
-    ChallengeModeCriteria* _challengeModeCriteria;
+    ChallengeModeCriteria* _challengeModeCriteria = nullptr;
     Player* _challengeOwner;
     KeyInfo* _challengeKey;
     uint32 _challengeModeTimerMax;

@@ -24,7 +24,30 @@ public:
 
         ForgeCharacterSpec* spec;
         if (fc->TryGetCharacterActiveSpec(iam.player, spec)) {
+            if (iam.message.size() > 3) {
+                auto classinfo = iam.message.substr(0, 3);
+                CharacterPointType type = CharacterPointType(base64_char.find_first_of(classinfo.substr(0, 1)));
+                auto spec = base64_char.find_first_of(classinfo.substr(1, 2));
+                auto pClass = base64_char.find_first_of(classinfo.substr(2, 3));
+                if (iam.player->getClass() != pClass) {
+                    if (iam.message.size() == 29) {
+                        auto ranks = iam.message.substr(3, iam.message.size());
 
+                    }
+                    else {
+                        iam.player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Malformed talent string.");
+                        return;
+                    }
+                }
+                else {
+                    iam.player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Incorrect Class in talent string.");
+                    return;
+                }
+            }
+            else {
+                iam.player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Malformed talent string.");
+                return;
+            }
 
             std::vector<std::string> typeSplit;
             boost::algorithm::split(typeSplit, iam.message, boost::is_any_of("|"));
@@ -206,7 +229,7 @@ public:
 
                                     for (auto unlock : node->unlocks)
                                         unlocked.push_back(unlock->spellId);
-                                    
+
                                     ForgeCharacterTalent* ct = new ForgeCharacterTalent();
                                     ct->CurrentRank = col.second;
                                     ct->SpellId = choiceNode ? col.second : talent->SpellId;
@@ -228,6 +251,8 @@ public:
 private:
     ForgeCommonMessage* cm;
     ForgeCache* fc;
+
+    const std::string base64_char = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
     ForgeCache::TreeMetaData* _treeMetaData;
     std::unordered_map<uint32 /*tabId*/, std::unordered_map<uint8 /*row*/, std::unordered_map<uint8/*col*/, uint32 /*rank*/>>> _simplifiedTreeMap;

@@ -5032,16 +5032,7 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
 
     bool knockbackImmune = false;
 
-    Unit::AuraApplicationMap& auraMap = unitTarget->GetAppliedAuras();
-    for (Unit::AuraApplicationMap::iterator iter = auraMap.begin(); iter != auraMap.end();)
-    {
-        AuraApplication* aurApp = iter->second;
-        Aura* aura = aurApp->GetBase();
-        if (aura->HasEffectType(SPELL_AURA_KNOCKBACK_IMMUNITY))
-            knockbackImmune = true;
-    }
-
-    if (knockbackImmune)
+    if (unitTarget->HasAuraType(SPELL_AURA_KNOCKBACK_IMMUNITY))
         return;
 
     // Xinef: allow entry specific spells to skip those checks

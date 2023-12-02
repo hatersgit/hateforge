@@ -58,23 +58,7 @@ public:
         if (!player)
             return;
 
-        uint32 count = 1;
-
-        for (auto const& [accID, session] : sWorld->GetAllSessions())
-        {
-            Player* _player = session->GetPlayer();
-            if (!_player || _player == player)
-            {
-                continue;
-            }
-
-            // If Remote Address matches, remove the player from the world
-            //if (player->GetSession()->GetRemoteAddress() == _player->GetSession()->GetRemoteAddress() && ++count > 1)
-            //{
-            //    player->GetSession()->KickPlayer();
-            //}
-        }
-
+        LearnSpellsForLevel(player);
         fc->ApplyAccountBoundTalents(player);
     }
 
@@ -102,85 +86,39 @@ public:
             uint32 levelMod = fc->GetConfig("levelMod", 2);
             uint8 levelDiff = currentLevel - oldlevel;
 
-            if (currentLevel == fc->GetConfig("MaxLevel", 80))
-            {
-                fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::PRESTIGE_TREE, fc->GetConfig("PrestigePointsAtMaxLevel", 5));
-            }
+            //if (currentLevel == fc->GetConfig("MaxLevel", 80))
+            //{
+            //    fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::PRESTIGE_TREE, fc->GetConfig("PrestigePointsAtMaxLevel", 5));
+            //}
 
             if (currentLevel >= 10)
             {
                 uint8 amount = levelDiff;
                 if (oldlevel < 10 && levelDiff > 1)
-                    amount = levelDiff - (9 - oldlevel);
+                    levelDiff -= (9 - oldlevel);
 
-                if (levelDiff < levelMod && currentLevel % levelMod == 0)
-                {
-                    uint32 scrapEarned = fc->GetConfig("scrapsPerLevelMod", 1);
-                    player->AddItem(FORGE_SCRAP, scrapEarned);
+                if (levelDiff > 1) {
+                    int div = levelDiff / 2;
+                    int rem = levelDiff % 2;
+                    fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::TALENT_TREE, div);
+                    if (rem)
+                        div += 1;
+
+                    fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::CLASS_TREE, div);
                 }
-                else if (levelDiff > 1 && levelDiff >= levelMod) // someone added levels, protect div by zero, dont allow 1 as its been evaluated. check if its enough levels
-                {
-                    uint32 pointsMultiplier = levelDiff / levelMod;
-                    uint32 scrapEarned = fc->GetConfig("scrapsPerLevelMod", 1) * pointsMultiplier;
-                    player->AddItem(FORGE_SCRAP, scrapEarned);
-                }
-
-                fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::TALENT_TREE, amount);
-
-                ForgeCharacterPoint* pp = fc->GetCommonCharacterPoint(player, CharacterPointType::PRESTIGE_COUNT);
-
-                if (oldlevel < 10 && pp->Sum == 0)
-                {
-                    auto points = fc->GetConfig("fogepointsAt10", 30);
-                    fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::FORGE_SKILL_TREE, points);
-                }
-
-                if (pp->Sum == 0)
-                {
-                    fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::FORGE_SKILL_TREE, amount * fc->GetConfig("InitialForgePointsPerLevel", 1));
-
-                    if (currentLevel >= 20 && oldlevel < 20)
-                        fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::RACIAL_TREE, fc->GetConfig("MilestonePoints", 4));
-
-                    if (currentLevel >= 40 && oldlevel < 40)
-                        fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::RACIAL_TREE, fc->GetConfig("MilestonePoints", 4));
-
-                    if (currentLevel >= 60 && oldlevel < 60)
-                        fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::RACIAL_TREE, fc->GetConfig("MilestonePoints", 4));
-
-                    if (currentLevel == 80)
-                        fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::RACIAL_TREE, fc->GetConfig("MilestonePoints", 4));
+                else {
+                    if (currentLevel % 2)
+                        fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::TALENT_TREE, amount);
+                    else
+                        fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::CLASS_TREE, amount);
                 }
 
                 cm->SendActiveSpecInfo(player);
-                cm->SendTalentTreeLayout(player);
                 cm->SendTalents(player);
             }
 
-            if (currentLevel == 80)
-            {
-                for (auto charTabType : fc->TALENT_POINT_TYPES)
-                {
-                    if (ACCOUNT_WIDE_TYPE != charTabType)
-                        continue;
-
-                    std::list<ForgeTalentTab*> tabs;
-                    if (fc->TryGetForgeTalentTabs(player, charTabType, tabs))
-                        for (auto* tab : tabs)
-                        {
-                            auto talItt = spec->Talents.find(tab->Id);
-
-                            for (auto spell : tab->Talents)
-                            {
-                                for (auto rank : spell.second->Ranks)
-                                    player->removeSpell(rank.second, SPEC_MASK_ALL, false);
-                            }
-                        }
-                }
-
-                cm->SendTalents(player);
-            }
-
+            fc->UpdateCharacterSpec(player, spec);
+            LearnSpellsForLevel(player);
         }
     }
 
@@ -259,7 +197,29 @@ private:
     TopicRouter* Router;
     ForgeCache* fc;
     ForgeCommonMessage* cm;
-    uint32 FORGE_SCRAP = 90000;
+
+    void LearnSpellsForLevel(Player* player) {
+        if (player->HasUnitState(UNIT_STATE_DIED))
+            player->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+
+        auto pClass = fc->_levelClassSpellMap.find(player->getClass());
+        if (pClass != fc->_levelClassSpellMap.end()) {
+            for (auto race : pClass->second) {
+                if (player->getRaceMask() & race.first) {
+                    for (auto level : race.second) {
+                        if (level.first <= player->getLevel()) {
+                            for (auto spell : level.second) {
+                                if (player->HasSpell(spell))
+                                    continue;
+
+                                player->learnSpell(spell);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 };
 
 // Add all scripts in one

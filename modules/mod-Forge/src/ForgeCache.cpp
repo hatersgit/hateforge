@@ -891,8 +891,7 @@ public:
         return 0;
     }
 
-    std::unordered_map<uint8 /*level*/, std::unordered_map<uint8/*class*/, std::unordered_map<uint32 /*tabId*/, std::vector<uint32 /*spell*/>>>> _levelClassSpellMap;
-    std::unordered_map<uint32 /*class*/, std::unordered_map<uint32 /*tab*/, std::vector<uint32/*spellId*/>>> _specStarterTalents;
+    std::unordered_map<uint8 /*class*/, std::unordered_map<uint32 /*racemask*/, std::unordered_map<uint8/*level*/, std::vector<uint32 /*spell*/>>>> _levelClassSpellMap;
 
     /* hater: cached tree meta data */
     struct NodeMetaData {
@@ -936,14 +935,6 @@ public:
         fcp->Sum = baseFcp->Sum;
 
         UpdateCharPoints(player, fcp);
-    }
-
-    void InitSpecForTabId(Player* player, uint32 tabId) {
-        ForgeCharacterSpec* spec;
-        if (TryGetCharacterActiveSpec(player, spec)) {
-            spec->Talents.clear();
-            auto starters = GetStarterTalents(player->getClass(), tabId);
-        }
     }
 
 private:
@@ -1013,7 +1004,6 @@ private:
             AddTalentTrees();
             AddTalentsToTrees();
             AddLevelClassSpellMap();
-            AddSpecStarterTalents();
             AddTalentPrereqs();
             AddTalentChoiceNodes();
             AddTalentRanks();
@@ -1728,7 +1718,7 @@ private:
     {
         _levelClassSpellMap.clear();
 
-        QueryResult mapQuery = WorldDatabase.Query("select `level`,`class`, `tab`, `spell` from `acore_world`.`forge_character_spec_spells` order by `level` asc, `class` asc, `tab` asc, `spell` asc");
+        QueryResult mapQuery = WorldDatabase.Query("select * from `acore_world`.`forge_character_spec_spells` order by `class` asc, `race` asc, `level` asc, `spell` asc");
 
         if (!mapQuery)
             return;
@@ -1736,37 +1726,13 @@ private:
         do
         {
             Field* mapFields = mapQuery->Fetch();
-            uint32 level = mapFields[0].Get<uint8>();
-            uint32 classId = mapFields[1].Get<uint32>();
-            uint32 spec = mapFields[2].Get<uint32>();
+            uint8 pClass = mapFields[0].Get<uint8>();
+            uint32 race = mapFields[1].Get<uint32>();
+            uint8 level = mapFields[2].Get<uint8>();
             uint32 spell = mapFields[3].Get<uint32>();
 
-            _levelClassSpellMap[level][classId][spec].push_back(spell);
+            _levelClassSpellMap[pClass][race][level].push_back(spell);
         } while (mapQuery->NextRow());
-    }
-
-    void AddSpecStarterTalents()
-    {
-        _specStarterTalents.clear();
-
-        QueryResult mapQuery = WorldDatabase.Query("select `class`, `tab`, `spell` from `acore_world`.`forge_character_spec_strarter_talents`");
-
-        if (!mapQuery)
-            return;
-
-        do
-        {
-            Field* mapFields = mapQuery->Fetch();
-            uint32 classId = mapFields[0].Get<uint32>();
-            uint32 spec = mapFields[1].Get<uint32>();
-            uint32 spell = mapFields[2].Get<uint32>();
-
-            _specStarterTalents[classId][spec].push_back(spell);
-        } while (mapQuery->NextRow());
-    }
-
-    std::vector<uint32> GetStarterTalents(uint32 pClass, uint32 tabId) {
-        return _specStarterTalents[pClass][tabId];
     }
 };
 

@@ -239,6 +239,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectNULL,                                     //164 SPELL_EFFECT_REMOVE_AURA
     &Spell::EffectLearnTransmogSet,                         //165 SPELL_EFFECT_LEARN_TRANSMOG_SET
     &Spell::EffectCreateAreaTrigger,                        //166 SPELL_EFFECT_CREATE_AREATRIGGER
+    &Spell::EffectJumpCharge,                               //167 SPELL_EFFECT_JUMP_CHARGE
 };
 
 wEffect WeaponAndSchoolDamageEffects[TOTAL_WEAPON_DAMAGE_EFFECTS] =
@@ -6315,6 +6316,35 @@ void Spell::EffectLearnTransmogSet(SpellEffIndex effIndex)
     for (uint32 i = 0; i < MAX_ITEM_SET_ITEMS; ++i)
         if (setEntry->itemId[i])
             Transmogrification::instance().AddToCollection(player, sObjectMgr->GetItemTemplate(setEntry->itemId[i]));
+}
+
+void Spell::EffectJumpCharge(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH)
+        return;
+
+    if (!m_caster)
+        return;
+
+    if (m_caster->IsInFlight())
+        return;
+
+    JumpChargeParams const* params = sObjectMgr->GetJumpChargeParams(m_spellInfo->Effects[effIndex].MiscValue);
+
+    if (!params)
+        return;
+
+    float speed = params->Speed;
+
+    if (params->TreatSpeedAsMoveTimeSeconds)
+        speed = m_caster->GetExactDist(destTarget) / params->MoveTimeInSec;
+
+    m_caster->GetMotionMaster()->MoveJumpWithGravity(*destTarget, speed, params->JumpGravity, 0, ObjectAccessor::GetUnit(*m_caster, m_caster->GetGuidValue(UNIT_FIELD_TARGET)));
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        sScriptMgr->AnticheatSetUnderACKmount(m_caster->ToPlayer());
+    }
 }
 
 void Spell::EffectCastButtons(SpellEffIndex effIndex)

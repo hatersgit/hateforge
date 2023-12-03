@@ -110,7 +110,5 @@ private:
                 }
             }
         }
-
-        fc->InitSpecForTabId(player, tabId);
     }
 };

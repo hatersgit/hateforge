@@ -116,7 +116,7 @@ public:
                 cm->SendActiveSpecInfo(player);
                 cm->SendTalents(player);
             }
-
+            cm->SendSpecInfo(player);
             fc->UpdateCharacterSpec(player, spec);
             LearnSpellsForLevel(player);
         }

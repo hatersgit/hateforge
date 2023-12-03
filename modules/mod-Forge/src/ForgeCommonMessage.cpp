@@ -126,7 +126,8 @@ std::string ForgeCommonMessage::BuildTree(Player* player, CharacterPointType poi
                 j++;
             }
 
-            msg = msg + "&" + std::to_string(talentKvp.second->nodeType) + "&";
+            msg = msg + "&" + std::to_string(talentKvp.second->nodeType) + "&"
+                + std::to_string(talentKvp.second->nodeIndex) + "&";
 
             for (auto& choice : talentKvp.second->Choices)
             {
@@ -138,7 +139,6 @@ std::string ForgeCommonMessage::BuildTree(Player* player, CharacterPointType poi
                 msg = msg + choiceDel + std::to_string(choice->spellId);
                 j++;
             }
-
             i++;
         }
 
@@ -318,57 +318,60 @@ bool ForgeCommonMessage::CanLearnTalent(Player* player, uint32 tabId, uint32 spe
     return false;
 }
 
-void ForgeCommonMessage::SendTalents(Player* player, uint32 tabId)
-{
-    std::unordered_map<uint32, ForgeCharacterTalent*> spec;
-    CharacterPointType pt;
-
-    if (fc->TryGetTabPointType(tabId, pt))
-    {
-        fc->TryGetCharacterTalents(player, tabId, spec);
-
-        std::string clientMsg = std::to_string(tabId) + "^" + std::to_string((int)pt) + "^";
-
-        clientMsg = DoBuildRanks(spec, player, clientMsg, tabId);
-
-        player->SendForgeUIMsg(ForgeTopic::GET_TALENTS, clientMsg);
-    }
-    else
-        player->SendForgeUIMsg(ForgeTopic::GET_TALENT_ERROR, "Unknown Tab");
-}
-
-
 void ForgeCommonMessage::SendTalents(Player* player)
 {
     ForgeCharacterSpec* spec;
     if (fc->TryGetCharacterActiveSpec(player, spec))
     {
-        uint32 i = 0;
+        auto pClass = player->getClass();
+        auto cSpec = spec->CharacterSpecTabId;
+        for (auto tpt : fc->TALENT_POINT_TYPES) {
+            std::string clientMsg = base64_char.substr(tpt+1, 1)+base64_char.substr(cSpec, 1)+base64_char.substr(pClass, 1);
+            switch (tpt) {
+            case CharacterPointType::TALENT_TREE: {
+                uint32 i = 0;
 
-        for (auto tpt : fc->TALENT_POINT_TYPES)
-        {
-            std::list<ForgeTalentTab*> tabs;
-            if (fc->TryGetForgeTalentTabs(player, tpt, tabs))
-            {
-                std::string clientMsg;
-                for (auto* tab : tabs)
-                {
-                    std::string delimiter = ";";
+                auto classTree = spec->Talents[fc->_cacheClassNodeToClassTree[player->getClass()]];
+                auto classMap = fc->_cacheClassNodeToSpell[pClass];
 
-                    if (i == 0)
-                        delimiter = "";
-                    //clientMsg = clientMsg + delimiter + std::to_string(tab->Id) + "^" + std::to_string((int)tab->TalentType) + "^";
-                    clientMsg = std::to_string(tab->Id) + "^" + std::to_string((int)tab->TalentType) + "^";
-                    std::unordered_map<uint32, ForgeCharacterTalent*> spec;
-                    fc->TryGetCharacterTalents(player, tab->Id, spec);
-                    clientMsg = DoBuildRanks(spec, player, clientMsg, tab->Id);
+                auto specTree = spec->Talents[spec->CharacterSpecTabId];
+                auto specMap = fc->_cacheSpecNodeToSpell[spec->CharacterSpecTabId];
+
+                if (classTree.size() == classMap.size()) {
+                    for (int i = 1; i <= classMap.size(); i++) {
+                        clientMsg += base64_char.substr(classTree[classMap[i]]->CurrentRank + 1, 1);
+                    }
+                }
+            
+                if (specTree.size() == specMap.size()) {
+                    for (int i = 1; i <= specMap.size(); i++) {
+                        clientMsg += base64_char.substr(specTree[specMap[i]]->CurrentRank + 1, 1);
+                    }
+                }
+
+                player->SendForgeUIMsg(ForgeTopic::GET_TALENTS, clientMsg);
+                break;
+            }
+            case CharacterPointType::PRESTIGE_TREE:
+            case CharacterPointType::RACIAL_TREE: {
+                std::list<ForgeTalentTab*> tabs;
+                if (fc->TryGetForgeTalentTabs(player, tpt, tabs)) {
+
+                    for (auto tab : tabs) {
+                        auto specTree = spec->Talents[tab->Id];
+                        for (auto talent : specTree) {
+                            clientMsg += base64_char.substr(talent.second->CurrentRank + 1, 1);
+                        }
+                    }
 
                     player->SendForgeUIMsg(ForgeTopic::GET_TALENTS, clientMsg);
-                    i++;
                 }
+                break;
+            }
+            default:
+                break;
             }
         }
-        
     }
 }
 
@@ -534,42 +537,5 @@ void ForgeCommonMessage::SendActiveSpecInfo(Player* player)
         }
 
         player->SendForgeUIMsg(ForgeTopic::GET_CHARACTER_SPECS, msg);
-    }
-}
-
-std::string ForgeCommonMessage::EncodeTalentString(Player* player) {
-    std::string export_str = "";
-    ForgeCharacterSpec* spec;
-
-    if (fc->TryGetCharacterActiveSpec(player, spec))
-    {
-        auto talents = spec->Talents.find(spec->CharacterSpecTabId);
-        if (talents != spec->Talents.end()) {
-            if (talents->second.empty())
-                return export_str;
-
-            size_t head = 0;
-            size_t byte = 0;
-            auto put_bit = [&export_str, &head, &byte, this](size_t bits, unsigned value) {
-                for (size_t i = 0; i < bits; i++)
-                {
-                    size_t bit = head % byte_size;
-                    byte += (value >> i & 0b1) << bit;
-                    if (bit == byte_size - 1)
-                    {
-                        export_str += base64_char[byte];
-                        byte = 0;
-                    }
-                    head++;
-                }
-                };
-
-            put_bit(version_bits, LOADOUT_SERIALIZATION_VERSION);
-            put_bit(spec_bits, static_cast<unsigned>(spec->CharacterSpecTabId));
-            put_bit(tree_bits, 0);
-
-            //std::map<unsigned, std::vector<std::pair<const trait_data_t*, unsigned>>> tree_nodes;
-
-        }
     }
 }

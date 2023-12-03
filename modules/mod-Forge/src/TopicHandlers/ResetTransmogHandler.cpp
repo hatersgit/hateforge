@@ -19,14 +19,7 @@ public:
     void HandleMessage(ForgeAddonMessage& iam) override
     {
         if (iam.message == "-1" || iam.message == "" || !fc->isNumber(iam.message))
-        {
             mc->SendTalents(iam.player);
-        }
-        else
-        {
-            uint32 tabId = static_cast<uint32>(std::stoul(iam.message));
-            mc->SendTalents(iam.player, tabId);
-        }
     }
 
 

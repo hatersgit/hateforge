@@ -22,7 +22,6 @@ public:
     ForgeCommonMessage(ForgeCache*);
     ForgeCache* fc;
 
-    void SendTalents(Player*, uint32);
     void SendTalents(Player*);
     void SendTalentTreeLayout(Player*);
     void SendTalentTreeLayout(Player*, uint32);
@@ -44,7 +43,7 @@ private:
     std::string DoBuildRanks(std::unordered_map<uint32, ForgeCharacterTalent*>& spec, Player* player, std::string clientMsg, uint32 tabId);
 
     // hater: talent string encoding
-    const std::string base64_char = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    const std::string base64_char = "|ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     const unsigned LOADOUT_SERIALIZATION_VERSION = 1;
     const size_t version_bits = 8;    // serialization version
     const size_t spec_bits = 16;   // specialization id

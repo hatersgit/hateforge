@@ -27,14 +27,7 @@ public:
         {
             ForgeCharacterSpec* spec;
             if (fc->TryGetCharacterActiveSpec(iam.player, spec)) {
-                if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", true) && !spec->CharacterSpecTabId) { // Main spec not selected yet, prompt user
-                    auto level10s = fc->_levelClassSpellMap.find(sConfigMgr->GetIntDefault("Forge.StrictSpecs.TalentLevelReq", 10));
-                    if (level10s != fc->_levelClassSpellMap.end())
-                        specSpells = level10s->second;
-                    SendSpecSelectInfo(iam.player);
-                }
-                else 
-                    cm->SendTalents(iam.player);
+                cm->SendTalents(iam.player);
             }
         }
         else
@@ -48,42 +41,4 @@ public:
 private:
     ForgeCache* fc;
     ForgeCommonMessage* cm;
-
-    std::unordered_map<uint8/*class*/, std::unordered_map<uint32 /*tabId*/, std::vector<uint32 /*spell*/>>> specSpells;
-
-    void SendSpecSelectInfo(Player* player)
-    {
-        std::list<ForgeTalentTab*> tabs;
-        if (fc->TryGetForgeTalentTabs(player, CharacterPointType::TALENT_TREE, tabs))
-        {
-            int i = 0;
-            std::string out = ""; // tabId;iconId;name;description?;spell~spell~spell~mastery?*
-            for (auto tab : tabs)
-            {
-                std::string sep = ";";
-                std::string delim = i ? "*" : "";
-
-                out += delim + std::to_string(tab->Id) + sep + std::to_string(tab->SpellIconId) + sep
-                    + tab->Name + sep + "TODO add descriptions" + sep;
-
-                auto pClass = specSpells.find(player->getClass());
-                if (pClass != specSpells.end())
-                {
-                    auto spec = pClass->second.find(tab->Id);
-                    if (spec != pClass->second.end()) {
-                        auto spells = spec->second;
-                        int j = 0;
-                        for (auto spell : spells) {
-                            auto spellSep = j ? "~" : "";
-                            out += spellSep + std::to_string(spell);
-                            j++;
-                        }
-                    }
-                }
-                i++;
-            }
-
-            player->SendForgeUIMsg(ForgeTopic::PROMPT_CHAR_SPEC, out);
-        }
-    }
 };

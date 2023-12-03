@@ -122,6 +122,8 @@ struct ForgeTalent
     uint8 RequiredLevel;
     CharacterPointType TalentType;
     NodeType nodeType;
+    uint8 nodeIndex;
+
     uint8 NumberOfRanks;
     PereqReqirementType PreReqType;
     std::list<ForgeTalentPrereq*> Prereqs;
@@ -919,7 +921,7 @@ public:
         std::list<ForgeTalentTab*> tabs;
         if (TryGetForgeTalentTabs(player, pointType, tabs))
             for (auto* tab : tabs)
-                for (auto spell : tab->Talents)
+                for (auto spell : tab->Talents) {
                     for (auto rank : spell.second->Ranks)
                         if (auto spellInfo = sSpellMgr->GetSpellInfo(rank.second)) {
 
@@ -929,7 +931,13 @@ public:
 
                             player->postCheckRemoveSpell(rank.second);
                             player->RemoveAura(rank.second);
+
+
                         }
+                    auto talent = spec->Talents[tab->Id].find(spell.first);
+                    if (talent != spec->Talents[tab->Id].end())
+                        talent->second->CurrentRank = 0;
+                }
         ForgeCharacterPoint* fcp = GetSpecPoints(player, pointType, spec->Id);
         ForgeCharacterPoint* baseFcp = GetCommonCharacterPoint(player, pointType);
         fcp->Sum = baseFcp->Sum;
@@ -937,6 +945,9 @@ public:
         UpdateCharPoints(player, fcp);
     }
 
+    std::unordered_map<uint32 /*tabid*/, std::unordered_map<uint8 /*node*/, uint32 /*spell*/>> _cacheSpecNodeToSpell;
+    std::unordered_map<uint32 /*class*/, std::unordered_map<uint8 /*node*/, uint32 /*spell*/>> _cacheClassNodeToSpell;
+    std::unordered_map<uint32, uint32> _cacheClassNodeToClassTree;
 private:
     std::unordered_map<ObjectGuid, uint32> CharacterActiveSpecs;
     std::unordered_map<std::string, uint32> CONFIG;
@@ -1239,10 +1250,13 @@ private:
 
     void AddTalentTrees()
     {
-        QueryResult talentTab = WorldDatabase.Query("SELECT * FROM forge_talent_tabs");
+        QueryResult talentTab = WorldDatabase.Query("SELECT * FROM forge_talent_tabs order by `id` asc");
 
         if (!talentTab)
             return;
+
+        _cacheClassNodeToClassTree.clear();
+        _cacheClassNodeToSpell.clear();
 
         do
         {
@@ -1277,6 +1291,10 @@ private:
                         SpellToTalentTabMap[newTab->SpellIconId] = newTab->Id;
                         TalentTabToSpellMap[newTab->Id] = newTab->SpellIconId;
                         CharacterPointTypeToTalentTabIds[newTab->TalentType].insert(newTab->Id);
+                        if (newTab->TalentType == CharacterPointType::CLASS_TREE) {
+                            _cacheClassNodeToSpell[wowClass.first] = {};
+                            _cacheClassNodeToClassTree[wowClass.first] = newTab->Id;
+                        }
                     }
                 }
             }
@@ -1291,10 +1309,14 @@ private:
         QueryResult talents = WorldDatabase.Query("SELECT * FROM forge_talents order by `talentTabId` asc, `rowIndex` asc, `columnIndex` asc");
 
         _cacheTreeMetaData.clear();
+        _cacheSpecNodeToSpell.clear();
+        _cacheClassNodeToSpell.clear();
 
         if (!talents)
             return;
 
+        int i = 1;
+        auto prevTab = -1;
         do
         {
             Field* talentFields = talents->Fetch();
@@ -1310,6 +1332,19 @@ private:
             newTalent->PreReqType = (PereqReqirementType)talentFields[8].Get<uint8>();
             newTalent->TabPointReq = talentFields[9].Get<uint16>();
             newTalent->nodeType = NodeType(talentFields[10].Get<uint8>());
+
+            if (prevTab != newTalent->TalentTabId) {
+                prevTab = newTalent->TalentTabId;
+                i = 1;
+            }
+
+            newTalent->nodeIndex = i++;
+            if (newTalent->TalentType != CharacterPointType::CLASS_TREE)
+                _cacheSpecNodeToSpell[newTalent->TalentTabId][newTalent->nodeIndex] = newTalent->SpellId;
+            else {
+                auto demaskClass = (TalentTabs[newTalent->TalentTabId]->ClassMask >> 1) + 1;
+                _cacheClassNodeToSpell[demaskClass][newTalent->nodeIndex] = newTalent->SpellId;
+            }
 
             auto tabItt = TalentTabs.find(newTalent->TalentTabId);
 

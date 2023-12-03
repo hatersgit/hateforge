@@ -10170,6 +10170,11 @@ PlayerInfo const* ObjectMgr::GetPlayerInfo(uint32 race, uint32 class_) const
     return info;
 }
 
+JumpChargeParams const* ObjectMgr::GetJumpChargeParams(int32 id) const
+{
+    return Acore::Containers::MapGetValuePtr(_jumpChargeParams, id);
+}
+
 void ObjectMgr::LoadGameObjectQuestItems()
 {
     uint32 oldMSTime = getMSTime();
@@ -10681,7 +10686,7 @@ void ObjectMgr::LoadSpellChargeMap()
         }
     } while (result->NextRow());
 
-    LOG_INFO("server.loading", ">> Loaded {} charges from forge_spell_charge in {} ms", _forgeMythicMaps.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded {} charges from forge_spell_charge in {} ms", _chargeSpellMap.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadWorldSafeLocs()
@@ -10712,6 +10717,54 @@ void ObjectMgr::LoadWorldSafeLocs()
     }
     else
         LOG_INFO("server.loading", ">> Loaded 0 world locations. DB table `world_safe_locs` is empty.");
+}
+
+void ObjectMgr::LoadJumpChargeParams()
+{
+    uint32 oldMSTime = getMSTime();
+
+    _jumpChargeParams.clear();
+
+    //                                               0   1      2                            3            4
+    QueryResult result = WorldDatabase.Query("SELECT id, speed, treatSpeedAsMoveTimeSeconds, jumpGravity, comments FROM forge_spell_jump_charge_params");
+
+    if (!result)
+    {
+        LOG_ERROR("sql.sql", ">> Loaded 0 jump charge params. DB table `forge_spell_jump_charge_params` is empty.");
+        LOG_INFO("server.loading", " ");
+        return;
+    }
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 id = fields[0].Get<uint32>();
+        float speed = fields[1].Get<float>();
+        bool treatSpeedAsMoveTimeSeconds = fields[2].Get<bool>();
+        float jumpGravity = fields[3].Get<float>();
+
+        if (speed <= 0.0f)
+        {
+            LOG_ERROR("sql.sql", "Table `forge_spell_jump_charge_params` uses invalid speed {} for id {}, set to default charge speed {}.", speed, id, SPEED_CHARGE);
+            speed = SPEED_CHARGE;
+        }
+
+        if (jumpGravity <= 0.0f)
+        {
+            LOG_ERROR("sql.sql", "Table `forge_spell_jump_charge_params` uses invalid jump gravity {} for id {}, set to default {}.", jumpGravity, id, Movement::gravity);
+            jumpGravity = Movement::gravity;
+        }
+
+        JumpChargeParams& params = _jumpChargeParams[id];
+        params.Speed = speed;
+        params.MoveTimeInSec = speed;
+        params.TreatSpeedAsMoveTimeSeconds = treatSpeedAsMoveTimeSeconds;
+        params.JumpGravity = jumpGravity;
+    }
+    while (result->NextRow());
+
+    LOG_INFO("server.loading", ">> Loaded {} jump charge params from forge_spell_jump_charge_params in {} ms", _jumpChargeParams.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 MapChallengeModeEntry* ObjectMgr::GetChallengeMode(uint32 id) const

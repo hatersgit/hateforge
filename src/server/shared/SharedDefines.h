@@ -1045,6 +1045,7 @@ enum SpellEffects
     SPELL_EFFECT_REMOVE_AURA                        = 164,
     SPELL_EFFECT_LEARN_TRANSMOG_SET                 = 165, 
     SPELL_EFFECT_CREATE_AREATRIGGER                 = 166,
+    SPELL_EFFECT_JUMP_CHARGE                        = 167,
     TOTAL_SPELL_EFFECTS                            
 };
 

@@ -1935,7 +1935,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
         {
             if (tDamage.second > 0)
             {
-                SpellInfo const* i_spellProto = sSpellMgr->GetSpellInfo(1129999);
+                SpellInfo const* i_spellProto = sSpellMgr->GetSpellInfo(1570001);
 
                 uint32 damage = tDamage.second > 0 ? tDamage.second : 0;
                 uint32 absorb = 0;
@@ -2026,7 +2026,7 @@ ThornsDamage Unit::CalculateThorns(Unit* attacker, Unit* victim, bool calcMisses
     //auto otherThorns = shieldOwner->GetUInt32Value(UNIT_FIELD_THORNS);
     //thornsDmg.ThornsDamageMap[SPELL_SCHOOL_MASK_NORMAL] += otherThorns;
 
-    SpellInfo const* thornsSpellInfo = sSpellMgr->GetSpellInfo(1129999);
+    SpellInfo const* thornsSpellInfo = sSpellMgr->GetSpellInfo(1570001);
 
     for (auto tDamage : thornsDmg.ThornsDamageMap)
     {

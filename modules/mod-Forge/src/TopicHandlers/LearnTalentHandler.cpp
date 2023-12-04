@@ -97,8 +97,9 @@ public:
                                             }
                                     }
                                 }
-                                fc->UpdateCharPoints(iam.player, points);
 
+                                iam.player->SetActiveSpec(specId);
+                                fc->UpdateCharPoints(iam.player, points);
                                 fc->UpdateCharacterSpec(iam.player, spec);
 
                                 cm->SendActiveSpecInfo(iam.player);

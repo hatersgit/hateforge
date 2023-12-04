@@ -541,6 +541,10 @@ public:
     typedef std::unordered_multimap<ObjectGuid::LowType, GameObject*> GameObjectBySpawnIdContainer;
     GameObjectBySpawnIdContainer& GetGameObjectBySpawnIdStore() { return _gameobjectBySpawnIdStore; }
 
+    typedef std::unordered_multimap<ObjectGuid::LowType, AreaTrigger*> AreaTriggerBySpawnIdContainer;
+    AreaTriggerBySpawnIdContainer& GetAreaTriggerBySpawnIdStore() { return _areaTriggerBySpawnIdStore; }
+    AreaTriggerBySpawnIdContainer const& GetAreaTriggerBySpawnIdStore() const { return _areaTriggerBySpawnIdStore; }
+
     [[nodiscard]] std::unordered_set<Corpse*> const* GetCorpsesInCell(uint32 cellId) const
     {
         auto itr = _corpsesByCell.find(cellId);
@@ -841,6 +845,7 @@ private:
     MapStoredObjectTypesContainer _objectsStore;
     CreatureBySpawnIdContainer _creatureBySpawnIdStore;
     GameObjectBySpawnIdContainer _gameobjectBySpawnIdStore;
+    AreaTriggerBySpawnIdContainer _areaTriggerBySpawnIdStore;
     std::unordered_map<uint32/*cellId*/, std::unordered_set<Corpse*>> _corpsesByCell;
     std::unordered_map<ObjectGuid, Corpse*> _corpsesByPlayer;
     std::unordered_set<Corpse*> _corpseBones;

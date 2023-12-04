@@ -7401,7 +7401,7 @@ void AuraEffect::HandleCreateAreaTrigger(AuraApplication const* aurApp, uint8 mo
     if (Unit* caster = GetCaster())
     {
         if (apply)
-            AreaTrigger::CreateAreaTrigger(GetMiscValue(), caster, target, GetSpellInfo(), *target, GetBase()->GetDuration(), m_spellInfo->SpellVisual, ObjectGuid::Empty, this);
+            AreaTrigger::CreateAreaTrigger(GetMiscValue(), caster, target, GetSpellInfo(), *target, GetBase()->GetDuration(), { m_spellInfo->SpellVisual[0], m_spellInfo->SpellVisual[1] }, nullptr, this);
         //else
            // caster->RemoveAreaTrigger(this);
     }

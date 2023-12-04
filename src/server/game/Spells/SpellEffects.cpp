@@ -6286,7 +6286,7 @@ void Spell::EffectCreateAreaTrigger(SpellEffIndex effIndex)
 
     int32 duration = GetSpellInfo()->GetDuration();
     
-    AreaTrigger::CreateAreaTrigger(m_spellInfo->GetEffect(effIndex).MiscValue, GetCaster(), nullptr, GetSpellInfo(), destTarget->GetPosition(), duration, m_spellInfo->SpellVisual, ObjectGuid::Empty);
+    AreaTrigger::CreateAreaTrigger(m_spellInfo->GetEffect(effIndex).MiscValue, GetCaster(), nullptr, GetSpellInfo(), destTarget->GetPosition(), duration, { m_spellInfo->SpellVisual[0], m_spellInfo->SpellVisual[1]}, this);
 }
 
 void Spell::EffectLearnTransmogSet(SpellEffIndex effIndex)

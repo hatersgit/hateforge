@@ -392,7 +392,7 @@ enum AuraType
     SPELL_AURA_MOD_SPELL_POWER_PCT                          = 329,
     SPELL_AURA_MOD_SPELL_POWER_OF_STAT_PERCENT              = 330,
     SPELL_AURA_MOD_SPELL_POWER_OF_RATING_PERCENT            = 331,
-    SPELL_AURA_MOD_TRIGGER_SPELL_ON_POWER_PCT               = 332,  // Alesit3r: Pls don't add it as 345 again :D
+    SPELL_AURA_MOD_REMOVE_AURA                              = 332,
     SPELL_AURA_MOD_RATING_PCT                               = 333,
     SPELL_AURA_MOD_RATING_OF_RATING_PCT                     = 334,
     SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER           = 335,
@@ -405,6 +405,7 @@ enum AuraType
     SPELL_AURA_MOD_RATING_FROM_ALL_SOURCES_BY_PCT           = 342,
     SPELL_AURA_MOD_RECOVERY_RATE                            = 343,
     SPELL_AURA_ADD_MASTERY_RATING_TO_SPELL_EFFECT           = 344,
+    SPELL_AURA_MOD_TRIGGER_SPELL_ON_POWER_PCT               = 345,
     TOTAL_AURAS
 };
 

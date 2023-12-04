@@ -1770,5 +1770,3 @@ private:
         } while (mapQuery->NextRow());
     }
 };
-
-#define sForgeCache ForgeCache::instance()

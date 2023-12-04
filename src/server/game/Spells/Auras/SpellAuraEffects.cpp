@@ -405,6 +405,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleModRatingPercent,                          //342 SPELL_AURA_MOD_RATING_FROM_ALL_SOURCES_BY_PCT visual only, implemented in Player::UpdateRating()
     &AuraEffect::HandleNoImmediateEffect,                         //343 SPELL_AURA_MOD_RECOVERY_RATE implemented in AuraEffect::PeriodicTick
     &AuraEffect::HandleNoImmediateEffect,                         //344 SPELL_AURA_ADD_MASTERY_RATING_TO_SPELL_EFFECT implemented in AuraEffect::CalculateSpellMod()
+    &AuraEffect::HandleNoImmediateEffect,                         //345 SPELL_AURA_MOD_REMOVE_AURA
 };
 
 AuraEffect::AuraEffect(Aura* base, uint8 effIndex, int32* baseAmount, Unit* caster):

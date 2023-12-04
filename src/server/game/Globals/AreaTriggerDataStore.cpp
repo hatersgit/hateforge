@@ -38,13 +38,13 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
 
             if (actionType >= AREATRIGGER_ACTION_MAX)
             {
-                LOG_ERROR("sql.sql", "Table `areatrigger_template_actions` has invalid ActionType (%u) for AreaTriggerId %u and Param %u", actionType, areaTriggerId, action.Param);
+                LOG_ERROR("sql.sql", "Table `areatrigger_template_actions` has invalid ActionType {} for AreaTriggerId {} and Param {}", actionType, areaTriggerId, action.Param);
                 continue;
             }
 
             if (targetType >= AREATRIGGER_ACTION_USER_MAX)
             {
-                LOG_ERROR("sql.sql", "Table `areatrigger_template_actions` has invalid TargetType (%u) for AreaTriggerId %u and Param %u", targetType, areaTriggerId, action.Param);
+                LOG_ERROR("sql.sql", "Table `areatrigger_template_actions` has invalid TargetType {} for AreaTriggerId {} and Param {}", targetType, areaTriggerId, action.Param);
                 continue;
             }
 
@@ -72,7 +72,7 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
 
             if (type >= AREATRIGGER_TYPE_MAX)
             {
-                LOG_ERROR("sql.sql", "Table `areatrigger_template` has listed areatrigger (Id: %u) with invalid type %u.", areaTriggerTemplate.Id, type);
+                LOG_ERROR("sql.sql", "Table `areatrigger_template` has listed areatrigger (Id: {}) with invalid type {}.", areaTriggerTemplate.Id, type);
                 continue;
             }
 
@@ -106,7 +106,7 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
 
             if (!miscTemplate.Template)
             {
-                LOG_ERROR("sql.sql", "Table `spell_areatrigger` reference invalid AreaTriggerId %u for miscId %u", areatriggerId, miscTemplate.MiscId);
+                LOG_ERROR("sql.sql", "Table `areatrigger_create_properties` reference invalid AreaTriggerId {} for miscId {}", areatriggerId, miscTemplate.MiscId);
                 continue;
             }
             /*
@@ -147,10 +147,10 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
     }
     else
     {
-        LOG_INFO("server.loading", ">> Loaded 0 Spell AreaTrigger templates. DB table `spell_areatrigger` is empty.");
+        LOG_INFO("server.loading", ">> Loaded 0 Spell AreaTrigger templates. DB table `areatrigger_create_properties` is empty.");
     }
 
-    LOG_INFO("server.loading", ">> Loaded {} spell areatrigger templates in %u ms.", _areaTriggerTemplateStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded {} spell areatrigger templates in {} ms.", _areaTriggerTemplateStore.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 AreaTriggerTemplate const* AreaTriggerDataStore::GetAreaTriggerTemplate(uint32 areaTriggerId) const

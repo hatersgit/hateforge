@@ -406,6 +406,8 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleNoImmediateEffect,                         //343 SPELL_AURA_MOD_RECOVERY_RATE implemented in AuraEffect::PeriodicTick
     &AuraEffect::HandleNoImmediateEffect,                         //344 SPELL_AURA_ADD_MASTERY_RATING_TO_SPELL_EFFECT implemented in AuraEffect::CalculateSpellMod()
     &AuraEffect::HandleNoImmediateEffect,                         //345 SPELL_AURA_MOD_REMOVE_AURA
+    &AuraEffect::HandleNoImmediateEffect,                         //346 SPELL_AURA_CAN_DOUBLE_JUMP
+    &AuraEffect::HandleNoImmediateEffect,                         //347 SPELL_AURA_CAN_GLIDE
 };
 
 AuraEffect::AuraEffect(Aura* base, uint8 effIndex, int32* baseAmount, Unit* caster):

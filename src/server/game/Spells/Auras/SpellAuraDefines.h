@@ -406,6 +406,8 @@ enum AuraType
     SPELL_AURA_MOD_RECOVERY_RATE                            = 343,
     SPELL_AURA_ADD_MASTERY_RATING_TO_SPELL_EFFECT           = 344,
     SPELL_AURA_MOD_REMOVE_AURA                              = 345,
+    SPELL_AURA_CAN_DOUBLE_JUMP                              = 346,
+    SPELL_AURA_CAN_GLIDE                                    = 347,
     TOTAL_AURAS
 };
 

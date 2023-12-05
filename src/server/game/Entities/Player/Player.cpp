@@ -3542,6 +3542,11 @@ void Player::removeSpell(uint32 spell_id, uint8 removeSpecMask, bool onlyTempora
         sScriptMgr->OnPlayerForgotSpell(this, spell_id);
         SendLearnPacket(spell_id, false);
     }
+
+    if (auto chargeEntry = sObjectMgr->TryGetChargeEntry(spellInfo->SpellFamilyFlags)) {
+        _spellCharges[spellInfo->SpellFamilyFlags] = chargeEntry->baseCharges;
+        TriggerChargeRegen(spellInfo->SpellFamilyFlags);
+    }
 }
 
 bool Player::Has310Flyer(bool checkAllSpells, uint32 excludeSpellId)
@@ -16976,7 +16981,7 @@ void Player::UpdateOperations()
             auto chargeCount = GetItemCount(charged->chargeItem);
             auto maxCharges = charged->baseCharges + CalculateSpellMaxCharges(info->SpellFamilyFlags);
 
-            if (chargeCount == maxCharges)
+            if (chargeCount >= maxCharges)
                 timedDelayedOperations.erase(spell);
         }
         else {
@@ -17021,15 +17026,15 @@ uint8 Player::CalculateSpellMaxCharges(flag96 spell) {
 
 void Player::TriggerChargeRegen(flag96 flag) {
     if (auto charged = sObjectMgr->TryGetChargeEntry(flag)) {
-        auto chargeCount = GetItemCount(charged->chargeItem);
         auto maxCharges = charged->baseCharges + CalculateSpellMaxCharges(flag);
-        if (chargeCount < maxCharges)
-            AddTimedDelayedOperation(charged->SpellId, getMSTime() + charged->rechargeTime, [this, charged, flag]() {
+        AddTimedDelayedOperation(charged->SpellId, getMSTime() + charged->rechargeTime, [this, charged, flag, maxCharges]() {
+            if (GetItemCount(charged->chargeItem) < maxCharges) {
                 uint32 noSpaceForCount = 0;
                 ItemPosCountVec dest;
                 InventoryResult msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, charged->chargeItem, 1, &noSpaceForCount);
                 StoreNewItem(dest, charged->chargeItem, true);
                 TriggerChargeRegen(flag);
+            }
             });
     }
 }

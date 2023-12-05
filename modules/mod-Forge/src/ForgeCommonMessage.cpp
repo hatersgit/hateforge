@@ -142,7 +142,7 @@ std::string ForgeCommonMessage::BuildTree(Player* player, CharacterPointType poi
             i++;
         }
 
-        player->SendForgeUIMsg(ForgeTopic::TALENT_TREE_LAYOUT, msg);
+            player->SendForgeUIMsg(ForgeTopic::TALENT_TREE_LAYOUT, msg);
     }
 
     return "";

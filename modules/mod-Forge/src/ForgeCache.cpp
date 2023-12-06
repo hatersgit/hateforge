@@ -1116,9 +1116,11 @@ private:
 
                 for (auto& tals : spec->Talents)
                 {
-                    if (TalentTabs[tals.first]->TalentType == ACCOUNT_WIDE_TYPE)
-                        for (auto& tal : tals.second)
-                            sp.second->Talents[tals.first][tal.first] = tal.second;
+                    if (tals.first > 0) {
+                        if (TalentTabs[tals.first]->TalentType == ACCOUNT_WIDE_TYPE)
+                            for (auto& tal : tals.second)
+                                sp.second->Talents[tals.first][tal.first] = tal.second;
+                    }
                 }
             }
 

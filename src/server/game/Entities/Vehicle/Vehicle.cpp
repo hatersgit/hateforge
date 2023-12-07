@@ -17,6 +17,7 @@
 
 #include "Vehicle.h"
 #include "BattlefieldWG.h"
+#include "CreatureAI.h"
 #include "Log.h"
 #include "MoveSplineInit.h"
 #include "ObjectMgr.h"
@@ -545,8 +546,7 @@ bool Vehicle::IsVehicleInUse()
 
 void Vehicle::TeleportVehicle(float x, float y, float z, float ang)
 {
-    if (!_me->GetMap()->IsGridLoaded(x, y))
-        _me->GetMap()->LoadGrid(x, y);
+    _me->GetMap()->LoadGrid(x, y);
     _me->NearTeleportTo(x, y, z, ang, true);
 
     for (SeatMap::const_iterator itr = Seats.begin(); itr != Seats.end(); ++itr)

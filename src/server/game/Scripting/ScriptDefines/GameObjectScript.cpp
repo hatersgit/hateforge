@@ -15,6 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "GameObjectScript.h"
+#include "AllGameObjectScript.h"
 #include "ScriptMgr.h"
 #include "ScriptMgrMacros.h"
 #include "ScriptedGossip.h"
@@ -36,7 +38,7 @@ bool ScriptMgr::OnGossipHello(Player* player, GameObject* go)
 
     auto tempScript = ScriptRegistry<GameObjectScript>::GetScriptById(go->GetScriptId());
     ClearGossipMenuFor(player);
-    return tempScript ? tempScript->OnGossipHello(player, go) : false;
+    return tempScript && tempScript->OnGossipHello(player, go);
 }
 
 bool ScriptMgr::OnGossipSelect(Player* player, GameObject* go, uint32 sender, uint32 action)
@@ -238,6 +240,7 @@ GameObjectAI* ScriptMgr::GetGameObjectAI(GameObject* go)
     return tempScript ? tempScript->GetAI(go) : nullptr;
 }
 
+<<<<<<< HEAD
 AreaTriggerAI* ScriptMgr::GetAreaTriggerAI(AreaTrigger* areatrigger)
 {
     ASSERT(areatrigger);
@@ -256,3 +259,12 @@ AreaTriggerAI* ScriptMgr::GetAreaTriggerAI(AreaTrigger* areatrigger)
     return tempScript ? tempScript->GetAI(areatrigger) : nullptr;
 }
 
+=======
+GameObjectScript::GameObjectScript(const char* name)
+    : ScriptObject(name)
+{
+    ScriptRegistry<GameObjectScript>::AddScript(this);
+}
+
+template class AC_GAME_API ScriptRegistry<GameObjectScript>;
+>>>>>>> 6faa364ad8accc3588766dcb28145e227696703e

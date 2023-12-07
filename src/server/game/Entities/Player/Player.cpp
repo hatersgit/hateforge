@@ -76,7 +76,9 @@
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
+#include "StringConvert.h"
 #include "TicketMgr.h"
+#include "Tokenize.h"
 #include "Transport.h"
 #include "UpdateData.h"
 #include "UpdateFieldFlags.h"
@@ -86,11 +88,6 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "Tokenize.h"
-#include "StringConvert.h"
-#include <iostream>
-#include <vector>
-#include <algorithm>
 
 /// @todo: this import is not necessary for compilation and marked as unused by the IDE
 //  however, for some reasons removing it would cause a damn linking issue
@@ -1372,7 +1369,10 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
         if (GetTransport())
         {
-            m_transport->RemovePassenger(this, true);
+            m_transport->RemovePassenger(this);
+            m_transport = nullptr;
+            m_movementInfo.transport.Reset();
+            m_movementInfo.RemoveMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
             RepopAtGraveyard();                             // teleport to near graveyard if on transport, looks blizz like :)
         }
 
@@ -1414,7 +1414,10 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
         else
         {
-            m_transport->RemovePassenger(this, true);
+            m_transport->RemovePassenger(this);
+            m_transport = nullptr;
+            m_movementInfo.transport.Reset();
+            m_movementInfo.RemoveMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
         }
     }
 
@@ -2290,14 +2293,14 @@ void Player::SetGameMaster(bool on)
     if (on)
     {
         m_ExtraFlags |= PLAYER_EXTRA_GM_ON;
-        if (AccountMgr::IsGMAccount(GetSession()->GetSecurity()))
+        if (GetSession()->IsGMAccount())
             SetFaction(FACTION_FRIENDLY);
         SetPlayerFlag(PLAYER_FLAGS_GM);
         SetUnitFlag2(UNIT_FLAG2_ALLOW_CHEAT_SPELLS);
 
         if (Pet* pet = GetPet())
         {
-            if (AccountMgr::IsGMAccount(GetSession()->GetSecurity()))
+            if (GetSession()->IsGMAccount())
                 pet->SetFaction(FACTION_FRIENDLY);
             pet->getHostileRefMgr().setOnlineOfflineState(false);
         }
@@ -2396,7 +2399,6 @@ bool Player::IsInSameGroupWith(Player const* p) const
 }
 
 ///- If the player is invited, remove him. If the group if then only 1 person, disband the group.
-/// \todo Shouldn't we also check if there is no other invitees before disbanding the group?
 void Player::UninviteFromGroup()
 {
     Group* group = GetGroupInvite();
@@ -2405,14 +2407,17 @@ void Player::UninviteFromGroup()
 
     group->RemoveInvite(this);
 
-    if (group->GetMembersCount() <= 1)                       // group has just 1 member => disband
+    if (group->IsCreated())
     {
-        if (group->IsCreated())
+        if (group->GetMembersCount() <= 1)                       // group has just 1 member => disband
         {
             group->Disband(true);
             group = nullptr; // gets deleted in disband
         }
-        else
+    }
+    else
+    {
+        if (group->GetInviteeCount() <= 1)
         {
             group->RemoveAllInvites();
             delete group;
@@ -6008,11 +6013,14 @@ void Player::SaveRecallPosition()
     m_recallO = GetOrientation();
 }
 
-void Player::SendMessageToSetInRange(WorldPacket const* data, float dist, bool self, Player const* skipped_rcvr) const
+void Player::SendMessageToSetInRange(WorldPacket const* data, float dist, bool self, bool includeMargin, Player const* skipped_rcvr) const
 {
     if (self)
         GetSession()->SendPacket(data);
 
+    dist += GetObjectSize();
+    if (includeMargin)
+        dist += VISIBILITY_COMPENSATION; // pussywizard: to ensure everyone receives all important packets
     Acore::MessageDistDeliverer notifier(this, data, dist, false, skipped_rcvr);
     Cell::VisitWorldObjects(this, notifier, dist);
 }
@@ -11914,7 +11922,7 @@ WorldLocation Player::GetStartPosition() const
     return WorldLocation(mapId, info->positionX, info->positionY, info->positionZ, 0);
 }
 
-bool Player::HaveAtClient(Object const* u) const
+bool Player::HaveAtClient(WorldObject const* u) const
 {
     if (u == this)
     {
@@ -13707,11 +13715,14 @@ void Player::SetViewpoint(WorldObject* target, bool apply)
         UpdateVisibilityOf(target);
 
         if (target->isType(TYPEMASK_UNIT) && !GetVehicle())
-            static_cast<Unit*>(target)->AddPlayerToVision(this);
+            ((Unit*)target)->AddPlayerToVision(this);
         SetSeer(target);
     }
     else
     {
+        //must immediately set seer back otherwise may crash
+        m_seer = this;
+
         LOG_DEBUG("maps", "Player::CreateViewpoint: Player {} remove seer", GetName());
 
         if (!RemoveGuidValue(PLAYER_FARSIGHT, target->GetGUID()))
@@ -15835,6 +15846,8 @@ void Player::ActivateSpec(uint8 spec)
         else
             ++iter;
     }
+
+    sScriptMgr->OnAfterSpecSlotChanged(this, GetActiveSpec());
 }
 
 void Player::LoadActions(PreparedQueryResult result)

@@ -18,6 +18,8 @@
 #ifndef ACORE_CREATUREAISELECTOR_H
 #define ACORE_CREATUREAISELECTOR_H
 
+#include "Define.h"
+
 class CreatureAI;
 class Creature;
 class MovementGenerator;
@@ -32,4 +34,5 @@ namespace FactorySelector
     AC_GAME_API GameObjectAI* SelectGameObjectAI(GameObject* go);
     AC_GAME_API AreaTriggerAI* SelectAreaTriggerAI(AreaTrigger* at);
 }
+
 #endif

@@ -15,23 +15,25 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CreatureScript.h"
+#include "GridNotifiers.h"
+#include "Player.h"
+#include "SpellAuraEffects.h"
+#include "SpellMgr.h"
+#include "SpellScript.h"
+#include "SpellScriptLoader.h"
+#include "TemporarySummon.h"
+
+
+#include "ScriptMgr.h"
+#include "AreaTriggerAI.h"
+#include <G3D/Vector3.h>
 /*
  * Scripts for spells with SPELLFAMILY_PRIEST and SPELLFAMILY_GENERIC spells used by priest players.
  * Ordered alphabetically using scriptname.
  * Scriptnames of files in this file should be prefixed with "spell_pri_".
  */
 
-#include "ScriptMgr.h"
-#include "AreaTriggerAI.h"
-#include "GridNotifiers.h"
-#include "Player.h"
-#include "ScriptMgr.h"
-#include "SpellAuraEffects.h"
-#include "SpellMgr.h"
-#include "SpellScript.h"
-#include "TemporarySummon.h"
-
-#include <G3D/Vector3.h>
 
 enum PriestSpells
 {
@@ -1112,3 +1114,4 @@ void AddSC_priest_spell_scripts()
 
     RegisterAreaTriggerAI(areatrigger_pri_divine_star);
 }
+

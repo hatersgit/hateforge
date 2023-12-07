@@ -15,10 +15,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SpellInfo.h"
 #include "DBCStores.h"
 #include "DBCStructure.h"
 #include "GameGraveyard.h"
+#include "SpellInfo.h"
 #include "SpellMgr.h"
 
 inline void ApplySpellFix(std::initializer_list<uint32> spellIds, void(*fix)(SpellInfo*))
@@ -55,6 +55,12 @@ void SpellMgr::LoadSpellInfoCorrections()
         }, [](SpellInfo* spellInfo)
     {
         spellInfo->AttributesEx3 |= SPELL_ATTR3_ALWAYS_HIT;
+    });
+
+    // Scarlet Raven Priest Image
+    ApplySpellFix({ 48763, 48761 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->AuraInterruptFlags &= ~AURA_INTERRUPT_FLAG_SPELL_ATTACK;
     });
 
     // Has Brewfest Mug
@@ -4600,6 +4606,36 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Effects[EFFECT_1].DieSides = 1;
         spellInfo->Effects[EFFECT_1].MiscValue = 22;
         spellInfo->Effects[EFFECT_1].SpellClassMask[0] = 6;
+    });
+
+    // 46747 Fling torch
+    ApplySpellFix({ 46747 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_CASTER);
+    });
+
+    // Chains of Naberius
+    ApplySpellFix({ 36146 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->MaxAffectedTargets = 1;
+    });
+
+    // Force of Neltharaku
+    ApplySpellFix({ 38762 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+    });
+
+    // Spotlight
+    ApplySpellFix({ 29683, 32214 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->AttributesEx5 |= SPELL_ATTR5_DO_NOT_DISPLAY_DURATION;
+    });
+
+    // Haunted
+    ApplySpellFix({ 53768 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->Attributes |= SPELL_ATTR0_NO_AURA_CANCEL;
     });
 
     for (uint32 i = 0; i < GetSpellInfoStoreSize(); ++i)

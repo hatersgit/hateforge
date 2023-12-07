@@ -513,20 +513,13 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
 
             if (canEffectScale)
             {
-                if (!caster->IsControlledByPlayer())
-                {
-                    GtNPCManaCostScalerEntry const* spellScaler = sGtNPCManaCostScalerStore.LookupEntry(_spellInfo->SpellLevel - 1);
-                    GtNPCManaCostScalerEntry const* casterScaler = sGtNPCManaCostScalerStore.LookupEntry(caster->getLevel() - 1);
-                    if (spellScaler && casterScaler)
-                        value *= casterScaler->ratio / spellScaler->ratio;
-                }
-                else
-                {
-                    auto spellScaler = PlayerSpellScaleMap[_spellInfo->SpellLevel];
-                    auto casterScaler = PlayerSpellScaleMap[caster->getLevel()];
-                    if (spellScaler && casterScaler)
-                        value *= casterScaler / spellScaler;
-                }
+                CreatureTemplate const* cInfo = caster->ToCreature()->GetCreatureTemplate();
+
+                CreatureBaseStats const* pCBS = sObjectMgr->GetCreatureBaseStats(caster->GetLevel(), caster->getClass());
+                float CBSPowerCreature = pCBS->BaseDamage[cInfo->expansion];
+                CreatureBaseStats const* spellCBS = sObjectMgr->GetCreatureBaseStats(_spellInfo->SpellLevel, caster->getClass());
+                float CBSPowerSpell = spellCBS->BaseDamage[cInfo->expansion];
+                value *= CBSPowerCreature / CBSPowerSpell;
             }
         }
     }
@@ -1582,7 +1575,6 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
         case 2584:                                          // Waiting to Resurrect
         case 22011:                                         // Spirit Heal Channel
         case 22012:                                         // Spirit Heal
-        case 24171:                                         // Resurrection Impact Visual
         case 42792:                                         // Recently Dropped Flag
         case 43681:                                         // Inactive
         case 44535:                                         // Spirit Heal (mana)

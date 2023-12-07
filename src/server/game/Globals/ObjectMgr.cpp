@@ -9621,7 +9621,10 @@ void ObjectMgr::LoadScriptNames()
                              "UNION "
                              "SELECT DISTINCT(ScriptName) FROM outdoorpvp_template WHERE ScriptName <> '' "
                              "UNION "
-                             "SELECT DISTINCT(script) FROM instance_template WHERE script <> ''");
+                             "SELECT DISTINCT(script) FROM instance_template WHERE script <> ''"
+                             "UNION "
+                             "SELECT DISTINCT(ScriptName) FROM areatrigger_create_properties WHERE ScriptName <> ''"
+    );
 
     if (!result)
     {

@@ -23,6 +23,7 @@
 #include "AccountMgr.h"
 #include "AchievementMgr.h"
 #include "AddonMgr.h"
+#include "AreaTriggerDataStore.h"
 #include "ArenaTeamMgr.h"
 #include "AsyncAuctionListing.h"
 #include "AuctionHouseMgr.h"
@@ -2215,6 +2216,9 @@ void World::SetInitialWorldSettings()
 
     LOG_INFO("server.loading", "Loading spell charges...");
     sObjectMgr->LoadSpellChargeMap();
+
+    LOG_INFO("server.loading", "Loading updated areatriggers...");
+    sAreaTriggerDataStore->LoadAreaTriggerTemplates();
 
     sScriptMgr->OnBeforeWorldInitialized();
 

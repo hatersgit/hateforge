@@ -1043,8 +1043,6 @@ private:
 
             LOG_INFO("server.load", "Loading npc sounds...");
             sObjectMgr->LoadNpcSounds();
-
-            sAreaTriggerDataStore->LoadAreaTriggerTemplates();
         }
         catch (std::exception & ex) {
             std::string error = ex.what();

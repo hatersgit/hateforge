@@ -23,6 +23,8 @@
 
 #include "GameObject.h"
 
+#include "AreaTriggerAI.h"
+
 #include "ScriptMgr.h"
 
 namespace FactorySelector
@@ -106,5 +108,31 @@ namespace FactorySelector
             return scriptedAI;
 
         return SelectFactory<GameObjectAI>(go)->Create(go);
+    }
+
+    static uint32 GetNullAreaTriggerAIScriptId()
+    {
+        return sObjectMgr->GetScriptId("NullAreaTriggerAI");
+    }
+
+    AreaTriggerAI* SelectAreaTriggerAI(AreaTrigger* at)
+    {
+        if (AreaTriggerAI* ai = sScriptMgr->GetAreaTriggerAI(at))
+            return ai;
+        else
+            return new NullAreaTriggerAI(at, GetNullAreaTriggerAIScriptId());
+    }
+
+    uint32 GetSelectedAIId(AreaTrigger const* at)
+    {
+        if (uint32 id = at->GetScriptId())
+        {
+            if (ScriptRegistry<AreaTriggerEntityScript>::GetScriptById(id))
+            {
+                return id;
+            }
+        }
+
+        return GetNullAreaTriggerAIScriptId();
     }
 }

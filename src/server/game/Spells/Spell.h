@@ -433,6 +433,8 @@ public:
     void EffectRechargeManaGem(SpellEffIndex effIndex);
     void EffectCreateAreaTrigger(SpellEffIndex effIndex);
     void EffectJumpCharge(SpellEffIndex effIndex);
+    void EffectModifyCurrentSpellCooldown(SpellEffIndex effIndex);
+    void EffectRemoveCurrentSpellCooldown(SpellEffIndex effIndex);
 
     typedef std::set<Aura*> UsedSpellMods;
 

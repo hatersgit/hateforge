@@ -38,6 +38,9 @@ public:
     virtual void OnGameObjectCreate(GameObject*) { }
     virtual void OnGameObjectRemove(GameObject*) { }
 
+    virtual void OnAreaTriggerCreate([[maybe_unused]] AreaTrigger* areaTrigger) { }
+    virtual void OnAreaTriggerRemove([[maybe_unused]] AreaTrigger* areaTrigger) { }
+
     virtual void OnUnitDeath(Unit*) { }
     virtual void OnPlayerDeath(Player*) { }
     virtual void OnCreatureEvade(Creature*) { }

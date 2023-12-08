@@ -15,6 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "GameObjectScript.h"
+#include "AllGameObjectScript.h"
 #include "ScriptMgr.h"
 #include "ScriptMgrMacros.h"
 #include "ScriptedGossip.h"
@@ -36,7 +38,7 @@ bool ScriptMgr::OnGossipHello(Player* player, GameObject* go)
 
     auto tempScript = ScriptRegistry<GameObjectScript>::GetScriptById(go->GetScriptId());
     ClearGossipMenuFor(player);
-    return tempScript ? tempScript->OnGossipHello(player, go) : false;
+    return tempScript && tempScript->OnGossipHello(player, go);
 }
 
 bool ScriptMgr::OnGossipSelect(Player* player, GameObject* go, uint32 sender, uint32 action)
@@ -238,21 +240,10 @@ GameObjectAI* ScriptMgr::GetGameObjectAI(GameObject* go)
     return tempScript ? tempScript->GetAI(go) : nullptr;
 }
 
-AreaTriggerAI* ScriptMgr::GetAreaTriggerAI(AreaTrigger* areatrigger)
+GameObjectScript::GameObjectScript(const char* name)
+    : ScriptObject(name)
 {
-    ASSERT(areatrigger);
-
-    auto retAI = GetReturnAIScript<AreaTriggerEntityScript, AreaTriggerAI>([areatrigger](AreaTriggerEntityScript* script)
-        {
-            return script->GetAI(areatrigger);
-        });
-
-    if (retAI)
-    {
-        return retAI;
-    }
-
-    auto tempScript = ScriptRegistry<AreaTriggerEntityScript>::GetScriptById(areatrigger->GetScriptId());
-    return tempScript ? tempScript->GetAI(areatrigger) : nullptr;
+    ScriptRegistry<GameObjectScript>::AddScript(this);
 }
 
+template class AC_GAME_API ScriptRegistry<GameObjectScript>;

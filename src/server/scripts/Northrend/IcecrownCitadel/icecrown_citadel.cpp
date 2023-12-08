@@ -15,20 +15,24 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "icecrown_citadel.h"
 #include "AccountMgr.h"
+#include "AreaTriggerScript.h"
 #include "Cell.h"
 #include "CellImpl.h"
+#include "CreatureScript.h"
 #include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
 #include "Group.h"
 #include "ObjectMgr.h"
 #include "PassiveAI.h"
-#include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
 #include "SmartAI.h"
 #include "SpellAuraEffects.h"
+#include "SpellScriptLoader.h"
+#include "icecrown_citadel.h"
+#include "GridNotifiersImpl.h"
+
+class OnlyOnceAreaTriggerScript;
 
 enum Texts
 {
@@ -3745,7 +3749,7 @@ class at_icc_spire_frostwyrm : public OnlyOnceAreaTriggerScript
 public:
     at_icc_spire_frostwyrm() : OnlyOnceAreaTriggerScript("at_icc_spire_frostwyrm") { }
 
-    bool _OnTrigger(Player* player, AreaTrigger const* areaTrigger) override
+    bool OnTrigger(Player* player, AreaTrigger const* areaTrigger) override
     {
         if (player->GetInstanceScript()->GetPersistentData(DATA_SPIRE_FROSTWYRM) != DONE)
         {

@@ -25,10 +25,11 @@ class Unit;
 
 class AreaTriggerAI
 {
+    uint32 _scriptId;
     protected:
         AreaTrigger* const at;
     public:
-        explicit AreaTriggerAI(AreaTrigger* a);
+        explicit AreaTriggerAI(AreaTrigger* a, uint32 scriptId = {});
         virtual ~AreaTriggerAI();
 
         // Called when the AreaTrigger has just been initialized, just before added to map
@@ -60,12 +61,14 @@ class AreaTriggerAI
 
         // Pass parameters between AI
         virtual void DoAction(int32 /*param*/) { }
+
+        uint32 GetId() const { return _scriptId; }
 };
 
 class NullAreaTriggerAI : public AreaTriggerAI
 {
     public:
-        explicit NullAreaTriggerAI(AreaTrigger* areaTrigger) : AreaTriggerAI(areaTrigger) { }
+        using AreaTriggerAI::AreaTriggerAI;
 };
 
 #endif

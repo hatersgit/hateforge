@@ -62,9 +62,6 @@ void InstanceScript::SaveToDB()
 
 void InstanceScript::OnCreatureCreate(Creature* creature)
 {
-    AddObject(creature, true);
-    AddMinion(creature, true);
-
     Difficulty difficulty = instance->GetDifficulty();
     if (difficulty != Difficulty::REGULAR_DIFFICULTY) {
         if (InstanceDifficultyMultiplier const* multiplier = sObjectMgr->GetInstanceDifficultyMultiplier(instance->GetId(), difficulty))
@@ -76,24 +73,28 @@ void InstanceScript::OnCreatureCreate(Creature* creature)
     if (IsChallengeModeStarted())
         if (!creature->IsPet())
             CastChallengeCreatureSpell(creature);
+
+    AddObject(creature);
+    AddMinion(creature);
 }
 
 void InstanceScript::OnCreatureRemove(Creature* creature)
 {
-    AddObject(creature, false);
-    AddMinion(creature, false);
+    RemoveObject(creature);
+    RemoveMinion(creature);
 }
 
 void InstanceScript::OnGameObjectCreate(GameObject* go)
 {
-    AddObject(go, true);
-    AddDoor(go, true);
+    AddObject(go);
+    AddDoor(go);
+    sScriptMgr->AfterInstanceGameObjectCreate(instance, go);
 }
 
 void InstanceScript::OnGameObjectRemove(GameObject* go)
 {
-    AddObject(go, false);
-    AddDoor(go, false);
+    RemoveObject(go);
+    RemoveDoor(go);
 }
 
 ObjectGuid InstanceScript::GetObjectGuid(uint32 type) const
@@ -347,6 +348,11 @@ void InstanceScript::AddObject(Creature* obj, bool add)
     }
 }
 
+void InstanceScript::RemoveObject(Creature* obj)
+{
+    AddObject(obj, false);
+}
+
 void InstanceScript::AddObject(GameObject* obj, bool add)
 {
     ObjectInfoMap::const_iterator j = _gameObjectInfo.find(obj->GetEntry());
@@ -354,6 +360,11 @@ void InstanceScript::AddObject(GameObject* obj, bool add)
     {
         AddObject(obj, j->second, add);
     }
+}
+
+void InstanceScript::RemoveObject(GameObject* obj)
+{
+    AddObject(obj, false);
 }
 
 void InstanceScript::AddObject(WorldObject* obj, uint32 type, bool add)
@@ -370,6 +381,11 @@ void InstanceScript::AddObject(WorldObject* obj, uint32 type, bool add)
             _objectGuids.erase(i);
         }
     }
+}
+
+void InstanceScript::RemoveObject(WorldObject* obj, uint32 type)
+{
+    AddObject(obj, type, false);
 }
 
 void InstanceScript::AddDoor(GameObject* door, bool add)
@@ -394,6 +410,11 @@ void InstanceScript::AddDoor(GameObject* door, bool add)
         UpdateDoorState(door);
 }
 
+void InstanceScript::RemoveDoor(GameObject* door)
+{
+    AddDoor(door, false);
+}
+
 void InstanceScript::AddMinion(Creature* minion, bool add)
 {
     MinionInfoMap::iterator itr = minions.find(minion->GetEntry());
@@ -404,6 +425,11 @@ void InstanceScript::AddMinion(Creature* minion, bool add)
         itr->second.bossInfo->minion.insert(minion);
     else
         itr->second.bossInfo->minion.erase(minion);
+}
+
+void InstanceScript::RemoveMinion(Creature* minion)
+{
+    AddMinion(minion, false);
 }
 
 bool InstanceScript::SetBossState(uint32 id, EncounterState state)
@@ -719,52 +745,46 @@ void InstanceScript::DoUpdateWorldState(uint32 uiStateId, uint32 uiStateData)
 // Send Notify to all players in instance
 void InstanceScript::DoSendNotifyToInstance(char const* format, ...)
 {
-    InstanceMap::PlayerList const& players = instance->GetPlayers();
-
-    if (!players.IsEmpty())
+    if (!instance->GetPlayers().IsEmpty())
     {
         va_list ap;
         va_start(ap, format);
         char buff[1024];
         vsnprintf(buff, 1024, format, ap);
         va_end(ap);
-        for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
-            if (Player* player = i->GetSource())
-                player->GetSession()->SendNotification("%s", buff);
+
+        instance->DoForAllPlayers([&, buff](Player* player)
+        {
+            player->GetSession()->SendNotification("%s", buff);
+        });
     }
 }
 
 // Update Achievement Criteria for all players in instance
 void InstanceScript::DoUpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscValue1 /*= 0*/, uint32 miscValue2 /*= 0*/, Unit* unit /*= nullptr*/)
 {
-    Map::PlayerList const& PlayerList = instance->GetPlayers();
-
-    if (!PlayerList.IsEmpty())
-        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-            if (Player* player = i->GetSource())
-                player->UpdateAchievementCriteria(type, miscValue1, miscValue2, unit);
+    instance->DoForAllPlayers([&](Player* player)
+    {
+        player->UpdateAchievementCriteria(type, miscValue1, miscValue2, unit);
+    });
 }
 
 // Start timed achievement for all players in instance
 void InstanceScript::DoStartTimedAchievement(AchievementCriteriaTimedTypes type, uint32 entry)
 {
-    Map::PlayerList const& PlayerList = instance->GetPlayers();
-
-    if (!PlayerList.IsEmpty())
-        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-            if (Player* player = i->GetSource())
-                player->StartTimedAchievement(type, entry);
+    instance->DoForAllPlayers([&](Player* player)
+    {
+        player->StartTimedAchievement(type, entry);
+    });
 }
 
 // Stop timed achievement for all players in instance
 void InstanceScript::DoStopTimedAchievement(AchievementCriteriaTimedTypes type, uint32 entry)
 {
-    Map::PlayerList const& PlayerList = instance->GetPlayers();
-
-    if (!PlayerList.IsEmpty())
-        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-            if (Player* player = i->GetSource())
-                player->RemoveTimedAchievement(type, entry);
+    instance->DoForAllPlayers([&](Player* player)
+    {
+        player->RemoveTimedAchievement(type, entry);
+    });
 }
 
 bool InstanceScript::CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* /*source*/, Unit const* /*target*/ /*= nullptr*/, uint32 /*miscvalue1*/ /*= 0*/)

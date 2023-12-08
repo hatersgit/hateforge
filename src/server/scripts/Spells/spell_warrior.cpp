@@ -15,18 +15,18 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CreatureScript.h"
+#include "Player.h"
+#include "SpellAuraEffects.h"
+#include "SpellInfo.h"
+#include "SpellMgr.h"
+#include "SpellScript.h"
+#include "SpellScriptLoader.h"
 /*
  * Scripts for spells with SPELLFAMILY_WARRIOR and SPELLFAMILY_GENERIC spells used by warrior players.
  * Ordered alphabetically using scriptname.
  * Scriptnames of files in this file should be prefixed with "spell_warr_".
  */
-
-#include "Player.h"
-#include "ScriptMgr.h"
-#include "SpellAuraEffects.h"
-#include "SpellInfo.h"
-#include "SpellMgr.h"
-#include "SpellScript.h"
 
 enum WarriorSpells
 {
@@ -959,3 +959,4 @@ void AddSC_warrior_spell_scripts()
     // Duskhaven
     RegisterSpellScript(spell_warr_devastator);
 }
+

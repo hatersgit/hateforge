@@ -7568,14 +7568,26 @@ void AuraEffect::HandlePeriodicCooldownRecoveryTick(AuraApplication* aurApp, Uni
 
     SpellInfo const* auraSpell = GetBase()->GetSpellInfo();
     flag96 spellMask = auraSpell->Effects[GetEffIndex()].SpellClassMask;
-    int32 amount = -(auraSpell->Effects[GetEffIndex()].CalcBaseValue(GetBaseAmount()));
+    int32 amount = -(auraSpell->Effects[GetEffIndex()].CalcValue());
+    int32 ignoreSpellMask = auraSpell->Effects[GetEffIndex()].MiscValue;
+    int32 ignoreSpellFamily = auraSpell->Effects[GetEffIndex()].MiscValueB;
     Player* player = target->ToPlayer();
     SpellCooldowns const spellCDs = player->GetSpellCooldowns();
+
+    if (amount >= 100)
+    {
+        LOG_ERROR("spells.aura", "SPELL_AURA_MOD_RECOVERY_RATE: amount {} is equal or greater than 100; setting to 99", amount);
+        amount = 99;
+    }
 
     for (SpellCooldowns::const_iterator itr = spellCDs.begin(); itr != spellCDs.end(); ++itr)
     {
         SpellInfo const* cdSpell = sSpellMgr->GetSpellInfo(itr->first);
-        if (cdSpell && cdSpell->SpellFamilyName == auraSpell->SpellFamilyName && (cdSpell->SpellFamilyFlags & spellMask))
+        if (cdSpell && cdSpell->SpellFamilyName == auraSpell->SpellFamilyName && (cdSpell->SpellFamilyFlags & spellMask) && !ignoreSpellMask && !ignoreSpellFamily)
+            player->ModifySpellCooldown(cdSpell->Id, amount);
+        else if (cdSpell && cdSpell->SpellFamilyName == auraSpell->SpellFamilyName && ignoreSpellMask && !ignoreSpellFamily)
+            player->ModifySpellCooldown(cdSpell->Id, amount);
+        else if (cdSpell && ignoreSpellFamily)
             player->ModifySpellCooldown(cdSpell->Id, amount);
     }
 }

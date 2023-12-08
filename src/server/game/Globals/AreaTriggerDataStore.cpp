@@ -202,6 +202,7 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
                 createProperties.Shape.DefaultDatas.Data[i] = fields[12 + i].Get<float>();
 
             createProperties.ScriptId = sObjectMgr->GetScriptId(fields[20].Get<std::string>());
+            createProperties.scriptName = fields[20].Get<std::string>();
 
             if (shape == AREATRIGGER_TYPE_POLYGON)
             {

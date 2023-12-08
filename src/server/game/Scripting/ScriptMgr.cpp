@@ -293,9 +293,3 @@ void ScriptMgr::FillSpellSummary()
         }
     }
 }
-
-AreaTriggerEntityScript::AreaTriggerEntityScript(char const* name)
-    : ScriptObject(name)
-{
-    ScriptRegistry<AreaTriggerEntityScript>::AddScript(this);
-}

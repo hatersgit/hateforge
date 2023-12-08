@@ -25,6 +25,7 @@
 #include "TemporarySummon.h"
 
 
+#include "AreaTriggerEntityScript.h"
 #include "ScriptMgr.h"
 #include "AreaTriggerAI.h"
 #include <G3D/Vector3.h>

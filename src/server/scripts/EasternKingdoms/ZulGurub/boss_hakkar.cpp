@@ -29,6 +29,8 @@ Comment: Blood siphon spell buggy cause of Core Issue.
 Category: Zul'Gurub
 */
 
+class OnlyOnceAreaTriggerScript;
+
 enum Says
 {
     SAY_AGGRO                       = 0,

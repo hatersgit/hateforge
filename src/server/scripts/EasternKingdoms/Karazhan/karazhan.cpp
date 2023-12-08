@@ -39,6 +39,8 @@ npc_berthold
 npc_image_of_medivh
 EndContentData */
 
+class OnlyOnceAreaTriggerScript;
+
 enum Spells
 {
     // Barnes

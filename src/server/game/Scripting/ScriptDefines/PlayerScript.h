@@ -558,6 +558,16 @@ public:
      * @param player Contains information about the Player
      */
     virtual void OnAfterCreatureLootMoney(Player* /*player*/) { }
+
+    /* forge scripts */
+
+    virtual void OnAfterPlayerDestroyItem(Player* player, Item* it, uint8 bag, uint8 slot) {}
+    virtual void OnAddItem(Player* player, uint32 item, uint32 count) {}
+    virtual void OnChangeSpec(Player* player, uint8 specId) {}
+    virtual bool CanAddQuest(Player* player) { return true; }
+    virtual void OnReceiveItemFromMail(Player* player, Player* sender, Item* item) {}
+    virtual void OnNewTaxiNode(Player* player, uint32 nodeId) {}
+    virtual void OnNewTitle(Player* player, uint32 title, bool lost) {}
 };
 
 #endif

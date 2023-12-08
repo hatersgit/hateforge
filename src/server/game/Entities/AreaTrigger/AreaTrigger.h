@@ -119,6 +119,10 @@ class AreaTrigger : public WorldObject, public GridObject<AreaTrigger>, public M
         static AreaTrigger* CreateAreaTrigger(uint32 areaTriggerCreatePropertiesId, Unit* caster, Unit* target, SpellInfo const* spellInfo, Position const& pos, int32 duration, SpellCastVisual spellVisual, Spell* spell = nullptr, AuraEffect const* aurEff = nullptr);
         static ObjectGuid CreateNewMovementForceId(Map* map, uint32 areaTriggerId);
 
+        [[nodiscard]] std::string const& GetAIName() { return GetCreateProperties()->scriptName; };
+        void SetDisplayId(uint32 displayid);
+        [[nodiscard]] uint32 GetDisplayId() const { return GetUInt32Value(GAMEOBJECT_DISPLAYID); }
+
         void Update(uint32 diff) override;
         void Remove();
         bool IsRemoved() const { return _isRemoved; }

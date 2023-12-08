@@ -787,58 +787,6 @@ void InstanceScript::DoStopTimedAchievement(AchievementCriteriaTimedTypes type, 
     });
 }
 
-<<<<<<< HEAD
-=======
-// Remove Auras due to Spell on all players in instance
-void InstanceScript::DoRemoveAurasDueToSpellOnPlayers(uint32 spell)
-{
-    instance->DoForAllPlayers([&](Player* player)
-    {
-        player->RemoveAurasDueToSpell(spell);
-        if (Pet* pet = player->GetPet())
-            pet->RemoveAurasDueToSpell(spell);
-    });
-}
-
-// Cast spell on all players in instance
-void InstanceScript::DoCastSpellOnPlayers(uint32 spell)
-{
-    instance->DoForAllPlayers([&](Player* player)
-    {
-        player->CastSpell(player, spell, true);
-    });
-}
-
-void InstanceScript::DoCastSpellOnPlayer(Player* player, uint32 spell, bool includePets /*= false*/, bool includeControlled /*= false*/)
-{
-    if (!player)
-        return;
-
-    player->CastSpell(player, spell, true);
-
-    if (!includePets)
-        return;
-
-    for (uint8 itr2 = 0; itr2 < MAX_SUMMON_SLOT; ++itr2)
-    {
-        ObjectGuid summonGUID = player->m_SummonSlot[itr2];
-        if (!summonGUID.IsEmpty())
-            if (Creature* summon = instance->GetCreature(summonGUID))
-                summon->CastSpell(player, spell, true);
-    }
-
-    if (!includeControlled)
-        return;
-
-    for (auto itr2 = player->m_Controlled.begin(); itr2 != player->m_Controlled.end(); ++itr2)
-    {
-        if (Unit* controlled = *itr2)
-            if (controlled->IsInWorld() && controlled->GetTypeId() == TYPEID_UNIT)
-                controlled->CastSpell(player, spell, true);
-    }
-}
-
->>>>>>> 6faa364ad8accc3588766dcb28145e227696703e
 bool InstanceScript::CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* /*source*/, Unit const* /*target*/ /*= nullptr*/, uint32 /*miscvalue1*/ /*= 0*/)
 {
     LOG_ERROR("scripts.ai", "Achievement system call InstanceScript::CheckAchievementCriteriaMeet but instance script for map {} not have implementation for achievement criteria {}",

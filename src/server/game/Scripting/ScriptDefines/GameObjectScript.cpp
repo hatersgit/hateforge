@@ -240,26 +240,6 @@ GameObjectAI* ScriptMgr::GetGameObjectAI(GameObject* go)
     return tempScript ? tempScript->GetAI(go) : nullptr;
 }
 
-<<<<<<< HEAD
-AreaTriggerAI* ScriptMgr::GetAreaTriggerAI(AreaTrigger* areatrigger)
-{
-    ASSERT(areatrigger);
-
-    auto retAI = GetReturnAIScript<AreaTriggerEntityScript, AreaTriggerAI>([areatrigger](AreaTriggerEntityScript* script)
-        {
-            return script->GetAI(areatrigger);
-        });
-
-    if (retAI)
-    {
-        return retAI;
-    }
-
-    auto tempScript = ScriptRegistry<AreaTriggerEntityScript>::GetScriptById(areatrigger->GetScriptId());
-    return tempScript ? tempScript->GetAI(areatrigger) : nullptr;
-}
-
-=======
 GameObjectScript::GameObjectScript(const char* name)
     : ScriptObject(name)
 {
@@ -267,4 +247,3 @@ GameObjectScript::GameObjectScript(const char* name)
 }
 
 template class AC_GAME_API ScriptRegistry<GameObjectScript>;
->>>>>>> 6faa364ad8accc3588766dcb28145e227696703e

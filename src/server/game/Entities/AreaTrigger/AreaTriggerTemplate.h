@@ -239,6 +239,7 @@ public:
     Optional<AreaTriggerOrbitInfo> OrbitInfo;
 
     uint32 ScriptId;
+    std::string scriptName;
 };
 
 #endif

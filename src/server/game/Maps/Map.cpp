@@ -688,7 +688,7 @@ bool Map::AddATToMap(AreaTrigger* at) {
 
     Cell cell(cellCoord);
     if (at->isActiveObject())
-        EnsureGridLoadedForActiveObject(cell, at);
+        EnsureGridLoaded(cell);
     else
         EnsureGridCreated(GridCoord(cell.GridX(), cell.GridY()));
 
@@ -1221,7 +1221,7 @@ void Map::AddAreaTriggerToMoveList(AreaTrigger* at, float x, float y, float z, f
 
     if (at->_moveState == MAP_OBJECT_CELL_MOVE_NONE)
         _areaTriggersToMove.push_back(at);
-    at->SetNewCellPosition(x, y, z, ang);
+    at->_moveState = MAP_OBJECT_CELL_MOVE_ACTIVE;
 }
 
 void Map::RemoveAreaTriggerFromMoveList(AreaTrigger* at)

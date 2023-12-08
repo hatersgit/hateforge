@@ -666,7 +666,7 @@ bool ScriptMgr::CanAddQuest(Player* player)
 {
     auto ret = IsValidBoolScript<PlayerScript>([&](PlayerScript* script)
     {
-        return script->CanAddQuest(player);
+        return !script->CanAddQuest(player);
     });
 
     if (ret && *ret)

@@ -55,9 +55,10 @@ namespace FactorySelector
     template <class AI, class T>
     inline FactoryHolder<AI, T> const* SelectFactory(T* obj)
     {
-        static_assert(std::is_same<AI, CreatureAI>::value || std::is_same<AI, GameObjectAI>::value, "Invalid template parameter");
+        static_assert(std::is_same<AI, CreatureAI>::value || std::is_same<AI, GameObjectAI>::value || std::is_same<AI, AreaTriggerAI>::value, "Invalid template parameter");
         static_assert(std::is_same<AI, CreatureAI>::value == std::is_same<T, Creature>::value, "Incompatible AI for type");
         static_assert(std::is_same<AI, GameObjectAI>::value == std::is_same<T, GameObject>::value, "Incompatible AI for type");
+        static_assert(std::is_same<AI, AreaTriggerAI>::value == std::is_same<T, AreaTrigger>::value, "Incompatible AI for type");
 
         using AIRegistry = typename FactoryHolder<AI, T>::FactoryHolderRegistry;
 
@@ -110,29 +111,11 @@ namespace FactorySelector
         return SelectFactory<GameObjectAI>(go)->Create(go);
     }
 
-    static uint32 GetNullAreaTriggerAIScriptId()
-    {
-        return sObjectMgr->GetScriptId("NullAreaTriggerAI");
-    }
-
     AreaTriggerAI* SelectAreaTriggerAI(AreaTrigger* at)
     {
         if (AreaTriggerAI* ai = sScriptMgr->GetAreaTriggerAI(at))
             return ai;
         else
-            return new NullAreaTriggerAI(at, GetNullAreaTriggerAIScriptId());
-    }
-
-    uint32 GetSelectedAIId(AreaTrigger const* at)
-    {
-        if (uint32 id = at->GetScriptId())
-        {
-            if (ScriptRegistry<AreaTriggerEntityScript>::GetScriptById(id))
-            {
-                return id;
-            }
-        }
-
-        return GetNullAreaTriggerAIScriptId();
+            return SelectFactory<AreaTriggerAI>(at)->Create(at);
     }
 }

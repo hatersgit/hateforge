@@ -1,0 +1,1 @@
+ ALTER TABLE `acore_world`.`forge_talents`ADD COLUMN `nodeIndex` INT;

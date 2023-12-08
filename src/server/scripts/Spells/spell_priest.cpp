@@ -15,19 +15,26 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CreatureScript.h"
+#include "GridNotifiers.h"
+#include "Player.h"
+#include "SpellAuraEffects.h"
+#include "SpellMgr.h"
+#include "SpellScript.h"
+#include "SpellScriptLoader.h"
+#include "TemporarySummon.h"
+
+
+#include "AreaTriggerEntityScript.h"
+#include "ScriptMgr.h"
+#include "AreaTriggerAI.h"
+#include <G3D/Vector3.h>
 /*
  * Scripts for spells with SPELLFAMILY_PRIEST and SPELLFAMILY_GENERIC spells used by priest players.
  * Ordered alphabetically using scriptname.
  * Scriptnames of files in this file should be prefixed with "spell_pri_".
  */
 
-#include "GridNotifiers.h"
-#include "Player.h"
-#include "ScriptMgr.h"
-#include "SpellAuraEffects.h"
-#include "SpellMgr.h"
-#include "SpellScript.h"
-#include "TemporarySummon.h"
 
 enum PriestSpells
 {
@@ -54,7 +61,14 @@ enum PriestSpells
     SPELL_GENERIC_BATTLEGROUND_DAMPENING            = 74411,
     SPELL_PRIEST_TWIN_DISCIPLINE_R1                 = 47586,
     SPELL_PRIEST_SPIRITUAL_HEALING_R1               = 14898,
-    SPELL_PRIEST_DIVINE_PROVIDENCE_R1               = 47562
+    SPELL_PRIEST_DIVINE_PROVIDENCE_R1               = 47562,
+
+    SPELL_PRIEST_DIVINE_STAR_HOLY = 1410005,
+    //SPELL_PRIEST_DIVINE_STAR_SHADOW = 122121,
+    SPELL_PRIEST_DIVINE_STAR_HOLY_DAMAGE = 1410006,
+    SPELL_PRIEST_DIVINE_STAR_HOLY_HEAL = 1410007,
+    //SPELL_PRIEST_DIVINE_STAR_SHADOW_DAMAGE = 390845,
+    //SPELL_PRIEST_DIVINE_STAR_SHADOW_HEAL = 390981,
 };
 
 enum PriestSpellIcons
@@ -955,6 +969,125 @@ class spell_pri_t4_4p_bonus : public AuraScript
     }
 };
 
+G3D::Vector3 PositionToVector3(Position p) { return { p.m_positionX, p.m_positionY, p.m_positionZ }; }
+
+struct areatrigger_pri_divine_star : AreaTriggerAI
+{
+    areatrigger_pri_divine_star(AreaTrigger* areatrigger) : AreaTriggerAI(areatrigger), _maxTravelDistance(0.0f) { }
+
+    void OnInitialize() override
+    {
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(at->GetSpellId());
+        if (!spellInfo)
+            return;
+
+        if (spellInfo->GetEffects().size() <= EFFECT_1)
+            return;
+
+        Unit* caster = at->GetCaster();
+        if (!caster)
+            return;
+
+        _casterCurrentPosition = caster->GetPosition();
+
+        // Note: max. distance at which the Divine Star can travel to is EFFECT_1's BasePoints yards.
+        _maxTravelDistance = float(spellInfo->GetEffect(EFFECT_1).CalcValue(caster));
+
+        Position destPos = _casterCurrentPosition;
+        at->MovePositionToFirstCollision(destPos, _maxTravelDistance, 0.0f);
+
+        PathGenerator firstPath(at);
+        firstPath.CalculatePath(destPos.GetPositionX(), destPos.GetPositionY(), destPos.GetPositionZ(), false);
+
+        G3D::Vector3 const& endPoint = firstPath.GetPath().back();
+
+        // Note: it takes 1000ms to reach EFFECT_1's BasePoints yards, so it takes (1000 / EFFECT_1's BasePoints)ms to run 1 yard.
+        at->InitSplines(firstPath.GetPath(), at->GetDistance(endPoint.x, endPoint.y, endPoint.z) * float(1000 / _maxTravelDistance));
+    }
+
+    void OnUpdate(uint32 diff) override
+    {
+        _scheduler.Update(diff);
+    }
+
+    void OnUnitEnter(Unit* unit) override
+    {
+        HandleUnitEnterExit(unit);
+    }
+
+    void OnUnitExit(Unit* unit) override
+    {
+        // Note: this ensures any unit receives a second hit if they happen to be inside the AT when Divine Star starts its return path.
+        HandleUnitEnterExit(unit);
+    }
+
+    void HandleUnitEnterExit(Unit* unit)
+    {
+        Unit* caster = at->GetCaster();
+        if (!caster)
+            return;
+
+        if (std::find(_affectedUnits.begin(), _affectedUnits.end(), unit->GetGUID()) != _affectedUnits.end())
+            return;
+
+        constexpr TriggerCastFlags TriggerFlags = TriggerCastFlags(TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CAST_IN_PROGRESS);
+
+        if (caster->IsValidAttackTarget(unit))
+            caster->CastSpell(unit, /*at->GetSpellId() == SPELL_PRIEST_DIVINE_STAR_SHADOW ? SPELL_PRIEST_DIVINE_STAR_SHADOW_DAMAGE :*/ SPELL_PRIEST_DIVINE_STAR_HOLY_DAMAGE,
+                TriggerFlags);
+        else if (caster->IsValidAssistTarget(unit))
+            caster->CastSpell(unit, /*at->GetSpellId() == SPELL_PRIEST_DIVINE_STAR_SHADOW ? SPELL_PRIEST_DIVINE_STAR_SHADOW_HEAL :*/ SPELL_PRIEST_DIVINE_STAR_HOLY_HEAL,
+                TriggerFlags);
+
+        _affectedUnits.push_back(unit->GetGUID());
+    }
+
+    void OnDestinationReached() override
+    {
+        Unit* caster = at->GetCaster();
+        if (!caster)
+            return;
+
+        if (at->GetDistance(_casterCurrentPosition) > 0.05f)
+        {
+            _affectedUnits.clear();
+
+            ReturnToCaster();
+        }
+        else
+            at->Remove();
+    }
+
+    void ReturnToCaster()
+    {
+        _scheduler.Schedule(0ms, [this](TaskContext task)
+            {
+                Unit* caster = at->GetCaster();
+                if (!caster)
+                    return;
+
+                _casterCurrentPosition = caster->GetPosition();
+
+                Movement::PointsArray returnSplinePoints;
+
+                returnSplinePoints.push_back(PositionToVector3(at->GetPosition()));
+                returnSplinePoints.push_back(PositionToVector3(at->GetPosition()));
+                returnSplinePoints.push_back(PositionToVector3(caster->GetPosition()));
+                returnSplinePoints.push_back(PositionToVector3(caster->GetPosition()));
+
+                at->InitSplines(returnSplinePoints, uint32(at->GetDistance(caster) / _maxTravelDistance * 1000));
+
+                task.Repeat(250ms);
+            });
+    }
+
+private:
+    TaskScheduler _scheduler;
+    Position _casterCurrentPosition;
+    std::vector<ObjectGuid> _affectedUnits;
+    float _maxTravelDistance;
+};
+
 void AddSC_priest_spell_scripts()
 {
     RegisterSpellScript(spell_pri_shadowfiend_scaling);
@@ -979,4 +1112,7 @@ void AddSC_priest_spell_scripts()
     RegisterSpellScript(spell_pri_vampiric_touch);
     RegisterSpellScript(spell_pri_mind_control);
     RegisterSpellScript(spell_pri_t4_4p_bonus);
+
+    RegisterAreaTriggerAI(areatrigger_pri_divine_star);
 }
+

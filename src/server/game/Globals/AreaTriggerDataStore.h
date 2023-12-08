@@ -6,7 +6,8 @@
 #include "AreaTrigger.h"
 
 class AreaTriggerTemplate;
-class AreaTriggerMiscTemplate;
+class AreaTriggerCreateProperties;
+struct AreaTriggerId;
 
 struct AreaTriggerData
 {
@@ -23,20 +24,14 @@ struct AreaTriggerData
 class AreaTriggerDataStore
 {
 public:
-    typedef std::list<AreaTriggerData> AreaTriggerDataList;
-    typedef std::unordered_map<uint32, AreaTriggerDataList> AreaTriggerDataContainer;
-
     void LoadAreaTriggerTemplates();
     void LoadAreaTriggers();
 
-    AreaTriggerTemplate const* GetAreaTriggerTemplate(uint32 areaTriggerId) const;
-    AreaTriggerMiscTemplate const* GetAreaTriggerMiscTemplate(uint32 spellMiscValue) const;
-    AreaTriggerDataList const* GetStaticAreaTriggersByMap(uint32 map_id) const;
+    AreaTriggerTemplate const* GetAreaTriggerTemplate(AreaTriggerId const& areaTriggerId) const;
+    AreaTriggerCreateProperties const* GetAreaTriggerCreateProperties(uint32 areaTriggerCreatePropertiesId) const;
 
     static AreaTriggerDataStore* Instance();
-
 private:
-    AreaTriggerDataContainer _areaTriggerData;
 };
 
 #define sAreaTriggerDataStore AreaTriggerDataStore::Instance()

@@ -1,6 +1,7 @@
 #include "AreaTrigger.h"
 #include "AreaTriggerAI.h"
 #include "AreaTriggerTemplate.h"
+#include "AreaTriggerEntityScript.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"

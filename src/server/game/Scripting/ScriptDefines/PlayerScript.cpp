@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "PlayerScript.h"
 #include "ScriptMgr.h"
 #include "ScriptMgrMacros.h"
 
@@ -150,6 +151,14 @@ void ScriptMgr::OnPlayerTalentsReset(Player* player, bool noCost)
     ExecuteScript<PlayerScript>([&](PlayerScript* script)
     {
         script->OnTalentsReset(player, noCost);
+    });
+}
+
+void ScriptMgr::OnAfterSpecSlotChanged(Player* player, uint8 newSlot)
+{
+    ExecuteScript<PlayerScript>([=](PlayerScript* script)
+    {
+        script->OnAfterSpecSlotChanged(player, newSlot);
     });
 }
 
@@ -657,7 +666,7 @@ bool ScriptMgr::CanAddQuest(Player* player)
 {
     auto ret = IsValidBoolScript<PlayerScript>([&](PlayerScript* script)
     {
-        return script->CanAddQuest(player);
+        return !script->CanAddQuest(player);
     });
 
     if (ret && *ret)
@@ -1749,3 +1758,11 @@ bool ScriptMgr::AnticheatCheckMovementInfo(Player* player, MovementInfo const& m
 
     return true;
 }
+
+PlayerScript::PlayerScript(const char* name)
+    : ScriptObject(name)
+{
+    ScriptRegistry<PlayerScript>::AddScript(this);
+}
+
+template class AC_GAME_API ScriptRegistry<PlayerScript>;

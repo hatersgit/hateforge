@@ -43,9 +43,9 @@ void GOMove::SendAddonMessage(Player * player, const char * msg)
     data.Initialize(SMSG_MESSAGECHAT, 100);
     data << uint8(CHAT_MSG_SYSTEM);
     data << int32(LANG_ADDON);
-    data << uint64(player->GetGUID());
+    data << uint64(player->GetGUID().GetCounter());
     data << uint32(0);
-    data << uint64(player->GetGUID());
+    data << uint64(player->GetGUID().GetCounter());
     data << uint32(messageLength);
     data << buf;
     data << uint8(0);

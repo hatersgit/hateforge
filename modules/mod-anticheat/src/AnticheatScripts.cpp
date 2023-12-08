@@ -104,7 +104,7 @@ public:
 
     void OnPlayerMove(Player* player, MovementInfo mi, uint32 opcode) override
     {
-        if (!AccountMgr::IsGMAccount(player->GetSession()->GetSecurity()) || sConfigMgr->GetOption<bool>("Anticheat.EnabledOnGmAccounts", false))
+        if (!player->GetSession()->IsGMAccount() || sConfigMgr->GetOption<bool>("Anticheat.EnabledOnGmAccounts", false))
             sAnticheatMgr->StartHackDetection(player, mi, opcode);
     }
 };

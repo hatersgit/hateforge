@@ -17,7 +17,7 @@ enum DemonHunterSpells
 
 // 204596 - Sigil of Flame
 // MiscId - 6039
-struct at_dh_sigil_of_flame : AreaTriggerAI
+struct at_dh_sigil_of_flame : public AreaTriggerAI
 {
     at_dh_sigil_of_flame(AreaTrigger* areatrigger) : AreaTriggerAI(areatrigger) { }
 

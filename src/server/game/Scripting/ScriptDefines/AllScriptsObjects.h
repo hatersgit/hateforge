@@ -65,5 +65,6 @@
 #include "WorldMapScript.h"
 #include "WorldObjectScript.h"
 #include "WorldScript.h"
+#include "AreaTriggerEntityScript.h"
 
 #endif

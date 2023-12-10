@@ -212,6 +212,10 @@ public:
     bool HasSplines() const;
     float GetMaxSearchRadius() const;
 
+    void SetScriptId(uint32 id) {
+        ScriptId = id;
+    }
+
     uint32 Id;
     AreaTriggerTemplate const* Template;
 

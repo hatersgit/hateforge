@@ -1483,6 +1483,7 @@ public:
 
     [[nodiscard]] uint32 GetHealth()    const { return GetUInt32Value(UNIT_FIELD_HEALTH); }
     [[nodiscard]] uint32 GetMaxHealth() const { return GetUInt32Value(UNIT_FIELD_MAXHEALTH); }
+    [[nodiscard]] uint32 GetMissingHealth() const { return GetMaxHealth() - GetHealth(); }
 
     [[nodiscard]] bool IsFullHealth() const { return GetHealth() == GetMaxHealth(); }
     [[nodiscard]] bool HealthBelowPct(int32 pct) const { return GetHealth() < CountPctFromMaxHealth(pct); }

@@ -372,12 +372,12 @@ void AreaTrigger::_UpdateDuration(int32 newDuration)
     m_areaTriggerData->Duration = _duration;
 }
 
-float AreaTrigger::CalcCurrentScale() const
+float AreaTrigger::CalcCurrentScale()
 {
     float scale = 1.0f;
     if (m_areaTriggerData->OverrideScaleCurve.OverrideActive)
         scale *= std::max(GetScaleCurveValue(m_areaTriggerData->OverrideScaleCurve, m_areaTriggerData->TimeToTargetScale), 0.000001f);
-    else if (AreaTriggerCreateProperties const* createProperties = GetCreateProperties())
+    else if (AreaTriggerCreateProperties* createProperties = GetCreateProperties())
         if (createProperties->ScaleCurveId)
             scale *= std::max(sObjectMgr->GetCurveValueAt(createProperties->ScaleCurveId, GetScaleCurveProgress(m_areaTriggerData->OverrideScaleCurve, m_areaTriggerData->TimeToTargetScale)), 0.000001f);
 
@@ -757,13 +757,21 @@ AreaTriggerTemplate const* AreaTrigger::GetTemplate() const
     return _areaTriggerTemplate;
 }
 
-uint32 AreaTrigger::GetScriptId() const
+uint32 AreaTrigger::GetScriptId()
 {
+    auto scriptId = 0;
+    if (AreaTriggerCreateProperties* createProperties = GetCreateProperties()) {
+        scriptId = createProperties->ScriptId;
+        if (!scriptId) {
+            for (auto& [scriptID, script] : ScriptRegistry<AreaTriggerEntityScript>::ScriptPointerList) {
+                if (script->GetName() == createProperties->scriptName)
+                    scriptId = scriptID;
+            }
+            createProperties->SetScriptId(scriptId);
+        }
+    }
 
-    if (AreaTriggerCreateProperties const* createProperties = GetCreateProperties())
-        return createProperties->ScriptId;
-
-    return 0;
+    return scriptId;
 }
 
 Unit* AreaTrigger::GetCaster() const
@@ -784,7 +792,7 @@ uint32 AreaTrigger::GetFaction() const
     return 0;
 }
 
-float AreaTrigger::GetMaxSearchRadius() const
+float AreaTrigger::GetMaxSearchRadius() 
 {
     return m_areaTriggerData->BoundsRadius2D * CalcCurrentScale();
 }
@@ -1076,13 +1084,13 @@ Position* AreaTrigger::GetOrbitCenterPosition() const
     return nullptr;
 }
 
-Position AreaTrigger::CalculateOrbitPosition() const
+Position AreaTrigger::CalculateOrbitPosition()
 {
     Position const* centerPos = GetOrbitCenterPosition();
     if (!centerPos)
         return GetPosition();
 
-    AreaTriggerCreateProperties const* createProperties = GetCreateProperties();
+    AreaTriggerCreateProperties* createProperties = GetCreateProperties();
     AreaTriggerOrbitInfo const& cmi = *_orbitInfo;
 
     // AreaTrigger make exactly "Duration / TimeToTarget" loops during his life time
@@ -1245,12 +1253,15 @@ void AreaTrigger::DebugVisualizePosition()
 
 void AreaTrigger::AI_Initialize()
 {
-    AI_Destroy();
-    _ai.reset(FactorySelector::SelectAreaTriggerAI(this));
+    if (_ai)
+        delete _ai;
+
+    _ai = FactorySelector::SelectAreaTriggerAI(this);
+
     _ai->OnInitialize();
 }
 
 void AreaTrigger::AI_Destroy()
 {
-    _ai.reset();
+    delete _ai;
 }

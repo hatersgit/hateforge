@@ -6,6 +6,7 @@
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "Timer.h"
+#include "ScriptMgr.h"
 #include <cmath>
 
 template <>
@@ -201,8 +202,13 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
             for (uint8 i = 0; i < MAX_AREATRIGGER_ENTITY_DATA; ++i)
                 createProperties.Shape.DefaultDatas.Data[i] = fields[12 + i].Get<float>();
 
-            createProperties.ScriptId = sObjectMgr->GetScriptId(fields[20].Get<std::string>());
             createProperties.scriptName = fields[20].Get<std::string>();
+            auto scriptId = 0;
+            for (auto& [scriptID, script] : ScriptRegistry<AreaTriggerEntityScript>::ScriptPointerList) {
+                if (script->GetName() == createProperties.scriptName)
+                    scriptId = scriptID;
+            }
+            createProperties.ScriptId = scriptId;
 
             if (shape == AREATRIGGER_TYPE_POLYGON)
             {
@@ -285,7 +291,7 @@ AreaTriggerTemplate const* AreaTriggerDataStore::GetAreaTriggerTemplate(AreaTrig
     return Acore::Containers::MapGetValuePtr(_areaTriggerTemplateStore, areaTriggerId);
 }
 
-AreaTriggerCreateProperties const* AreaTriggerDataStore::GetAreaTriggerCreateProperties(uint32 areaTriggerCreatePropertiesId) const
+AreaTriggerCreateProperties* AreaTriggerDataStore::GetAreaTriggerCreateProperties(uint32 areaTriggerCreatePropertiesId) const
 {
     return Acore::Containers::MapGetValuePtr(_areaTriggerCreateProperties, areaTriggerCreatePropertiesId);
 }

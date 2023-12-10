@@ -115,7 +115,7 @@ namespace FactorySelector
     {
         if (AreaTriggerAI* ai = sScriptMgr->GetAreaTriggerAI(at))
             return ai;
-        else
-            return SelectFactory<AreaTriggerAI>(at)->Create(at);
+
+        return SelectFactory<AreaTriggerAI>(at)->Create(at);
     }
 }

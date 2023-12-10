@@ -26,14 +26,9 @@ public:
         if (iam.message == "-1" || iam.message == "" || !fc->isNumber(iam.message))
         {
             ForgeCharacterSpec* spec;
-            if (fc->TryGetCharacterActiveSpec(iam.player, spec)) {
+            if (fc->TryGetCharacterActiveSpec(iam.player, spec) && iam.player->getLevel() >= 10) {
                 cm->SendTalents(iam.player);
             }
-        }
-        else
-        {
-            uint32 tabId = static_cast<uint32>(std::stoul(iam.message));
-            cm->SendTalents(iam.player);
         }
     }
 

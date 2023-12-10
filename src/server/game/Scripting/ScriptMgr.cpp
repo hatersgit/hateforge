@@ -127,6 +127,7 @@ void ScriptMgr::Unload()
     SCR_CLEAR<WorldMapScript>();
     SCR_CLEAR<WorldObjectScript>();
     SCR_CLEAR<WorldScript>();
+    SCR_CLEAR<AreaTriggerEntityScript>();
 
     delete[] SpellSummary;
 }
@@ -152,6 +153,7 @@ void ScriptMgr::LoadDatabase()
     ScriptRegistry<ConditionScript>::AddALScripts();
     ScriptRegistry<TransportScript>::AddALScripts();
     ScriptRegistry<AchievementCriteriaScript>::AddALScripts();
+    ScriptRegistry<AreaTriggerEntityScript>::AddALScripts();
 
     FillSpellSummary();
 
@@ -199,7 +201,8 @@ void ScriptMgr::CheckIfScriptsInDatabaseExist()
                 !ScriptRegistry<CommandSC>::GetScriptById(sid) &&
                 !ScriptRegistry<ArenaScript>::GetScriptById(sid) &&
                 !ScriptRegistry<GroupScript>::GetScriptById(sid) &&
-                !ScriptRegistry<DatabaseScript>::GetScriptById(sid))
+                !ScriptRegistry<DatabaseScript>::GetScriptById(sid) &&
+                !ScriptRegistry< AreaTriggerEntityScript>::GetScriptById(sid))
                 {
                     LOG_ERROR("sql.sql", "Script named '{}' is assigned in the database, but has no code!", scriptName);
                 }

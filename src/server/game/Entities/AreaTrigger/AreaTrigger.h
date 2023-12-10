@@ -103,7 +103,7 @@ class AreaTrigger : public WorldObject, public GridObject<AreaTrigger>, public M
         void AI_Initialize();
         void AI_Destroy();
 
-        AreaTriggerAI* AI() { return _ai.get(); }
+        AreaTriggerAI* AI() { return _ai; }
 
         bool IsServerSide() const { return _areaTriggerTemplate->Id.IsServerSide; }
 
@@ -163,9 +163,9 @@ class AreaTrigger : public WorldObject, public GridObject<AreaTrigger>, public M
 
         GuidUnorderedSet const& GetInsideUnits() const { return _insideUnits; }
 
-        AreaTriggerCreateProperties const* GetCreateProperties() const { return _areaTriggerCreateProperties; }
+        AreaTriggerCreateProperties* GetCreateProperties() { return _areaTriggerCreateProperties; }
         AreaTriggerTemplate const* GetTemplate() const;
-        uint32 GetScriptId() const;
+        uint32 GetScriptId();
 
         ObjectGuid GetCreatorGUID() const { return GetCasterGuid(); }
         ObjectGuid GetOwnerGUID() const { return GetCasterGuid(); }
@@ -176,7 +176,7 @@ class AreaTrigger : public WorldObject, public GridObject<AreaTrigger>, public M
         uint32 GetFaction() const;
 
         AreaTriggerShapeInfo const& GetShape() const { return _shape; }
-        float GetMaxSearchRadius() const;
+        float GetMaxSearchRadius();
         Position const& GetRollPitchYaw() const { return _rollPitchYaw; }
         Position const& GetTargetRollPitchYaw() const { return _targetRollPitchYaw; }
         void InitSplineOffsets(std::vector<Position> const& offsets, uint32 timeToTarget);
@@ -208,7 +208,7 @@ class AreaTrigger : public WorldObject, public GridObject<AreaTrigger>, public M
         void _UpdateDuration(int32 newDuration);
         float GetProgress() const;
 
-        float CalcCurrentScale() const;
+        float CalcCurrentScale();
 
         float GetScaleCurveProgress(ScaleCurve const& scaleCurve, uint32 timeTo) const;
         float GetScaleCurveValueAtProgress(ScaleCurve const& scaleCurve, float x) const;
@@ -238,7 +238,7 @@ class AreaTrigger : public WorldObject, public GridObject<AreaTrigger>, public M
         void UpdateOverridePosition();
 
         Position* GetOrbitCenterPosition() const;
-        Position CalculateOrbitPosition() const;
+        Position CalculateOrbitPosition();
 
         void DebugVisualizePosition(); // Debug purpose only
 
@@ -260,10 +260,10 @@ class AreaTrigger : public WorldObject, public GridObject<AreaTrigger>, public M
         int32 _lastSplineIndex;
         uint32 _movementTime;
         Optional<AreaTriggerOrbitInfo> _orbitInfo;
-        AreaTriggerCreateProperties const* _areaTriggerCreateProperties;
+        AreaTriggerCreateProperties* _areaTriggerCreateProperties;
         AreaTriggerTemplate const* _areaTriggerTemplate;
         GuidUnorderedSet _insideUnits;
-        std::unique_ptr<AreaTriggerAI> _ai;
+        AreaTriggerAI* _ai = nullptr;
 };
 
 typedef std::list<AreaTrigger*> AreaTriggerList;

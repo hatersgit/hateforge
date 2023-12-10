@@ -28,7 +28,7 @@ public:
     void LoadAreaTriggers();
 
     AreaTriggerTemplate const* GetAreaTriggerTemplate(AreaTriggerId const& areaTriggerId) const;
-    AreaTriggerCreateProperties const* GetAreaTriggerCreateProperties(uint32 areaTriggerCreatePropertiesId) const;
+    AreaTriggerCreateProperties* GetAreaTriggerCreateProperties(uint32 areaTriggerCreatePropertiesId) const;
 
     static AreaTriggerDataStore* Instance();
 private:

@@ -60,6 +60,8 @@ public:
 
         LearnSpellsForLevel(player);
         fc->ApplyAccountBoundTalents(player);
+
+        fc->UnlearnFlaggedSpells(player);
     }
 
     void OnDelete(ObjectGuid guid, uint32 accountId) override
@@ -140,6 +142,8 @@ public:
                     player->learnSpell(fsId);
             }
         }
+
+        fc->LearnExtraSpellsIfAny(player, spellID);
     }
 
     void OnLootItem(Player* player, Item* item, uint32 count, ObjectGuid lootguid) override

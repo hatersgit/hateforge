@@ -875,6 +875,24 @@ public:
         return BuildXmogFromEquipped(player);
     }
 
+    void UnlearnFlaggedSpells(Player* player) {
+        auto found = FlaggedForUnlearn.find(player->GetGUID().GetCounter());
+        if (found != FlaggedForUnlearn.end()) {
+            if (player->HasSpell(found->second))
+                player->postCheckRemoveSpell(found->second);
+        }
+    }
+
+    void LearnExtraSpellsIfAny(Player* player, uint32 spell) {
+        auto found = SpellLearnedAdditionalSpells.find(spell);
+        if (found != SpellLearnedAdditionalSpells.end()) {
+            for (auto spell : found->second) {
+                if (!player->HasSpell(spell))
+                    player->learnSpell(spell);
+            }
+        }
+    }
+
     std::vector<uint32> RACE_LIST;
     std::vector<uint32> CLASS_LIST;
     std::vector<CharacterPointType> TALENT_POINT_TYPES;
@@ -979,6 +997,8 @@ private:
 
     // Flagged for spec reset
     std::vector<uint32 /*guid*/> FlaggedForReset;
+    std::unordered_map<uint32 /*guid*/, uint32 /*spell*/> FlaggedForUnlearn;
+    std::unordered_map<uint32 /*guid*/, std::vector<uint32 /*spell*/>> SpellLearnedAdditionalSpells;
 
     // xmog
     std::unordered_map<uint32 /*char*/, std::unordered_map<uint8 /*setId*/, ForgeCharacterXmog*>> XmogSets;
@@ -1043,6 +1063,11 @@ private:
 
             LOG_INFO("server.load", "Loading npc sounds...");
             sObjectMgr->LoadNpcSounds();
+
+            LOG_INFO("server.load", "Loading character spell unlearn flags...");
+            AddSpellUnlearnFlags();
+            LOG_INFO("server.load", "Loading character spell learn additional spells...");
+            AddSpellLearnAdditionalSpells();
         }
         catch (std::exception & ex) {
             std::string error = ex.what();
@@ -1748,6 +1773,48 @@ private:
             PlayerSpellScaleMap[id] = data;
 
         } while (scale->NextRow());
+    }
+
+    void AddSpellUnlearnFlags()
+    {
+        FlaggedForUnlearn.clear();
+
+        std::unordered_map<uint32 /*guid*/, std::vector<uint32 /*spell*/>> SpellLearnedAdditionalSpells;
+        QueryResult flag = WorldDatabase.Query("SELECT * FROM `forge_talent_spell_flagged_unlearn`");
+
+        if (!flag)
+            return;
+
+        do
+        {
+            Field* talentFields = flag->Fetch();
+            uint32 guid = talentFields[0].Get<uint32>();
+            uint32 spell = talentFields[1].Get<float>();
+
+            FlaggedForUnlearn[guid] = spell;
+
+        } while (flag->NextRow());
+    }
+
+    void AddSpellLearnAdditionalSpells()
+    {
+        SpellLearnedAdditionalSpells.clear();
+
+        std::unordered_map<uint32 /*guid*/, std::vector<uint32 /*spell*/>> SpellLearnedAdditionalSpells;
+        QueryResult added = WorldDatabase.Query("SELECT * FROM `forge_talent_learn_additional_spell`");
+
+        if (!added)
+            return;
+
+        do
+        {
+            Field* talentFields = added->Fetch();
+            uint32 rootSpell = talentFields[0].Get<uint32>();
+            uint32 addedSpell = talentFields[1].Get<float>();
+
+            SpellLearnedAdditionalSpells[rootSpell].push_back(addedSpell);
+
+        } while (added->NextRow());
     }
 
     void AddLevelClassSpellMap()

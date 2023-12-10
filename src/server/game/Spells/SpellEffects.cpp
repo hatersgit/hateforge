@@ -964,24 +964,37 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
             targets.SetUnitTarget(m_caster);
     }
 
-    CustomSpellValues values;
-    // set basepoints for trigger with value effect
-    if (m_spellInfo->Effects[effIndex].Effect == SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE)
-    {
-        // maybe need to set value only when basepoints == 0?
-        values.AddSpellMod(SPELLVALUE_BASE_POINT0, damage);
-        values.AddSpellMod(SPELLVALUE_BASE_POINT1, damage);
-        values.AddSpellMod(SPELLVALUE_BASE_POINT2, damage);
-    }
+    Milliseconds delay = 0ms;
+    if (m_spellInfo->Effects[effIndex].MiscValue > 0)
+        delay = Milliseconds(m_spellInfo->Effects[effIndex].MiscValue);
 
-    // Remove spell cooldown (not category) if spell triggering spell with cooldown and same category
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && spellInfo->CategoryRecoveryTime && m_spellInfo->GetCategory() == spellInfo->GetCategory())
-    {
-        m_caster->ToPlayer()->RemoveSpellCooldown(spellInfo->Id);
-    }
+    uint32 repeat = 1;
+    if (m_spellInfo->Effects[effIndex].MiscValueB > 1)
+        repeat = m_spellInfo->Effects[effIndex].MiscValueB;
 
-    // original caster guid only for GO cast
-    m_caster->CastSpell(targets, spellInfo, &values, TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_NO_PERIODIC_RESET), nullptr, nullptr, m_originalCasterGUID);
+    for (uint32 i = 0; i < repeat; ++i)
+    {
+        m_caster->m_Events.AddEventAtOffset([caster = m_caster, targets, originalCaster = m_originalCasterGUID, spellInfo, effectIndex = effIndex, dmg = damage, sInfo = m_spellInfo]()
+        {
+            CustomSpellValues values;
+            // set basepoints for trigger with value effect
+            if (sInfo->Effects[effectIndex].Effect == SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE)
+            {
+                // maybe need to set value only when basepoints == 0?
+                for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                values.AddSpellMod(SpellValueMod(SPELLVALUE_BASE_POINT0 + i), dmg);
+            }
+
+            // Remove spell cooldown (not category) if spell triggering spell with cooldown and same category
+            if (caster->GetTypeId() == TYPEID_PLAYER && spellInfo->CategoryRecoveryTime && sInfo->GetCategory() == spellInfo->GetCategory())
+            {
+                caster->ToPlayer()->RemoveSpellCooldown(spellInfo->Id);
+            }
+
+            // original caster guid only for GO cast
+            caster->CastSpell(targets, spellInfo, &values, TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_NO_PERIODIC_RESET), nullptr, nullptr, originalCaster);
+        }, delay + (delay * i));
+    }
 }
 
 void Spell::EffectTriggerMissileSpell(SpellEffIndex effIndex)

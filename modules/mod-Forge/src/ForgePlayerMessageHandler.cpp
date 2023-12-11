@@ -60,6 +60,8 @@ public:
 
         LearnSpellsForLevel(player);
         fc->ApplyAccountBoundTalents(player);
+
+        fc->UnlearnFlaggedSpells(player);
     }
 
     void OnDelete(ObjectGuid guid, uint32 accountId) override
@@ -84,41 +86,43 @@ public:
         {
             uint8 currentLevel = player->getLevel();
             uint32 levelMod = fc->GetConfig("levelMod", 2);
-            uint8 levelDiff = currentLevel - oldlevel;
+            if (oldlevel < currentLevel) {
+                uint8 levelDiff = currentLevel - oldlevel;
 
-            //if (currentLevel == fc->GetConfig("MaxLevel", 80))
-            //{
-            //    fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::PRESTIGE_TREE, fc->GetConfig("PrestigePointsAtMaxLevel", 5));
-            //}
+                //if (currentLevel == fc->GetConfig("MaxLevel", 80))
+                //{
+                //    fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::PRESTIGE_TREE, fc->GetConfig("PrestigePointsAtMaxLevel", 5));
+                //}
 
-            if (currentLevel >= 10)
-            {
-                uint8 amount = levelDiff;
-                if (oldlevel < 10 && levelDiff > 1)
-                    levelDiff -= (9 - oldlevel);
+                if (currentLevel >= 10)
+                {
+                    uint8 amount = levelDiff;
+                    if (oldlevel < 10 && levelDiff > 1)
+                        levelDiff -= (9 - oldlevel);
 
-                if (levelDiff > 1) {
-                    int div = levelDiff / 2;
-                    int rem = levelDiff % 2;
-                    fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::TALENT_TREE, div);
-                    if (rem)
-                        div += 1;
+                    if (levelDiff > 1) {
+                        int div = levelDiff / 2;
+                        int rem = levelDiff % 2;
+                        fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::TALENT_TREE, div);
+                        if (rem)
+                            div += 1;
 
-                    fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::CLASS_TREE, div);
+                        fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::CLASS_TREE, div);
+                    }
+                    else {
+                        if (currentLevel % 2)
+                            fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::TALENT_TREE, amount);
+                        else
+                            fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::CLASS_TREE, amount);
+                    }
+
+                    cm->SendActiveSpecInfo(player);
+                    cm->SendTalents(player);
                 }
-                else {
-                    if (currentLevel % 2)
-                        fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::TALENT_TREE, amount);
-                    else
-                        fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::CLASS_TREE, amount);
-                }
-
-                cm->SendActiveSpecInfo(player);
-                cm->SendTalents(player);
+                cm->SendSpecInfo(player);
+                fc->UpdateCharacterSpec(player, spec);
+                LearnSpellsForLevel(player);
             }
-            cm->SendSpecInfo(player);
-            fc->UpdateCharacterSpec(player, spec);
-            LearnSpellsForLevel(player);
         }
     }
 
@@ -140,6 +144,8 @@ public:
                     player->learnSpell(fsId);
             }
         }
+
+        fc->LearnExtraSpellsIfAny(player, spellID);
     }
 
     void OnLootItem(Player* player, Item* item, uint32 count, ObjectGuid lootguid) override

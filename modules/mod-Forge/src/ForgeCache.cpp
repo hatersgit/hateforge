@@ -932,26 +932,18 @@ public:
     std::unordered_map<uint32 /*tabId*/, TreeMetaData*> _cacheTreeMetaData;
 
     void ForgetTalents(Player* player, ForgeCharacterSpec* spec, CharacterPointType pointType) {
-        
-        if (ACCOUNT_WIDE_TYPE != pointType && pointType != CharacterPointType::TALENT_TREE
-            && pointType != RACIAL_TREE && pointType != PET_TALENT)
-            return;
-
         std::list<ForgeTalentTab*> tabs;
         if (TryGetForgeTalentTabs(player, pointType, tabs))
             for (auto* tab : tabs)
                 for (auto spell : tab->Talents) {
                     for (auto rank : spell.second->Ranks)
                         if (auto spellInfo = sSpellMgr->GetSpellInfo(rank.second)) {
-
                             if (spellInfo->HasEffect(SPELL_EFFECT_LEARN_SPELL))
                                 for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-                                    player->postCheckRemoveSpell(spellInfo->Effects[i].TriggerSpell);
+                                    player->removeSpell(spellInfo->Effects[i].TriggerSpell, player->GetActiveSpecMask(), false);
 
-                            player->postCheckRemoveSpell(rank.second);
                             player->RemoveAura(rank.second);
-
-
+                            player->removeSpell(rank.second, player->GetActiveSpecMask(), false);
                         }
                     auto talent = spec->Talents[tab->Id].find(spell.first);
                     if (talent != spec->Talents[tab->Id].end())
@@ -1442,11 +1434,10 @@ private:
             auto found = _cacheTreeMetaData.find(reqSpelltab);
             if (found != _cacheTreeMetaData.end()) {
                 TreeMetaData* tree = found->second;
-                NodeMetaData* node = tree->nodeLocation[reqdSpellId];
-                node->unlocks.push_back(tree->nodeLocation[newTalent->Talent]);
-
+                NodeMetaData* node = tree->nodeLocation[newTalent->Talent];
+                node->unlocks.push_back(tree->nodeLocation[reqdSpellId]);
+                tree->nodeLocation[newTalent->Talent] = node;
                 tree->nodes[node->row][node->col] = node;
-                tree->nodeLocation[node->spellId] = node;
             }
             else
                 LOG_ERROR("FORGE.ForgeCache", "Prereq cannot be mapped to existing talent meta data.");

@@ -54,6 +54,7 @@ public:
                     if (iam.player->GetSpecActivationAllowed()) {
                         ForgeTalentTab* tab;
                         if (fc->TryGetTalentTab(iam.player, tabId, tab)) {
+                            fc->ForgetTalents(iam.player, spec, CLASS_TREE);
                             fc->ForgetTalents(iam.player, spec, TALENT_TREE);
                             spec->CharacterSpecTabId = tabId;
                             iam.player->SetActiveSpec(tabId);
@@ -70,7 +71,7 @@ public:
                             iam.player->SendForgeUIMsg(ForgeTopic::ACTIVATE_CLASS_SPEC_ERROR, "Invalid tab id for class.");
 
                         iam.player->SetSpecActivationAllowed(false);
-                        iam.player->SendForgeUIMsg(ForgeTopic::ACTIVATE_CLASS_SPEC, "0");
+                        iam.player->SendForgeUIMsg(ForgeTopic::ACTIVATE_CLASS_SPEC, std::to_string(spec->CharacterSpecTabId));
                     }
                     });
             }

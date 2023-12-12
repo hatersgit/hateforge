@@ -1442,11 +1442,10 @@ private:
             auto found = _cacheTreeMetaData.find(reqSpelltab);
             if (found != _cacheTreeMetaData.end()) {
                 TreeMetaData* tree = found->second;
-                NodeMetaData* node = tree->nodeLocation[reqdSpellId];
-                node->unlocks.push_back(tree->nodeLocation[newTalent->Talent]);
-
+                NodeMetaData* node = tree->nodeLocation[newTalent->Talent];
+                node->unlocks.push_back(tree->nodeLocation[reqdSpellId]);
+                tree->nodeLocation[newTalent->Talent] = node;
                 tree->nodes[node->row][node->col] = node;
-                tree->nodeLocation[node->spellId] = node;
             }
             else
                 LOG_ERROR("FORGE.ForgeCache", "Prereq cannot be mapped to existing talent meta data.");

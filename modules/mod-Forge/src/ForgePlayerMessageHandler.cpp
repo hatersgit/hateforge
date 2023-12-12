@@ -87,7 +87,7 @@ public:
             uint8 currentLevel = player->getLevel();
             uint32 levelMod = fc->GetConfig("levelMod", 2);
             if (oldlevel < currentLevel) {
-                uint8 levelDiff = currentLevel - oldlevel;
+                int levelDiff = currentLevel - oldlevel;
 
                 //if (currentLevel == fc->GetConfig("MaxLevel", 80))
                 //{
@@ -96,7 +96,7 @@ public:
 
                 if (currentLevel >= 10)
                 {
-                    uint8 amount = levelDiff;
+                    int amount = levelDiff;
                     if (oldlevel < 10 && levelDiff > 1)
                         levelDiff -= (9 - oldlevel);
 

@@ -1076,6 +1076,11 @@ enum SpellEffects
     SPELL_EFFECT_JUMP_CHARGE                        = 167,
     SPELL_EFFECT_MODIFY_CURRENT_SPELL_COOLDOWN      = 168,
     SPELL_EFFECT_REMOVE_CURRENT_SPELL_COOLDOWN      = 169,
+    SPELL_EFFECT_RESTORE_SPELL_CHARGE               = 170,
+    SPELL_EFFECT_GIVE_EXPERIENCE                    = 171,
+    SPELL_EFFECT_GIVE_RESTED_EXPERIENCE_BONUS       = 172,
+    SPELL_EFFECT_GIVE_HONOR                         = 173,
+    SPELL_EFFECT_RECEIVE_ITEM                       = 174,
     TOTAL_SPELL_EFFECTS                            
 };
 

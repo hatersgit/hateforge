@@ -13200,6 +13200,11 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
         for (AuraEffectList::const_iterator i = mHealingGet.begin(); i != mHealingGet.end(); ++i)
             if (caster->GetGUID() == (*i)->GetCasterGUID() && (*i)->IsAffectedOnSpell(spellProto))
                 AddPct(TakenTotalMod, (*i)->GetAmount());
+
+        AuraEffectList const& mHealingSchoolMaskReceived = GetAuraEffectsByType(SPELL_AURA_MOD_SCHOOL_MASK_HEALING_FROM_CASTER);
+        for (AuraEffectList::const_iterator i = mHealingSchoolMaskReceived.begin(); i != mHealingSchoolMaskReceived.end(); ++i)
+            if (caster->GetGUID() == (*i)->GetCasterGUID() && ((*i)->GetMiscValue() & spellProto->GetSchoolMask()))
+                AddPct(TakenTotalMod, (*i)->GetAmount());
     }
 
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)

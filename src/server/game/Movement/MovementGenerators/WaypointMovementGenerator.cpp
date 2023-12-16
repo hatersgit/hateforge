@@ -406,7 +406,7 @@ void FlightPathMovementGenerator::DoReset(Player* player)
     }
     init.SetFirstPointId(GetCurrentNode());
     init.SetFly();
-    init.SetVelocity(PLAYER_FLIGHT_SPEED);
+    init.SetVelocity(PLAYER_FLIGHT_SPEED * player->GetTotalAuraMultiplier(SPELL_AURA_MOD_TAXI_FLIGHT_SPEED));
     init.Launch();
 }
 

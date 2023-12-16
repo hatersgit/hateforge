@@ -10195,6 +10195,26 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 }
                 break;
             }
+        // duskhaven:
+        case 1020039:
+        {
+            target = triggeredByAura->GetBase()->GetCaster();
+            if (!target)
+                return false;
+
+            if (Player* pTarget = target->ToPlayer())
+            {
+                if (cooldown)
+                {
+                    if (pTarget->HasSpellCooldown(trigger_spell_id))
+                        return false;
+                    pTarget->AddSpellCooldown(trigger_spell_id, 0, cooldown);
+                }
+                target->CastSpell(pTarget, trigger_spell_id, true);
+                return true;
+            }
+            return false;
+        }
     }
 
     // try detect target manually if not set

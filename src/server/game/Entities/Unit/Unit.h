@@ -1978,6 +1978,15 @@ public:
     // m_appliedAuras container management
     AuraApplicationMap&       GetAppliedAuras()       { return m_appliedAuras; }
     [[nodiscard]] AuraApplicationMap const& GetAppliedAuras() const { return m_appliedAuras; }
+    uint8 GetAppliedAuraCountByMechanicType(Mechanics mech) {
+        uint8 out = 0;
+        for (auto aura : m_appliedAuras) {
+            if (SpellInfo const* spell = aura.second->GetBase()->GetSpellInfo())
+                if (spell->GetAllEffectsMechanicMask() & 1 << mech)
+                    out += 1;
+        }
+        return out;
+    }
 
     void RemoveAura(AuraApplicationMap::iterator& i, AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);
     void RemoveAura(uint32 spellId, ObjectGuid casterGUID = ObjectGuid::Empty, uint8 reqEffMask = 0, AuraRemoveMode removeMode = AURA_REMOVE_BY_DEFAULT);

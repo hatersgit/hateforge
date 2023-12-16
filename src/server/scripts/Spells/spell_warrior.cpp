@@ -63,7 +63,13 @@ enum WarriorSpells
     SPELL_WARRIOR_WHIRLWIND_OFF                     = 44949,
 
     // Duskhaven
-    SPELL_WARRIOR_DEVASTATOR                        = 1040001
+    SPELL_WARRIOR_DEVASTATOR                        = 1040001,
+    SPELL_WARRIOR_AVATAR                            = 1020085,
+    SPELL_WARRIOR_AVATAR_WHIRLWIND                  = 1020091,
+    SPELL_WARRIOR_AVATAR_DREADNAUGHT                = 1020090,
+    AURA_WARRIOR_BLOODGORGED                        = 1020084,
+    SPELL_WARRIOR_THROW_SPEAR                       = 1020069,
+    AURA_WARRIOR_SWIRLING_STEEL                     = 1020071,
 };
 
 enum WarriorSpellIcons
@@ -423,6 +429,13 @@ class spell_warr_execute : public SpellScript
                 rageUsed += aurEff->GetAmount() * 10;
 
             int32 bp = GetEffectValue() + int32(rageUsed * spellInfo->Effects[effIndex].DamageMultiplier + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.2f);
+
+            // 1020084 Blood-gorged
+            if (caster->HasAura(AURA_WARRIOR_BLOODGORGED)) {
+                auto info = sSpellMgr->GetSpellInfo(AURA_WARRIOR_BLOODGORGED);
+                bp += CalculatePct(bp, target->GetAppliedAuraCountByMechanicType(MECHANIC_BLEED) * info->GetEffect(EFFECT_0).CalcValue());
+            }
+
             caster->CastCustomSpell(target, SPELL_WARRIOR_EXECUTE, &bp, nullptr, nullptr, true, nullptr, nullptr, GetOriginalCaster()->GetGUID());
         }
     }
@@ -592,9 +605,20 @@ class spell_warr_rend : public AuraScript
         }
     }
 
+    void RemoveEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        Unit* caster = GetCaster();
+        Unit* target = GetTarget();
+        if (caster->HasAura(AURA_WARRIOR_SWIRLING_STEEL))
+            if (!(GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEATH && caster && target && caster->IsPlayer() && caster->ToPlayer()->isHonorOrXPTarget(target))) {
+                caster->ToPlayer()->ModifySpellCooldown(SPELL_WARRIOR_THROW_SPEAR, sSpellMgr->GetSpellInfo(AURA_WARRIOR_SWIRLING_STEEL)->GetEffect(EFFECT_1).CalcValue());
+            }
+    }
+
     void Register() override
     {
         DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warr_rend::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+        OnEffectRemove += AuraEffectRemoveFn(spell_warr_rend::RemoveEffect, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
     }
 };
 
@@ -929,6 +953,72 @@ class spell_warr_devastator : public SpellScript
     }
 };
 
+class spell_warr_whirlwind : public SpellScript
+{
+    PrepareSpellScript(spell_warr_whirlwind);
+
+    void SetCanProc() {
+        canCast = true;
+    }
+
+    void AfterHit(SpellEffIndex)
+    {
+        Unit* caster = GetCaster();
+        Player* player = caster->ToPlayer();
+        auto amount = CalculatePct(GetHitDamage(), 35);
+
+        if (caster->HasAura(SPELL_WARRIOR_AVATAR) && canCast)
+            player->CastCustomSpell(GetHitUnit(), SPELL_WARRIOR_AVATAR_WHIRLWIND, &amount, nullptr, nullptr, true);
+
+        canCast = false;
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_warr_whirlwind::AfterHit, EFFECT_ALL, SPELL_EFFECT_ANY);
+        OnCast += SpellCastFn(spell_warr_whirlwind::SetCanProc);
+    }
+
+    bool canCast = false;
+};
+
+class spell_warr_dreadnaught : public SpellScript
+{
+    PrepareSpellScript(spell_warr_dreadnaught);
+
+    void SetCanProc() {
+        canCast = true;
+    }
+
+    bool Validate(SpellInfo const* /*spellEntry*/) override
+    {
+        return ValidateSpellInfo(
+            {
+                SPELL_WARRIOR_AVATAR_DREADNAUGHT
+            });
+    }
+
+    void AfterHit(SpellEffIndex)
+    {
+        Unit* caster = GetCaster();
+        Player* player = caster->ToPlayer();
+        auto amount = CalculatePct(GetHitDamage(), 35);
+
+        if (caster->HasAura(SPELL_WARRIOR_AVATAR) && canCast)
+            player->CastCustomSpell(GetHitUnit(), SPELL_WARRIOR_AVATAR_DREADNAUGHT, &amount, nullptr, nullptr, true);
+
+        canCast = false;
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_warr_dreadnaught::AfterHit, EFFECT_ALL, SPELL_EFFECT_ANY);
+        OnCast += SpellCastFn(spell_warr_dreadnaught::SetCanProc);
+    }
+
+    bool canCast = false;
+};
+
 void AddSC_warrior_spell_scripts()
 {
     RegisterSpellScript(spell_warr_mocking_blow);
@@ -958,5 +1048,7 @@ void AddSC_warrior_spell_scripts()
 
     // Duskhaven
     RegisterSpellScript(spell_warr_devastator);
+    RegisterSpellScript(spell_warr_whirlwind);
+    RegisterSpellScript(spell_warr_dreadnaught);
 }
 

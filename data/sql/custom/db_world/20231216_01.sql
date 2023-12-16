@@ -1,0 +1,1 @@
+INSERT INTO acore_world.spell_proc_event (entry, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, procFlags, procEx, procPhase, ppmRate, CustomChance, Cooldown) VALUES(1020038, 0, 0, 0, 0, 0, 0, 2, 4, 0.0, 100.0, 1000);

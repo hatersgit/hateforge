@@ -408,6 +408,9 @@ enum AuraType
     SPELL_AURA_MOD_REMOVE_AURA                              = 345,
     SPELL_AURA_CAN_DOUBLE_JUMP                              = 346,
     SPELL_AURA_CAN_GLIDE                                    = 347,
+    SPELL_AURA_MOD_SCHOOL_MASK_HEALING_FROM_CASTER          = 348,
+    SPELL_AURA_MOD_MONEY_GAIN                               = 349,
+    SPELL_AURA_MOD_TAXI_FLIGHT_SPEED                        = 350,
     TOTAL_AURAS
 };
 

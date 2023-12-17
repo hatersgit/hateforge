@@ -435,6 +435,11 @@ public:
     void EffectJumpCharge(SpellEffIndex effIndex);
     void EffectModifyCurrentSpellCooldown(SpellEffIndex effIndex);
     void EffectRemoveCurrentSpellCooldown(SpellEffIndex effIndex);
+    void EffectRestoreSpellCharge(SpellEffIndex effIndex);
+    void EffectGiveExperience(SpellEffIndex effIndex);
+    void EffectGiveRestedExperience(SpellEffIndex effIndex);
+    void EffectGiveHonor(SpellEffIndex effIndex);
+    void EffectReceiveItem(SpellEffIndex effIndex);
 
     typedef std::set<Aura*> UsedSpellMods;
 

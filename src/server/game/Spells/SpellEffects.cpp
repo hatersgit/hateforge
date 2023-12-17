@@ -22,6 +22,7 @@
 #include "BattlegroundSA.h"
 #include "BattlegroundWS.h"
 #include "CellImpl.h"
+#include "Chat.h"
 #include "Common.h"
 #include "Creature.h"
 #include "DynamicObject.h"
@@ -242,6 +243,11 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectJumpCharge,                               //167 SPELL_EFFECT_JUMP_CHARGE
     &Spell::EffectModifyCurrentSpellCooldown,               //168 SPELL_EFFECT_MODIFY_CURRENT_SPELL_COOLDOWN
     &Spell::EffectRemoveCurrentSpellCooldown,               //169 SPELL_EFFECT_REMOVE_CURRENT_SPELL_COOLDOWN
+    &Spell::EffectRestoreSpellCharge,                       //170 SPELL_EFFECT_RESTORE_SPELL_CHARGE
+    &Spell::EffectGiveExperience,                           //171 SPELL_EFFECT_GIVE_EXPERIENCE
+    &Spell::EffectGiveRestedExperience,                     //172 SPELL_EFFECT_GIVE_RESTED_EXPERIENCE_BONUS
+    &Spell::EffectGiveHonor,                                //173 SPELL_EFFECT_GIVE_HONOR
+    &Spell::EffectReceiveItem,                              //174 SPELL_EFFECT_RECEIVE_ITEM
 };
 
 wEffect WeaponAndSchoolDamageEffects[TOTAL_WEAPON_DAMAGE_EFFECTS] =
@@ -6415,6 +6421,113 @@ void Spell::EffectRemoveCurrentSpellCooldown(SpellEffIndex effIndex)
         else if (cdSpell && ignoreSpellFamily)
             player->RemoveSpellCooldown(cdSpell->Id, true);
     }
+}
+
+void Spell::EffectRestoreSpellCharge(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
+        return;
+
+    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    flag96 spellMask = GetSpellInfo()->Effects[effIndex].SpellClassMask;
+
+    if (SpellChargeEntry* chargeEntry = sObjectMgr->TryGetChargeEntry(spellMask))
+    {
+        m_caster->ToPlayer()->TriggerChargeRegen(spellMask);
+    }
+}
+
+void Spell::EffectGiveExperience(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+        return;
+
+    Player* playerTarget = unitTarget->ToPlayer();
+
+    if (!playerTarget)
+        return;
+
+    bool pctValue = false;
+
+    if (GetSpellInfo()->Effects[effIndex].MiscValue != 0)
+        pctValue = true;
+
+    uint32 xp = 0;
+    int32 spellAmount = GetSpellInfo()->Effects[effIndex].CalcValue();
+
+    if (spellAmount < 1)
+        spellAmount = 1;
+
+    if (pctValue)
+    {
+        uint32 xpForLevel = sObjectMgr->GetXPForLevel(playerTarget->GetLevel());
+        xp = round(CalculatePct(xpForLevel, spellAmount));
+    }
+    else
+        xp = spellAmount;
+
+    playerTarget->GiveXP(xp, nullptr);
+}
+
+void Spell::EffectGiveRestedExperience(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+        return;
+
+    Player* playerTarget = unitTarget->ToPlayer();
+
+    if (!playerTarget)
+        return;
+
+    int32 spellAmount = GetSpellInfo()->Effects[effIndex].CalcValue();
+
+    if (spellAmount < 1)
+        return;
+
+    float rest_bonus_max = float(playerTarget->GetUInt32Value(PLAYER_NEXT_LEVEL_XP) * 1.5f / 2);
+    float restBonus = CalculatePct(rest_bonus_max, spellAmount);
+
+    playerTarget->SetRestBonus(playerTarget->GetRestBonus() + restBonus);
+}
+
+void Spell::EffectGiveHonor(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+        return;
+
+    Player* playerTarget = unitTarget->ToPlayer();
+
+    if (!playerTarget)
+        return;
+
+    int32 spellAmount = GetSpellInfo()->Effects[effIndex].CalcValue();
+    int32 miscB = GetSpellInfo()->Effects[effIndex].MiscValueB;
+
+    bool showChatMessage = false;
+
+    if (miscB != 0)
+        showChatMessage = true;
+
+    playerTarget->ModifyHonorPoints(spellAmount);
+
+    if (showChatMessage)
+        ChatHandler(playerTarget->GetSession()).PSendSysMessage("Rewarded %u honor.", spellAmount);
+}
+
+void Spell::EffectReceiveItem(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+        return;
+
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    uint32 item = GetSpellInfo()->Effects[effIndex].MiscValue;
+    uint32 amount = GetSpellInfo()->Effects[effIndex].CalcValue();
+
+    unitTarget->ToPlayer()->AddItem(item, amount);
 }
 
 void Spell::EffectCastButtons(SpellEffIndex effIndex)

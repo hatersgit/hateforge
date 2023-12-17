@@ -4889,6 +4889,18 @@ Aura* Unit::GetOwnedAura(uint32 spellId, ObjectGuid casterGUID, ObjectGuid itemC
     return nullptr;
 }
 
+uint8 Unit::GetAppliedAuraCountByMechanicType(Mechanics mech)
+{
+    uint8 out = 0;
+    for (auto aura : m_appliedAuras) {
+        AuraApplication* app = aura.second;
+        if (SpellInfo const* spell = app->GetBase()->GetSpellInfo())
+            if (spell->GetAllEffectsMechanicMask() & 1 << mech)
+                out += 1;
+    }
+    return out;
+}
+
 void Unit::RemoveAura(AuraApplicationMap::iterator& i, AuraRemoveMode mode)
 {
     AuraApplication* aurApp = i->second;

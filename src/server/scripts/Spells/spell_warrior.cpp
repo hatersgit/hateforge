@@ -70,6 +70,8 @@ enum WarriorSpells
     AURA_WARRIOR_BLOODGORGED                        = 1020084,
     SPELL_WARRIOR_THROW_SPEAR                       = 1020069,
     AURA_WARRIOR_SWIRLING_STEEL                     = 1020071,
+    SPELL_WARRIOR_RELENTLESS_STRIKES                = 1020064,
+    AURA_WARRIOR_RELENTLESS_STRIKES                 = 1020092,
 };
 
 enum WarriorSpellIcons
@@ -1019,6 +1021,51 @@ class spell_warr_dreadnaught : public SpellScript
     bool canCast = false;
 };
 
+// 1020064
+class spell_warr_relentless_strikes : public SpellScript
+{
+    PrepareSpellScript(spell_warr_relentless_strikes);
+
+    void AfterHit(SpellEffIndex)
+    {
+        Unit* caster = GetCaster();
+        if (Player* player = caster->ToPlayer()) {
+            if (!player->HasAura(AURA_WARRIOR_RELENTLESS_STRIKES))
+                player->AddAura(AURA_WARRIOR_RELENTLESS_STRIKES, player);
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_warr_relentless_strikes::AfterHit, EFFECT_ALL, SPELL_EFFECT_ANY);
+    }
+};
+
+// 1020092
+class aura_warr_relentless_strikes : public AuraScript
+{
+    PrepareAuraScript(aura_warr_relentless_strikes);
+
+    void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        if (auto player = GetTarget()->ToPlayer())
+            if (player->HasSpellCooldown(SPELL_WARRIOR_RELENTLESS_STRIKES))
+                player->RemoveSpellCooldown(SPELL_WARRIOR_RELENTLESS_STRIKES, true);
+    }
+
+    void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        if (auto player = GetTarget()->ToPlayer())
+            player->AddSpellCooldown(SPELL_WARRIOR_RELENTLESS_STRIKES, 0, sSpellMgr->GetSpellInfo(SPELL_WARRIOR_RELENTLESS_STRIKES)->GetRecoveryTime(), true);
+    }
+
+    void Register() override
+    {
+        OnEffectApply += AuraEffectApplyFn(aura_warr_relentless_strikes::HandleEffectApply, EFFECT_ALL, SPELL_EFFECT_ANY, AURA_EFFECT_HANDLE_REAL);
+        OnEffectRemove += AuraEffectRemoveFn(aura_warr_relentless_strikes::HandleEffectRemove, EFFECT_ALL, SPELL_EFFECT_ANY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     RegisterSpellScript(spell_warr_mocking_blow);
@@ -1050,5 +1097,7 @@ void AddSC_warrior_spell_scripts()
     RegisterSpellScript(spell_warr_devastator);
     RegisterSpellScript(spell_warr_whirlwind);
     RegisterSpellScript(spell_warr_dreadnaught);
+    RegisterSpellScript(spell_warr_relentless_strikes);
+    RegisterSpellScript(aura_warr_relentless_strikes);
 }
 

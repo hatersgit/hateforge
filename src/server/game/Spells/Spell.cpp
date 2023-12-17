@@ -5803,7 +5803,8 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (m_spellInfo->ExcludeCasterAuraSpell && m_caster->HasAura(sSpellMgr->GetSpellIdForDifficulty(m_spellInfo->ExcludeCasterAuraSpell, m_caster)))
             return SPELL_FAILED_CASTER_AURASTATE;
 
-        if (reqCombat && m_caster->IsInCombat() && !m_spellInfo->CanBeUsedInCombat())
+
+        if ((reqCombat && m_caster->IsInCombat() && !m_spellInfo->CanBeUsedInCombat()) || (!m_caster->IsInCombat() && m_spellInfo->RequiresCombat()))
             return SPELL_FAILED_AFFECTING_COMBAT;
     }
 

@@ -72,6 +72,8 @@ enum WarriorSpells
     AURA_WARRIOR_SWIRLING_STEEL                     = 1020071,
     SPELL_WARRIOR_RELENTLESS_STRIKES                = 1020064,
     AURA_WARRIOR_RELENTLESS_STRIKES                 = 1020092,
+    AURA_WARRIOR_IMPALING_BLOWS                     = 1030018,
+    AURA_WARRIOR_BURNING_BLOWS                      = 1030059,
 };
 
 enum WarriorSpellIcons
@@ -1066,6 +1068,38 @@ class aura_warr_relentless_strikes : public AuraScript
     }
 };
 
+// 1030047
+class spell_warr_burning_sweep : public SpellScript
+{
+    PrepareSpellScript(spell_warr_burning_sweep);
+
+    void InitCounter() {
+        count = 0;
+    }
+
+    void TriggerEffect()
+    {
+        Unit* caster = GetCaster();
+        int32 amount = GetHitDamage();
+
+        if (Player* player = caster->ToPlayer()) {
+            if (auto target = GetHitUnit())
+                count += 1;
+
+            if (count > 4)
+                player->CastSpell(player, AURA_WARRIOR_BURNING_BLOWS, true);
+        }
+    }
+
+    void Register() override
+    {
+        AfterHit += SpellHitFn(spell_warr_burning_sweep::TriggerEffect);
+        OnCast += SpellCastFn(spell_warr_burning_sweep::InitCounter);
+    }
+
+    int count = 0;
+};
+
 void AddSC_warrior_spell_scripts()
 {
     RegisterSpellScript(spell_warr_mocking_blow);
@@ -1099,5 +1133,6 @@ void AddSC_warrior_spell_scripts()
     RegisterSpellScript(spell_warr_dreadnaught);
     RegisterSpellScript(spell_warr_relentless_strikes);
     RegisterSpellScript(aura_warr_relentless_strikes);
+    RegisterSpellScript(spell_warr_burning_sweep);
 }
 

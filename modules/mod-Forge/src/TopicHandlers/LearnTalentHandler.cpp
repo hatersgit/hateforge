@@ -76,10 +76,15 @@ public:
                             ForgeCharacterPoint* points = fc->GetSpecPoints(iam.player, foundType, spec->Id);
                             if (VerifyFlatTable(iam.player, points, specTab)) {
                                 fc->ForgetTalents(iam.player, spec, foundType);
+                                std::list<uint32> tabs = {};
 
                                 for (auto ct : toLearn) {
-                                    bool choiceNode = ct->type == NodeType::CHOICE;
+                                    if (std::find(tabs.begin(), tabs.end(), ct->TabId) == tabs.end()) {
+                                        spec->Talents[ct->TabId].clear();
+                                        tabs.push_back(ct->TabId);
+                                    }
 
+                                    bool choiceNode = ct->type == NodeType::CHOICE;
                                     spec->Talents[ct->TabId][ct->SpellId] = ct;
                                     if (ct->CurrentRank > 0) {
                                         ForgeTalentTab* ThisTab;
@@ -96,8 +101,8 @@ public:
                                                 if (choiceNode) {
                                                     iam.player->learnSpell(ct->SpellId);
 
-                                                    uint32 choiceId = fc->GetChoiceNodeFromSpell(ct->SpellId);
-                                                    spec->ChoiceNodesChosen[choiceId] = ct->SpellId;
+                                                    uint32 choiceId = fc->GetChoiceNodeFromindex(ct->CurrentRank);
+                                                    spec->ChoiceNodesChosen[ct->SpellId] = choiceId;
                                                 }
                                                 else {
                                                     iam.player->learnSpell(rankedSpell);
@@ -169,7 +174,7 @@ public:
                                                     bool choiceNode = talent->nodeType == NodeType::CHOICE;
                                                     if (col.second > 0) {
                                                         if (choiceNode) {
-                                                            uint32 choiceId = fc->GetChoiceNodeFromSpell(col.second);
+                                                            uint32 choiceId = fc->GetChoiceNodeFromindex(col.second);
                                                             if (!choiceId)
                                                                 return false;
                                                         }
@@ -192,7 +197,7 @@ public:
                                                     }
                                                     ForgeCharacterTalent* ct = new ForgeCharacterTalent();
                                                     ct->CurrentRank = col.second;
-                                                    ct->SpellId = choiceNode ? col.second : talent->SpellId;
+                                                    ct->SpellId = talent->SpellId;
                                                     ct->TabId = tab.first;
                                                     ct->type = talent->nodeType;
 

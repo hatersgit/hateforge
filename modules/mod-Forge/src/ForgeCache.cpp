@@ -127,7 +127,7 @@ struct ForgeTalent
     uint8 NumberOfRanks;
     PereqReqirementType PreReqType;
     std::list<ForgeTalentPrereq*> Prereqs;
-    std::list<ForgeTalentChoice*> Choices;
+    std::map<uint8 /*index*/, ForgeTalentChoice*> Choices;
     std::list<uint32> UnlearnSpells;
     // rank number, spellId
     std::unordered_map<uint32, uint32> Ranks;
@@ -568,21 +568,26 @@ public:
 
         for (auto& tabIdKvp : spec->Talents)
             for (auto& tabTypeKvp : tabIdKvp.second)
-                if (tabTypeKvp.second->type == NodeType::CHOICE)
-                    UpdateChacterChoiceNodeInternal(trans, acct, charId, spec->Id, tabTypeKvp.second->TabId, tabTypeKvp.second->SpellId, spec->ChoiceNodesChosen.at(tabTypeKvp.second->SpellId));
+                if (tabTypeKvp.second->type == NodeType::CHOICE) {
+                    auto found = spec->ChoiceNodesChosen.find(tabTypeKvp.second->SpellId);
+                    if (found != spec->ChoiceNodesChosen.end())
+                        UpdateCharacterChoiceNodeInternal(trans, acct, charId, spec->Id, tabTypeKvp.second->TabId, tabTypeKvp.second->SpellId, found->second);
+                    else
+                        UpdateCharacterChoiceNodeInternal(trans, acct, charId, spec->Id, tabTypeKvp.second->TabId, tabTypeKvp.second->SpellId, 0);
+                }
                 else
-                    UpdateChacterTalentInternal(acct, charId, trans, spec->Id, tabTypeKvp.second->SpellId, tabTypeKvp.second->TabId, tabTypeKvp.second->CurrentRank);
+                    UpdateCharacterTalentInternal(acct, charId, trans, spec->Id, tabTypeKvp.second->SpellId, tabTypeKvp.second->TabId, tabTypeKvp.second->CurrentRank);
                 
         CharacterDatabase.CommitTransaction(trans);
     }
 
-    void UpdateChacterChoiceNodeInternal(CharacterDatabaseTransaction trans, uint32 account, uint32 guid, uint32 specId, uint32 tabId, uint32 choiceNodeId, uint32 choiceNodeSelection) {
+    void UpdateCharacterChoiceNodeInternal(CharacterDatabaseTransaction trans, uint32 account, uint32 guid, uint32 specId, uint32 tabId, uint32 choiceNodeId, uint32 choiceNodeSelection) {
         if (TalentTabs[tabId]->TalentType != ACCOUNT_WIDE_TYPE)
             trans->Append("INSERT INTO `forge_character_node_choices` (`guid`,`spec`,`tabId`,`node`,`choice`) VALUES ({},{},{},{},{}) ON DUPLICATE KEY UPDATE `choice` = {}",
-                guid, specId, choiceNodeId, tabId, choiceNodeSelection, choiceNodeSelection);
+                guid, specId, tabId, choiceNodeId, choiceNodeSelection, choiceNodeSelection);
         else
             trans->Append("INSERT INTO `forge_character_node_choices` (`guid`,`spec`,`tabId`,`node`,`choice`) VALUES ({},{},{},{},{}) ON DUPLICATE KEY UPDATE `choice` = {}",
-                account, ACCOUNT_WIDE_KEY, choiceNodeId, tabId, choiceNodeSelection, choiceNodeSelection);
+                account, ACCOUNT_WIDE_KEY, tabId, choiceNodeId, choiceNodeSelection, choiceNodeSelection);
     }
 
     void UpdateCharacterSpecDetailsOnly(Player* player, ForgeCharacterSpec*& spec)
@@ -903,10 +908,11 @@ public:
     // choiceNodeId is the id of the node in forge_talents
     std::unordered_map<uint32 /*nodeid*/, std::vector<uint32/*choice spell id*/>> _choiceNodes;
     std::unordered_map<uint32 /*choice spell id*/, uint32 /*nodeid*/> _choiceNodesRev;
+    std::unordered_map<uint8, uint32> _choiceNodeIndexLookup;
 
-    uint32 GetChoiceNodeFromSpell(uint32 spellId) {
-        auto out = _choiceNodesRev.find(spellId);
-        if (out != _choiceNodesRev.end())
+    uint32 GetChoiceNodeFromindex(uint8 index) {
+        auto out = _choiceNodeIndexLookup.find(index);
+        if (out != _choiceNodeIndexLookup.end())
             return out->second;
 
         return 0;
@@ -1177,7 +1183,7 @@ private:
         }
     }
 
-    void UpdateChacterTalentInternal(uint32 account, uint32 charId, CharacterDatabaseTransaction& trans, uint32 spec, uint32 spellId, uint32 tabId, uint8 known)
+    void UpdateCharacterTalentInternal(uint32 account, uint32 charId, CharacterDatabaseTransaction& trans, uint32 spec, uint32 spellId, uint32 tabId, uint8 known)
     {
         if (TalentTabs[tabId]->TalentType != ACCOUNT_WIDE_TYPE)
             trans->Append("INSERT INTO `forge_character_talents` (`guid`,`spec`,`spellid`,`tabId`,`currentrank`) VALUES ({},{},{},{},{}) ON DUPLICATE KEY UPDATE `currentrank` = {}", charId, spec, spellId, tabId, known, known);
@@ -1451,6 +1457,7 @@ private:
 
         _choiceNodes.clear();
         _choiceNodesRev.clear();
+        _choiceNodeIndexLookup.clear();
 
         if (!exclTalents)
             return;
@@ -1460,7 +1467,8 @@ private:
             Field* talentFields = exclTalents->Fetch();
             uint32 choiceNodeId = talentFields[0].Get<uint32>();
             uint32 talentTabId = talentFields[1].Get<uint32>();
-            uint32 spellChoice = talentFields[2].Get<uint32>();
+            uint8 choiceIndex = talentFields[2].Get<uint8>();
+            uint32 spellChoice = talentFields[3].Get<uint32>();
 
             ForgeTalentChoice* choice = new ForgeTalentChoice();
             choice->active = false;
@@ -1468,11 +1476,12 @@ private:
 
             _choiceNodes[choiceNodeId].push_back(spellChoice);
             _choiceNodesRev[spellChoice] = choiceNodeId;
+            _choiceNodeIndexLookup[choiceIndex] = spellChoice;
 
             ForgeTalent* lt = TalentTabs[talentTabId]->Talents[choiceNodeId];
             if (lt != nullptr)
             {
-                lt->Choices.push_back(choice);
+                lt->Choices[choiceIndex] = choice;
             }
             else
             {
@@ -1653,7 +1662,6 @@ private:
                 ForgeTalent* ft = TalentTabs[talent->TabId]->Talents[talent->SpellId];
                 ForgeCharacterSpec* spec = CharacterSpecs[characterGuid][specId];
                 talent->type = ft->nodeType;
-
                 spec->Talents[talent->TabId][talent->SpellId] = talent;
             }
             else
@@ -1668,7 +1676,6 @@ private:
                         spec.second->Talents[talent->TabId][talent->SpellId] = talent;
                     }
             }
-
         } while (talentsQuery->NextRow());
     }
 

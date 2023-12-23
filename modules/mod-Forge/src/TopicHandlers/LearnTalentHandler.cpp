@@ -22,7 +22,6 @@ public:
         if (iam.message.empty()) // talentType|tabId?rank~rank~rank;*
             return;
 
-        ForgeCharacterSpec* spec;
         if (fc->TryGetCharacterActiveSpec(iam.player, spec)) {
             if (iam.message.size() > 3) {
                 _treeMetaData.clear();
@@ -151,8 +150,7 @@ public:
     bool VerifyFlatTable(Player* player, ForgeCharacterPoint* points, ForgeTalentTab* tab) {
         toLearn.clear();
         unlocked.clear();
-        ForgeCharacterSpec* spec;
-        if (fc->TryGetCharacterActiveSpec(player, spec) && tab->ClassMask == player->getClassMask()) {
+        if (tab->ClassMask == player->getClassMask()) {
             std::unordered_map <uint32 /*tabId*/, uint8 /*spent*/> spend;
                 for (auto tab : _simplifiedTreeMap) {
                     ForgeTalentTab* specTab;
@@ -220,6 +218,7 @@ private:
     ForgeCommonMessage* cm;
     ForgeCache* fc;
 
+    ForgeCharacterSpec* spec;
     const uint8 META_PREFIX = 3;
 
     const std::string base64_char = "|ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; // | is to offset string to base 1

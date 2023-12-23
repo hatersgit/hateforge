@@ -1504,7 +1504,7 @@ private:
             ObjectGuid characterGuid = ObjectGuid::Create<HighGuid::Player>(id);
             uint32 specId = fields[1].Get<uint32>();
             uint32 TabId = fields[2].Get<uint32>();
-            uint32 nodeId = fields[3].Get<uint8>();
+            uint32 nodeId = fields[3].Get<uint32>();
             uint32 chosenSpell = fields[4].Get<uint32>();
 
             ForgeTalent* ft = TalentTabs[TabId]->Talents[nodeId];

@@ -121,7 +121,6 @@ public:
                                 iam.player->SendPlaySpellVisual(179); // 53 SpellCastDirected
                                 iam.player->SendPlaySpellImpact(iam.player->GetGUID(), 362); // 113 EmoteSalute
                             } else {
-                                iam.player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Malformed talent string.");
                                 return;
                             }
                         }
@@ -173,22 +172,32 @@ public:
                                                     if (col.second > 0) {
                                                         if (choiceNode) {
                                                             uint32 choiceId = fc->GetChoiceNodeFromindex(col.second);
-                                                            if (!choiceId)
+                                                            if (!choiceId) {
+                                                                player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Unknown choice noce received.");
                                                                 return false;
+                                                            }
                                                         }
-                                                        else if (talent->Ranks.size() < col.second || col.second < 0)
+                                                        else if (talent->Ranks.size() < col.second || col.second < 0) {
+                                                            player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Rank value not allowed.");
                                                             return false;
+                                                        }
 
                                                         if (!talent->Prereqs.empty())
-                                                            if (std::find(unlocked.begin(), unlocked.end(), node->spellId) == unlocked.end())
+                                                            if (std::find(unlocked.begin(), unlocked.end(), node->spellId) == unlocked.end()) {
+                                                                player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Missing prerequisite.");
                                                                 return false;
+                                                            }
 
-                                                        if (talent->RequiredLevel > player->getLevel() || node->pointReq > spend[tab.first])
+                                                        if (talent->RequiredLevel > player->getLevel() || node->pointReq > spend[tab.first]) {
+                                                            player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Level requirement not met.");
                                                             return false;
+                                                        }
 
                                                         spend[tab.first] += choiceNode ? talent->RankCost : col.second * talent->RankCost;
-                                                        if (spend[specTab->Id] > points->Max)
+                                                        if (spend[specTab->Id] > points->Max) {
+                                                            player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Point requirement not met.");
                                                             return false;
+                                                        }
 
                                                         for (auto unlock : node->unlocks)
                                                             unlocked.push_back(unlock->spellId);

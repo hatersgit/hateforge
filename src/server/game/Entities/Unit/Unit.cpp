@@ -1333,8 +1333,8 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
         case SPELL_DAMAGE_CLASS_RANGED:
         case SPELL_DAMAGE_CLASS_MELEE:
             {
-                // Aleist3r: changed from physical damage to all schools
-                if ((damageSchoolMask & SPELL_SCHOOL_MASK_ALL) || CanBlockSpells(victim))
+                // Physical or has aura SPELL_AURA_ADD_SPELL_BLOCK
+                if ((damageSchoolMask & SPELL_SCHOOL_MASK_NORMAL) || CanBlockSpells(victim))
                 {
                     // Get blocked status
                     blocked = isSpellBlocked(victim, spellInfo, attackType);
@@ -1404,9 +1404,8 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
         case SPELL_DAMAGE_CLASS_NONE:
         case SPELL_DAMAGE_CLASS_MAGIC:
             {
-                // Aleist3r: copied it here as well, it is needed for paladin talents for example
-                // not 100% sure if it'll work as intended
-                if ((damageSchoolMask & SPELL_SCHOOL_MASK_ALL) || CanBlockSpells(victim))
+                // Aleist3r: turns out school mask is not needed otherwise it'll block even without SPELL_AURA_ADD_SPELL_BLOCK
+                if (CanBlockSpells(victim))
                 {
                     // Get blocked status
                     blocked = isSpellBlocked(victim, spellInfo, attackType);

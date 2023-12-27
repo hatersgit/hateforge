@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Chat.h"
 #include "CreatureAI.h"
 #include "DisableMgr.h"
 #include "GameEventMgr.h"
@@ -783,6 +784,44 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
 
         if (moneyRew > 0)
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_QUEST_REWARD, uint32(moneyRew));
+    }
+
+    
+
+    if (moneyRew > 0)
+    {
+        uint32 goldMod = CalculatePct(moneyRew, GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MONEY_GAIN, 1)) + CalculatePct(moneyRew, GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MONEY_GAIN, 2));
+
+        if (goldMod)
+        {
+            uint32 gold = goldMod / 10000;
+            uint8 silver = (goldMod / 100) % 100;
+            uint8 copper = goldMod % 100;
+            std::string currStr = "";
+
+            if (gold > 0)
+                currStr.append(std::to_string(gold) + " Gold");
+
+            if (silver > 0)
+            {
+                if (!currStr.empty())
+                    currStr.append(", ");
+                currStr.append(std::to_string(silver) + " Silver");
+            }
+
+            if (copper > 0)
+            {
+                if (!currStr.empty())
+                    currStr.append(", ");
+                currStr.append(std::to_string(copper) + " Copper");
+            }
+
+            if (!currStr.empty())
+                currStr.append(".");
+
+            ModifyMoney(goldMod);
+            ChatHandler(GetSession()).PSendSysMessage("Received additional %s", currStr);
+        }
     }
 
     // honor reward

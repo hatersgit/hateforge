@@ -1157,6 +1157,9 @@ public:
     void LoadTrainerSpell();
     void AddSpellToTrainer(uint32 entry, uint32 spell, uint32 spellCost, uint32 reqSkill, uint32 reqSkillValue, uint32 reqLevel, uint32 reqSpell);
 
+    // Aleist3r: jump charge effect (think of retai heroic leap/dh metamorphosis)
+    void LoadJumpChargeParams();
+
     std::string GeneratePetName(uint32 entry);
     std::string GeneratePetNameLocale(uint32 entry, LocaleConstant locale);
     uint32 GetBaseXP(uint8 level);
@@ -1599,6 +1602,8 @@ public:
         return _forgeAffixTiers;
     }
 
+    JumpChargeParams const* GetJumpChargeParams(int32 id) const;
+
     CurveEntry* GetCurve(uint32 id) {
         auto curve = _curves.find(id);
         return curve != _curves.end() ? curve->second : nullptr;
@@ -1752,7 +1757,7 @@ public:
 
         return 0.0f;
     }
-
+    
 private:
     // first free id for selected id type
     uint32 _auctionId; // pussywizard: accessed by a single thread
@@ -1967,6 +1972,8 @@ private:
         unsigned short m_state;
     };
     std::vector<GameobjectInstanceSavedState> GameobjectInstanceSavedStateList;
+
+    std::unordered_map<int32, JumpChargeParams> _jumpChargeParams;
 };
 
 #define sObjectMgr ObjectMgr::instance()

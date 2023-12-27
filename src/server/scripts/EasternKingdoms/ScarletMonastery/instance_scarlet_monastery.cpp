@@ -215,7 +215,8 @@ enum WhitemaneEvents
 {
     EVENT_SPELL_HOLY_SMITE          =   1,
     EVENT_SPELL_POWER_WORLD_SHIELD  =   2,
-    EVENT_SPELL_HEAL                =   3
+    EVENT_SPELL_HEAL                =   3,
+    EVENT_SPELL_TELEPORT_WHITEMANE  =   4
 };
 
 enum Spells
@@ -233,7 +234,8 @@ enum Spells
     SPELL_DOMINATE_MIND             =   14515,
     SPELL_HOLY_SMITE                =   9481,
     SPELL_HEAL                      =   12039,
-    SPELL_POWER_WORD_SHIELD         =   22187
+    SPELL_POWER_WORD_SHIELD         =   22187,
+    SPELL_TELEPORT_WHITEMANE        =   52096
 };
 
 enum Says
@@ -419,6 +421,7 @@ public:
             if (spell->Id == SPELL_SCARLET_RESURRECTION)
             {
                 Talk(SAY_MO_RESURRECTED);
+                events.ScheduleEvent(EVENT_SPELL_TELEPORT_WHITEMANE, 6s);
                 fakeDeath = false;
                 instance->SetData(TYPE_MOGRAINE_AND_WHITE_EVENT, SPECIAL);
             }
@@ -623,6 +626,9 @@ public:
                         break;
                     case EVENT_SPELL_HEAL:
                         me->CastSpell(me, SPELL_HEAL, false);
+                        break;
+                    case EVENT_SPELL_TELEPORT_WHITEMANE:
+                        me->CastSpell(me, SPELL_TELEPORT_WHITEMANE, false);
                         break;
                 }
             }

@@ -127,7 +127,7 @@ struct ForgeTalent
     uint8 NumberOfRanks;
     PereqReqirementType PreReqType;
     std::list<ForgeTalentPrereq*> Prereqs;
-    std::list<ForgeTalentChoice*> Choices;
+    std::map<uint8 /*index*/, ForgeTalentChoice*> Choices;
     std::list<uint32> UnlearnSpells;
     // rank number, spellId
     std::unordered_map<uint32, uint32> Ranks;
@@ -891,10 +891,11 @@ public:
     // choiceNodeId is the id of the node in forge_talents
     std::unordered_map<uint32 /*nodeid*/, std::vector<uint32/*choice spell id*/>> _choiceNodes;
     std::unordered_map<uint32 /*choice spell id*/, uint32 /*nodeid*/> _choiceNodesRev;
+    std::unordered_map<uint8, uint32> _choiceNodeIndexLookup;
 
-    uint32 GetChoiceNodeFromSpell(uint32 spellId) {
-        auto out = _choiceNodesRev.find(spellId);
-        if (out != _choiceNodesRev.end())
+    uint32 GetChoiceNodeFromindex(uint8 index) {
+        auto out = _choiceNodeIndexLookup.find(index);
+        if (out != _choiceNodeIndexLookup.end())
             return out->second;
 
         return 0;
@@ -924,15 +925,21 @@ public:
         if (TryGetForgeTalentTabs(player, pointType, tabs))
             for (auto* tab : tabs)
                 for (auto spell : tab->Talents) {
-                    for (auto rank : spell.second->Ranks)
-                        if (auto spellInfo = sSpellMgr->GetSpellInfo(rank.second)) {
-                            if (spellInfo->HasEffect(SPELL_EFFECT_LEARN_SPELL))
-                                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-                                    player->removeSpell(spellInfo->Effects[i].TriggerSpell, player->GetActiveSpecMask(), false);
+                    if (spell.second->nodeType == NodeType::CHOICE) {
+                        for (auto choice : _choiceNodesRev)
+                            if (player->HasSpell(choice.first))
+                                player->removeSpell(choice.first, player->GetActiveSpecMask(), false);
+                    }
+                    else
+                        for (auto rank : spell.second->Ranks)
+                            if (auto spellInfo = sSpellMgr->GetSpellInfo(rank.second)) {
+                                if (spellInfo->HasEffect(SPELL_EFFECT_LEARN_SPELL))
+                                    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                                        player->removeSpell(spellInfo->Effects[i].TriggerSpell, player->GetActiveSpecMask(), false);
 
-                            player->RemoveAura(rank.second);
-                            player->removeSpell(rank.second, player->GetActiveSpecMask(), false);
-                        }
+                                player->RemoveAura(rank.second);
+                                player->removeSpell(rank.second, player->GetActiveSpecMask(), false);
+                            }
                     auto talent = spec->Talents[tab->Id].find(spell.first);
                     if (talent != spec->Talents[tab->Id].end())
                         talent->second->CurrentRank = 0;
@@ -1458,6 +1465,7 @@ private:
 
         _choiceNodes.clear();
         _choiceNodesRev.clear();
+        _choiceNodeIndexLookup.clear();
 
         if (!exclTalents)
             return;
@@ -1467,7 +1475,8 @@ private:
             Field* talentFields = exclTalents->Fetch();
             uint32 choiceNodeId = talentFields[0].Get<uint32>();
             uint32 talentTabId = talentFields[1].Get<uint32>();
-            uint32 spellChoice = talentFields[2].Get<uint32>();
+            uint8 choiceIndex = talentFields[2].Get<uint8>();
+            uint32 spellChoice = talentFields[3].Get<uint32>();
 
             ForgeTalentChoice* choice = new ForgeTalentChoice();
             choice->active = false;
@@ -1475,11 +1484,12 @@ private:
 
             _choiceNodes[choiceNodeId].push_back(spellChoice);
             _choiceNodesRev[spellChoice] = choiceNodeId;
+            _choiceNodeIndexLookup[choiceIndex] = spellChoice;
 
             ForgeTalent* lt = TalentTabs[talentTabId]->Talents[choiceNodeId];
             if (lt != nullptr)
             {
-                lt->Choices.push_back(choice);
+                lt->Choices[choiceIndex] = choice;
             }
             else
             {
@@ -1502,7 +1512,7 @@ private:
             ObjectGuid characterGuid = ObjectGuid::Create<HighGuid::Player>(id);
             uint32 specId = fields[1].Get<uint32>();
             uint32 TabId = fields[2].Get<uint32>();
-            uint32 nodeId = fields[3].Get<uint8>();
+            uint32 nodeId = fields[3].Get<uint32>();
             uint32 chosenSpell = fields[4].Get<uint32>();
 
             ForgeTalent* ft = TalentTabs[TabId]->Talents[nodeId];
@@ -1660,7 +1670,6 @@ private:
                 ForgeTalent* ft = TalentTabs[talent->TabId]->Talents[talent->SpellId];
                 ForgeCharacterSpec* spec = CharacterSpecs[characterGuid][specId];
                 talent->type = ft->nodeType;
-
                 spec->Talents[talent->TabId][talent->SpellId] = talent;
             }
             else
@@ -1675,7 +1684,6 @@ private:
                         spec.second->Talents[talent->TabId][talent->SpellId] = talent;
                     }
             }
-
         } while (talentsQuery->NextRow());
     }
 

@@ -1255,6 +1255,11 @@ bool SpellInfo::CanBeUsedInCombat() const
     return !(HasAttribute(SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL));
 }
 
+bool SpellInfo::RequiresCombat() const
+{
+    return (AttributesCu & SPELL_ATTR0_CU_REQUIRES_COMBAT);
+}
+
 bool SpellInfo::IsPositive() const
 {
     return !(AttributesCu & SPELL_ATTR0_CU_NEGATIVE) || (AttributesCu & SPELL_ATTR0_CU_POSITIVE);

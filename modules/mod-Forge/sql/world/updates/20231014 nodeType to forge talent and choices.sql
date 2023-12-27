@@ -12,8 +12,15 @@ DROP TABLE IF EXISTS `acore_world`.`forge_talent_choice_nodes`;
 CREATE TABLE `acore_world`.`forge_talent_choice_nodes` (
   `choiceNodeId` MEDIUMINT UNSIGNED NOT NULL,
   `talentTabId` INT UNSIGNED NOT NULL,
+  `choiceIndex` int unsigned not null,
   `choiceSpellId` MEDIUMINT UNSIGNED NOT NULL,
   PRIMARY KEY (`choiceNodeId`, `talentTabId`, `choiceSpellId`));
   
  ALTER TABLE `acore_world`.`forge_talents`
 	ADD COLUMN `nodeType` TINYINT NOT null default 0;
+
+
+INSERT INTO acore_world.forge_talent_choice_nodes (choiceNodeId, talentTabId, choiceIndex, choiceSpellId) VALUES(1020011, 1, 1, 1020011);
+INSERT INTO acore_world.forge_talent_choice_nodes (choiceNodeId, talentTabId, choiceIndex, choiceSpellId) VALUES(1020011, 1, 2, 1020065);
+INSERT INTO acore_world.forge_talent_choice_nodes (choiceNodeId, talentTabId, choiceIndex, choiceSpellId) VALUES(1020052, 1, 1, 1020052);
+INSERT INTO acore_world.forge_talent_choice_nodes (choiceNodeId, talentTabId, choiceIndex, choiceSpellId) VALUES(1020052, 1, 2, 1020054);

@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Chat.h"
 #include "Corpse.h"
 #include "Creature.h"
 #include "GameObject.h"
@@ -200,25 +201,83 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
 
             for (std::vector<Player*>::const_iterator i = playersNear.begin(); i != playersNear.end(); ++i)
             {
-                (*i)->ModifyMoney(goldPerPlayer);
+                uint32 goldMod = CalculatePct(goldPerPlayer, (*i)->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MONEY_GAIN, 0)) + CalculatePct(goldPerPlayer, (*i)->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MONEY_GAIN, 2));
+
+                (*i)->ModifyMoney(goldPerPlayer + goldMod);
                 (*i)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, goldPerPlayer);
 
                 WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
                 data << uint32(goldPerPlayer);
                 data << uint8(playersNear.size() > 1 ? 0 : 1);     // Controls the text displayed in chat. 0 is "Your share is..." and 1 is "You loot..."
                 (*i)->GetSession()->SendPacket(&data);
+
+                if (goldMod)
+                {
+                    uint32 gold = goldMod / 10000;
+                    uint8 silver = (goldMod / 100) % 100;
+                    uint8 copper = goldMod % 100;
+                    std::string currStr = "";
+
+                    if (gold > 0)
+                        currStr.append(std::to_string(gold) + " Gold");
+
+                    if (silver > 0)
+                    {
+                        if (!currStr.empty())
+                            currStr.append(", ");
+                        currStr.append(std::to_string(silver) + " Silver");
+                    }
+
+                    if (copper > 0)
+                    {
+                        if (!currStr.empty())
+                            currStr.append(", ");
+                        currStr.append(std::to_string(copper) + " Copper");
+                    }
+
+                    ChatHandler(player->GetSession()).PSendSysMessage("You loot additional %s", currStr);
+                }
             }
         }
         else
         {
+            uint32 goldMod = CalculatePct(loot->gold, player->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MONEY_GAIN, 0)) + CalculatePct(loot->gold, player->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MONEY_GAIN, 2));
+
             sScriptMgr->OnAfterCreatureLootMoney(player);
-            player->ModifyMoney(loot->gold);
+            player->ModifyMoney(loot->gold + goldMod);
             player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, loot->gold);
 
             WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
             data << uint32(loot->gold);
             data << uint8(1);   // "You loot..."
             SendPacket(&data);
+
+            if (goldMod)
+            {
+                uint32 gold = goldMod / 10000;
+                uint8 silver = (goldMod / 100) % 100;
+                uint8 copper = goldMod % 100;
+                std::string currStr = "";
+
+                if (gold > 0)
+                    currStr.append(std::to_string(gold) + " Gold");
+
+                if (silver > 0)
+                {
+                    if (!currStr.empty())
+                        currStr.append(", ");
+                    currStr.append(std::to_string(silver) + " Silver");
+                }
+
+                if (copper > 0)
+                {
+                    if (!currStr.empty())
+                        currStr.append(", ");
+                    currStr.append(std::to_string(copper) + " Copper");
+                }
+
+                ChatHandler(player->GetSession()).PSendSysMessage("You loot additional %s", currStr);
+            }
         }
 
         sScriptMgr->OnLootMoney(player, loot->gold);

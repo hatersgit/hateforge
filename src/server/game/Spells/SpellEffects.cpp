@@ -22,6 +22,7 @@
 #include "BattlegroundSA.h"
 #include "BattlegroundWS.h"
 #include "CellImpl.h"
+#include "Chat.h"
 #include "Common.h"
 #include "Creature.h"
 #include "DynamicObject.h"
@@ -239,6 +240,14 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectNULL,                                     //164 SPELL_EFFECT_REMOVE_AURA
     &Spell::EffectLearnTransmogSet,                         //165 SPELL_EFFECT_LEARN_TRANSMOG_SET
     &Spell::EffectCreateAreaTrigger,                        //166 SPELL_EFFECT_CREATE_AREATRIGGER
+    &Spell::EffectJumpCharge,                               //167 SPELL_EFFECT_JUMP_CHARGE
+    &Spell::EffectModifyCurrentSpellCooldown,               //168 SPELL_EFFECT_MODIFY_CURRENT_SPELL_COOLDOWN
+    &Spell::EffectRemoveCurrentSpellCooldown,               //169 SPELL_EFFECT_REMOVE_CURRENT_SPELL_COOLDOWN
+    &Spell::EffectRestoreSpellCharge,                       //170 SPELL_EFFECT_RESTORE_SPELL_CHARGE
+    &Spell::EffectGiveExperience,                           //171 SPELL_EFFECT_GIVE_EXPERIENCE
+    &Spell::EffectGiveRestedExperience,                     //172 SPELL_EFFECT_GIVE_RESTED_EXPERIENCE_BONUS
+    &Spell::EffectGiveHonor,                                //173 SPELL_EFFECT_GIVE_HONOR
+    &Spell::EffectReceiveItem,                              //174 SPELL_EFFECT_RECEIVE_ITEM
 };
 
 wEffect WeaponAndSchoolDamageEffects[TOTAL_WEAPON_DAMAGE_EFFECTS] =
@@ -961,24 +970,37 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
             targets.SetUnitTarget(m_caster);
     }
 
-    CustomSpellValues values;
-    // set basepoints for trigger with value effect
-    if (m_spellInfo->Effects[effIndex].Effect == SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE)
-    {
-        // maybe need to set value only when basepoints == 0?
-        values.AddSpellMod(SPELLVALUE_BASE_POINT0, damage);
-        values.AddSpellMod(SPELLVALUE_BASE_POINT1, damage);
-        values.AddSpellMod(SPELLVALUE_BASE_POINT2, damage);
-    }
+    Milliseconds delay = 0ms;
+    if (m_spellInfo->Effects[effIndex].MiscValue > 0)
+        delay = Milliseconds(m_spellInfo->Effects[effIndex].MiscValue);
 
-    // Remove spell cooldown (not category) if spell triggering spell with cooldown and same category
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && spellInfo->CategoryRecoveryTime && m_spellInfo->GetCategory() == spellInfo->GetCategory())
-    {
-        m_caster->ToPlayer()->RemoveSpellCooldown(spellInfo->Id);
-    }
+    uint32 repeat = 1;
+    if (m_spellInfo->Effects[effIndex].MiscValueB > 1)
+        repeat = m_spellInfo->Effects[effIndex].MiscValueB;
 
-    // original caster guid only for GO cast
-    m_caster->CastSpell(targets, spellInfo, &values, TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_NO_PERIODIC_RESET), nullptr, nullptr, m_originalCasterGUID);
+    for (uint32 i = 0; i < repeat; ++i)
+    {
+        m_caster->m_Events.AddEventAtOffset([caster = m_caster, targets, originalCaster = m_originalCasterGUID, spellInfo, effectIndex = effIndex, dmg = damage, sInfo = m_spellInfo]()
+        {
+            CustomSpellValues values;
+            // set basepoints for trigger with value effect
+            if (sInfo->Effects[effectIndex].Effect == SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE)
+            {
+                // maybe need to set value only when basepoints == 0?
+                for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                values.AddSpellMod(SpellValueMod(SPELLVALUE_BASE_POINT0 + i), dmg);
+            }
+
+            // Remove spell cooldown (not category) if spell triggering spell with cooldown and same category
+            if (caster->GetTypeId() == TYPEID_PLAYER && spellInfo->CategoryRecoveryTime && sInfo->GetCategory() == spellInfo->GetCategory())
+            {
+                caster->ToPlayer()->RemoveSpellCooldown(spellInfo->Id);
+            }
+
+            // original caster guid only for GO cast
+            caster->CastSpell(targets, spellInfo, &values, TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_NO_PERIODIC_RESET), nullptr, nullptr, originalCaster);
+        }, delay + (delay * i));
+    }
 }
 
 void Spell::EffectTriggerMissileSpell(SpellEffIndex effIndex)
@@ -2115,9 +2137,10 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
     ObjectGuid guid;
 
     // Get lockId
+    GameObjectTemplate const* goInfo;
     if (gameObjTarget)
     {
-        GameObjectTemplate const* goInfo = gameObjTarget->GetGOInfo();
+        goInfo = gameObjTarget->GetGOInfo();
         // Arathi Basin banner opening. /// @todo: Verify correctness of this check
         if ((goInfo->type == GAMEOBJECT_TYPE_BUTTON && goInfo->button.noDamageImmune) ||
                 (goInfo->type == GAMEOBJECT_TYPE_GOOBER && goInfo->goober.losOK))
@@ -2202,6 +2225,14 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
                 {
                     gameObjTarget->AddToSkillupList(player->GetGUID());
                     player->UpdateGatherSkill(skillId, pureSkillValue, reqSkillValue);
+
+                    if (uint8 xpDifficulty = goInfo->chest.xpDifficulty)
+                    {
+                        int32 xpLevel = goInfo->chest.xpMinLevel;
+
+                        Quest const* quest;
+                        player->GiveXP(quest->XPValue(player->getLevel(), xpLevel, xpDifficulty), nullptr);
+                    }
                 }
 
             }
@@ -4958,7 +4989,6 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
         Player* player = m_caster->ToPlayer();
         if (player)
         {
-            sScriptMgr->AnticheatSetSkipOnePacketForASH(player, true);
             // charge changes fall time
             player->SetFallInformation(GameTime::GetGameTime().count(), m_caster->GetPositionZ());
 
@@ -4985,22 +5015,12 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
             sScriptMgr->AnticheatSetUnderACKmount(player);
         }
     }
-
-    if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET && m_caster->ToPlayer())
-    {
-        sScriptMgr->AnticheatSetSkipOnePacketForASH(m_caster->ToPlayer(), true);
-    }
 }
 
 void Spell::EffectChargeDest(SpellEffIndex /*effIndex*/)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH)
         return;
-
-    if (m_caster->ToPlayer())
-    {
-        sScriptMgr->AnticheatSetSkipOnePacketForASH(m_caster->ToPlayer(), true);
-    }
 
     if (m_targets.HasDst())
     {
@@ -5208,7 +5228,6 @@ void Spell::EffectPullTowards(SpellEffIndex effIndex)
 
     if (unitTarget->GetTypeId() == TYPEID_PLAYER)
     {
-        sScriptMgr->AnticheatSetSkipOnePacketForASH(unitTarget->ToPlayer(), true);
         sScriptMgr->AnticheatSetUnderACKmount(unitTarget->ToPlayer());
     }
 }
@@ -6315,6 +6334,197 @@ void Spell::EffectLearnTransmogSet(SpellEffIndex effIndex)
     for (uint32 i = 0; i < MAX_ITEM_SET_ITEMS; ++i)
         if (setEntry->itemId[i])
             Transmogrification::instance().AddToCollection(player, sObjectMgr->GetItemTemplate(setEntry->itemId[i]));
+}
+
+void Spell::EffectJumpCharge(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH)
+        return;
+
+    if (!m_caster)
+        return;
+
+    if (m_caster->IsInFlight())
+        return;
+
+    JumpChargeParams const* params = sObjectMgr->GetJumpChargeParams(m_spellInfo->Effects[effIndex].MiscValue);
+
+    if (!params)
+        return;
+
+    float speed = params->Speed;
+
+    if (params->TreatSpeedAsMoveTimeSeconds)
+        speed = m_caster->GetExactDist(destTarget) / params->MoveTimeInSec;
+
+    m_caster->GetMotionMaster()->MoveJumpWithGravity(*destTarget, speed, params->JumpGravity, 0, ObjectAccessor::GetUnit(*m_caster, m_caster->GetGuidValue(UNIT_FIELD_TARGET)));
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        sScriptMgr->AnticheatSetUnderACKmount(m_caster->ToPlayer());
+    }
+}
+
+void Spell::EffectModifyCurrentSpellCooldown(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
+        return;
+
+    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    SpellInfo const* spellInfo = GetSpellInfo();
+    flag96 spellMask = spellInfo->Effects[effIndex].SpellClassMask;
+    int32 amount = spellInfo->Effects[effIndex].CalcValue();
+    int32 ignoreSpellMask = spellInfo->Effects[effIndex].MiscValue;
+    int32 ignoreSpellFamily = spellInfo->Effects[effIndex].MiscValueB;
+    Player* player = m_caster->ToPlayer();
+    SpellCooldowns const spellCDs = player->GetSpellCooldowns();
+
+    for (SpellCooldowns::const_iterator itr = spellCDs.begin(); itr != spellCDs.end(); ++itr)
+    {
+        SpellInfo const* cdSpell = sSpellMgr->GetSpellInfo(itr->first);
+        if (cdSpell && cdSpell->SpellFamilyName == spellInfo->SpellFamilyName && (cdSpell->SpellFamilyFlags & spellMask) && !ignoreSpellMask && !ignoreSpellFamily)
+            player->ModifySpellCooldown(cdSpell->Id, amount);
+        else if (cdSpell && cdSpell->SpellFamilyName == spellInfo->SpellFamilyName && ignoreSpellMask && !ignoreSpellFamily)
+            player->ModifySpellCooldown(cdSpell->Id, amount);
+        else if (cdSpell && ignoreSpellFamily)
+            player->ModifySpellCooldown(cdSpell->Id, amount);
+    }
+}
+
+void Spell::EffectRemoveCurrentSpellCooldown(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
+        return;
+
+    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    SpellInfo const* spellInfo = GetSpellInfo();
+    flag96 spellMask = spellInfo->Effects[effIndex].SpellClassMask;
+    int32 ignoreSpellMask = spellInfo->Effects[effIndex].MiscValue;
+    int32 ignoreSpellFamily = spellInfo->Effects[effIndex].MiscValueB;
+    Player* player = m_caster->ToPlayer();
+    SpellCooldowns const spellCDs = player->GetSpellCooldowns();
+
+    for (SpellCooldowns::const_iterator itr = spellCDs.begin(); itr != spellCDs.end(); ++itr)
+    {
+        SpellInfo const* cdSpell = sSpellMgr->GetSpellInfo(itr->first);
+        if (cdSpell && cdSpell->SpellFamilyName == spellInfo->SpellFamilyName && (cdSpell->SpellFamilyFlags & spellMask) && !ignoreSpellMask && !ignoreSpellFamily)
+            player->RemoveSpellCooldown(cdSpell->Id, true);
+        else if (cdSpell && cdSpell->SpellFamilyName == spellInfo->SpellFamilyName && ignoreSpellMask && !ignoreSpellFamily)
+            player->RemoveSpellCooldown(cdSpell->Id, true);
+        else if (cdSpell && ignoreSpellFamily)
+            player->RemoveSpellCooldown(cdSpell->Id, true);
+    }
+}
+
+void Spell::EffectRestoreSpellCharge(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
+        return;
+
+    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    flag96 spellMask = GetSpellInfo()->Effects[effIndex].SpellClassMask;
+
+    if (SpellChargeEntry* chargeEntry = sObjectMgr->TryGetChargeEntry(spellMask))
+    {
+        m_caster->ToPlayer()->TriggerChargeRegen(spellMask);
+    }
+}
+
+void Spell::EffectGiveExperience(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+        return;
+
+    Player* playerTarget = unitTarget->ToPlayer();
+
+    if (!playerTarget)
+        return;
+
+    bool pctValue = false;
+
+    if (GetSpellInfo()->Effects[effIndex].MiscValue != 0)
+        pctValue = true;
+
+    uint32 xp = 0;
+    int32 spellAmount = GetSpellInfo()->Effects[effIndex].CalcValue();
+
+    if (spellAmount < 1)
+        spellAmount = 1;
+
+    if (pctValue)
+    {
+        uint32 xpForLevel = sObjectMgr->GetXPForLevel(playerTarget->GetLevel());
+        xp = round(CalculatePct(xpForLevel, spellAmount));
+    }
+    else
+        xp = spellAmount;
+
+    playerTarget->GiveXP(xp, nullptr);
+}
+
+void Spell::EffectGiveRestedExperience(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+        return;
+
+    Player* playerTarget = unitTarget->ToPlayer();
+
+    if (!playerTarget)
+        return;
+
+    int32 spellAmount = GetSpellInfo()->Effects[effIndex].CalcValue();
+
+    if (spellAmount < 1)
+        return;
+
+    float rest_bonus_max = float(playerTarget->GetUInt32Value(PLAYER_NEXT_LEVEL_XP) * 1.5f / 2);
+    float restBonus = CalculatePct(rest_bonus_max, spellAmount);
+
+    playerTarget->SetRestBonus(playerTarget->GetRestBonus() + restBonus);
+}
+
+void Spell::EffectGiveHonor(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+        return;
+
+    Player* playerTarget = unitTarget->ToPlayer();
+
+    if (!playerTarget)
+        return;
+
+    int32 spellAmount = GetSpellInfo()->Effects[effIndex].CalcValue();
+    int32 miscB = GetSpellInfo()->Effects[effIndex].MiscValueB;
+
+    bool showChatMessage = false;
+
+    if (miscB != 0)
+        showChatMessage = true;
+
+    playerTarget->ModifyHonorPoints(spellAmount);
+
+    if (showChatMessage)
+        ChatHandler(playerTarget->GetSession()).PSendSysMessage("Rewarded %u honor.", spellAmount);
+}
+
+void Spell::EffectReceiveItem(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+        return;
+
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    uint32 item = GetSpellInfo()->Effects[effIndex].MiscValue;
+    uint32 amount = GetSpellInfo()->Effects[effIndex].CalcValue();
+
+    unitTarget->ToPlayer()->AddItem(item, amount);
 }
 
 void Spell::EffectCastButtons(SpellEffIndex effIndex)

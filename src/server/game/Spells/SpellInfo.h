@@ -211,6 +211,11 @@ enum SpellCustomAttributes
     SPELL_ATTR0_CU_POSITIVE                      = SPELL_ATTR0_CU_POSITIVE_EFF0 | SPELL_ATTR0_CU_POSITIVE_EFF1 | SPELL_ATTR0_CU_POSITIVE_EFF2,
 };
 
+enum SpellCustomAttributes2
+{
+    SPELL_ATTR0_CU_REQUIRES_COMBAT = 0x00000001,
+};
+
 uint32 GetTargetFlagMask(SpellTargetObjectTypes objType);
 
 class SpellImplicitTargetInfo

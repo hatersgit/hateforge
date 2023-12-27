@@ -47,8 +47,8 @@ public:
         if (name.size() > fc->LOADOUT_NAME_MAX || talentString.size() != reqLen)
             return;
 
-
-        auto plos = fc->_playerTalentLoadouts.find(iam.player->GetGUID().GetCounter());
+        auto guid = iam.player->GetGUID().GetCounter();
+        auto plos = fc->_playerTalentLoadouts.find(guid);
         if (plos != fc->_playerTalentLoadouts.end())
         {
             auto spec = plos->second.find(specId);
@@ -58,8 +58,29 @@ public:
                     exists->second->name = name;
                     exists->second->talentString = talentString;
                 }
-                CharacterDatabase.Execute("insert into `forge_character_talent_loadouts` (`guid`, `id`, `tabId`, `name`, `talentString`) values ({}, {}, {}, {}, {},) on duplicate key update `name` = {}, `talentString` = {}",
-                    iam.player->GetGUID().GetCounter(), id, specId, name, talentString, name, talentString);
+                else {
+                    if (spec->second.size() >= fc->MAX_LOADOUTS_PER_SPEC)
+                        return;
+
+                    auto active = fc->_playerActiveTalentLoadouts[guid];
+                    active->active = false;
+                    fc->_playerActiveTalentLoadouts[guid] = active;
+
+                    CharacterDatabase.Execute("update `forge_character_talent_loadouts` set `active` = 0 where `guid` = {} and `tabId` = {} and `id` = {}",
+                        guid, active->tabId, active->id);
+
+                    ForgeCache::PlayerLoadout* plo = new ForgeCache::PlayerLoadout();
+                    plo->active = true;
+                    plo->id = id;
+                    plo->tabId = specId;
+                    plo->name = name;
+                    plo->talentString = talentString;
+
+                    fc->_playerActiveTalentLoadouts[guid] = plo;
+                    fc->_playerTalentLoadouts[guid][specId][id] = plo;
+                }
+                CharacterDatabase.Execute("insert into `forge_character_talent_loadouts` (`guid`, `id`, `tabId`, `name`, `talentString`, `active`) values ({}, {}, {}, {}, {}, {}) on duplicate key update `name` = {}, `talentString` = {}, `active` = {}",
+                    guid, id, specId, name, talentString, true, name, talentString, true);
             }
         }
 

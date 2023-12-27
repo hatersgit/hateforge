@@ -959,6 +959,7 @@ public:
 
     const uint8 LOADOUT_NAME_MAX = 64;
     const uint8 META_PREFIX = 3;
+    const uint8 MAX_LOADOUTS_PER_SPEC = 7;
 
     struct PlayerLoadout {
         bool active;

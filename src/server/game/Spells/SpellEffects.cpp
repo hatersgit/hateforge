@@ -4989,7 +4989,6 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
         Player* player = m_caster->ToPlayer();
         if (player)
         {
-            sScriptMgr->AnticheatSetSkipOnePacketForASH(player, true);
             // charge changes fall time
             player->SetFallInformation(GameTime::GetGameTime().count(), m_caster->GetPositionZ());
 
@@ -5016,22 +5015,12 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
             sScriptMgr->AnticheatSetUnderACKmount(player);
         }
     }
-
-    if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET && m_caster->ToPlayer())
-    {
-        sScriptMgr->AnticheatSetSkipOnePacketForASH(m_caster->ToPlayer(), true);
-    }
 }
 
 void Spell::EffectChargeDest(SpellEffIndex /*effIndex*/)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH)
         return;
-
-    if (m_caster->ToPlayer())
-    {
-        sScriptMgr->AnticheatSetSkipOnePacketForASH(m_caster->ToPlayer(), true);
-    }
 
     if (m_targets.HasDst())
     {
@@ -5239,7 +5228,6 @@ void Spell::EffectPullTowards(SpellEffIndex effIndex)
 
     if (unitTarget->GetTypeId() == TYPEID_PLAYER)
     {
-        sScriptMgr->AnticheatSetSkipOnePacketForASH(unitTarget->ToPlayer(), true);
         sScriptMgr->AnticheatSetUnderACKmount(unitTarget->ToPlayer());
     }
 }

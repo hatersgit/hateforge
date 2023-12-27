@@ -136,7 +136,7 @@ std::string ForgeCommonMessage::BuildTree(Player* player, CharacterPointType poi
                 if (j == 0)
                     choiceDel = "";
 
-                msg = msg + choiceDel + std::to_string(choice->spellId);
+                msg = msg + choiceDel + std::to_string(choice.second->spellId);
                 j++;
             }
             i++;

@@ -283,7 +283,7 @@ void AreaTriggerDataStore::LoadAreaTriggerTemplates()
         LOG_INFO("server.loading", ">> Loaded 0 AreaTrigger templates circular movement infos. DB table `areatrigger_create_properties_orbit` is empty.");
     }
 
-    LOG_INFO("server.loading", ">> Loaded {} spell areatrigger templates in %u ms.", _areaTriggerTemplateStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded {} spell areatrigger templates in {} ms.", _areaTriggerTemplateStore.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 AreaTriggerTemplate const* AreaTriggerDataStore::GetAreaTriggerTemplate(AreaTriggerId const& areaTriggerId) const

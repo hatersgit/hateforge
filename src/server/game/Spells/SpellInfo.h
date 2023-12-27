@@ -459,6 +459,7 @@ public:
     bool IsRequiringDeadTarget() const;
     bool IsAllowingDeadTarget() const;
     bool CanBeUsedInCombat() const;
+    bool RequiresCombat() const; // hater
     bool IsPositive() const;
     bool IsPositiveEffect(uint8 effIndex) const;
     bool IsChanneled() const;

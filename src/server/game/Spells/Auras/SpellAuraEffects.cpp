@@ -392,7 +392,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleAuraModSpellPowerPercent,                  //329 SPELL_AURA_MOD_SPELL_POWER_PCT
     &AuraEffect::HandleAuraModSpellPowerOfStatPercent,            //330 SPELL_AURA_MOD_SPELL_POWER_OF_STAT_PERCENT
     &AuraEffect::HandleAuraModSpellPowerOfCombatRatingPercent,    //331 SPELL_AURA_MOD_SPELL_POWER_OF_RATING_PERCENT
-    &AuraEffect::HandleNoImmediateEffect,                         //332 SPELL_AURA_MOD_TRIGGER_SPELL_ON_POWER_PCT
+    &AuraEffect::HandleAuraModTriggerSpellPowerPercent,           //332 SPELL_AURA_MOD_TRIGGER_SPELL_ON_POWER_PCT
     &AuraEffect::HandleModRatingPercent,                          //333 SPELL_AURA_MOD_RATING_PCT
     &AuraEffect::HandleModRatingFromRating,                       //334 SPELL_AURA_MOD_RATING_OF_RATING_PCT
     &AuraEffect::HandleNoImmediateEffect,                         //335 SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER
@@ -405,7 +405,12 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleModRatingPercent,                          //342 SPELL_AURA_MOD_RATING_FROM_ALL_SOURCES_BY_PCT visual only, implemented in Player::UpdateRating()
     &AuraEffect::HandleNoImmediateEffect,                         //343 SPELL_AURA_MOD_RECOVERY_RATE implemented in AuraEffect::PeriodicTick
     &AuraEffect::HandleNoImmediateEffect,                         //344 SPELL_AURA_ADD_MASTERY_RATING_TO_SPELL_EFFECT implemented in AuraEffect::CalculateSpellMod()
-    &AuraEffect::HandleAuraModTriggerSpellPowerPercent,           //345 SPELL_AURA_MOD_TRIGGER_SPELL_ON_POWER_PC
+    &AuraEffect::HandleNoImmediateEffect,                         //345 SPELL_AURA_MOD_REMOVE_AURA
+    &AuraEffect::HandleNoImmediateEffect,                         //346 SPELL_AURA_CAN_DOUBLE_JUMP
+    &AuraEffect::HandleNoImmediateEffect,                         //347 SPELL_AURA_CAN_GLIDE
+    &AuraEffect::HandleNoImmediateEffect,                         //348 SPELL_AURA_MOD_SCHOOL_MASK_HEALING_FROM_CASTER
+    &AuraEffect::HandleNoImmediateEffect,                         //349 SPELL_AURA_MOD_MONEY_GAIN
+    &AuraEffect::HandleNoImmediateEffect,                         //350 SPELL_AURA_MOD_TAXI_FLIGHT_SPEED
 };
 
 AuraEffect::AuraEffect(Aura* base, uint8 effIndex, int32* baseAmount, Unit* caster):
@@ -7566,14 +7571,26 @@ void AuraEffect::HandlePeriodicCooldownRecoveryTick(AuraApplication* aurApp, Uni
 
     SpellInfo const* auraSpell = GetBase()->GetSpellInfo();
     flag96 spellMask = auraSpell->Effects[GetEffIndex()].SpellClassMask;
-    int32 amount = -(auraSpell->Effects[GetEffIndex()].CalcBaseValue(GetBaseAmount()));
+    int32 amount = -(auraSpell->Effects[GetEffIndex()].CalcValue());
+    int32 ignoreSpellMask = auraSpell->Effects[GetEffIndex()].MiscValue;
+    int32 ignoreSpellFamily = auraSpell->Effects[GetEffIndex()].MiscValueB;
     Player* player = target->ToPlayer();
     SpellCooldowns const spellCDs = player->GetSpellCooldowns();
+
+    if (amount >= 100)
+    {
+        LOG_ERROR("spells.aura", "SPELL_AURA_MOD_RECOVERY_RATE: amount {} is equal or greater than 100; setting to 99", amount);
+        amount = 99;
+    }
 
     for (SpellCooldowns::const_iterator itr = spellCDs.begin(); itr != spellCDs.end(); ++itr)
     {
         SpellInfo const* cdSpell = sSpellMgr->GetSpellInfo(itr->first);
-        if (cdSpell && cdSpell->SpellFamilyName == auraSpell->SpellFamilyName && (cdSpell->SpellFamilyFlags & spellMask))
+        if (cdSpell && cdSpell->SpellFamilyName == auraSpell->SpellFamilyName && (cdSpell->SpellFamilyFlags & spellMask) && !ignoreSpellMask && !ignoreSpellFamily)
+            player->ModifySpellCooldown(cdSpell->Id, amount);
+        else if (cdSpell && cdSpell->SpellFamilyName == auraSpell->SpellFamilyName && ignoreSpellMask && !ignoreSpellFamily)
+            player->ModifySpellCooldown(cdSpell->Id, amount);
+        else if (cdSpell && ignoreSpellFamily)
             player->ModifySpellCooldown(cdSpell->Id, amount);
     }
 }
@@ -7767,7 +7784,9 @@ void AuraEffect::HandleAuraModTriggerSpellPowerPercent(AuraApplication const* au
         int32 amount = GetAmount();
 
         if ((GetMiscValueB() == 0 && (float)(caster->GetPowerPct(Powers(power))) < amount)
-            || (GetMiscValueB() == 1 && (float)(caster->GetPowerPct(Powers(power))) > amount))
+            || (GetMiscValueB() == 1 && (float)(caster->GetPowerPct(Powers(power))) <= amount)
+            || (GetMiscValueB() == 2 && (float)(caster->GetPowerPct(Powers(power))) > amount)
+            || (GetMiscValueB() == 3 && (float)(caster->GetPowerPct(Powers(power))) >= amount))
         {
             if (!caster->HasAura(GetTriggerSpell()))
                 caster->AddAura(GetTriggerSpell(), caster);

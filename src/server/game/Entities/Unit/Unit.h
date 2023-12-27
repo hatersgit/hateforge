@@ -1483,6 +1483,7 @@ public:
 
     [[nodiscard]] uint32 GetHealth()    const { return GetUInt32Value(UNIT_FIELD_HEALTH); }
     [[nodiscard]] uint32 GetMaxHealth() const { return GetUInt32Value(UNIT_FIELD_MAXHEALTH); }
+    [[nodiscard]] uint32 GetMissingHealth() const { return GetMaxHealth() - GetHealth(); }
 
     [[nodiscard]] bool IsFullHealth() const { return GetHealth() == GetMaxHealth(); }
     [[nodiscard]] bool HealthBelowPct(int32 pct) const { return GetHealth() < CountPctFromMaxHealth(pct); }
@@ -1977,6 +1978,7 @@ public:
     // m_appliedAuras container management
     AuraApplicationMap&       GetAppliedAuras()       { return m_appliedAuras; }
     [[nodiscard]] AuraApplicationMap const& GetAppliedAuras() const { return m_appliedAuras; }
+    uint8 GetAppliedAuraCountByMechanicType(Mechanics mech);
 
     void RemoveAura(AuraApplicationMap::iterator& i, AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);
     void RemoveAura(uint32 spellId, ObjectGuid casterGUID = ObjectGuid::Empty, uint8 reqEffMask = 0, AuraRemoveMode removeMode = AURA_REMOVE_BY_DEFAULT);

@@ -1332,8 +1332,8 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
         case SPELL_DAMAGE_CLASS_RANGED:
         case SPELL_DAMAGE_CLASS_MELEE:
             {
-                // Aleist3r: changed from physical damage to all schools
-                if ((damageSchoolMask & SPELL_SCHOOL_MASK_ALL) || CanBlockSpells(victim))
+                // Physical or has aura SPELL_AURA_ADD_SPELL_BLOCK
+                if ((damageSchoolMask & SPELL_SCHOOL_MASK_NORMAL) || CanBlockSpells(victim))
                 {
                     // Get blocked status
                     blocked = isSpellBlocked(victim, spellInfo, attackType);
@@ -1403,9 +1403,8 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
         case SPELL_DAMAGE_CLASS_NONE:
         case SPELL_DAMAGE_CLASS_MAGIC:
             {
-                // Aleist3r: copied it here as well, it is needed for paladin talents for example
-                // not 100% sure if it'll work as intended
-                if ((damageSchoolMask & SPELL_SCHOOL_MASK_ALL) || CanBlockSpells(victim))
+                // Aleist3r: turns out school mask is not needed otherwise it'll block even without SPELL_AURA_ADD_SPELL_BLOCK
+                if (CanBlockSpells(victim))
                 {
                     // Get blocked status
                     blocked = isSpellBlocked(victim, spellInfo, attackType);
@@ -1972,7 +1971,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
         {
             if (tDamage.second > 0)
             {
-                SpellInfo const* i_spellProto = sSpellMgr->GetSpellInfo(1129999);
+                SpellInfo const* i_spellProto = sSpellMgr->GetSpellInfo(1570001);
 
                 uint32 damage = tDamage.second > 0 ? tDamage.second : 0;
                 uint32 absorb = 0;
@@ -2063,7 +2062,7 @@ ThornsDamage Unit::CalculateThorns(Unit* attacker, Unit* victim, bool calcMisses
     //auto otherThorns = shieldOwner->GetUInt32Value(UNIT_FIELD_THORNS);
     //thornsDmg.ThornsDamageMap[SPELL_SCHOOL_MASK_NORMAL] += otherThorns;
 
-    SpellInfo const* thornsSpellInfo = sSpellMgr->GetSpellInfo(1129999);
+    SpellInfo const* thornsSpellInfo = sSpellMgr->GetSpellInfo(1570001);
 
     for (auto tDamage : thornsDmg.ThornsDamageMap)
     {
@@ -4886,6 +4885,18 @@ Aura* Unit::GetOwnedAura(uint32 spellId, ObjectGuid casterGUID, ObjectGuid itemC
         }
     }
     return nullptr;
+}
+
+uint8 Unit::GetAppliedAuraCountByMechanicType(Mechanics mech)
+{
+    uint8 out = 0;
+    for (auto aura : m_appliedAuras) {
+        AuraApplication* app = aura.second;
+        if (SpellInfo const* spell = app->GetBase()->GetSpellInfo())
+            if (spell->GetAllEffectsMechanicMask() & 1 << mech)
+                out += 1;
+    }
+    return out;
 }
 
 void Unit::RemoveAura(AuraApplicationMap::iterator& i, AuraRemoveMode mode)
@@ -10194,6 +10205,26 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 }
                 break;
             }
+        // duskhaven:
+        case 1020039:
+        {
+            target = triggeredByAura->GetBase()->GetCaster();
+            if (!target)
+                return false;
+
+            if (Player* pTarget = target->ToPlayer())
+            {
+                if (cooldown)
+                {
+                    if (pTarget->HasSpellCooldown(trigger_spell_id))
+                        return false;
+                    pTarget->AddSpellCooldown(trigger_spell_id, 0, cooldown);
+                }
+                target->CastSpell(pTarget, trigger_spell_id, true);
+                return true;
+            }
+            return false;
+        }
     }
 
     // try detect target manually if not set
@@ -13178,6 +13209,11 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
         AuraEffectList const& mHealingGet = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_RECEIVED);
         for (AuraEffectList::const_iterator i = mHealingGet.begin(); i != mHealingGet.end(); ++i)
             if (caster->GetGUID() == (*i)->GetCasterGUID() && (*i)->IsAffectedOnSpell(spellProto))
+                AddPct(TakenTotalMod, (*i)->GetAmount());
+
+        AuraEffectList const& mHealingSchoolMaskReceived = GetAuraEffectsByType(SPELL_AURA_MOD_SCHOOL_MASK_HEALING_FROM_CASTER);
+        for (AuraEffectList::const_iterator i = mHealingSchoolMaskReceived.begin(); i != mHealingSchoolMaskReceived.end(); ++i)
+            if (caster->GetGUID() == (*i)->GetCasterGUID() && ((*i)->GetMiscValue() & spellProto->GetSchoolMask()))
                 AddPct(TakenTotalMod, (*i)->GetAmount());
     }
 

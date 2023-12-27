@@ -1912,6 +1912,9 @@ void World::SetInitialWorldSettings()
     LOG_INFO("server.loading", "Loading Pet Name Parts...");
     sObjectMgr->LoadPetNames();
 
+    LOG_INFO("server.loading", "Loading Jump Charge Params...");
+    sObjectMgr->LoadJumpChargeParams();
+
     CharacterDatabaseCleaner::CleanDatabase();
 
     LOG_INFO("server.loading", "Loading The Max Pet Number...");

@@ -5967,13 +5967,16 @@ ActionButton* Player::addActionButton(uint8 button, uint32 action, uint8 type)
         return nullptr;
 
     // it create new button (NEW state) if need or return existed
-    ActionButton& ab = m_actionButtons[button];
+    auto ab = m_actionButtons.find(button);
+    if (ab != m_actionButtons.end()) {
+        // set data and update to CHANGED if not NEW
+        ab->second.SetActionAndType(action, ActionButtonType(type));
 
-    // set data and update to CHANGED if not NEW
-    ab.SetActionAndType(action, ActionButtonType(type));
+        LOG_DEBUG("entities.player", "Player {} Added Action {} (type {}) to Button {}", GetGUID().ToString(), action, type, button);
+        return &ab->second;
+    }
 
-    LOG_DEBUG("entities.player", "Player {} Added Action {} (type {}) to Button {}", GetGUID().ToString(), action, type, button);
-    return &ab;
+    return nullptr;
 }
 
 void Player::removeActionButton(uint8 button)

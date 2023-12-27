@@ -69,6 +69,7 @@ enum class ForgeTopic
     SET_GAME_MODES_ERROR            = 29,
     END_GAME_MODES                  = 30,
 
+    // xmog
     COLLECTION_INIT                 = 31,
     GET_XMOG_SETS                   = 32,
     LOAD_XMOG_SET                   = 33,
@@ -85,7 +86,7 @@ enum class ForgeTopic
     COLLECTION_SETUP_FINISHED       = 53,
     ADD_XMOG                        = 54,
     APPLY_XMOG_ERROR                = 55,
-
+    
     // m+
     MYTHIC_GET_WEEKLY_REWARD        = 101,
     MYTHIC_GET_MAP_STATS            = 102,
@@ -96,6 +97,12 @@ enum class ForgeTopic
     MYTHIC_UPDATE_TIMER             = 107,
     MYTHIC_UPDATE_DEATHS            = 108,
     MYTHIC_UPDATE_CRITERIA          = 109,
+
+    // loadouts
+    LOADOUT_ERROR                   = 120,
+    GET_LOADOUTS                    = 121,
+    SAVE_LOADOUT                    = 122,
+    DELETE_LOADOUT                  = 123,
 };
 
 enum class ForgeError

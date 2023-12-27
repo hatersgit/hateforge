@@ -539,3 +539,23 @@ void ForgeCommonMessage::SendActiveSpecInfo(Player* player)
         player->SendForgeUIMsg(ForgeTopic::GET_CHARACTER_SPECS, msg);
     }
 }
+
+void ForgeCommonMessage::SendLoadouts(Player* player)
+{
+    auto found = fc->_playerTalentLoadouts.find(player->GetGUID().GetCounter());
+    if (found != fc->_playerTalentLoadouts.end()) {
+        std::string msg;
+        std::string delim = "";
+        for (auto spec : found->second) {
+            msg += delim + std::to_string(spec.first) + "$";
+            for (auto loadout : spec.second) {
+                msg +=  std::to_string(loadout.first) + "^"
+                    + std::to_string(loadout.second->active) + "^"
+                    + loadout.second->name + "^" + loadout.second->talentString;
+            }
+            delim = "*";
+        }
+
+        player->SendForgeUIMsg(ForgeTopic::GET_LOADOUTS, msg);
+    }
+}

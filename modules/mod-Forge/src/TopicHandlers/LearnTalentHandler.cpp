@@ -27,10 +27,10 @@ public:
             if (iam.message.size() > 3) {
                 _treeMetaData.clear();
 
-                auto classinfo = iam.message.substr(0, META_PREFIX);
-                CharacterPointType type = CharacterPointType(base64_char.find(classinfo.substr(0, 1))-1);
-                auto specId = base64_char.find(classinfo.substr(1, 1));
-                auto pClass = base64_char.find(classinfo.substr(2, 1));
+                auto classinfo = iam.message.substr(0, fc->META_PREFIX);
+                CharacterPointType type = CharacterPointType(fc->base64_char.find(classinfo.substr(0, 1))-1);
+                auto specId = fc->base64_char.find(classinfo.substr(1, 1));
+                auto pClass = fc->base64_char.find(classinfo.substr(2, 1));
                 if (iam.player->getClass() == pClass && spec->CharacterSpecTabId == specId) {
                     CharacterPointType foundType;
                     ForgeTalentTab* specTab;
@@ -42,8 +42,8 @@ public:
                         auto nodeMap = fc->_cacheSpecNodeToSpell[specId];
 
                         int treeLen = classMap.size() + nodeMap.size();
-                        if (iam.message.size() == treeLen + META_PREFIX) {
-                            auto ranks = iam.message.substr(META_PREFIX, iam.message.size());
+                        if (iam.message.size() == treeLen + fc->META_PREFIX) {
+                            auto ranks = iam.message.substr(fc->META_PREFIX, iam.message.size());
 
                             auto tabId = 0;
                             auto spell = 0;
@@ -70,7 +70,7 @@ public:
 
                                 auto nodeLoc = tabMetaData->second->nodeLocation[spell];
 
-                                _simplifiedTreeMap[tabId][nodeLoc->row][nodeLoc->col] = base64_char.find(ch)-1;
+                                _simplifiedTreeMap[tabId][nodeLoc->row][nodeLoc->col] = fc->base64_char.find(ch)-1;
                             }
 
                             ForgeCharacterPoint* points = fc->GetSpecPoints(iam.player, foundType, spec->Id);
@@ -214,10 +214,6 @@ public:
 private:
     ForgeCommonMessage* cm;
     ForgeCache* fc;
-
-    const uint8 META_PREFIX = 3;
-
-    const std::string base64_char = "|ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; // | is to offset string to base 1
 
     std::unordered_map<uint32, ForgeCache::TreeMetaData*> _treeMetaData;
     std::unordered_map<uint32 /*tabId*/, std::unordered_map<uint8 /*row*/, std::unordered_map<uint8/*col*/, uint32 /*rank*/>>> _simplifiedTreeMap;

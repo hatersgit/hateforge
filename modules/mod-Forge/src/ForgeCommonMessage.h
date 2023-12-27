@@ -37,6 +37,8 @@ public:
     void SendXmogSet(Player*, uint8 /*set id*/);
     void SendXmogSets(Player*);
 
+    // talent loadouts
+    void SendLoadouts(Player*);
     std::string EncodeTalentString(Player* player);
     void DecodeTalentString(std::string talent_str);
 private:

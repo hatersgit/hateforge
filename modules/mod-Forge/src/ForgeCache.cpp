@@ -568,21 +568,9 @@ public:
 
         for (auto& tabIdKvp : spec->Talents)
             for (auto& tabTypeKvp : tabIdKvp.second)
-                if (tabTypeKvp.second->type == NodeType::CHOICE)
-                    UpdateChacterChoiceNodeInternal(trans, acct, charId, spec->Id, tabTypeKvp.second->TabId, tabTypeKvp.second->SpellId, spec->ChoiceNodesChosen.at(tabTypeKvp.second->SpellId));
-                else
-                    UpdateChacterTalentInternal(acct, charId, trans, spec->Id, tabTypeKvp.second->SpellId, tabTypeKvp.second->TabId, tabTypeKvp.second->CurrentRank);
-                
-        CharacterDatabase.CommitTransaction(trans);
-    }
+                UpdateCharacterTalentInternal(acct, charId, trans, spec->Id, tabTypeKvp.second->SpellId, tabTypeKvp.second->TabId, tabTypeKvp.second->CurrentRank);
 
-    void UpdateChacterChoiceNodeInternal(CharacterDatabaseTransaction trans, uint32 account, uint32 guid, uint32 specId, uint32 tabId, uint32 choiceNodeId, uint32 choiceNodeSelection) {
-        if (TalentTabs[tabId]->TalentType != ACCOUNT_WIDE_TYPE)
-            trans->Append("INSERT INTO `forge_character_node_choices` (`guid`,`spec`,`tabId`,`node`,`choice`) VALUES ({},{},{},{},{}) ON DUPLICATE KEY UPDATE `choice` = {}",
-                guid, specId, choiceNodeId, tabId, choiceNodeSelection, choiceNodeSelection);
-        else
-            trans->Append("INSERT INTO `forge_character_node_choices` (`guid`,`spec`,`tabId`,`node`,`choice`) VALUES ({},{},{},{},{}) ON DUPLICATE KEY UPDATE `choice` = {}",
-                account, ACCOUNT_WIDE_KEY, choiceNodeId, tabId, choiceNodeSelection, choiceNodeSelection);
+        CharacterDatabase.CommitTransaction(trans);
     }
 
     void UpdateCharacterSpecDetailsOnly(Player* player, ForgeCharacterSpec*& spec)
@@ -959,6 +947,22 @@ public:
     std::unordered_map<uint32 /*tabid*/, std::unordered_map<uint8 /*node*/, uint32 /*spell*/>> _cacheSpecNodeToSpell;
     std::unordered_map<uint32 /*class*/, std::unordered_map<uint8 /*node*/, uint32 /*spell*/>> _cacheClassNodeToSpell;
     std::unordered_map<uint32, uint32> _cacheClassNodeToClassTree;
+
+    const std::string base64_char = "|ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; // | is to offset string to base 1
+
+    const uint8 LOADOUT_NAME_MAX = 64;
+    const uint8 META_PREFIX = 3;
+
+    struct PlayerLoadout {
+        bool active;
+        uint8 id;
+        uint32 tabId;
+        std::string name;
+        std::string talentString;
+    };
+    // hater: player loadout storage
+    std::unordered_map<uint32 /*guid*/, std::unordered_map<uint32 /*tabId*/, std::unordered_map<uint8 /*id*/, PlayerLoadout*>>> _playerTalentLoadouts;
+    std::unordered_map<uint32 /*guid*/,PlayerLoadout*> _playerActiveTalentLoadouts;
 private:
     std::unordered_map<ObjectGuid, uint32> CharacterActiveSpecs;
     std::unordered_map<std::string, uint32> CONFIG;
@@ -1035,7 +1039,9 @@ private:
             AddCharacterSpecs();
             AddTalentSpent();
             AddCharacterTalents();
-            AddCharacterChoiceNodes();
+            //AddCharacterChoiceNodes();
+
+            AddPlayerTalentLoadouts();
 
             LOG_INFO("server.load", "Loading characters points...");
             AddCharacterPointsFromDB();
@@ -1177,7 +1183,7 @@ private:
         }
     }
 
-    void UpdateChacterTalentInternal(uint32 account, uint32 charId, CharacterDatabaseTransaction& trans, uint32 spec, uint32 spellId, uint32 tabId, uint8 known)
+    void UpdateCharacterTalentInternal(uint32 account, uint32 charId, CharacterDatabaseTransaction& trans, uint32 spec, uint32 spellId, uint32 tabId, uint8 known)
     {
         if (TalentTabs[tabId]->TalentType != ACCOUNT_WIDE_TYPE)
             trans->Append("INSERT INTO `forge_character_talents` (`guid`,`spec`,`spellid`,`tabId`,`currentrank`) VALUES ({},{},{},{},{}) ON DUPLICATE KEY UPDATE `currentrank` = {}", charId, spec, spellId, tabId, known, known);
@@ -1827,6 +1833,39 @@ private:
 
             _levelClassSpellMap[pClass][race][level].push_back(spell);
         } while (mapQuery->NextRow());
+    }
+
+    void AddPlayerTalentLoadouts()
+    {
+        _playerTalentLoadouts.clear();
+        _playerActiveTalentLoadouts.clear();
+
+        QueryResult loadouts = WorldDatabase.Query("select * from `acore_characters`.`forge_character_talent_loadouts`");
+
+        if (!loadouts)
+            return;
+
+        do
+        {
+            Field* loadoutsFields = loadouts->Fetch();
+            uint32 guid = loadoutsFields[0].Get<uint32>();
+            uint32 id = loadoutsFields[1].Get<uint32>();
+            uint32 tabId = loadoutsFields[2].Get<uint32>();
+            std::string name = loadoutsFields[3].Get<std::string>();
+            std::string talentString = loadoutsFields[4].Get<std::string>();
+            bool active = loadoutsFields[5].Get<bool>();
+
+            PlayerLoadout* plo = new PlayerLoadout();
+            plo->id = id;
+            plo->tabId = tabId;
+            plo->name = name;
+            plo->talentString = talentString;
+            plo->active = active;
+
+
+            _playerTalentLoadouts[guid][tabId][id] = plo;
+            _playerActiveTalentLoadouts[guid] = plo;
+        } while (loadouts->NextRow());
     }
 };
 

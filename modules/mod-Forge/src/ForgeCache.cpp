@@ -1354,14 +1354,16 @@ private:
                 {
                     auto classBit = (newTab->ClassMask & (1 << (wowClass.first - 1)));
 
-                    auto firstSpec = _playerClassFirstSpec.find(classBit);
-                    if (firstSpec == _playerClassFirstSpec.end())
-                        firstSpec->second = newTab->Id;
-                    else if (newTab->Id < firstSpec->second)
-                        firstSpec->second = newTab->Id;
-
                     if (classBit != 0 || newTab->ClassMask == 0)
                     {
+                        auto firstSpec = _playerClassFirstSpec.find(classBit);
+                        if (firstSpec != _playerClassFirstSpec.end()) {
+                            if (newTab->Id < firstSpec->second)
+                                _playerClassFirstSpec[classBit] = newTab->Id;
+                        }
+                        else 
+                            _playerClassFirstSpec[classBit] = newTab->Id;
+
                         RaceAndClassTabMap[race.first][wowClass.first].insert(newTab->Id);
                         SpellToTalentTabMap[newTab->SpellIconId] = newTab->Id;
                         TalentTabToSpellMap[newTab->Id] = newTab->SpellIconId;

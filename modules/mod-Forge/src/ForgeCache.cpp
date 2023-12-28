@@ -1919,11 +1919,6 @@ private:
             _playerActiveTalentLoadouts[guid] = plo;
         } while (loadouts->NextRow());
     }
-
-    uint32 GetFirstSpec(Player* player)
-    {
-        
-    }
 };
 
 #define sForgeCache ForgeCache::instance()

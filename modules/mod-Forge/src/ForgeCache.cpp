@@ -475,6 +475,7 @@ public:
         spec->Description = "Skill Specilization";
         spec->Visability = SpecVisibility::PRIVATE;
         spec->SpellIconId = 133743;
+        spec->CharacterSpecTabId = GetFirstSpec(player);
 
         player->SetSpecsCount(num);
 
@@ -971,6 +972,39 @@ public:
     // hater: player loadout storage
     std::unordered_map<uint32 /*guid*/, std::unordered_map<uint32 /*tabId*/, std::unordered_map<uint8 /*id*/, PlayerLoadout*>>> _playerTalentLoadouts;
     std::unordered_map<uint32 /*guid*/,PlayerLoadout*> _playerActiveTalentLoadouts;
+
+    void AddDefaultLoadout(Player* player)
+    {
+        std::string loadout = "A";
+        auto find = *RaceAndClassTabMap[player->getRace()][player->getClass()].begin();
+        loadout += base64_char.substr(find, 1);
+        loadout += base64_char.substr(player->getClass(), 1);
+
+        auto classMap = _cacheClassNodeToSpell[player->getClass()];
+        for (int i = 1; i <= classMap.size(); i++)
+            loadout += base64_char.substr(1, 1);
+
+        auto specMap = _cacheSpecNodeToSpell[find];
+        for (int i = 1; i <= specMap.size(); i++) {
+            loadout += base64_char.substr(1, 1);
+        }
+
+        auto guid = player->GetGUID().GetCounter();
+
+        PlayerLoadout* plo = new PlayerLoadout();
+        plo->active = true;
+        plo->id = 1;
+        plo->name = "Default";
+        plo->tabId = find;
+        plo->talentString = loadout;
+
+        _playerTalentLoadouts[guid][find][plo->id] = plo;
+        _playerActiveTalentLoadouts[guid] = plo;
+
+        CharacterDatabase.Execute("insert into `forge_character_talent_loadouts` (`guid`, `id`, `tabId`, `name`, `talentString`, `active`) values ({}, {}, {}, {}, {}, {})",
+            guid, plo->id, find, plo->name, loadout, true);
+    }
+
 private:
     std::unordered_map<ObjectGuid, uint32> CharacterActiveSpecs;
     std::unordered_map<std::string, uint32> CONFIG;
@@ -1875,6 +1909,11 @@ private:
             _playerTalentLoadouts[guid][tabId][id] = plo;
             _playerActiveTalentLoadouts[guid] = plo;
         } while (loadouts->NextRow());
+    }
+
+    uint32 GetFirstSpec(Player* player)
+    {
+        
     }
 };
 

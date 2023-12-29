@@ -475,7 +475,7 @@ public:
         spec->Description = "Skill Specilization";
         spec->Visability = SpecVisibility::PRIVATE;
         spec->SpellIconId = 133743;
-        spec->CharacterSpecTabId = GetFirstSpec(player);
+        spec->CharacterSpecTabId = _playerClassFirstSpec[player->getClass()];
 
         player->SetSpecsCount(num);
 
@@ -1003,7 +1003,7 @@ public:
         _playerTalentLoadouts[guid][find][plo->id] = plo;
         _playerActiveTalentLoadouts[guid] = plo;
 
-        CharacterDatabase.Execute("insert into `forge_character_talent_loadouts` (`guid`, `id`, `tabId`, `name`, `talentString`, `active`) values ({}, {}, {}, {}, {}, {})",
+        CharacterDatabase.Execute("insert into `forge_character_talent_loadouts` (`guid`, `id`, `tabId`, `name`, `talentString`, `active`) values ({}, {}, {}, '{}', '{}', {})",
             guid, plo->id, find, plo->name, loadout, true);
     }
 

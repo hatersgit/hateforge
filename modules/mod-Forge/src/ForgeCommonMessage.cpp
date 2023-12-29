@@ -548,10 +548,12 @@ void ForgeCommonMessage::SendLoadouts(Player* player)
         std::string delim = "";
         for (auto spec : found->second) {
             msg += delim + std::to_string(spec.first) + "$";
+            auto idDelim = "";
             for (auto loadout : spec.second) {
-                msg +=  std::to_string(loadout.first) + "^"
+                msg += idDelim + std::to_string(loadout.first) + "^"
                     + std::to_string(loadout.second->active) + "^"
                     + loadout.second->name + "^" + loadout.second->talentString;
+                idDelim = "~";
             }
             delim = "*";
         }

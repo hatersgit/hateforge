@@ -924,7 +924,7 @@ public:
     void ForgetTalents(Player* player, ForgeCharacterSpec* spec, CharacterPointType pointType) {
         std::list<ForgeTalentTab*> tabs;
         if (TryGetForgeTalentTabs(player, pointType, tabs))
-            for (auto* tab : tabs)
+            for (auto* tab : tabs) {
                 for (auto spell : tab->Talents) {
                     if (spell.second->nodeType == NodeType::CHOICE) {
                         for (auto choice : _choiceNodesRev)
@@ -945,6 +945,8 @@ public:
                     if (talent != spec->Talents[tab->Id].end())
                         talent->second->CurrentRank = 0;
                 }
+                spec->PointsSpent[tab->Id] = 0;
+            }
         ForgeCharacterPoint* fcp = GetSpecPoints(player, pointType, spec->Id);
         ForgeCharacterPoint* baseFcp = GetCommonCharacterPoint(player, pointType);
         fcp->Sum = baseFcp->Sum;

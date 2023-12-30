@@ -22,6 +22,9 @@ public:
         if (iam.message.empty()) // talentType|tabId?rank~rank~rank;*
             return;
 
+        if (iam.player->getLevel() < 10)
+            return;
+
         if (fc->TryGetCharacterActiveSpec(iam.player, spec)) {
             if (iam.message.size() > 3) {
                 _treeMetaData.clear();

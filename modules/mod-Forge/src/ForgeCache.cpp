@@ -948,8 +948,37 @@ public:
                 spec->PointsSpent[tab->Id] = 0;
             }
         ForgeCharacterPoint* fcp = GetSpecPoints(player, pointType, spec->Id);
-        auto pointTypeForLevel = 0;
-        fcp->Sum = pointTypeForLevel;
+
+        auto amount = 0;
+        auto level = player->getLevel();
+        if (level > 10)
+            level -= 9;
+
+        switch (pointType) {
+        case CharacterPointType::TALENT_TREE:
+            if (level > 1) {
+                int div = level / 2;
+               amount = div;
+            }
+            else
+                if (level % 2)
+                    amount = 1;
+            break;
+        case CharacterPointType::CLASS_TREE:
+            if (level > 1) {
+                int rem = level % 2;
+                int div = level / 2;
+                if (rem)
+                    div += 1;
+
+                amount = div;
+            }
+            break;
+        default:
+            break;
+        }
+
+        fcp->Sum = amount;
 
         UpdateCharPoints(player, fcp);
     }

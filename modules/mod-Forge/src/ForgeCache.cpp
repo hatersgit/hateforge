@@ -948,8 +948,8 @@ public:
                 spec->PointsSpent[tab->Id] = 0;
             }
         ForgeCharacterPoint* fcp = GetSpecPoints(player, pointType, spec->Id);
-        ForgeCharacterPoint* baseFcp = GetCommonCharacterPoint(player, pointType);
-        fcp->Sum = baseFcp->Sum;
+        auto pointTypeForLevel = 0;
+        fcp->Sum = pointTypeForLevel;
 
         UpdateCharPoints(player, fcp);
     }

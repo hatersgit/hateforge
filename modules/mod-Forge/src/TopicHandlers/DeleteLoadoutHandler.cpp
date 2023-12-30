@@ -18,15 +18,24 @@ public:
 
     void HandleMessage(ForgeAddonMessage& iam) override
     {
-        if(fc->isNumber(iam.message)) {
+        if (fc->isNumber(iam.message)) {
             uint32 id = static_cast<uint32>(std::stoul(iam.message));
-            auto found = fc->_playerTalentLoadouts.find(id);
-            if (found != fc->_playerTalentLoadouts.end()) {
-                fc->_playerTalentLoadouts.erase(id);
-                CharacterDatabase.Execute("delete from `forge_character_talent_loadouts` where guid = {} and id = {}", iam.player->GetGUID().GetCounter(), id);
-            }
+            ForgeCharacterSpec* spec;
+            if (fc->TryGetCharacterActiveSpec(iam.player, spec) && id > 1) {
+                auto player = fc->_playerTalentLoadouts.find(iam.player->GetGUID().GetCounter());
+                if (player != fc->_playerTalentLoadouts.end()) {
+                    auto specs = player->second.find(spec->CharacterSpecTabId);
+                    if (specs != player->second.end()) {
+                        auto found = specs->second.find(id);
+                        if (found != specs->second.end()) {
+                            specs->second.erase(id);
+                            CharacterDatabase.Execute("delete from `forge_character_talent_loadouts` where guid = {} and tabId = {} and id = {}", iam.player->GetGUID().GetCounter(), spec->CharacterSpecTabId, id);
+                        }
+                    }
+                }
 
-            cm->SendLoadouts(iam.player);
+                cm->SendLoadouts(iam.player);
+            }
         }
     }
 

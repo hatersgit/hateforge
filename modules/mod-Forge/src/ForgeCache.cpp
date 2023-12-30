@@ -948,6 +948,7 @@ public:
                 spec->PointsSpent[tab->Id] = 0;
             }
         ForgeCharacterPoint* fcp = GetSpecPoints(player, pointType, spec->Id);
+
         auto amount = 0;
         auto level = player->getLevel();
         if (level > 10)

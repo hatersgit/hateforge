@@ -101,7 +101,6 @@ public:
 
                 if (currentLevel >= 10)
                 {
-                    int amount = levelDiff;
                     if (oldlevel < 10 && levelDiff > 1)
                         levelDiff -= (9 - oldlevel);
 
@@ -116,9 +115,9 @@ public:
                     }
                     else {
                         if (currentLevel % 2)
-                            fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::TALENT_TREE, amount);
+                            fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::TALENT_TREE, 1);
                         else
-                            fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::CLASS_TREE, amount);
+                            fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::CLASS_TREE, 1);
                     }
 
                     cm->SendActiveSpecInfo(player);

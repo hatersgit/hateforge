@@ -65,9 +65,10 @@ public:
                     auto active = fc->_playerActiveTalentLoadouts[guid];
                     active->active = false;
                     fc->_playerActiveTalentLoadouts[guid] = active;
+                    fc->_playerTalentLoadouts[guid][specId][active->id] = active;
 
-                    CharacterDatabase.Execute("update `forge_character_talent_loadouts` set `active` = 0 where `guid` = {} and `tabId` = {} and `id` = {}",
-                        guid, active->tabId, active->id);
+                    CharacterDatabase.DirectExecute("update `forge_character_talent_loadouts` set `active` = 0 where `guid` = {} and `tabId` = {}",
+                        guid, active->tabId);
 
                     ForgeCache::PlayerLoadout* plo = new ForgeCache::PlayerLoadout();
                     plo->active = true;
@@ -79,7 +80,7 @@ public:
                     fc->_playerActiveTalentLoadouts[guid] = plo;
                     fc->_playerTalentLoadouts[guid][specId][id] = plo;
                 }
-                CharacterDatabase.Execute("insert into `forge_character_talent_loadouts` (`guid`, `id`, `tabId`, `name`, `talentString`, `active`) values ({}, {}, {}, {}, {}, {}) on duplicate key update `name` = {}, `talentString` = {}, `active` = {}",
+                CharacterDatabase.DirectExecute("insert into `forge_character_talent_loadouts` (`guid`, `id`, `tabId`, `name`, `talentString`, `active`) values ({}, {}, {}, '{}', '{}', {}) on duplicate key update `name` = '{}', `talentString` = '{}', `active` = {}",
                     guid, id, specId, name, talentString, true, name, talentString, true);
             }
         }

@@ -18,10 +18,10 @@ public:
 
     void HandleMessage(ForgeAddonMessage& iam) override
     {
-        if(fc->isNumber(iam.message)) {
+        if (fc->isNumber(iam.message)) {
             uint32 id = static_cast<uint32>(std::stoul(iam.message));
             ForgeCharacterSpec* spec;
-            if (fc->TryGetCharacterActiveSpec(iam.player, spec)) {
+            if (fc->TryGetCharacterActiveSpec(iam.player, spec) && id > 1) {
                 auto player = fc->_playerTalentLoadouts.find(iam.player->GetGUID().GetCounter());
                 if (player != fc->_playerTalentLoadouts.end()) {
                     auto specs = player->second.find(spec->CharacterSpecTabId);

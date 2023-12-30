@@ -65,9 +65,10 @@ public:
                     auto active = fc->_playerActiveTalentLoadouts[guid];
                     active->active = false;
                     fc->_playerActiveTalentLoadouts[guid] = active;
+                    fc->_playerTalentLoadouts[guid][specId][active->id] = active;
 
-                    CharacterDatabase.Execute("update `forge_character_talent_loadouts` set `active` = 0 where `guid` = {} and `tabId` = {} and `id` = {}",
-                        guid, active->tabId, active->id);
+                    CharacterDatabase.Execute("update `forge_character_talent_loadouts` set `active` = 0 where `guid` = {} and `tabId` = {}",
+                        guid, active->tabId);
 
                     ForgeCache::PlayerLoadout* plo = new ForgeCache::PlayerLoadout();
                     plo->active = true;

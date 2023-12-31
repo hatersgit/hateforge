@@ -951,7 +951,7 @@ public:
 
         auto amount = 0;
         auto level = player->getLevel();
-        if (level > 10)
+        if (level >= 10)
             level -= 9;
 
         switch (pointType) {

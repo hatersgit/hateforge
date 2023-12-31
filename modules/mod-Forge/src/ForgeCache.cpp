@@ -981,6 +981,8 @@ public:
         fcp->Sum = amount;
 
         UpdateCharPoints(player, fcp);
+        if (pointType == CharacterPointType::TALENT_TREE)
+            return ForgetTalents(player, spec, CharacterPointType::CLASS_TREE);
     }
 
     std::unordered_map<uint32 /*tabid*/, std::unordered_map<uint8 /*node*/, uint32 /*spell*/>> _cacheSpecNodeToSpell;

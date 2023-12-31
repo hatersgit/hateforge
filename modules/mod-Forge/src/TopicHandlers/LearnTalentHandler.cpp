@@ -75,8 +75,7 @@ public:
                                 _simplifiedTreeMap[tabId][nodeLoc->row][nodeLoc->col] = fc->base64_char.find(ch)-1;
                             }
 
-                            ForgeCharacterPoint* points = fc->GetSpecPoints(iam.player, foundType, spec->Id);
-                            if (VerifyFlatTable(iam.player, points, specTab)) {
+                            if (VerifyFlatTable(iam.player, specTab)) {
                                 fc->ForgetTalents(iam.player, spec, foundType);
                                 std::list<uint32> tabs = {};
 
@@ -91,6 +90,7 @@ public:
                                     if (ct->CurrentRank > 0) {
                                         ForgeTalentTab* ThisTab;
                                         if (fc->TryGetTalentTab(iam.player, ct->TabId, ThisTab)) {
+                                            ForgeCharacterPoint* points = fc->GetSpecPoints(iam.player, ThisTab->TalentType, spec->Id);
                                             auto ft = ThisTab->Talents[ct->SpellId];
                                             spec->PointsSpent[ct->TabId] += ft->RankCost * ct->CurrentRank;
                                             points->Sum -= ft->RankCost;
@@ -99,7 +99,7 @@ public:
                                                 iam.player->removeSpell(s, SPEC_MASK_ALL, false);
 
                                             auto rankedSpell = ft->Ranks[ct->CurrentRank];
-                                            if (!iam.player->HasSpell(ct->SpellId))
+                                            if (!iam.player->HasSpell(ct->SpellId)) {
                                                 if (choiceNode) {
                                                     iam.player->learnSpell(ct->SpellId);
 
@@ -109,12 +109,14 @@ public:
                                                 else {
                                                     iam.player->learnSpell(rankedSpell);
                                                 }
+
+                                                fc->UpdateCharPoints(iam.player, points);
+                                            }
                                         }
                                     }
                                 }
 
                                 iam.player->SetActiveSpec(specId);
-                                fc->UpdateCharPoints(iam.player, points);
                                 fc->UpdateCharacterSpec(iam.player, spec);
 
                                 cm->SendActiveSpecInfo(iam.player);
@@ -149,7 +151,7 @@ public:
         }
     }
 
-    bool VerifyFlatTable(Player* player, ForgeCharacterPoint* points, ForgeTalentTab* tab) {
+    bool VerifyFlatTable(Player* player, ForgeTalentTab* tab) {
         toLearn.clear();
         unlocked.clear();
         if (tab->ClassMask == player->getClassMask()) {
@@ -157,6 +159,7 @@ public:
                 for (auto tab : _simplifiedTreeMap) {
                     ForgeTalentTab* specTab;
                     if (fc->TryGetTalentTab(player, tab.first, specTab)) {
+                        ForgeCharacterPoint* points = fc->GetSpecPoints(player, specTab->TalentType, spec->Id);
                         for (auto row : tab.second) {
                             for (auto col : row.second) {
                                 if (auto metaData = _treeMetaData[tab.first]) {

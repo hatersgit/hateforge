@@ -4854,7 +4854,7 @@ void AuraEffect::HandleAuraModForgeStat(AuraApplication const* aurApp, uint8 mod
             if (!GetMiscValueB())
                 target->HandleStatModifier(UnitMods(UNIT_MOD_FORGE_STAT_START + i), TOTAL_VALUE, float(GetAmount()), apply);
             else
-                target->HandleStatModifier(UnitMods(UNIT_MOD_FORGE_STAT_START + i), TOTAL_PCT, float(GetAmount()), apply);
+                target->HandleStatModifier(UnitMods(UNIT_MOD_FORGE_STAT_START + i), BASE_PCT, float(GetAmount()), apply);
         }
     }
 }

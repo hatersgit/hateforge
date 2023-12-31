@@ -295,6 +295,7 @@ enum UnitMods
     UNIT_MOD_RESISTANCE_END = UNIT_MOD_RESISTANCE_ARCANE + 1,
     UNIT_MOD_POWER_START = UNIT_MOD_MANA,
     UNIT_MOD_POWER_END = UNIT_MOD_RUNIC_POWER + 1,
+    UNIT_MOD_FORGE_STAT_START = UNIT_MOD_THORNS,
 };
 
 enum BaseModGroup
@@ -722,7 +723,8 @@ enum MeleeHitOutcome
 
 enum ForgeStats
 {
-    FORGE_STAT_THORNS
+    FORGE_STAT_THORNS,
+    FORGE_STAT_END
 };
 
 enum ExtraAttackSpells

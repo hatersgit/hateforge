@@ -1750,6 +1750,10 @@ void World::SetInitialWorldSettings()
     LOG_INFO("server.loading", "Loading Items...");                         // must be after LoadRandomEnchantmentsTable and LoadPageTexts
     sObjectMgr->LoadItemTemplates();
 
+    // hater: custom items
+    LOG_INFO("server.loading", "Loading Custom Items...");
+    sObjectMgr->LoadCustomItemTemplates();
+
     LOG_INFO("server.loading", "Loading Item Set Names...");                // must be after LoadItemPrototypes
     sObjectMgr->LoadItemSetNames();
 

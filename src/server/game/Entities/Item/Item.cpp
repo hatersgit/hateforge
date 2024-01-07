@@ -18,6 +18,7 @@
 #include "Item.h"
 #include "Common.h"
 #include "ConditionMgr.h"
+#include "CustomItemTemplate.h"
 #include "DatabaseEnv.h"
 #include "GameTime.h"
 #include "ItemEnchantmentMgr.h"
@@ -29,6 +30,8 @@
 #include "StringConvert.h"
 #include "Tokenize.h"
 #include "WorldPacket.h"
+
+#include <random>
 
 #include "Transmogrification.h"
 
@@ -286,17 +289,44 @@ bool Item::Create(ObjectGuid::LowType guidlow, uint32 itemid, Player const* owne
 {
     Object::_Create(guidlow, 0, HighGuid::Item);
 
-    SetEntry(itemid);
     SetObjectScale(1.0f);
 
     SetGuidValue(ITEM_FIELD_OWNER, owner ? owner->GetGUID() : ObjectGuid::Empty);
     SetGuidValue(ITEM_FIELD_CONTAINED, owner ? owner->GetGUID() : ObjectGuid::Empty);
 
-    ItemTemplate const* itemProto = sObjectMgr->GetItemTemplate(itemid);
+    // Do item creation here
+    auto itemProto = sObjectMgr->GetItemTemplate(itemid);
     if (!itemProto)
         return false;
 
-    SetUInt32Value(ITEM_FIELD_STACK_COUNT, 1);
+    if (itemProto->Quality >= ITEM_QUALITY_UNCOMMON
+        && (itemProto->Class == ITEM_CLASS_ARMOR || itemProto->Class == ITEM_CLASS_WEAPON)) {
+        itemProto = sObjectMgr->CreateItemTemplate(guidlow, itemid);
+        CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
+
+        SetEntry(guidlow);
+        std::random_device dev;
+        std::mt19937 rng(dev());
+        std::uniform_int_distribution<std::mt19937::result_type> dist6(1, 6);
+
+        custom->SetName("Completely new item name :)");
+        custom->SetStatsCount(0);
+        custom->SetStatType(0, 0);
+        custom->SetStatValue(0, 0);
+        custom->SetSpellID(0, 0);
+        custom->SetSpellTrigger(0, 0);
+
+        custom->SetArmor(dist6(rng));
+
+        custom->Save();
+        owner->SendItemQueryPacket(custom);
+        itemProto = custom->_GetInfo();
+    }
+    else {
+        SetEntry(itemid);
+    }
+
+    SetUInt32Value(ITEM_FIELD_STACK_COUNT, itemProto->GetMaxStackSize());
     SetUInt32Value(ITEM_FIELD_MAXDURABILITY, itemProto->MaxDurability);
     SetUInt32Value(ITEM_FIELD_DURABILITY, itemProto->MaxDurability);
 
@@ -306,6 +336,7 @@ bool Item::Create(ObjectGuid::LowType guidlow, uint32 itemid, Player const* owne
     SetUInt32Value(ITEM_FIELD_DURATION, itemProto->Duration);
     SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, 0);
     sScriptMgr->OnItemCreate(this, itemProto, owner);
+
     return true;
 }
 

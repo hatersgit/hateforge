@@ -721,6 +721,17 @@ struct ItemTemplate
     uint32 MaxMoneyLoot;
     uint32 FlagsCu;
     WorldPacket queryData;                                  // pussywizard
+    std::array<WorldPacket, TOTAL_LOCALES> QueryData;
+    int32 _totalAP;
+
+    int32 GetTotalAPBonus() const { return _totalAP; }
+
+    WorldPacket* GetQueryData();
+    //TSItemEvents* events = nullptr;
+    //TSEntity m_tsEntity;
+    bool m_isDirty = false;
+    void _LoadTotalAP();
+
 
     // helpers
     [[nodiscard]] bool HasSignature() const
@@ -784,7 +795,7 @@ struct ItemTemplate
         return 0;
     }
 
-    [[nodiscard]] float GetItemLevelIncludingQuality(uint8 pLevel) const
+    [[nodiscard]] float GetItemLevelIncludingQuality() const
     {
         auto itemLevel = (float)ItemLevel;
         switch (Quality)
@@ -792,21 +803,19 @@ struct ItemTemplate
             case ITEM_QUALITY_POOR:
             case ITEM_QUALITY_NORMAL:
             case ITEM_QUALITY_UNCOMMON:
+            case ITEM_QUALITY_ARTIFACT:
+            case ITEM_QUALITY_HEIRLOOM:
                 itemLevel -= 26.0f;
                 break;
             case ITEM_QUALITY_RARE:
                 itemLevel -= 13.0f;
                 break;
-            case ITEM_QUALITY_HEIRLOOM:
-                itemLevel = pLevel * 2.33f;
-                break;
-            case ITEM_QUALITY_ARTIFACT:
             case ITEM_QUALITY_EPIC:
             case ITEM_QUALITY_LEGENDARY:
             default:
                 break;
         }
-        return std::max<float>(0.f, itemLevel);
+        return std::max<float>(1.f, itemLevel);
     }
 
     [[nodiscard]] uint32 GetSkill() const

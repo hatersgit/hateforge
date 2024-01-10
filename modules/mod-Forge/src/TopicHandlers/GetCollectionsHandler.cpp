@@ -52,11 +52,11 @@ private:
 
         for (auto entry : player->transmogrification_appearances[slotId]) {
             if (slotId < EQUIPMENT_SLOT_END) {
-                auto source = sObjectMgr->GetItemTemplate(entry);
-                if (source->AllowableClass & player->getClassMask() && source->AllowableRace & player->getRaceMask())
-                    msg = msg + std::to_string(entry)
-                    + "^" + std::to_string(source->Class)
-                    + "^" + std::to_string(source->SubClass) + "*";
+                if(auto source = sObjectMgr->GetItemTemplate(entry))
+                    if (source->AllowableClass & player->getClassMask() && source->AllowableRace & player->getRaceMask())
+                        msg = msg + std::to_string(entry)
+                        + "^" + std::to_string(source->Class)
+                        + "^" + std::to_string(source->SubClass) + "*";
             }
             else {
                 // hater: for now skip enchants, still saved but will come back to this

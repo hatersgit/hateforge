@@ -882,6 +882,28 @@ public:
         }
     }
 
+    void LoadLoadoutActions(Player* player)
+    {
+        ForgeCharacterSpec* spec;
+        if (TryGetCharacterActiveSpec(player, spec)) {
+            // SELECT button, action, type FROM forge_character_action WHERE guid = ? AND spec = ? and loadout = ? ORDER BY button;
+            CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_ACTIONS_SPEC_LOADOUT);
+            stmt->SetData(0, player->GetGUID().GetCounter());
+            stmt->SetData(1, spec->CharacterSpecTabId);
+            stmt->SetData(2, _playerActiveTalentLoadouts[player->GetGUID().GetCounter()]->id);
+
+            WorldSession* mySess = player->GetSession();
+            mySess->GetQueryProcessor().AddCallback(CharacterDatabase.AsyncQuery(stmt)
+                .WithPreparedCallback([mySess](PreparedQueryResult result)
+                    {
+                        // safe callback, we can't pass this pointer directly
+                        // in case player logs out before db response (player would be deleted in that case)
+                        if (Player* thisPlayer = mySess->GetPlayer())
+                            thisPlayer->LoadActions(result);
+                    }));
+        }
+    }
+
     std::vector<uint32> RACE_LIST;
     std::vector<uint32> CLASS_LIST;
     std::vector<CharacterPointType> TALENT_POINT_TYPES;
@@ -1747,10 +1769,12 @@ private:
             talent->TabId = talentFields[3].Get<uint32>();
             talent->CurrentRank = talentFields[4].Get<uint8>();
 
+            auto invalid = false;
+
             if (specId != ACCOUNT_WIDE_KEY)
             {
                 ForgeTalent* ft = TalentTabs[talent->TabId]->Talents[talent->SpellId];
-                ForgeCharacterSpec* spec = CharacterSpecs[characterGuid][specId];
+                ForgeCharacterSpec * spec = CharacterSpecs[characterGuid][specId];
                 talent->type = ft->nodeType;
                 spec->Talents[talent->TabId][talent->SpellId] = talent;
             }
@@ -1766,6 +1790,7 @@ private:
                         spec.second->Talents[talent->TabId][talent->SpellId] = talent;
                     }
             }
+
         } while (talentsQuery->NextRow());
     }
 

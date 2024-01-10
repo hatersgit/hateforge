@@ -65,8 +65,25 @@ public:
 
         LearnSpellsForLevel(player);
         fc->ApplyAccountBoundTalents(player);
-
         fc->UnlearnFlaggedSpells(player);
+
+        fc->LoadLoadoutActions(player);
+    }
+
+    void OnLogout(Player* player) override
+    {
+        if (!player)
+            return;
+
+        ForgeCharacterSpec* spec;
+        if (fc->TryGetCharacterActiveSpec(player, spec)) {
+            auto active = fc->_playerActiveTalentLoadouts.find(player->GetGUID().GetCounter());
+            if (active != fc->_playerActiveTalentLoadouts.end()) {
+                CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+                player->SaveLoadoutActions(trans, spec->CharacterSpecTabId, active->second->id);
+                CharacterDatabase.CommitTransaction(trans);
+            }
+        }
     }
 
     void OnDelete(ObjectGuid guid, uint32 accountId) override

@@ -2702,6 +2702,9 @@ public:
         specActivationAllowed = allow;
     }
 
+    // hater: loadout actions
+    void SaveLoadoutActions(CharacterDatabaseTransaction trans, uint32 specId, uint8 loadoutId);
+
  protected:
     // Gamemaster whisper whitelist
     WhisperListContainer WhisperList;

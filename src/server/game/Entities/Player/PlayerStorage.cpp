@@ -7251,6 +7251,8 @@ void Player::SaveGoldToDB(CharacterDatabaseTransaction trans)
 
 void Player::_SaveActions(CharacterDatabaseTransaction trans)
 {
+    // hater: skip this and call custom from fc on logout
+    /*
     CharacterDatabasePreparedStatement* stmt = nullptr;
 
     for (ActionButtonList::iterator itr = m_actionButtons.begin(); itr != m_actionButtons.end();)
@@ -7294,7 +7296,30 @@ void Player::_SaveActions(CharacterDatabaseTransaction trans)
                 ++itr;
                 break;
         }
+    }*/
+}
+
+void Player::SaveLoadoutActions(CharacterDatabaseTransaction trans, uint32 specId, uint8 loadoutId)
+{
+
+    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_ACTION_LOADOUT);
+    stmt->SetData(0, GetGUID().GetCounter());
+    stmt->SetData(1, specId);
+    stmt->SetData(2, loadoutId);
+    trans->Append(stmt);
+
+    for (ActionButtonList::iterator itr = m_actionButtons.begin(); itr != m_actionButtons.end();) {
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_ACTION_LOADOUT);
+        stmt->SetData(0, GetGUID().GetCounter());
+        stmt->SetData(1, specId);
+        stmt->SetData(2, loadoutId);
+        stmt->SetData(3, itr->first);
+        stmt->SetData(4, itr->second.GetAction());
+        stmt->SetData(5, uint8(itr->second.GetType()));
+
+        trans->Append(stmt);
     }
+
 }
 
 void Player::_SaveAuras(CharacterDatabaseTransaction trans, bool logout)

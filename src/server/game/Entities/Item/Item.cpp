@@ -31,8 +31,6 @@
 #include "Tokenize.h"
 #include "WorldPacket.h"
 
-#include <random>
-
 #include "Transmogrification.h"
 
 void AddItemsSetItem(Player* player, Item* item)
@@ -303,21 +301,8 @@ bool Item::Create(ObjectGuid::LowType guidlow, uint32 itemid, Player const* owne
         && (itemProto->Class == ITEM_CLASS_ARMOR || itemProto->Class == ITEM_CLASS_WEAPON)) {
         itemProto = sObjectMgr->CreateItemTemplate(guidlow, itemid);
         CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
-
         SetEntry(guidlow);
-        std::random_device dev;
-        std::mt19937 rng(dev());
-        std::uniform_int_distribution<std::mt19937::result_type> dist6(1, 6);
-
-        custom->SetName("Completely new item name :)");
-        custom->SetStatsCount(0);
-        custom->SetStatType(0, 0);
-        custom->SetStatValue(0, 0);
-        custom->SetSpellID(0, 0);
-        custom->SetSpellTrigger(0, 0);
-
-        custom->SetArmor(dist6(rng));
-
+        custom->GenerateItem();
         custom->Save();
         owner->SendItemQueryPacket(custom);
         itemProto = custom->_GetInfo();

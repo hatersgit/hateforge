@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `forge_character_action` (
+CREATE TABLE IF NOT EXISTS `acore_characters`.`forge_character_action` (
   `guid` int unsigned NOT NULL DEFAULT '0',
   `spec` tinyint unsigned NOT NULL DEFAULT '0',
   `loadout` int unsigned NOT NULL DEFAULT '1',

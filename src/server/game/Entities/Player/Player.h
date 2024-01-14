@@ -22,6 +22,7 @@
 #include "Battleground.h"
 #include "CharacterCache.h"
 #include "CinematicMgr.h"
+#include "CustomItemTemplate.h"
 #include "DBCStores.h"
 #include "DatabaseEnvFwd.h"
 #include "EnumFlag.h"
@@ -1866,6 +1867,9 @@ public:
     void SendActionButtons(uint32 state) const;
     bool IsActionButtonDataValid(uint8 button, uint32 action, uint8 type);
 
+    // hater: custom items
+    void SendItemQueryPacket(CustomItemTemplate* curItem) const;
+
     PvPInfo pvpInfo;
     void UpdatePvPState();
     void UpdateFFAPvPState(bool reset = true);
@@ -2697,6 +2701,9 @@ public:
     void SetSpecActivationAllowed(bool allow) {
         specActivationAllowed = allow;
     }
+
+    // hater: loadout actions
+    void SaveLoadoutActions(CharacterDatabaseTransaction trans, uint32 specId, uint8 loadoutId);
 
  protected:
     // Gamemaster whisper whitelist

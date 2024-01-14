@@ -882,6 +882,28 @@ public:
         }
     }
 
+    void LoadLoadoutActions(Player* player)
+    {
+        ForgeCharacterSpec* spec;
+        if (TryGetCharacterActiveSpec(player, spec)) {
+            // SELECT button, action, type FROM forge_character_action WHERE guid = ? AND spec = ? and loadout = ? ORDER BY button;
+            CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_ACTIONS_SPEC_LOADOUT);
+            stmt->SetData(0, player->GetGUID().GetCounter());
+            stmt->SetData(1, spec->CharacterSpecTabId);
+            stmt->SetData(2, _playerActiveTalentLoadouts[player->GetGUID().GetCounter()]->id);
+
+            WorldSession* mySess = player->GetSession();
+            mySess->GetQueryProcessor().AddCallback(CharacterDatabase.AsyncQuery(stmt)
+                .WithPreparedCallback([mySess](PreparedQueryResult result)
+                    {
+                        // safe callback, we can't pass this pointer directly
+                        // in case player logs out before db response (player would be deleted in that case)
+                        if (Player* thisPlayer = mySess->GetPlayer())
+                            thisPlayer->LoadActions(result);
+                    }));
+        }
+    }
+
     std::vector<uint32> RACE_LIST;
     std::vector<uint32> CLASS_LIST;
     std::vector<CharacterPointType> TALENT_POINT_TYPES;
@@ -1038,9 +1060,39 @@ public:
                 _playerTalentLoadouts[guid][tab->Id][plo->id] = plo;
                 _playerActiveTalentLoadouts[guid] = plo;
 
-                CharacterDatabase.Execute("insert into `forge_character_talent_loadouts` (`guid`, `id`, `tabId`, `name`, `talentString`, `active`) values ({}, {}, {}, '{}', '{}', {})",
+                CharacterDatabase.Execute("insert into `forge_character_talent_loadouts` (`guid`, `id`, `talentTabId`, `name`, `talentString`, `active`) values ({}, {}, {}, '{}', '{}', {})",
                     guid, plo->id, tab->Id, plo->name, loadout, true);
             }
+        }
+    }
+
+    void EchosDefaultLoadout(Player* player)
+    {
+        std::list<ForgeTalentTab*> tabs;
+        std::string loadout = "AD";
+        if (TryGetForgeTalentTabs(player, CharacterPointType::TALENT_TREE, tabs)) {
+            loadout += base64_char.substr(player->getClass(), 1);
+            for (auto tab : tabs) {
+                auto specMap = _cacheSpecNodeToSpell[tab->Id];
+                for (int i = 1; i <= specMap.size(); i++) {
+                    loadout += base64_char.substr(1, 1);
+                }
+            }
+            
+            auto guid = player->GetGUID().GetCounter();
+
+            PlayerLoadout* plo = new PlayerLoadout();
+            plo->active = true;
+            plo->id = 1;
+            plo->name = "Default";
+            plo->tabId = 1;
+            plo->talentString = loadout;
+
+            _playerTalentLoadouts[guid][1][plo->id] = plo;
+            _playerActiveTalentLoadouts[guid] = plo;
+
+            CharacterDatabase.Execute("insert into `forge_character_talent_loadouts` (`guid`, `id`, `talentTabId`, `name`, `talentString`, `active`) values ({}, {}, {}, '{}', '{}', {})",
+                guid, plo->id, 1, plo->name, loadout, true);
         }
     }
 
@@ -1747,10 +1799,12 @@ private:
             talent->TabId = talentFields[3].Get<uint32>();
             talent->CurrentRank = talentFields[4].Get<uint8>();
 
+            auto invalid = false;
+
             if (specId != ACCOUNT_WIDE_KEY)
             {
                 ForgeTalent* ft = TalentTabs[talent->TabId]->Talents[talent->SpellId];
-                ForgeCharacterSpec* spec = CharacterSpecs[characterGuid][specId];
+                ForgeCharacterSpec * spec = CharacterSpecs[characterGuid][specId];
                 talent->type = ft->nodeType;
                 spec->Talents[talent->TabId][talent->SpellId] = talent;
             }
@@ -1766,6 +1820,7 @@ private:
                         spec.second->Talents[talent->TabId][talent->SpellId] = talent;
                     }
             }
+
         } while (talentsQuery->NextRow());
     }
 

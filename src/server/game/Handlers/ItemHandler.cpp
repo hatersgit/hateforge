@@ -359,6 +359,34 @@ bool ItemTemplate::HasStat(ItemModType stat) const
     return false;
 }
 
+WorldPacket* ItemTemplate::GetQueryData()
+{
+    if (m_isDirty)
+    {
+        InitializeQueryData();
+        m_isDirty = false;
+    }
+    return &queryData;
+}
+
+void ItemTemplate::_LoadTotalAP()
+{
+    int32 totalAP = 0;
+    for (uint32 i = 0; i < StatsCount; ++i)
+        if (ItemStat[i].ItemStatType == ITEM_MOD_ATTACK_POWER)
+            totalAP += ItemStat[i].ItemStatValue;
+
+    // some items can have equip spells with +AP
+    for (uint32 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+        if (Spells[i].SpellId > 0 && Spells[i].SpellTrigger == ITEM_SPELLTRIGGER_ON_EQUIP)
+            if (auto spellInfo = sSpellMgr->GetSpellInfo(Spells[i].SpellId))
+                for (auto effect : spellInfo->Effects)
+                    if (effect.IsAura(SPELL_AURA_MOD_ATTACK_POWER))
+                        totalAP += effect.CalcValue();
+
+    _totalAP = totalAP;
+}
+
 bool ItemTemplate::HasSpellPowerStat() const
 {
     bool invalid = false;
@@ -543,10 +571,10 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recvData)
 
     LOG_DEBUG("network.opcode", "STORAGE: Item Query = {}", item);
 
-    ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(item);
+    ItemTemplate* pProto = sObjectMgr->GetItemTemplateMutable(item);
     if (pProto)
     {
-        std::string Name = pProto->Name1;
+        /*std::string Name = pProto->Name1;
         std::string Description = pProto->Description;
 
         int loc_idx = GetSessionDbLocaleIndex();
@@ -684,6 +712,8 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recvData)
         queryData << pProto->ItemLimitCategory;                  // WotLK, ItemLimitCategory
         queryData << pProto->HolidayId;                          // Holiday.dbc?
         SendPacket(&queryData);
+        */
+        SendPacket(pProto->GetQueryData());
     }
     else
     {

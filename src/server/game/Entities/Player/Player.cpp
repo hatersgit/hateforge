@@ -5229,7 +5229,7 @@ uint32 Player::GetShieldBlockValue() const
 
 float Player::GetMeleeCritFromAgility()
 {
-    uint8 level = GetLevel();
+    uint8 level = STATIC_STAT_LEVEL;
     uint32 pclass = getClass();
 
     if (level > GT_MAX_LEVEL)
@@ -5277,7 +5277,7 @@ void Player::GetDodgeFromAgility(float& diminishing, float& nondiminishing)
         2.00f / 1.15f   // Druid
     };
 
-    uint8 level = GetLevel();
+    uint8 level = STATIC_STAT_LEVEL;
     uint32 pclass = getClass();
 
     if (level > GT_MAX_LEVEL)
@@ -5299,7 +5299,7 @@ void Player::GetDodgeFromAgility(float& diminishing, float& nondiminishing)
 
 float Player::GetSpellCritFromIntellect()
 {
-    uint8 level = GetLevel();
+    uint8 level = STATIC_STAT_LEVEL;
     uint32 pclass = getClass();
 
     if (level > GT_MAX_LEVEL)
@@ -5316,7 +5316,7 @@ float Player::GetSpellCritFromIntellect()
 
 float Player::GetRatingMultiplier(CombatRating cr) const
 {
-    uint8 level = GetLevel();
+    uint8 level = STATIC_STAT_LEVEL;
 
     if (level > GT_MAX_LEVEL)
         level = GT_MAX_LEVEL;
@@ -16335,6 +16335,16 @@ void Player::_LoadRandomBGStatus(PreparedQueryResult result)
         m_IsBGRandomWinner = true;
 }
 
+void Player::SendItemQueryPacket(CustomItemTemplate* curItem) const
+{
+    if (curItem)
+    {
+        curItem->_GetInfo()->InitializeQueryData();
+        WorldPacket* response = curItem->_GetInfo()->GetQueryData();
+        GetSession()->SendPacket(response);
+    }
+}
+
 float Player::GetAverageItemLevel()
 {
     float sum = 0;
@@ -16348,7 +16358,7 @@ float Player::GetAverageItemLevel()
             continue;
 
         if (m_items[i] && m_items[i]->GetTemplate())
-            sum += m_items[i]->GetTemplate()->GetItemLevelIncludingQuality(level);
+            sum += m_items[i]->GetTemplate()->GetItemLevelIncludingQuality();
 
         ++count;
     }

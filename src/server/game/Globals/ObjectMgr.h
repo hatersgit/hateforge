@@ -1098,6 +1098,12 @@ public:
     void LoadGameObjectLocales();
     void LoadGameobjects();
     void LoadItemTemplates();
+
+    // hater: custom items
+    void LoadCustomItemTemplates();
+    ItemTemplate* GetItemTemplateMutable(uint32 entry);
+    ItemTemplate* CreateItemTemplate(uint32 entry, uint32 copyID);
+
     void LoadItemLocales();
     void LoadItemSetNames();
     void LoadItemSetNameLocales();

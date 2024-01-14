@@ -55,7 +55,12 @@ public:
         fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::RACIAL_TREE, fc->GetConfig("InitialPoints", 8));
         fc->UpdateCharacters(player->GetSession()->GetAccountId(), player);
 
-        fc->AddDefaultLoadout(player);
+        if (sConfigMgr->GetBoolDefault("echos", false)) {
+            fc->EchosDefaultLoadout(player);
+        }
+        else {
+            fc->AddDefaultLoadout(player);
+        }
     }
 
     void OnLogin(Player* player) override

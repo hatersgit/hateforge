@@ -62,87 +62,88 @@ std::string ForgeCommonMessage::BuildTree(Player* player, CharacterPointType poi
 
         for (auto& talentKvp : tab->Talents)
         {
-            std::string delimiter = "*";
+            if (talentKvp.second) {
+                std::string delimiter = "*";
 
-            if (i == 0)
-                delimiter = "";
+                if (i == 0)
+                    delimiter = "";
 
-            msg = msg + delimiter + std::to_string(tab->Id) + "&" +
-                std::to_string(talentKvp.second->SpellId) + "&" +
-                std::to_string(talentKvp.second->ColumnIndex) + "&" +
-                std::to_string(talentKvp.second->RowIndex) + "&" +
-                std::to_string(talentKvp.second->RankCost) + "&" +
-                std::to_string(talentKvp.second->RequiredLevel) + "&" +
-                std::to_string(talentKvp.second->TabPointReq) + "&" +
-                std::to_string(talentKvp.second->NumberOfRanks) + "&" +
-                std::to_string((int)talentKvp.second->PreReqType) + "&";
+                msg = msg + delimiter + std::to_string(tab->Id) + "&" +
+                    std::to_string(talentKvp.second->SpellId) + "&" +
+                    std::to_string(talentKvp.second->ColumnIndex) + "&" +
+                    std::to_string(talentKvp.second->RowIndex) + "&" +
+                    std::to_string(talentKvp.second->RankCost) + "&" +
+                    std::to_string(talentKvp.second->RequiredLevel) + "&" +
+                    std::to_string(talentKvp.second->TabPointReq) + "&" +
+                    std::to_string(talentKvp.second->NumberOfRanks) + "&" +
+                    std::to_string((int)talentKvp.second->PreReqType) + "&";
 
-            int j = 0;
+                int j = 0;
 
-            for (auto& preReq : talentKvp.second->Prereqs)
-            {
-                std::string reqDel = "@";
+                for (auto& preReq : talentKvp.second->Prereqs)
+                {
+                    std::string reqDel = "@";
 
-                if (j == 0)
-                    reqDel = "";
+                    if (j == 0)
+                        reqDel = "";
 
-                msg = msg + reqDel + std::to_string(preReq->Talent) + "$" +
-                    std::to_string(preReq->TalentTabId) + "$" +
-                    std::to_string(preReq->RequiredRank);
+                    msg = msg + reqDel + std::to_string(preReq->Talent) + "$" +
+                        std::to_string(preReq->TalentTabId) + "$" +
+                        std::to_string(preReq->RequiredRank);
 
-                j++;
+                    j++;
+                }
+
+                msg = msg + "&"; // delimit the field
+
+                j = 0;
+
+                for (auto& preReq : talentKvp.second->Ranks)
+                {
+                    std::string reqDel = "%";
+
+                    if (j == 0)
+                        reqDel = "";
+
+                    msg = msg + reqDel + std::to_string(preReq.first) + "~" +
+                        std::to_string(preReq.second);
+
+                    j++;
+                }
+
+                msg = msg + "&"; // delimit the field
+
+                j = 0;
+
+                for (auto& preReq : talentKvp.second->UnlearnSpells)
+                {
+                    std::string reqDel = "`";
+
+                    if (j == 0)
+                        reqDel = "";
+
+                    msg = msg + reqDel + std::to_string(preReq);
+
+                    j++;
+                }
+
+                msg = msg + "&" + std::to_string(talentKvp.second->nodeType) + "&"
+                    + std::to_string(talentKvp.second->nodeIndex) + "&";
+
+                for (auto& choice : talentKvp.second->Choices)
+                {
+                    std::string choiceDel = "!";
+
+                    if (j == 0)
+                        choiceDel = "";
+
+                    msg = msg + choiceDel + std::to_string(choice.second->spellId);
+                    j++;
+                }
+                i++;
             }
-
-            msg = msg + "&"; // delimit the field
-
-            j = 0;
-
-            for (auto& preReq : talentKvp.second->Ranks)
-            {
-                std::string reqDel = "%";
-
-                if (j == 0)
-                    reqDel = "";
-
-                msg = msg + reqDel + std::to_string(preReq.first) + "~" +
-                    std::to_string(preReq.second);
-
-                j++;
-            }
-
-            msg = msg + "&"; // delimit the field
-
-            j = 0;
-
-            for (auto& preReq : talentKvp.second->UnlearnSpells)
-            {
-                std::string reqDel = "`";
-
-                if (j == 0)
-                    reqDel = "";
-
-                msg = msg + reqDel + std::to_string(preReq);
-
-                j++;
-            }
-
-            msg = msg + "&" + std::to_string(talentKvp.second->nodeType) + "&"
-                + std::to_string(talentKvp.second->nodeIndex) + "&";
-
-            for (auto& choice : talentKvp.second->Choices)
-            {
-                std::string choiceDel = "!";
-
-                if (j == 0)
-                    choiceDel = "";
-
-                msg = msg + choiceDel + std::to_string(choice.second->spellId);
-                j++;
-            }
-            i++;
         }
-
-            player->SendForgeUIMsg(ForgeTopic::TALENT_TREE_LAYOUT, msg);
+        player->SendForgeUIMsg(ForgeTopic::TALENT_TREE_LAYOUT, msg);
     }
 
     return "";
@@ -329,23 +330,36 @@ void ForgeCommonMessage::SendTalents(Player* player)
             std::string clientMsg = base64_char.substr(tpt+1, 1)+base64_char.substr(cSpec, 1)+base64_char.substr(pClass, 1);
             switch (tpt) {
             case CharacterPointType::TALENT_TREE: {
-                uint32 i = 0;
+                if (!sConfigMgr->GetBoolDefault("echos", false)) {
+                    uint32 i = 0;
+                    auto classTree = spec->Talents[fc->_cacheClassNodeToClassTree[player->getClass()]];
+                    auto classMap = fc->_cacheClassNodeToSpell[pClass];
 
-                auto classTree = spec->Talents[fc->_cacheClassNodeToClassTree[player->getClass()]];
-                auto classMap = fc->_cacheClassNodeToSpell[pClass];
+                    auto specTree = spec->Talents[spec->CharacterSpecTabId];
+                    auto specMap = fc->_cacheSpecNodeToSpell[spec->CharacterSpecTabId];
 
-                auto specTree = spec->Talents[spec->CharacterSpecTabId];
-                auto specMap = fc->_cacheSpecNodeToSpell[spec->CharacterSpecTabId];
+                    if (classTree.size() == classMap.size()) {
+                        for (int i = 1; i <= classMap.size(); i++) {
+                            clientMsg += base64_char.substr(classTree[classMap[i]]->CurrentRank + 1, 1);
+                        }
+                    }
 
-                if (classTree.size() == classMap.size()) {
-                    for (int i = 1; i <= classMap.size(); i++) {
-                        clientMsg += base64_char.substr(classTree[classMap[i]]->CurrentRank + 1, 1);
+                    if (specTree.size() == specMap.size()) {
+                        for (int i = 1; i <= specMap.size(); i++) {
+                            clientMsg += base64_char.substr(specTree[specMap[i]]->CurrentRank + 1, 1);
+                        }
                     }
                 }
-            
-                if (specTree.size() == specMap.size()) {
-                    for (int i = 1; i <= specMap.size(); i++) {
-                        clientMsg += base64_char.substr(specTree[specMap[i]]->CurrentRank + 1, 1);
+                else {
+                    std::list<ForgeTalentTab*> tabs;
+                    if (fc->TryGetForgeTalentTabs(player, tpt, tabs)) {
+                        for (auto tab : tabs) {
+                            auto specTree = spec->Talents[tab->Id];
+                            auto specMap = fc->_cacheSpecNodeToSpell[tab->Id];
+                            for (int i = 1; i <= specMap.size(); i++) {
+                                clientMsg += base64_char.substr(specTree[specMap[i]]->CurrentRank + 1, 1);
+                            }
+                        }
                     }
                 }
 

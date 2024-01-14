@@ -71,7 +71,6 @@ public:
                                 }
 
                                 auto nodeLoc = tabMetaData->second->nodeLocation[spell];
-
                                 _simplifiedTreeMap[tabId][nodeLoc->row][nodeLoc->col] = fc->base64_char.find(ch)-1;
                             }
 

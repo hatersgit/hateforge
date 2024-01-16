@@ -582,8 +582,9 @@ void WorldSession::HandleLoadActionsSwitchSpec(PreparedQueryResult result)
     if (!GetPlayer())
         return;
 
-    if (result)
-        GetPlayer()->_LoadActions(result);
+    // hater: disabled
+    //if (result)
+        //GetPlayer()->_LoadActions(result);
 
     GetPlayer()->SendActionButtons(1);
 }

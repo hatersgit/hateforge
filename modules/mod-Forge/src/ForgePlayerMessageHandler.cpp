@@ -83,11 +83,8 @@ public:
         ForgeCharacterSpec* spec;
         if (fc->TryGetCharacterActiveSpec(player, spec)) {
             auto active = fc->_playerActiveTalentLoadouts.find(player->GetGUID().GetCounter());
-            if (active != fc->_playerActiveTalentLoadouts.end()) {
-                CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
-                player->SaveLoadoutActions(trans, spec->CharacterSpecTabId, active->second->id);
-                CharacterDatabase.CommitTransaction(trans);
-            }
+            if (active != fc->_playerActiveTalentLoadouts.end())
+                player->SaveLoadoutActions(spec->CharacterSpecTabId, active->second->id);
         }
     }
 

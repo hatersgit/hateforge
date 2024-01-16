@@ -2703,7 +2703,7 @@ public:
     }
 
     // hater: loadout actions
-    void SaveLoadoutActions(CharacterDatabaseTransaction trans, uint32 specId, uint8 loadoutId);
+    void SaveLoadoutActions(uint32 specId, uint8 loadoutId);
 
  protected:
     // Gamemaster whisper whitelist

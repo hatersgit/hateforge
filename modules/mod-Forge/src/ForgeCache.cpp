@@ -495,6 +495,21 @@ public:
                 spec->PointsSpent[pointsSpent.first] = pointsSpent.second;
         }
 
+        std::list<ForgeTalentTab*> tabs;
+        if (TryGetForgeTalentTabs(player, CharacterPointType::TALENT_TREE, tabs)) {
+            for (auto tab : tabs) {
+                for (auto talent : tab->Talents) {
+                    ForgeCharacterTalent* ct = new ForgeCharacterTalent();
+                    ct->CurrentRank = 0;
+                    ct->SpellId = talent.second->SpellId;
+                    ct->TabId = tab->Id;
+                    ct->type = talent.second->nodeType;
+
+                    spec->Talents[tab->Id][ct->SpellId] = ct;
+                }
+            }
+        }
+
         for (auto pt : TALENT_POINT_TYPES)
         {
             if (ACCOUNT_WIDE_TYPE == pt)

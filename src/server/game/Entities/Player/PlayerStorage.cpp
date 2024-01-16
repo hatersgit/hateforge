@@ -5568,7 +5568,7 @@ bool Player::LoadFromDB(ObjectGuid playerGuid, CharacterDatabaseQueryHolder cons
     // update items with duration and realtime
     UpdateItemDuration(time_diff, true);
 
-    _LoadActions(holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_ACTIONS));
+    // hater: disable _LoadActions(holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_ACTIONS));
 
     m_social = sSocialMgr->LoadFromDB(holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_SOCIAL_LIST), GetGUID());
 
@@ -7299,8 +7299,9 @@ void Player::_SaveActions(CharacterDatabaseTransaction trans)
     }*/
 }
 
-void Player::SaveLoadoutActions(CharacterDatabaseTransaction trans, uint32 specId, uint8 loadoutId)
+void Player::SaveLoadoutActions(uint32 specId, uint8 loadoutId)
 {
+    CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
 
     CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_ACTION_LOADOUT);
     stmt->SetData(0, GetGUID().GetCounter());
@@ -7308,18 +7309,18 @@ void Player::SaveLoadoutActions(CharacterDatabaseTransaction trans, uint32 specI
     stmt->SetData(2, loadoutId);
     trans->Append(stmt);
 
-    for (ActionButtonList::iterator itr = m_actionButtons.begin(); itr != m_actionButtons.end();) {
+    for (auto button : m_actionButtons) {
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_ACTION_LOADOUT);
         stmt->SetData(0, GetGUID().GetCounter());
         stmt->SetData(1, specId);
         stmt->SetData(2, loadoutId);
-        stmt->SetData(3, itr->first);
-        stmt->SetData(4, itr->second.GetAction());
-        stmt->SetData(5, uint8(itr->second.GetType()));
+        stmt->SetData(3, button.first);
+        stmt->SetData(4, button.second.GetAction());
+        stmt->SetData(5, uint8(button.second.GetType()));
 
         trans->Append(stmt);
     }
-
+    CharacterDatabase.CommitTransaction(trans);
 }
 
 void Player::_SaveAuras(CharacterDatabaseTransaction trans, bool logout)

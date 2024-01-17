@@ -32,9 +32,9 @@ public:
     {
         static ChatCommandTable cacheCommandTable =
         {
-            { "info",      HandleCacheInfoCommand,       SEC_GAMEMASTER, Console::Yes    },
-            { "delete",    HandleCacheDeleteCommand,     SEC_ADMINISTRATOR, Console::Yes },
-            { "refresh",   HandleCacheRefreshCommand,    SEC_GAMEMASTER, Console::Yes    }
+            { "info",      HandleCacheInfoCommand,       SEC_GAMEMASTER1, Console::Yes    },
+            { "delete",    HandleCacheDeleteCommand,     SEC_OWNER, Console::Yes },
+            { "refresh",   HandleCacheRefreshCommand,    SEC_GAMEMASTER2_F, Console::Yes    }
         };
 
         static ChatCommandTable commandTable =

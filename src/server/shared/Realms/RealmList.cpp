@@ -201,7 +201,7 @@ void RealmList::UpdateRealms(boost::system::error_code const& error)
                 RealmHandle id{ realmId };
 
                 UpdateRealm(id, build, name, externalAddress->address(), localAddress->address(), localSubmask->address(), port, icon, flag,
-                    timezone, (allowedSecurityLevel <= SEC_ADMINISTRATOR ? AccountTypes(allowedSecurityLevel) : SEC_ADMINISTRATOR), pop);
+                    timezone, (allowedSecurityLevel <= SEC_OWNER ? AccountTypes(allowedSecurityLevel) : SEC_OWNER), pop);
 
                 if (!existingRealms.count(id))
                 {

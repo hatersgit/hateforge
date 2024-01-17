@@ -93,7 +93,7 @@ int ns1__executeCommand(soap* soap, char* command, char** result)
         return 401;
     }
 
-    if (AccountMgr::GetSecurity(accountId) < SEC_ADMINISTRATOR)
+    if (AccountMgr::GetSecurity(accountId) < SEC_GAMEMASTER2_F)
     {
         LOG_DEBUG("network.soap", "ACSoap: {}'s gmlevel is too low", soap->userid);
         return 403;

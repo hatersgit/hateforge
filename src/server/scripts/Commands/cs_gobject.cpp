@@ -49,17 +49,17 @@ public:
     {
         static ChatCommandTable gobjectCommandTable =
         {
-            { "activate",  HandleGameObjectActivateCommand, SEC_GAMEMASTER,    Console::No },
-            { "delete",    HandleGameObjectDeleteCommand,   SEC_ADMINISTRATOR, Console::No },
-            { "info",      HandleGameObjectInfoCommand,     SEC_MODERATOR,     Console::No },
-            { "move",      HandleGameObjectMoveCommand,     SEC_ADMINISTRATOR, Console::No },
-            { "near",      HandleGameObjectNearCommand,     SEC_MODERATOR,     Console::No },
-            { "target",    HandleGameObjectTargetCommand,   SEC_MODERATOR,     Console::No },
-            { "turn",      HandleGameObjectTurnCommand,     SEC_ADMINISTRATOR, Console::No },
-            { "add temp",  HandleGameObjectAddTempCommand,  SEC_GAMEMASTER,    Console::No },
-            { "add",       HandleGameObjectAddCommand,      SEC_ADMINISTRATOR, Console::No },
-            { "set phase", HandleGameObjectSetPhaseCommand, SEC_ADMINISTRATOR, Console::No },
-            { "set state", HandleGameObjectSetStateCommand, SEC_ADMINISTRATOR, Console::No }
+            { "activate",  HandleGameObjectActivateCommand, SEC_GAMEMASTER2_L,    Console::No },
+            { "delete",    HandleGameObjectDeleteCommand,   SEC_GAMEMASTER2_F, Console::No },
+            { "info",      HandleGameObjectInfoCommand,     SEC_GAMEMASTER1,     Console::No },
+            { "move",      HandleGameObjectMoveCommand,     SEC_GAMEMASTER2_F, Console::No },
+            { "near",      HandleGameObjectNearCommand,     SEC_GAMEMASTER1,     Console::No },
+            { "target",    HandleGameObjectTargetCommand,   SEC_GAMEMASTER1,     Console::No },
+            { "turn",      HandleGameObjectTurnCommand,     SEC_GAMEMASTER2_F, Console::No },
+            { "add temp",  HandleGameObjectAddTempCommand,  SEC_GAMEMASTER2_L,    Console::No },
+            { "add",       HandleGameObjectAddCommand,      SEC_GAMEMASTER2_F, Console::No },
+            { "set phase", HandleGameObjectSetPhaseCommand, SEC_GAMEMASTER2_F, Console::No },
+            { "set state", HandleGameObjectSetStateCommand, SEC_GAMEMASTER2_F, Console::No }
         };
         static ChatCommandTable commandTable =
         {

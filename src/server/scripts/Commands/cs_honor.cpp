@@ -39,14 +39,14 @@ public:
     {
         static ChatCommandTable honorAddCommandTable =
         {
-            { "kill", HandleHonorAddKillCommand, SEC_GAMEMASTER, Console::No },
-            { "",     HandleHonorAddCommand,     SEC_GAMEMASTER, Console::No }
+            { "kill", HandleHonorAddKillCommand, SEC_GAMEMASTER1, Console::No },
+            { "",     HandleHonorAddCommand,     SEC_GAMEMASTER1, Console::No }
         };
 
         static ChatCommandTable honorCommandTable =
         {
             { "add",    honorAddCommandTable },
-            { "update", HandleHonorUpdateCommand, SEC_GAMEMASTER, Console::No }
+            { "update", HandleHonorUpdateCommand, SEC_GAMEMASTER1, Console::No }
         };
 
         static ChatCommandTable commandTable =

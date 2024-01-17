@@ -56,62 +56,62 @@ public:
     {
         static ChatCommandTable debugPlayCommandTable =
         {
-            { "cinematic",      HandleDebugPlayCinematicCommand,       SEC_ADMINISTRATOR, Console::No },
-            { "movie",          HandleDebugPlayMovieCommand,           SEC_ADMINISTRATOR, Console::No },
-            { "sound",          HandleDebugPlaySoundCommand,           SEC_ADMINISTRATOR, Console::No },
-            { "music",          HandleDebugPlayMusicCommand,           SEC_ADMINISTRATOR, Console::No },
-            { "visual",         HandleDebugVisualCommand,              SEC_ADMINISTRATOR, Console::No }
+            { "cinematic",      HandleDebugPlayCinematicCommand,       SEC_GAMEMASTER2_F, Console::No },
+            { "movie",          HandleDebugPlayMovieCommand,           SEC_GAMEMASTER2_F, Console::No },
+            { "sound",          HandleDebugPlaySoundCommand,           SEC_GAMEMASTER2_F, Console::No },
+            { "music",          HandleDebugPlayMusicCommand,           SEC_GAMEMASTER2_F, Console::No },
+            { "visual",         HandleDebugVisualCommand,              SEC_GAMEMASTER2_F, Console::No }
         };
         static ChatCommandTable debugSendCommandTable =
         {
-            { "buyerror",       HandleDebugSendBuyErrorCommand,        SEC_ADMINISTRATOR, Console::No },
-            { "channelnotify",  HandleDebugSendChannelNotifyCommand,   SEC_ADMINISTRATOR, Console::No },
-            { "chatmmessage",   HandleDebugSendChatMsgCommand,         SEC_ADMINISTRATOR, Console::No },
-            { "equiperror",     HandleDebugSendEquipErrorCommand,      SEC_ADMINISTRATOR, Console::No },
-            { "largepacket",    HandleDebugSendLargePacketCommand,     SEC_ADMINISTRATOR, Console::No },
-            { "opcode",         HandleDebugSendOpcodeCommand,          SEC_ADMINISTRATOR, Console::No },
-            { "qpartymsg",      HandleDebugSendQuestPartyMsgCommand,   SEC_ADMINISTRATOR, Console::No },
-            { "qinvalidmsg",    HandleDebugSendQuestInvalidMsgCommand, SEC_ADMINISTRATOR, Console::No },
-            { "sellerror",      HandleDebugSendSellErrorCommand,       SEC_ADMINISTRATOR, Console::No },
-            { "setphaseshift",  HandleDebugSendSetPhaseShiftCommand,   SEC_ADMINISTRATOR, Console::No },
-            { "spellfail",      HandleDebugSendSpellFailCommand,       SEC_ADMINISTRATOR, Console::No }
+            { "buyerror",       HandleDebugSendBuyErrorCommand,        SEC_GAMEMASTER2_F, Console::No },
+            { "channelnotify",  HandleDebugSendChannelNotifyCommand,   SEC_GAMEMASTER2_F, Console::No },
+            { "chatmmessage",   HandleDebugSendChatMsgCommand,         SEC_GAMEMASTER2_F, Console::No },
+            { "equiperror",     HandleDebugSendEquipErrorCommand,      SEC_GAMEMASTER2_F, Console::No },
+            { "largepacket",    HandleDebugSendLargePacketCommand,     SEC_GAMEMASTER2_F, Console::No },
+            { "opcode",         HandleDebugSendOpcodeCommand,          SEC_GAMEMASTER2_F, Console::No },
+            { "qpartymsg",      HandleDebugSendQuestPartyMsgCommand,   SEC_GAMEMASTER2_F, Console::No },
+            { "qinvalidmsg",    HandleDebugSendQuestInvalidMsgCommand, SEC_GAMEMASTER2_F, Console::No },
+            { "sellerror",      HandleDebugSendSellErrorCommand,       SEC_GAMEMASTER2_F, Console::No },
+            { "setphaseshift",  HandleDebugSendSetPhaseShiftCommand,   SEC_GAMEMASTER2_F, Console::No },
+            { "spellfail",      HandleDebugSendSpellFailCommand,       SEC_GAMEMASTER2_F, Console::No }
         };
         static ChatCommandTable debugCommandTable =
         {
-            { "setbit",         HandleDebugSet32BitCommand,            SEC_ADMINISTRATOR, Console::No },
-            { "threat",         HandleDebugThreatListCommand,          SEC_ADMINISTRATOR, Console::No },
-            { "hostile",        HandleDebugHostileRefListCommand,      SEC_ADMINISTRATOR, Console::No },
-            { "anim",           HandleDebugAnimCommand,                SEC_ADMINISTRATOR, Console::No },
-            { "arena",          HandleDebugArenaCommand,               SEC_ADMINISTRATOR, Console::No },
-            { "bg",             HandleDebugBattlegroundCommand,        SEC_ADMINISTRATOR, Console::No },
-            { "getitemstate",   HandleDebugGetItemStateCommand,        SEC_ADMINISTRATOR, Console::No },
-            { "lootrecipient",  HandleDebugGetLootRecipientCommand,    SEC_ADMINISTRATOR, Console::No },
-            { "getvalue",       HandleDebugGetValueCommand,            SEC_ADMINISTRATOR, Console::No },
-            { "getitemvalue",   HandleDebugGetItemValueCommand,        SEC_ADMINISTRATOR, Console::No },
-            { "Mod32Value",     HandleDebugMod32ValueCommand,          SEC_ADMINISTRATOR, Console::No },
+            { "setbit",         HandleDebugSet32BitCommand,            SEC_GAMEMASTER2_F, Console::No },
+            { "threat",         HandleDebugThreatListCommand,          SEC_GAMEMASTER2_F, Console::No },
+            { "hostile",        HandleDebugHostileRefListCommand,      SEC_GAMEMASTER2_F, Console::No },
+            { "anim",           HandleDebugAnimCommand,                SEC_GAMEMASTER2_F, Console::No },
+            { "arena",          HandleDebugArenaCommand,               SEC_GAMEMASTER2_F, Console::No },
+            { "bg",             HandleDebugBattlegroundCommand,        SEC_GAMEMASTER2_F, Console::No },
+            { "getitemstate",   HandleDebugGetItemStateCommand,        SEC_GAMEMASTER2_F, Console::No },
+            { "lootrecipient",  HandleDebugGetLootRecipientCommand,    SEC_GAMEMASTER2_F, Console::No },
+            { "getvalue",       HandleDebugGetValueCommand,            SEC_GAMEMASTER2_F, Console::No },
+            { "getitemvalue",   HandleDebugGetItemValueCommand,        SEC_GAMEMASTER2_F, Console::No },
+            { "Mod32Value",     HandleDebugMod32ValueCommand,          SEC_GAMEMASTER2_F, Console::No },
             { "play",           debugPlayCommandTable },
             { "send",           debugSendCommandTable },
-            { "setaurastate",   HandleDebugSetAuraStateCommand,        SEC_ADMINISTRATOR, Console::No },
-            { "setitemvalue",   HandleDebugSetItemValueCommand,        SEC_ADMINISTRATOR, Console::No },
-            { "setvalue",       HandleDebugSetValueCommand,            SEC_ADMINISTRATOR, Console::No },
-            { "spawnvehicle",   HandleDebugSpawnVehicleCommand,        SEC_ADMINISTRATOR, Console::No },
-            { "setvid",         HandleDebugSetVehicleIdCommand,        SEC_ADMINISTRATOR, Console::No },
-            { "entervehicle",   HandleDebugEnterVehicleCommand,        SEC_ADMINISTRATOR, Console::No },
-            { "uws",            HandleDebugUpdateWorldStateCommand,    SEC_ADMINISTRATOR, Console::No },
-            { "update",         HandleDebugUpdateCommand,              SEC_ADMINISTRATOR, Console::No },
-            { "itemexpire",     HandleDebugItemExpireCommand,          SEC_ADMINISTRATOR, Console::No },
-            { "areatriggers",   HandleDebugAreaTriggersCommand,        SEC_ADMINISTRATOR, Console::No },
-            { "lfg",            HandleDebugDungeonFinderCommand,       SEC_ADMINISTRATOR, Console::No },
-            { "los",            HandleDebugLoSCommand,                 SEC_ADMINISTRATOR, Console::No },
-            { "moveflags",      HandleDebugMoveflagsCommand,           SEC_ADMINISTRATOR, Console::No },
-            { "unitstate",      HandleDebugUnitStateCommand,           SEC_ADMINISTRATOR, Console::No },
-            { "objectcount",    HandleDebugObjectCountCommand,         SEC_ADMINISTRATOR, Console::Yes},
-            { "dummy",          HandleDebugDummyCommand,               SEC_ADMINISTRATOR, Console::No }
+            { "setaurastate",   HandleDebugSetAuraStateCommand,        SEC_GAMEMASTER2_F, Console::No },
+            { "setitemvalue",   HandleDebugSetItemValueCommand,        SEC_GAMEMASTER2_F, Console::No },
+            { "setvalue",       HandleDebugSetValueCommand,            SEC_GAMEMASTER2_F, Console::No },
+            { "spawnvehicle",   HandleDebugSpawnVehicleCommand,        SEC_GAMEMASTER2_F, Console::No },
+            { "setvid",         HandleDebugSetVehicleIdCommand,        SEC_GAMEMASTER2_F, Console::No },
+            { "entervehicle",   HandleDebugEnterVehicleCommand,        SEC_GAMEMASTER2_F, Console::No },
+            { "uws",            HandleDebugUpdateWorldStateCommand,    SEC_GAMEMASTER2_F, Console::No },
+            { "update",         HandleDebugUpdateCommand,              SEC_GAMEMASTER2_F, Console::No },
+            { "itemexpire",     HandleDebugItemExpireCommand,          SEC_GAMEMASTER2_F, Console::No },
+            { "areatriggers",   HandleDebugAreaTriggersCommand,        SEC_GAMEMASTER2_F, Console::No },
+            { "lfg",            HandleDebugDungeonFinderCommand,       SEC_GAMEMASTER2_F, Console::No },
+            { "los",            HandleDebugLoSCommand,                 SEC_GAMEMASTER2_F, Console::No },
+            { "moveflags",      HandleDebugMoveflagsCommand,           SEC_GAMEMASTER2_F, Console::No },
+            { "unitstate",      HandleDebugUnitStateCommand,           SEC_GAMEMASTER2_F, Console::No },
+            { "objectcount",    HandleDebugObjectCountCommand,         SEC_GAMEMASTER2_F, Console::Yes},
+            { "dummy",          HandleDebugDummyCommand,               SEC_GAMEMASTER2_F, Console::No }
         };
         static ChatCommandTable commandTable =
         {
             { "debug", debugCommandTable },
-            { "wpgps", HandleWPGPSCommand, SEC_ADMINISTRATOR, Console::No }
+            { "wpgps", HandleWPGPSCommand, SEC_GAMEMASTER2_F, Console::No }
         };
         return commandTable;
     }

@@ -41,12 +41,12 @@ public:
     {
         static ChatCommandTable castCommandTable =
         {
-            { "back",   HandleCastBackCommand,  SEC_GAMEMASTER, Console::No },
-            { "dist",   HandleCastDistCommand,  SEC_GAMEMASTER, Console::No },
-            { "self",   HandleCastSelfCommand,  SEC_GAMEMASTER, Console::No },
-            { "target", HandleCastTargetCommad, SEC_GAMEMASTER, Console::No },
-            { "dest",   HandleCastDestCommand,  SEC_GAMEMASTER, Console::No },
-            { "",       HandleCastCommand,      SEC_GAMEMASTER, Console::No }
+            { "back",   HandleCastBackCommand,  SEC_GAMEMASTER1, Console::No },
+            { "dist",   HandleCastDistCommand,  SEC_GAMEMASTER1, Console::No },
+            { "self",   HandleCastSelfCommand,  SEC_GAMEMASTER1, Console::No },
+            { "target", HandleCastTargetCommad, SEC_GAMEMASTER1, Console::No },
+            { "dest",   HandleCastDestCommand,  SEC_GAMEMASTER1, Console::No },
+            { "",       HandleCastCommand,      SEC_GAMEMASTER1, Console::No }
         };
         static ChatCommandTable commandTable =
         {

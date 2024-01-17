@@ -56,40 +56,40 @@ public:
     {
         static ChatCommandTable unbanCommandTable =
         {
-            { "account",        SEC_ADMINISTRATOR,  true,  &HandleUnBanAccountCommand,          "" },
-            { "character",      SEC_ADMINISTRATOR,  true,  &HandleUnBanCharacterCommand,        "" },
-            { "playeraccount",  SEC_ADMINISTRATOR,  true,  &HandleUnBanAccountByCharCommand,    "" },
-            { "ip",             SEC_ADMINISTRATOR,  true,  &HandleUnBanIPCommand,               "" }
+            { "account",        SEC_GAMEMASTER2_F,  true,  &HandleUnBanAccountCommand,          "" },
+            { "character",      SEC_GAMEMASTER2_F,  true,  &HandleUnBanCharacterCommand,        "" },
+            { "playeraccount",  SEC_GAMEMASTER2_F,  true,  &HandleUnBanAccountByCharCommand,    "" },
+            { "ip",             SEC_GAMEMASTER2_F,  true,  &HandleUnBanIPCommand,               "" }
         };
 
         static ChatCommandTable banlistCommandTable =
         {
-            { "account",        SEC_GAMEMASTER,  true,  &HandleBanListAccountCommand,        "" },
-            { "character",      SEC_GAMEMASTER,  true,  &HandleBanListCharacterCommand,      "" },
-            { "ip",             SEC_GAMEMASTER,  true,  &HandleBanListIPCommand,             "" }
+            { "account",        SEC_GAMEMASTER1,  true,  &HandleBanListAccountCommand,        "" },
+            { "character",      SEC_GAMEMASTER1,  true,  &HandleBanListCharacterCommand,      "" },
+            { "ip",             SEC_GAMEMASTER1,  true,  &HandleBanListIPCommand,             "" }
         };
 
         static ChatCommandTable baninfoCommandTable =
         {
-            { "account",        SEC_GAMEMASTER,  true,  &HandleBanInfoAccountCommand,        "" },
-            { "character",      SEC_GAMEMASTER,  true,  &HandleBanInfoCharacterCommand,      "" },
-            { "ip",             SEC_GAMEMASTER,  true,  &HandleBanInfoIPCommand,             "" }
+            { "account",        SEC_GAMEMASTER1,  true,  &HandleBanInfoAccountCommand,        "" },
+            { "character",      SEC_GAMEMASTER1,  true,  &HandleBanInfoCharacterCommand,      "" },
+            { "ip",             SEC_GAMEMASTER1,  true,  &HandleBanInfoIPCommand,             "" }
         };
 
         static ChatCommandTable banCommandTable =
         {
-            { "account",        SEC_GAMEMASTER,  true,  &HandleBanAccountCommand,            "" },
-            { "character",      SEC_GAMEMASTER,  true,  &HandleBanCharacterCommand,          "" },
-            { "playeraccount",  SEC_GAMEMASTER,  true,  &HandleBanAccountByCharCommand,      "" },
-            { "ip",             SEC_GAMEMASTER,  true,  &HandleBanIPCommand,                 "" }
+            { "account",        SEC_GAMEMASTER2_F,  true,  &HandleBanAccountCommand,            "" },
+            { "character",      SEC_GAMEMASTER2_F,  true,  &HandleBanCharacterCommand,          "" },
+            { "playeraccount",  SEC_GAMEMASTER2_F,  true,  &HandleBanAccountByCharCommand,      "" },
+            { "ip",             SEC_GAMEMASTER2_F,  true,  &HandleBanIPCommand,                 "" }
         };
 
         static ChatCommandTable commandTable =
         {
-            { "ban",            SEC_GAMEMASTER,     true,  nullptr, "", banCommandTable },
-            { "baninfo",        SEC_GAMEMASTER,     true,  nullptr, "", baninfoCommandTable },
-            { "banlist",        SEC_GAMEMASTER,     true,  nullptr, "", banlistCommandTable },
-            { "unban",          SEC_ADMINISTRATOR,  true,  nullptr, "", unbanCommandTable }
+            { "ban",            SEC_GAMEMASTER2_L,     true,  nullptr, "", banCommandTable },
+            { "baninfo",        SEC_GAMEMASTER2_L,     true,  nullptr, "", baninfoCommandTable },
+            { "banlist",        SEC_GAMEMASTER2_L,     true,  nullptr, "", banlistCommandTable },
+            { "unban",          SEC_GAMEMASTER2_F,  true,  nullptr, "", unbanCommandTable }
         };
 
         return commandTable;

@@ -22,24 +22,24 @@ public:
         static std::vector<ChatCommand> exampleCommandTable1 =
         {
             // This command does something
-            { "forge",      SEC_ADMINISTRATOR,     true,  &ForgePoints,      "" },
-            { "talent",      SEC_ADMINISTRATOR,     true, &TalentPoints,      "" },
-            { "prestige",      SEC_ADMINISTRATOR,     true, &PrestigePoints,      "" },
-            { "racial",      SEC_ADMINISTRATOR,     true, &RacialPoints,      "" }
+            { "forge",      SEC_GAMEMASTER2_L,     true,  &ForgePoints,      "" },
+            { "talent",      SEC_GAMEMASTER2_L,     true, &TalentPoints,      "" },
+            { "prestige",      SEC_GAMEMASTER2_L,     true, &PrestigePoints,      "" },
+            { "racial",      SEC_GAMEMASTER2_L,     true, &RacialPoints,      "" }
         };
 
         // Level 1 sub command
         static std::vector<ChatCommand> exampleCommandTable =
         {
-            { "reloadCache",      SEC_ADMINISTRATOR,     true,  &ReloadCache,      ""},
-            { "addpoints",      SEC_ADMINISTRATOR,     true, nullptr,      "", exampleCommandTable1}
+            { "reloadCache",      SEC_GAMEMASTER2_L,     true,  &ReloadCache,      ""},
+            { "addpoints",      SEC_GAMEMASTER2_L,     true, nullptr,      "", exampleCommandTable1}
         };
 
         // Root command
         static std::vector<ChatCommand> commandTable =
         {
             //  name       permission   allow console?   handler method      help      child commands table 
-            { "forge",   SEC_ADMINISTRATOR,      true,           nullptr,         "", exampleCommandTable}
+            { "forge",   SEC_GAMEMASTER2_L,      true,           nullptr,         "", exampleCommandTable}
         };
 
         return commandTable; // Return the root command table

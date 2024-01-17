@@ -71,7 +71,7 @@ public:
     {
         static ChatCommandTable inventoryCommandTable =
         {
-            { "count",      HandleInventoryCountCommand,   SEC_MODERATOR, Console::No }
+            { "count",      HandleInventoryCountCommand,   SEC_TRIAL_GAMEMASTER, Console::No }
         };
 
         static ChatCommandTable commandTable =

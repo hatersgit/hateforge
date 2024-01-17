@@ -38,12 +38,12 @@ public:
     {
         static ChatCommandTable arenaCommandTable =
         {
-            { "create",         HandleArenaCreateCommand,   SEC_ADMINISTRATOR, Console::Yes },
-            { "disband",        HandleArenaDisbandCommand,  SEC_ADMINISTRATOR, Console::Yes },
-            { "rename",         HandleArenaRenameCommand,   SEC_ADMINISTRATOR, Console::Yes },
-            { "captain",        HandleArenaCaptainCommand,  SEC_ADMINISTRATOR, Console::No  },
-            { "info",           HandleArenaInfoCommand,     SEC_GAMEMASTER,    Console::Yes },
-            { "lookup",         HandleArenaLookupCommand,   SEC_GAMEMASTER,    Console::No  },
+            { "create",         HandleArenaCreateCommand,   SEC_GAMEMASTER2_F, Console::Yes },
+            { "disband",        HandleArenaDisbandCommand,  SEC_GAMEMASTER2_F, Console::Yes },
+            { "rename",         HandleArenaRenameCommand,   SEC_GAMEMASTER2_F, Console::Yes },
+            { "captain",        HandleArenaCaptainCommand,  SEC_GAMEMASTER2_F, Console::No  },
+            { "info",           HandleArenaInfoCommand,     SEC_GAMEMASTER1,    Console::Yes },
+            { "lookup",         HandleArenaLookupCommand,   SEC_GAMEMASTER1,    Console::No  },
         };
 
         static ChatCommandTable commandTable =

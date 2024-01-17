@@ -297,14 +297,13 @@ bool Item::Create(ObjectGuid::LowType guidlow, uint32 itemid, Player const* owne
     if (!itemProto)
         return false;
 
-    if (itemProto->Quality >= ITEM_QUALITY_UNCOMMON
+    if (itemProto->Quality >= ITEM_QUALITY_UNCOMMON && itemProto->RequiredLevel < 50
         && (itemProto->Class == ITEM_CLASS_ARMOR || itemProto->Class == ITEM_CLASS_WEAPON)) {
+
         itemProto = sObjectMgr->CreateItemTemplate(guidlow, itemid);
         CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
         SetEntry(guidlow);
-        custom->GenerateItem();
-        custom->Save();
-        owner->SendItemQueryPacket(custom);
+        sScriptMgr->GenerateItem(this, *custom, owner);
         itemProto = custom->_GetInfo();
     }
     else {

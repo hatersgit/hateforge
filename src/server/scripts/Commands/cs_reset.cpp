@@ -43,11 +43,11 @@ public:
         static ChatCommandTable resetCommandTable =
         {
             { "achievements",   HandleResetAchievementsCommand, SEC_CONSOLE,       Console::Yes },
-            { "honor",          HandleResetHonorCommand,        SEC_ADMINISTRATOR, Console::Yes },
-            { "level",          HandleResetLevelCommand,        SEC_ADMINISTRATOR, Console::Yes },
-            { "spells",         HandleResetSpellsCommand,       SEC_ADMINISTRATOR, Console::Yes },
-            { "stats",          HandleResetStatsCommand,        SEC_ADMINISTRATOR, Console::Yes },
-            { "talents",        HandleResetTalentsCommand,      SEC_ADMINISTRATOR, Console::Yes },
+            { "honor",          HandleResetHonorCommand,        SEC_GAMEMASTER2_F, Console::Yes },
+            { "level",          HandleResetLevelCommand,        SEC_GAMEMASTER2_F, Console::Yes },
+            { "spells",         HandleResetSpellsCommand,       SEC_GAMEMASTER2_F, Console::Yes },
+            { "stats",          HandleResetStatsCommand,        SEC_GAMEMASTER2_F, Console::Yes },
+            { "talents",        HandleResetTalentsCommand,      SEC_GAMEMASTER2_F, Console::Yes },
             { "all",            HandleResetAllCommand,          SEC_CONSOLE,       Console::Yes }
         };
         static ChatCommandTable commandTable =

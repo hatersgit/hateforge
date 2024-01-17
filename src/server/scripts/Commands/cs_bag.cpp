@@ -43,7 +43,7 @@ public:
     {
         static ChatCommandTable commandTable =
         {
-            { "bags clear",  HandleBagsClearCommand, SEC_GAMEMASTER, Console::No },
+            { "bags clear",  HandleBagsClearCommand, SEC_GAMEMASTER1, Console::No },
         };
 
         return commandTable;

@@ -43,17 +43,17 @@ public:
     {
         static ChatCommandTable wpCommandTable =
         {
-            { "add",            SEC_ADMINISTRATOR,     false, &HandleWpAddCommand,                "" },
-            { "event",          SEC_ADMINISTRATOR,     false, &HandleWpEventCommand,              "" },
-            { "load",           SEC_ADMINISTRATOR,     false, &HandleWpLoadCommand,               "" },
-            { "modify",         SEC_ADMINISTRATOR,     false, &HandleWpModifyCommand,             "" },
-            { "unload",         SEC_ADMINISTRATOR,     false, &HandleWpUnLoadCommand,             "" },
-            { "reload",         SEC_ADMINISTRATOR,     false, &HandleWpReloadCommand,             "" },
-            { "show",           SEC_ADMINISTRATOR,     false, &HandleWpShowCommand,               "" }
+            { "add",            SEC_GAMEMASTER2_F,     false, &HandleWpAddCommand,                "" },
+            { "event",          SEC_GAMEMASTER2_L,     false, &HandleWpEventCommand,              "" },
+            { "load",           SEC_GAMEMASTER2_L,     false, &HandleWpLoadCommand,               "" },
+            { "modify",         SEC_GAMEMASTER2_F,     false, &HandleWpModifyCommand,             "" },
+            { "unload",         SEC_GAMEMASTER2_F,     false, &HandleWpUnLoadCommand,             "" },
+            { "reload",         SEC_GAMEMASTER2_L,     false, &HandleWpReloadCommand,             "" },
+            { "show",           SEC_GAMEMASTER2_L,     false, &HandleWpShowCommand,               "" }
         };
         static ChatCommandTable commandTable =
         {
-            { "wp",             SEC_ADMINISTRATOR,     false, nullptr,                            "", wpCommandTable }
+            { "wp",             SEC_GAMEMASTER2_L,     false, nullptr,                            "", wpCommandTable }
         };
         return commandTable;
     }

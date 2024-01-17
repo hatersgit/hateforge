@@ -37,11 +37,11 @@ public:
     {
         static ChatCommandTable battlefieldcommandTable =
         {
-            { "start",  HandleBattlefieldStart,  SEC_ADMINISTRATOR, Console::No },
-            { "stop",   HandleBattlefieldEnd,    SEC_ADMINISTRATOR, Console::No },
-            { "switch", HandleBattlefieldSwitch, SEC_ADMINISTRATOR, Console::No },
-            { "timer",  HandleBattlefieldTimer,  SEC_ADMINISTRATOR, Console::No },
-            { "enable", HandleBattlefieldEnable, SEC_ADMINISTRATOR, Console::No }
+            { "start",  HandleBattlefieldStart,  SEC_GAMEMASTER2_F, Console::No },
+            { "stop",   HandleBattlefieldEnd,    SEC_GAMEMASTER2_F, Console::No },
+            { "switch", HandleBattlefieldSwitch, SEC_GAMEMASTER2_F, Console::No },
+            { "timer",  HandleBattlefieldTimer,  SEC_GAMEMASTER2_F, Console::No },
+            { "enable", HandleBattlefieldEnable, SEC_GAMEMASTER2_F, Console::No }
         };
         static ChatCommandTable commandTable =
         {

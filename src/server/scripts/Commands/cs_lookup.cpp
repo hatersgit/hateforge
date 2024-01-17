@@ -45,29 +45,29 @@ public:
     {
         static ChatCommandTable lookupPlayerCommandTable =
         {
-            { "ip",      HandleLookupPlayerIpCommand,      SEC_GAMEMASTER, Console::Yes  },
-            { "account", HandleLookupPlayerAccountCommand, SEC_GAMEMASTER, Console::Yes  },
-            { "email",   HandleLookupPlayerEmailCommand,   SEC_GAMEMASTER, Console::Yes  }
+            { "ip",      HandleLookupPlayerIpCommand,      SEC_GAMEMASTER1, Console::Yes  },
+            { "account", HandleLookupPlayerAccountCommand, SEC_GAMEMASTER1, Console::Yes  },
+            { "email",   HandleLookupPlayerEmailCommand,   SEC_GAMEMASTER1, Console::Yes  }
         };
 
         static ChatCommandTable lookupCommandTable =
         {
-            { "area",     HandleLookupAreaCommand,         SEC_MODERATOR, Console::Yes  },
-            { "creature", HandleLookupCreatureCommand,     SEC_MODERATOR, Console::Yes  },
-            { "event",    HandleLookupEventCommand,        SEC_MODERATOR, Console::Yes  },
-            { "faction",  HandleLookupFactionCommand,      SEC_MODERATOR, Console::Yes  },
-            { "item",     HandleLookupItemCommand,         SEC_MODERATOR, Console::Yes  },
-            { "item set", HandleLookupItemSetCommand,      SEC_MODERATOR, Console::Yes  },
-            { "map",      HandleLookupMapCommand,          SEC_MODERATOR, Console::Yes  },
-            { "object",   HandleLookupObjectCommand,       SEC_MODERATOR, Console::Yes  },
-            { "gobject",  HandleLookupObjectCommand,       SEC_MODERATOR, Console::Yes  },
-            { "quest",    HandleLookupQuestCommand,        SEC_MODERATOR, Console::Yes  },
-            { "skill",    HandleLookupSkillCommand,        SEC_MODERATOR, Console::Yes  },
-            { "taxinode", HandleLookupTaxiNodeCommand,     SEC_MODERATOR, Console::Yes  },
-            { "teleport", HandleLookupTeleCommand,         SEC_MODERATOR, Console::Yes  },
-            { "title",    HandleLookupTitleCommand,        SEC_MODERATOR, Console::Yes  },
-            { "spell",    HandleLookupSpellCommand,        SEC_MODERATOR, Console::Yes  },
-            { "spell id", HandleLookupSpellIdCommand,      SEC_MODERATOR, Console::Yes  },
+            { "area",     HandleLookupAreaCommand,         SEC_TRIAL_GAMEMASTER, Console::Yes  },
+            { "creature", HandleLookupCreatureCommand,     SEC_TRIAL_GAMEMASTER, Console::Yes  },
+            { "event",    HandleLookupEventCommand,        SEC_TRIAL_GAMEMASTER, Console::Yes  },
+            { "faction",  HandleLookupFactionCommand,      SEC_TRIAL_GAMEMASTER, Console::Yes  },
+            { "item",     HandleLookupItemCommand,         SEC_TRIAL_GAMEMASTER, Console::Yes  },
+            { "item set", HandleLookupItemSetCommand,      SEC_TRIAL_GAMEMASTER, Console::Yes  },
+            { "map",      HandleLookupMapCommand,          SEC_TRIAL_GAMEMASTER, Console::Yes  },
+            { "object",   HandleLookupObjectCommand,       SEC_TRIAL_GAMEMASTER, Console::Yes  },
+            { "gobject",  HandleLookupObjectCommand,       SEC_TRIAL_GAMEMASTER, Console::Yes  },
+            { "quest",    HandleLookupQuestCommand,        SEC_TRIAL_GAMEMASTER, Console::Yes  },
+            { "skill",    HandleLookupSkillCommand,        SEC_TRIAL_GAMEMASTER, Console::Yes  },
+            { "taxinode", HandleLookupTaxiNodeCommand,     SEC_TRIAL_GAMEMASTER, Console::Yes  },
+            { "teleport", HandleLookupTeleCommand,         SEC_TRIAL_GAMEMASTER, Console::Yes  },
+            { "title",    HandleLookupTitleCommand,        SEC_TRIAL_GAMEMASTER, Console::Yes  },
+            { "spell",    HandleLookupSpellCommand,        SEC_TRIAL_GAMEMASTER, Console::Yes  },
+            { "spell id", HandleLookupSpellIdCommand,      SEC_TRIAL_GAMEMASTER, Console::Yes  },
             { "player",   lookupPlayerCommandTable },
         };
 

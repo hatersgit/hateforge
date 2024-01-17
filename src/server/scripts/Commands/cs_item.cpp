@@ -41,14 +41,14 @@ public:
     {
         static ChatCommandTable HandleItemRestoreCommandTable =
         {
-            { "list",      HandleItemRestoreListCommand,        SEC_GAMEMASTER,    Console::Yes },
-            { "",          HandleItemRestoreCommand,            SEC_GAMEMASTER,    Console::Yes },
+            { "list",      HandleItemRestoreListCommand,        SEC_GAMEMASTER1,    Console::Yes },
+            { "",          HandleItemRestoreCommand,            SEC_GAMEMASTER1,    Console::Yes },
         };
         static ChatCommandTable itemCommandTable =
         {
             { "restore",   HandleItemRestoreCommandTable },
-            { "move",      HandleItemMoveCommand,               SEC_GAMEMASTER,    Console::Yes },
-            { "refund",    HandleItemRefundCommand,             SEC_ADMINISTRATOR, Console::Yes },
+            { "move",      HandleItemMoveCommand,               SEC_GAMEMASTER1,    Console::Yes },
+            { "refund",    HandleItemRefundCommand,             SEC_GAMEMASTER2_F, Console::Yes },
         };
         static ChatCommandTable commandTable =
         {

@@ -960,8 +960,8 @@ void World::LoadConfigSettings(bool reload)
     _int_configs[CONFIG_GM_CHAT]               = sConfigMgr->GetOption<int32>("GM.Chat", 2);
     _int_configs[CONFIG_GM_WHISPERING_TO]      = sConfigMgr->GetOption<int32>("GM.WhisperingTo", 2);
 
-    _int_configs[CONFIG_GM_LEVEL_IN_GM_LIST]   = sConfigMgr->GetOption<int32>("GM.InGMList.Level", SEC_ADMINISTRATOR);
-    _int_configs[CONFIG_GM_LEVEL_IN_WHO_LIST]  = sConfigMgr->GetOption<int32>("GM.InWhoList.Level", SEC_ADMINISTRATOR);
+    _int_configs[CONFIG_GM_LEVEL_IN_GM_LIST]   = sConfigMgr->GetOption<int32>("GM.InGMList.Level", SEC_GAMEMASTER2_F);
+    _int_configs[CONFIG_GM_LEVEL_IN_WHO_LIST]  = sConfigMgr->GetOption<int32>("GM.InWhoList.Level", SEC_GAMEMASTER2_F);
     _int_configs[CONFIG_START_GM_LEVEL]        = sConfigMgr->GetOption<int32>("GM.StartLevel", 1);
     if (_int_configs[CONFIG_START_GM_LEVEL] < _int_configs[CONFIG_START_PLAYER_LEVEL])
     {
@@ -1253,7 +1253,7 @@ void World::LoadConfigSettings(bool reload)
             LOG_ERROR("server.loading", "ClientCacheVersion can't be negative {}, ignored.", clientCacheId);
     }
 
-    _int_configs[CONFIG_INSTANT_LOGOUT] = sConfigMgr->GetOption<int32>("InstantLogout", SEC_MODERATOR);
+    _int_configs[CONFIG_INSTANT_LOGOUT] = sConfigMgr->GetOption<int32>("InstantLogout", SEC_TRIAL_GAMEMASTER);
 
     _int_configs[CONFIG_GUILD_EVENT_LOG_COUNT] = sConfigMgr->GetOption<int32>("Guild.EventLogRecordsCount", GUILD_EVENTLOG_MAX_RECORDS);
     if (_int_configs[CONFIG_GUILD_EVENT_LOG_COUNT] > GUILD_EVENTLOG_MAX_RECORDS)

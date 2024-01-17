@@ -178,7 +178,7 @@ WorldSession::~WorldSession()
 
 bool WorldSession::IsGMAccount() const
 {
-    return GetSecurity() >= SEC_GAMEMASTER;
+    return GetSecurity() >= SEC_GAMEMASTER1;
 }
 
 std::string const& WorldSession::GetPlayerName() const

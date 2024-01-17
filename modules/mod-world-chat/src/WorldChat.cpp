@@ -245,8 +245,8 @@ public:
         static std::vector<ChatCommand> commandTable =
         {
             { "chat", SEC_PLAYER, true, NULL , "" , wcCommandTable},
-            { "chath", SEC_MODERATOR, true, &HandleWorldChatHordeCommand , ""},
-            { "chata", SEC_MODERATOR, true, &HandleWorldChatAllianceCommand , ""},
+            { "chath", SEC_TRIAL_GAMEMASTER, true, &HandleWorldChatHordeCommand , ""},
+            { "chata", SEC_TRIAL_GAMEMASTER, true, &HandleWorldChatAllianceCommand , ""},
         };
         return commandTable;
     }

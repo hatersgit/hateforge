@@ -36,10 +36,10 @@ public:
     {
         static ChatCommandTable sendCommandTable =
         {
-            { "items",   HandleSendItemsCommand,   SEC_GAMEMASTER,    Console::Yes },
-            { "mail",    HandleSendMailCommand,    SEC_GAMEMASTER,    Console::Yes },
-            { "message", HandleSendMessageCommand, SEC_ADMINISTRATOR, Console::Yes },
-            { "money",   HandleSendMoneyCommand,   SEC_GAMEMASTER,    Console::Yes }
+            { "items",   HandleSendItemsCommand,   SEC_GAMEMASTER1,    Console::Yes },
+            { "mail",    HandleSendMailCommand,    SEC_GAMEMASTER1,    Console::Yes },
+            { "message", HandleSendMessageCommand, SEC_GAMEMASTER2_L, Console::Yes },
+            { "money",   HandleSendMoneyCommand,   SEC_GAMEMASTER1,    Console::Yes }
         };
 
         static ChatCommandTable commandTable =

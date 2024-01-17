@@ -49,15 +49,15 @@ public:
     {
         static ChatCommandTable deserterInstanceCommandTable =
         {
-            { "add",        HandleDeserterInstanceAdd,       SEC_ADMINISTRATOR, Console::Yes },
-            { "remove all", HandleDeserterInstanceRemoveAll, SEC_ADMINISTRATOR, Console::Yes },
-            { "remove",     HandleDeserterInstanceRemove,    SEC_ADMINISTRATOR, Console::Yes }
+            { "add",        HandleDeserterInstanceAdd,       SEC_GAMEMASTER2_F, Console::Yes },
+            { "remove all", HandleDeserterInstanceRemoveAll, SEC_GAMEMASTER2_F, Console::Yes },
+            { "remove",     HandleDeserterInstanceRemove,    SEC_GAMEMASTER2_F, Console::Yes }
         };
         static ChatCommandTable deserterBGCommandTable =
         {
-            { "add",        HandleDeserterBGAdd,       SEC_ADMINISTRATOR, Console::Yes },
-            { "remove all", HandleDeserterBGRemoveAll, SEC_ADMINISTRATOR, Console::Yes },
-            { "remove",     HandleDeserterBGRemove,    SEC_ADMINISTRATOR, Console::Yes }
+            { "add",        HandleDeserterBGAdd,       SEC_GAMEMASTER2_F, Console::Yes },
+            { "remove all", HandleDeserterBGRemoveAll, SEC_GAMEMASTER2_F, Console::Yes },
+            { "remove",     HandleDeserterBGRemove,    SEC_GAMEMASTER2_F, Console::Yes }
         };
 
         static ChatCommandTable deserterCommandTable =

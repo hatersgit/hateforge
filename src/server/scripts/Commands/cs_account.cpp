@@ -52,7 +52,7 @@ public:
     {
         static ChatCommandTable accountSetCommandTable =
         {
-            { "addon",      SEC_GAMEMASTER,     true,   &HandleAccountSetAddonCommand,          "" },
+            { "addon",      SEC_TRIAL_GAMEMASTER,     true,   &HandleAccountSetAddonCommand,          "" },
             { "gmlevel",    SEC_CONSOLE,        true,   &HandleAccountSetGmLevelCommand,        "" },
             { "password",   SEC_CONSOLE,        true,   &HandleAccountSetPasswordCommand,       "" },
             { "2fa",        SEC_PLAYER,         true,   &HandleAccountSet2FACommand,            "" }
@@ -72,20 +72,20 @@ public:
 
         static ChatCommandTable accountRemoveCommandTable
         {
-            { "country",    SEC_ADMINISTRATOR,  true,  &HandleAccountRemoveLockCountryCommand,  "" }
+            { "country",    SEC_GAMEMASTER2_F,  true,  &HandleAccountRemoveLockCountryCommand,  "" }
         };
 
         static ChatCommandTable accountCommandTable =
         {
             { "2fa",        SEC_PLAYER,         true,   nullptr, "", account2faCommandTable        },
-            { "addon",      SEC_MODERATOR,      false,  &HandleAccountAddonCommand,             "" },
+            { "addon",      SEC_TRIAL_GAMEMASTER,      false,  &HandleAccountAddonCommand,             "" },
             { "create",     SEC_CONSOLE,        true,   &HandleAccountCreateCommand,            "" },
             { "delete",     SEC_CONSOLE,        true,   &HandleAccountDeleteCommand,            "" },
             { "onlinelist", SEC_CONSOLE,        true,   &HandleAccountOnlineListCommand,        "" },
             { "lock",       SEC_PLAYER,         false,  nullptr, "", accountLockCommandTable       },
-            { "set",        SEC_ADMINISTRATOR,  true,   nullptr, "", accountSetCommandTable        },
+            { "set",        SEC_GAMEMASTER2_F,  true,   nullptr, "", accountSetCommandTable        },
             { "password",   SEC_PLAYER,         false,  &HandleAccountPasswordCommand,          "" },
-            { "remove",     SEC_ADMINISTRATOR,  true,   nullptr, "", accountRemoveCommandTable     },
+            { "remove",     SEC_GAMEMASTER2_F,  true,   nullptr, "", accountRemoveCommandTable     },
             { "",           SEC_PLAYER,         false,  &HandleAccountCommand,                  "" }
         };
 

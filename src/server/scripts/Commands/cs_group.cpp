@@ -33,11 +33,11 @@ public:
     {
         static ChatCommandTable groupCommandTable =
         {
-            { "list",    HandleGroupListCommand,    SEC_GAMEMASTER, Console::Yes },
-            { "join",    HandleGroupJoinCommand,    SEC_GAMEMASTER, Console::No },
-            { "remove",  HandleGroupRemoveCommand,  SEC_GAMEMASTER, Console::No },
-            { "disband", HandleGroupDisbandCommand, SEC_GAMEMASTER, Console::No },
-            { "leader",  HandleGroupLeaderCommand,  SEC_GAMEMASTER, Console::No }
+            { "list",    HandleGroupListCommand,    SEC_GAMEMASTER1, Console::Yes },
+            { "join",    HandleGroupJoinCommand,    SEC_GAMEMASTER1, Console::No },
+            { "remove",  HandleGroupRemoveCommand,  SEC_GAMEMASTER1, Console::No },
+            { "disband", HandleGroupDisbandCommand, SEC_GAMEMASTER1, Console::No },
+            { "leader",  HandleGroupLeaderCommand,  SEC_GAMEMASTER1, Console::No }
         };
 
         static ChatCommandTable commandTable =

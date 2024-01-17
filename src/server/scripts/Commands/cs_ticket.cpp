@@ -41,28 +41,28 @@ public:
     {
         static ChatCommandTable ticketResponseCommandTable =
         {
-            { "append",         HandleGMTicketResponseAppendCommand,    SEC_GAMEMASTER,     Console::Yes },
-            { "appendln",       HandleGMTicketResponseAppendLnCommand,  SEC_GAMEMASTER,     Console::Yes }
+            { "append",         HandleGMTicketResponseAppendCommand,    SEC_TRIAL_GAMEMASTER,     Console::Yes },
+            { "appendln",       HandleGMTicketResponseAppendLnCommand,  SEC_TRIAL_GAMEMASTER,     Console::Yes }
         };
         static ChatCommandTable ticketCommandTable =
         {
-            { "assign",         HandleGMTicketAssignToCommand,          SEC_GAMEMASTER,     Console::Yes },
-            { "close",          HandleGMTicketCloseByIdCommand,         SEC_GAMEMASTER,     Console::Yes },
-            { "closedlist",     HandleGMTicketListClosedCommand,        SEC_GAMEMASTER,     Console::Yes },
-            { "comment",        HandleGMTicketCommentCommand,           SEC_GAMEMASTER,     Console::Yes },
-            { "complete",       HandleGMTicketCompleteCommand,          SEC_GAMEMASTER,     Console::Yes },
-            { "delete",         HandleGMTicketDeleteByIdCommand,        SEC_ADMINISTRATOR,  Console::Yes },
-            { "escalate",       HandleGMTicketEscalateCommand,          SEC_GAMEMASTER,     Console::Yes },
-            { "escalatedlist",  HandleGMTicketListEscalatedCommand,     SEC_GAMEMASTER,     Console::Yes },
-            { "list",           HandleGMTicketListCommand,              SEC_GAMEMASTER,     Console::Yes },
-            { "onlinelist",     HandleGMTicketListOnlineCommand,        SEC_GAMEMASTER,     Console::Yes },
+            { "assign",         HandleGMTicketAssignToCommand,          SEC_GAMEMASTER1,     Console::Yes },
+            { "close",          HandleGMTicketCloseByIdCommand,         SEC_GAMEMASTER1,     Console::Yes },
+            { "closedlist",     HandleGMTicketListClosedCommand,        SEC_TRIAL_GAMEMASTER,     Console::Yes },
+            { "comment",        HandleGMTicketCommentCommand,           SEC_TRIAL_GAMEMASTER,     Console::Yes },
+            { "complete",       HandleGMTicketCompleteCommand,          SEC_GAMEMASTER1,     Console::Yes },
+            { "delete",         HandleGMTicketDeleteByIdCommand,        SEC_GAMEMASTER2_F,  Console::Yes },
+            { "escalate",       HandleGMTicketEscalateCommand,          SEC_GAMEMASTER1,     Console::Yes },
+            { "escalatedlist",  HandleGMTicketListEscalatedCommand,     SEC_TRIAL_GAMEMASTER,     Console::Yes },
+            { "list",           HandleGMTicketListCommand,              SEC_TRIAL_GAMEMASTER,     Console::Yes },
+            { "onlinelist",     HandleGMTicketListOnlineCommand,        SEC_TRIAL_GAMEMASTER,     Console::Yes },
             { "reset",          HandleGMTicketResetCommand,             SEC_CONSOLE,        Console::Yes },
 
             { "response",       ticketResponseCommandTable },
-            { "togglesystem",   HandleToggleGMTicketSystem,             SEC_ADMINISTRATOR,  Console::Yes },
-            { "unassign",       HandleGMTicketUnAssignCommand,          SEC_GAMEMASTER,     Console::Yes },
-            { "viewid",         HandleGMTicketGetByIdCommand,           SEC_GAMEMASTER,     Console::Yes },
-            { "viewname",       HandleGMTicketGetByNameCommand,         SEC_GAMEMASTER,     Console::Yes }
+            { "togglesystem",   HandleToggleGMTicketSystem,             SEC_GAMEMASTER2_F,  Console::Yes },
+            { "unassign",       HandleGMTicketUnAssignCommand,          SEC_GAMEMASTER1,     Console::Yes },
+            { "viewid",         HandleGMTicketGetByIdCommand,           SEC_TRIAL_GAMEMASTER,     Console::Yes },
+            { "viewname",       HandleGMTicketGetByNameCommand,         SEC_TRIAL_GAMEMASTER,     Console::Yes }
         };
         static ChatCommandTable commandTable =
         {

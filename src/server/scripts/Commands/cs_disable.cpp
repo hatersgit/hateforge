@@ -43,21 +43,21 @@ public:
     {
         static ChatCommandTable removeDisableCommandTable =
         {
-            { "spell",        HandleRemoveDisableSpellCommand,        SEC_ADMINISTRATOR, Console::Yes },
-            { "quest",        HandleRemoveDisableQuestCommand,        SEC_ADMINISTRATOR, Console::Yes },
-            { "map",          HandleRemoveDisableMapCommand,          SEC_ADMINISTRATOR, Console::Yes },
-            { "battleground", HandleRemoveDisableBattlegroundCommand, SEC_ADMINISTRATOR, Console::Yes },
-            { "outdoorpvp",   HandleRemoveDisableOutdoorPvPCommand,   SEC_ADMINISTRATOR, Console::Yes },
-            { "vmap",         HandleRemoveDisableVmapCommand,         SEC_ADMINISTRATOR, Console::Yes }
+            { "spell",        HandleRemoveDisableSpellCommand,        SEC_GAMEMASTER2_F, Console::Yes },
+            { "quest",        HandleRemoveDisableQuestCommand,        SEC_GAMEMASTER2_F, Console::Yes },
+            { "map",          HandleRemoveDisableMapCommand,          SEC_GAMEMASTER2_F, Console::Yes },
+            { "battleground", HandleRemoveDisableBattlegroundCommand, SEC_GAMEMASTER2_F, Console::Yes },
+            { "outdoorpvp",   HandleRemoveDisableOutdoorPvPCommand,   SEC_GAMEMASTER2_F, Console::Yes },
+            { "vmap",         HandleRemoveDisableVmapCommand,         SEC_GAMEMASTER2_F, Console::Yes }
         };
         static ChatCommandTable addDisableCommandTable =
         {
-            { "spell",        HandleAddDisableSpellCommand,           SEC_ADMINISTRATOR, Console::Yes },
-            { "quest",        HandleAddDisableQuestCommand,           SEC_ADMINISTRATOR, Console::Yes },
-            { "map",          HandleAddDisableMapCommand,             SEC_ADMINISTRATOR, Console::Yes },
-            { "battleground", HandleAddDisableBattlegroundCommand,    SEC_ADMINISTRATOR, Console::Yes },
-            { "outdoorpvp",   HandleAddDisableOutdoorPvPCommand,      SEC_ADMINISTRATOR, Console::Yes },
-            { "vmap",         HandleAddDisableVmapCommand,            SEC_ADMINISTRATOR, Console::Yes }
+            { "spell",        HandleAddDisableSpellCommand,           SEC_GAMEMASTER2_F, Console::Yes },
+            { "quest",        HandleAddDisableQuestCommand,           SEC_GAMEMASTER2_F, Console::Yes },
+            { "map",          HandleAddDisableMapCommand,             SEC_GAMEMASTER2_F, Console::Yes },
+            { "battleground", HandleAddDisableBattlegroundCommand,    SEC_GAMEMASTER2_F, Console::Yes },
+            { "outdoorpvp",   HandleAddDisableOutdoorPvPCommand,      SEC_GAMEMASTER2_F, Console::Yes },
+            { "vmap",         HandleAddDisableVmapCommand,            SEC_GAMEMASTER2_F, Console::Yes }
         };
         static ChatCommandTable disableCommandTable =
         {

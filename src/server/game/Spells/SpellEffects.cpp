@@ -4402,6 +4402,7 @@ void Spell::EffectActivateObject(SpellEffIndex effIndex)
 
 void Spell::EffectApplyGlyph(SpellEffIndex effIndex)
 {
+    /*
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
         return;
 
@@ -4482,6 +4483,7 @@ void Spell::EffectApplyGlyph(SpellEffIndex effIndex)
             player->SendTalentsInfoData(false);
         }
     }
+    */
 }
 
 void Spell::EffectEnchantHeldItem(SpellEffIndex effIndex)

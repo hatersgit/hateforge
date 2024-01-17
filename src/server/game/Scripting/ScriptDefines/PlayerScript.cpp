@@ -98,6 +98,14 @@ bool ScriptMgr::OnCanPlayerFlyInZone(Player* player, uint32 mapId, uint32 zoneId
     return true;
 }
 
+void ScriptMgr::GenerateItem(Item* item, CustomItemTemplate itemProto, Player const* owner)
+{
+    ExecuteScript<PlayerScript>([item, itemProto, owner](PlayerScript* script)
+        {
+            script->GenerateItem(item, itemProto, owner);
+        });
+}
+
 void ScriptMgr::OnPVPKill(Player* killer, Player* killed)
 {
     ExecuteScript<PlayerScript>([&](PlayerScript* script)

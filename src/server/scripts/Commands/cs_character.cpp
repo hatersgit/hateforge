@@ -48,44 +48,44 @@ public:
     {
         static ChatCommandTable pdumpCommandTable =
         {
-            { "load",           HandlePDumpLoadCommand,  SEC_ADMINISTRATOR, Console::Yes },
-            { "write",          HandlePDumpWriteCommand, SEC_ADMINISTRATOR, Console::Yes }
+            { "load",           HandlePDumpLoadCommand,  SEC_GAMEMASTER2_F, Console::Yes },
+            { "write",          HandlePDumpWriteCommand, SEC_GAMEMASTER2_F, Console::Yes }
         };
 
         static ChatCommandTable characterDeletedCommandTable =
         {
             { "delete",         HandleCharacterDeletedDeleteCommand,   SEC_CONSOLE,       Console::Yes },
-            { "list",           HandleCharacterDeletedListCommand,     SEC_ADMINISTRATOR, Console::Yes },
-            { "restore",        HandleCharacterDeletedRestoreCommand,  SEC_ADMINISTRATOR, Console::Yes },
+            { "list",           HandleCharacterDeletedListCommand,     SEC_GAMEMASTER2_F, Console::Yes },
+            { "restore",        HandleCharacterDeletedRestoreCommand,  SEC_GAMEMASTER2_F, Console::Yes },
             { "purge",          HandleCharacterDeletedPurgeCommand,    SEC_CONSOLE,       Console::Yes }
         };
 
         static ChatCommandTable characterCheckCommandTable =
         {
-            { "bank",          HandleCharacterCheckBankCommand,          SEC_GAMEMASTER, Console::Yes },
-            { "bag",           HandleCharacterCheckBagCommand,           SEC_GAMEMASTER, Console::Yes },
-            { "profession",    HandleCharacterCheckProfessionCommand,    SEC_GAMEMASTER, Console::Yes }
+            { "bank",          HandleCharacterCheckBankCommand,          SEC_GAMEMASTER1, Console::Yes },
+            { "bag",           HandleCharacterCheckBagCommand,           SEC_GAMEMASTER1, Console::Yes },
+            { "profession",    HandleCharacterCheckProfessionCommand,    SEC_GAMEMASTER1, Console::Yes }
         };
 
         static ChatCommandTable characterCommandTable =
         {
-            { "customize",      HandleCharacterCustomizeCommand,        SEC_GAMEMASTER, Console::Yes },
-            { "changefaction",  HandleCharacterChangeFactionCommand,    SEC_GAMEMASTER, Console::Yes },
-            { "changerace",     HandleCharacterChangeRaceCommand,       SEC_GAMEMASTER, Console::Yes },
-            { "changeaccount",  HandleCharacterChangeAccountCommand,    SEC_ADMINISTRATOR, Console::Yes },
+            { "customize",      HandleCharacterCustomizeCommand,        SEC_GAMEMASTER1, Console::Yes },
+            { "changefaction",  HandleCharacterChangeFactionCommand,    SEC_GAMEMASTER2_F, Console::Yes },
+            { "changerace",     HandleCharacterChangeRaceCommand,       SEC_GAMEMASTER2_F, Console::Yes },
+            { "changeaccount",  HandleCharacterChangeAccountCommand,    SEC_GAMEMASTER2_F, Console::Yes },
             { "check",          characterCheckCommandTable },
             { "erase",          HandleCharacterEraseCommand,            SEC_CONSOLE,    Console::Yes },
             { "deleted",        characterDeletedCommandTable },
-            { "level",          HandleCharacterLevelCommand,            SEC_GAMEMASTER, Console::Yes },
-            { "rename",         HandleCharacterRenameCommand,           SEC_GAMEMASTER, Console::Yes },
-            { "reputation",     HandleCharacterReputationCommand,       SEC_GAMEMASTER, Console::Yes },
-            { "titles",         HandleCharacterTitlesCommand,           SEC_GAMEMASTER, Console::Yes }
+            { "level",          HandleCharacterLevelCommand,            SEC_GAMEMASTER2_F, Console::Yes },
+            { "rename",         HandleCharacterRenameCommand,           SEC_GAMEMASTER2_F, Console::Yes },
+            { "reputation",     HandleCharacterReputationCommand,       SEC_GAMEMASTER1, Console::Yes },
+            { "titles",         HandleCharacterTitlesCommand,           SEC_GAMEMASTER1, Console::Yes }
         };
 
         static ChatCommandTable commandTable =
         {
             { "character",      characterCommandTable },
-            { "levelup",        HandleLevelUpCommand, SEC_GAMEMASTER, Console::No },
+            { "levelup",        HandleLevelUpCommand, SEC_GAMEMASTER2_F, Console::No },
             { "pdump",          pdumpCommandTable }
         };
 

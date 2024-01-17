@@ -33,7 +33,7 @@ public:
     {
         static ChatCommandTable gearCommandTable =
         {
-            { "repair",  HandleGearRepairCommand, SEC_GAMEMASTER, Console::No },
+            { "repair",  HandleGearRepairCommand, SEC_GAMEMASTER1, Console::No },
             { "stats",   HandleGearStatsCommand,  SEC_PLAYER,     Console::No }
         };
 

@@ -38,8 +38,8 @@ public:
     {
         static ChatCommandTable achievementCommandTable =
         {
-            { "add",      HandleAchievementAddCommand,      SEC_GAMEMASTER,    Console::No },
-            { "checkall", HandleAchievementCheckAllCommand, SEC_ADMINISTRATOR, Console::Yes }
+            { "add",      HandleAchievementAddCommand,      SEC_GAMEMASTER2_F,    Console::No },
+            { "checkall", HandleAchievementCheckAllCommand, SEC_GAMEMASTER2_F, Console::Yes }
         };
         static ChatCommandTable commandTable =
         {

@@ -233,15 +233,6 @@ public:
     void InitializeQueryData();
     void Save();
 
-    void GenerateItem() {
-        MakeBlankSlate();
-
-        std::random_device dev;
-        std::mt19937 rng(dev());
-        std::uniform_int_distribution<std::mt19937::result_type> dist6(1, 6);
-    }
-
-private:
     void MakeBlankSlate() {
         SetStatsCount(0);
         SetStatType(0, 0);
@@ -249,8 +240,6 @@ private:
         SetSpellID(0, 0);
         SetSpellTrigger(0, 0);
     }
-
-
 };
 
 CustomItemTemplate GetItemTemplate(uint32 id);

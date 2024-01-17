@@ -192,6 +192,14 @@ public:
         OnAddItem(player, item->GetTemplate()->ItemId, count);
     }
 
+    void GenerateItem(Item* item, CustomItemTemplate itemProto, Player const* owner) override
+    {
+        itemProto->MakeBlankSlate();
+        itemProto->SetName("TESTING SCRIPT INJECT");
+        itemProto->Save();
+        owner->SendItemQueryPacket(&itemProto);
+    }
+
     /*void OnGiveXP(Player* player, uint32& amount, Unit* victim) override
     {
         if (Gamemode::HasGameMode(player, GameModeType::CLASSIC))

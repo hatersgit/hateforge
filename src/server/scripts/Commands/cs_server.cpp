@@ -52,39 +52,39 @@ public:
     {
         static ChatCommandTable serverIdleRestartCommandTable =
         {
-            { "cancel",       HandleServerShutDownCancelCommand, SEC_ADMINISTRATOR, Console::Yes },
+            { "cancel",       HandleServerShutDownCancelCommand, SEC_GAMEMASTER2_F, Console::Yes },
             { "",             HandleServerIdleRestartCommand,    SEC_CONSOLE,       Console::Yes }
         };
 
         static ChatCommandTable serverIdleShutdownCommandTable =
         {
-            { "cancel",       HandleServerShutDownCancelCommand, SEC_ADMINISTRATOR, Console::Yes },
+            { "cancel",       HandleServerShutDownCancelCommand, SEC_GAMEMASTER2_F, Console::Yes },
             { "",             HandleServerIdleShutDownCommand,   SEC_CONSOLE,       Console::Yes }
         };
 
         static ChatCommandTable serverRestartCommandTable =
         {
-            { "cancel",       HandleServerShutDownCancelCommand, SEC_ADMINISTRATOR, Console::Yes },
-            { "",             HandleServerRestartCommand,        SEC_ADMINISTRATOR, Console::Yes }
+            { "cancel",       HandleServerShutDownCancelCommand, SEC_GAMEMASTER2_F, Console::Yes },
+            { "",             HandleServerRestartCommand,        SEC_GAMEMASTER2_F, Console::Yes }
         };
 
         static ChatCommandTable serverShutdownCommandTable =
         {
-            { "cancel",       HandleServerShutDownCancelCommand, SEC_ADMINISTRATOR, Console::Yes },
-            { "",             HandleServerShutDownCommand,       SEC_ADMINISTRATOR, Console::Yes }
+            { "cancel",       HandleServerShutDownCancelCommand, SEC_GAMEMASTER2_F, Console::Yes },
+            { "",             HandleServerShutDownCommand,       SEC_GAMEMASTER2_F, Console::Yes }
         };
 
         static ChatCommandTable serverSetCommandTable =
         {
             { "loglevel",     HandleServerSetLogLevelCommand,    SEC_CONSOLE,       Console::Yes },
-            { "motd",         HandleServerSetMotdCommand,        SEC_ADMINISTRATOR, Console::Yes },
+            { "motd",         HandleServerSetMotdCommand,        SEC_GAMEMASTER2_F, Console::Yes },
             { "closed",       HandleServerSetClosedCommand,      SEC_CONSOLE,       Console::Yes },
         };
 
         static ChatCommandTable serverCommandTable =
         {
-            { "corpses",      HandleServerCorpsesCommand,        SEC_GAMEMASTER,    Console::Yes },
-            { "debug",        HandleServerDebugCommand,          SEC_ADMINISTRATOR, Console::Yes },
+            { "corpses",      HandleServerCorpsesCommand,        SEC_GAMEMASTER1,    Console::Yes },
+            { "debug",        HandleServerDebugCommand,          SEC_GAMEMASTER2_F, Console::Yes },
             { "exit",         HandleServerExitCommand,           SEC_CONSOLE,       Console::Yes },
             { "idlerestart",  serverIdleRestartCommandTable },
             { "idleshutdown", serverIdleShutdownCommandTable },

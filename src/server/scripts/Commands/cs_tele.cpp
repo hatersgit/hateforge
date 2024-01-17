@@ -42,22 +42,22 @@ public:
     {
         static ChatCommandTable teleNameNpcCommandTable =
         {
-            { "id",     HandleTeleNameNpcIdCommand,      SEC_GAMEMASTER,    Console::Yes },
-            { "guid",   HandleTeleNameNpcSpawnIdCommand, SEC_GAMEMASTER,    Console::Yes },
-            { "name",   HandleTeleNameNpcNameCommand,    SEC_GAMEMASTER,    Console::Yes },
+            { "id",     HandleTeleNameNpcIdCommand,      SEC_TRIAL_GAMEMASTER,    Console::Yes },
+            { "guid",   HandleTeleNameNpcSpawnIdCommand, SEC_TRIAL_GAMEMASTER,    Console::Yes },
+            { "name",   HandleTeleNameNpcNameCommand,    SEC_TRIAL_GAMEMASTER,    Console::Yes },
         };
         static ChatCommandTable teleNameCommandTable =
         {
             { "npc",    teleNameNpcCommandTable },
-            { "",       HandleTeleNameCommand,           SEC_GAMEMASTER,    Console::Yes },
+            { "",       HandleTeleNameCommand,           SEC_TRIAL_GAMEMASTER,    Console::Yes },
         };
         static ChatCommandTable teleCommandTable =
         {
-            { "add",    HandleTeleAddCommand,            SEC_ADMINISTRATOR, Console::No },
-            { "del",    HandleTeleDelCommand,            SEC_ADMINISTRATOR, Console::Yes },
+            { "add",    HandleTeleAddCommand,            SEC_GAMEMASTER2_F, Console::No },
+            { "del",    HandleTeleDelCommand,            SEC_GAMEMASTER2_F, Console::Yes },
             { "name",   teleNameCommandTable },
-            { "group",  HandleTeleGroupCommand,          SEC_GAMEMASTER,    Console::No },
-            { "",       HandleTeleCommand,               SEC_GAMEMASTER,    Console::No }
+            { "group",  HandleTeleGroupCommand,          SEC_GAMEMASTER1,    Console::No },
+            { "",       HandleTeleCommand,               SEC_TRIAL_GAMEMASTER,    Console::No }
         };
         static ChatCommandTable commandTable =
         {

@@ -45,19 +45,19 @@ public:
     {
         static ChatCommandTable goCommandTable =
         {
-            { "creature",      HandleGoCreatureSpawnIdCommand,   SEC_MODERATOR,  Console::No },
-            { "creature id",   HandleGoCreatureCIdCommand,       SEC_MODERATOR,  Console::No },
-            { "creature name", HandleGoCreatureNameCommand,      SEC_MODERATOR,  Console::No },
-            { "gameobject",    HandleGoGameObjectSpawnIdCommand, SEC_MODERATOR,  Console::No },
-            { "gameobject id", HandleGoGameObjectGOIdCommand,    SEC_MODERATOR,  Console::No },
-            { "graveyard",     HandleGoGraveyardCommand,         SEC_MODERATOR,  Console::No },
-            { "grid",          HandleGoGridCommand,              SEC_MODERATOR,  Console::No },
-            { "taxinode",      HandleGoTaxinodeCommand,          SEC_MODERATOR,  Console::No },
-            { "trigger",       HandleGoTriggerCommand,           SEC_MODERATOR,  Console::No },
-            { "zonexy",        HandleGoZoneXYCommand,            SEC_MODERATOR,  Console::No },
-            { "xyz",           HandleGoXYZCommand,               SEC_MODERATOR,  Console::No },
-            { "ticket",        HandleGoTicketCommand,            SEC_GAMEMASTER, Console::No },
-            { "quest",         HandleGoQuestCommand,             SEC_MODERATOR,  Console::No },
+            { "creature",      HandleGoCreatureSpawnIdCommand,   SEC_TRIAL_GAMEMASTER,  Console::No },
+            { "creature id",   HandleGoCreatureCIdCommand,       SEC_TRIAL_GAMEMASTER,  Console::No },
+            { "creature name", HandleGoCreatureNameCommand,      SEC_TRIAL_GAMEMASTER,  Console::No },
+            { "gameobject",    HandleGoGameObjectSpawnIdCommand, SEC_TRIAL_GAMEMASTER,  Console::No },
+            { "gameobject id", HandleGoGameObjectGOIdCommand,    SEC_TRIAL_GAMEMASTER,  Console::No },
+            { "graveyard",     HandleGoGraveyardCommand,         SEC_TRIAL_GAMEMASTER,  Console::No },
+            { "grid",          HandleGoGridCommand,              SEC_TRIAL_GAMEMASTER,  Console::No },
+            { "taxinode",      HandleGoTaxinodeCommand,          SEC_TRIAL_GAMEMASTER,  Console::No },
+            { "trigger",       HandleGoTriggerCommand,           SEC_TRIAL_GAMEMASTER,  Console::No },
+            { "zonexy",        HandleGoZoneXYCommand,            SEC_TRIAL_GAMEMASTER,  Console::No },
+            { "xyz",           HandleGoXYZCommand,               SEC_TRIAL_GAMEMASTER,  Console::No },
+            { "ticket",        HandleGoTicketCommand,            SEC_GAMEMASTER1, Console::No },
+            { "quest",         HandleGoQuestCommand,             SEC_TRIAL_GAMEMASTER,  Console::No },
         };
 
         static ChatCommandTable commandTable =

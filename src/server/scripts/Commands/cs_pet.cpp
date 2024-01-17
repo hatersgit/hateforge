@@ -36,9 +36,9 @@ public:
     {
         static ChatCommandTable petCommandTable =
         {
-            { "create",  HandlePetCreateCommand,  SEC_GAMEMASTER, Console::No },
-            { "learn",   HandlePetLearnCommand,   SEC_GAMEMASTER, Console::No },
-            { "unlearn", HandlePetUnlearnCommand, SEC_GAMEMASTER, Console::No }
+            { "create",  HandlePetCreateCommand,  SEC_GAMEMASTER2_L, Console::No },
+            { "learn",   HandlePetLearnCommand,   SEC_GAMEMASTER1, Console::No },
+            { "unlearn", HandlePetUnlearnCommand, SEC_GAMEMASTER1, Console::No }
         };
 
         static ChatCommandTable commandTable =

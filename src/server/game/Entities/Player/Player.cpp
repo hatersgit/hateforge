@@ -2836,7 +2836,7 @@ void Player::SendInitialSpells()
     }
 
     // Added spells from glyphs too (needed by spell tooltips)
-    for (uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
+    /*for (uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
     {
         if (uint32 glyph = GetGlyph(i))
         {
@@ -2848,7 +2848,7 @@ void Player::SendInitialSpells()
                 ++spellCount;
             }
         }
-    }
+    }*/
 
     // xinef: we have to send talents, but not those on m_spells list
     for (PlayerTalentMap::iterator itr = m_talents.begin(); itr != m_talents.end(); ++itr)

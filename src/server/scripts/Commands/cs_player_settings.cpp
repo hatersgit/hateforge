@@ -31,7 +31,7 @@ public:
     {
         static ChatCommandTable playerSettingsCommandTable =
         {
-            { "announcer", HandleSettingsAnnouncerFlags, SEC_MODERATOR, Console::No },
+            { "announcer", HandleSettingsAnnouncerFlags, SEC_TRIAL_GAMEMASTER, Console::No },
         };
         static ChatCommandTable commandTable =
         {

@@ -42,32 +42,32 @@ public:
     {
         static ChatCommandTable learnAllMyCommandTable =
         {
-            { "class",      HandleLearnAllMyClassCommand,      SEC_GAMEMASTER, Console::No },
-            { "pettalents", HandleLearnAllMyPetTalentsCommand, SEC_GAMEMASTER, Console::No },
-            { "spells",     HandleLearnAllMySpellsCommand,     SEC_GAMEMASTER, Console::No },
-            { "talents",    HandleLearnAllMyTalentsCommand,    SEC_GAMEMASTER, Console::No }
+            { "class",      HandleLearnAllMyClassCommand,      SEC_GAMEMASTER2_L, Console::No },
+            { "pettalents", HandleLearnAllMyPetTalentsCommand, SEC_GAMEMASTER2_L, Console::No },
+            { "spells",     HandleLearnAllMySpellsCommand,     SEC_GAMEMASTER2_L, Console::No },
+            { "talents",    HandleLearnAllMyTalentsCommand,    SEC_GAMEMASTER2_L, Console::No }
         };
 
         static ChatCommandTable learnAllCommandTable =
         {
             { "my", learnAllMyCommandTable },
-            { "gm",        HandleLearnAllGMCommand,            SEC_GAMEMASTER, Console::No },
-            { "crafts",    HandleLearnAllCraftsCommand,        SEC_GAMEMASTER, Console::No },
-            { "default",   HandleLearnAllDefaultCommand,       SEC_GAMEMASTER, Console::No },
-            { "lang",      HandleLearnAllLangCommand,          SEC_GAMEMASTER, Console::No },
-            { "recipes",   HandleLearnAllRecipesCommand,       SEC_GAMEMASTER, Console::No },
+            { "gm",        HandleLearnAllGMCommand,            SEC_GAMEMASTER2_L, Console::No },
+            { "crafts",    HandleLearnAllCraftsCommand,        SEC_GAMEMASTER2_L, Console::No },
+            { "default",   HandleLearnAllDefaultCommand,       SEC_GAMEMASTER2_L, Console::No },
+            { "lang",      HandleLearnAllLangCommand,          SEC_GAMEMASTER2_L, Console::No },
+            { "recipes",   HandleLearnAllRecipesCommand,       SEC_GAMEMASTER2_L, Console::No },
         };
 
         static ChatCommandTable learnCommandTable =
         {
             { "all", learnAllCommandTable },
-            { "",     HandleLearnCommand,                      SEC_GAMEMASTER, Console::No }
+            { "",     HandleLearnCommand,                      SEC_GAMEMASTER2_L, Console::No }
         };
 
         static ChatCommandTable commandTable =
         {
             { "learn", learnCommandTable },
-            { "unlearn",     HandleUnLearnCommand,             SEC_GAMEMASTER, Console::No }
+            { "unlearn",     HandleUnLearnCommand,             SEC_GAMEMASTER2_L, Console::No }
         };
         return commandTable;
     }

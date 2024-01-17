@@ -1458,7 +1458,7 @@ public:
 
         bool CheckRequiredBosses(uint32 bossId, Player const* player) const override
         {
-            if (player && player->GetSession() && player->GetSession()->GetSecurity() >= SEC_MODERATOR)
+            if (player && player->GetSession() && player->GetSession()->GetSecurity() >= SEC_TRIAL_GAMEMASTER)
             {
                 return true;
             }

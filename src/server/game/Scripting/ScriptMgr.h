@@ -23,6 +23,7 @@
 #include "AuctionHouseMgr.h"
 #include "Battleground.h"
 #include "Common.h"
+#include "CustomItemTemplate.h"
 #include "DBCStores.h"
 #include "DynamicObject.h"
 #include "GameEventMgr.h"
@@ -455,6 +456,7 @@ public: /* PlayerScript */
     void OnAfterCreatureLoot(Player* player);
     void OnAfterCreatureLootMoney(Player* player);
     bool OnCanPlayerFlyInZone(Player* player, uint32 mapId, uint32 zoneId, SpellInfo const* bySpell);
+    void GenerateItem(Item* item, CustomItemTemplate itemProto, Player const* owner);
 
     // Anti cheat
     void AnticheatSetCanFlybyServer(Player* player, bool apply);

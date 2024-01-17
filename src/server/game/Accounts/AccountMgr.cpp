@@ -284,7 +284,7 @@ namespace AccountMgr
 
     bool IsAdminAccount(uint32 gmlevel)
     {
-        return gmlevel >= SEC_ADMINISTRATOR && gmlevel <= SEC_CONSOLE;
+        return gmlevel >= SEC_GAMEMASTER2_F && gmlevel <= SEC_CONSOLE;
     }
 
     bool IsConsoleAccount(uint32 gmlevel)

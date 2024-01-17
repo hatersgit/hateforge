@@ -44,12 +44,12 @@ public:
     {
         static ChatCommandTable instanceCommandTable =
         {
-            { "listbinds",    HandleInstanceListBindsCommand,    SEC_MODERATOR,     Console::No },
-            { "unbind",       HandleInstanceUnbindCommand,       SEC_GAMEMASTER,    Console::No },
-            { "stats",        HandleInstanceStatsCommand,        SEC_MODERATOR,     Console::Yes },
-            { "savedata",     HandleInstanceSaveDataCommand,     SEC_ADMINISTRATOR, Console::No },
-            { "setbossstate", HandleInstanceSetBossStateCommand, SEC_GAMEMASTER,    Console::Yes },
-            { "getbossstate", HandleInstanceGetBossStateCommand, SEC_MODERATOR,     Console::Yes },
+            { "listbinds",    HandleInstanceListBindsCommand,    SEC_GAMEMASTER1,     Console::No },
+            { "unbind",       HandleInstanceUnbindCommand,       SEC_GAMEMASTER2_L,    Console::No },
+            { "stats",        HandleInstanceStatsCommand,        SEC_GAMEMASTER1,     Console::Yes },
+            { "savedata",     HandleInstanceSaveDataCommand,     SEC_GAMEMASTER2_F, Console::No },
+            { "setbossstate", HandleInstanceSetBossStateCommand, SEC_GAMEMASTER2_L,    Console::Yes },
+            { "getbossstate", HandleInstanceGetBossStateCommand, SEC_GAMEMASTER1,     Console::Yes },
         };
 
         static ChatCommandTable commandTable =

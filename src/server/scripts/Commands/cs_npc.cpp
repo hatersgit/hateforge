@@ -137,57 +137,57 @@ public:
     {
         static ChatCommandTable npcAddCommandTable =
         {
-            { "formation",      HandleNpcAddFormationCommand,      SEC_ADMINISTRATOR, Console::No },
-            { "item",           HandleNpcAddVendorItemCommand,     SEC_ADMINISTRATOR, Console::No },
-            { "move",           HandleNpcAddMoveCommand,           SEC_ADMINISTRATOR, Console::No },
-            { "temp",           HandleNpcAddTempSpawnCommand,      SEC_ADMINISTRATOR, Console::No },
-            { "",               HandleNpcAddCommand,               SEC_ADMINISTRATOR, Console::No }
+            { "formation",      HandleNpcAddFormationCommand,      SEC_GAMEMASTER2_F, Console::No },
+            { "item",           HandleNpcAddVendorItemCommand,     SEC_GAMEMASTER2_F, Console::No },
+            { "move",           HandleNpcAddMoveCommand,           SEC_GAMEMASTER2_F, Console::No },
+            { "temp",           HandleNpcAddTempSpawnCommand,      SEC_GAMEMASTER2_F, Console::No },
+            { "",               HandleNpcAddCommand,               SEC_GAMEMASTER2_F, Console::No }
         };
         static ChatCommandTable npcDeleteCommandTable =
         {
-            { "item",           HandleNpcDeleteVendorItemCommand,  SEC_ADMINISTRATOR, Console::No },
-            { "",               HandleNpcDeleteCommand,            SEC_ADMINISTRATOR, Console::No }
+            { "item",           HandleNpcDeleteVendorItemCommand,  SEC_GAMEMASTER2_L, Console::No },
+            { "",               HandleNpcDeleteCommand,            SEC_GAMEMASTER2_F, Console::No }
         };
         static ChatCommandTable npcFollowCommandTable =
         {
-            { "stop",           HandleNpcUnFollowCommand,          SEC_GAMEMASTER, Console::No },
-            { "",               HandleNpcFollowCommand,            SEC_GAMEMASTER, Console::No }
+            { "stop",           HandleNpcUnFollowCommand,          SEC_GAMEMASTER1, Console::No },
+            { "",               HandleNpcFollowCommand,            SEC_GAMEMASTER1, Console::No }
         };
 
         static ChatCommandTable npcFactionCommandTable =
         {
-            { "permanent",      HandleNpcSetFactionIdCommand,      SEC_ADMINISTRATOR, Console::No },
-            { "temp",           HandleNpcSetFactionTempIdCommand,  SEC_ADMINISTRATOR, Console::No },
-            { "original",       HandleNpcSetOriginalFaction,       SEC_ADMINISTRATOR, Console::No }
+            { "permanent",      HandleNpcSetFactionIdCommand,      SEC_GAMEMASTER2_F, Console::No },
+            { "temp",           HandleNpcSetFactionTempIdCommand,  SEC_GAMEMASTER2_F, Console::No },
+            { "original",       HandleNpcSetOriginalFaction,       SEC_GAMEMASTER2_F, Console::No }
         };
 
         static ChatCommandTable npcSetCommandTable =
         {
-            { "allowmove",      HandleNpcSetAllowMovementCommand,  SEC_ADMINISTRATOR, Console::No },
-            { "entry",          HandleNpcSetEntryCommand,          SEC_ADMINISTRATOR, Console::No },
+            { "allowmove",      HandleNpcSetAllowMovementCommand,  SEC_GAMEMASTER2_F, Console::No },
+            { "entry",          HandleNpcSetEntryCommand,          SEC_GAMEMASTER2_F, Console::No },
             { "faction",        npcFactionCommandTable},
-            { "flag",           HandleNpcSetFlagCommand,           SEC_ADMINISTRATOR, Console::No },
-            { "level",          HandleNpcSetLevelCommand,          SEC_ADMINISTRATOR, Console::No },
-            { "link",           HandleNpcSetLinkCommand,           SEC_ADMINISTRATOR, Console::No },
-            { "model",          HandleNpcSetModelCommand,          SEC_ADMINISTRATOR, Console::No },
-            { "movetype",       HandleNpcSetMoveTypeCommand,       SEC_ADMINISTRATOR, Console::No },
-            { "phase",          HandleNpcSetPhaseCommand,          SEC_ADMINISTRATOR, Console::No },
-            { "wanderdistance", HandleNpcSetWanderDistanceCommand, SEC_ADMINISTRATOR, Console::No },
-            { "spawntime",      HandleNpcSetSpawnTimeCommand,      SEC_ADMINISTRATOR, Console::No },
-            { "data",           HandleNpcSetDataCommand,           SEC_ADMINISTRATOR, Console::No }
+            { "flag",           HandleNpcSetFlagCommand,           SEC_GAMEMASTER2_F, Console::No },
+            { "level",          HandleNpcSetLevelCommand,          SEC_GAMEMASTER2_F, Console::No },
+            { "link",           HandleNpcSetLinkCommand,           SEC_GAMEMASTER2_F, Console::No },
+            { "model",          HandleNpcSetModelCommand,          SEC_GAMEMASTER2_F, Console::No },
+            { "movetype",       HandleNpcSetMoveTypeCommand,       SEC_GAMEMASTER2_F, Console::No },
+            { "phase",          HandleNpcSetPhaseCommand,          SEC_GAMEMASTER2_F, Console::No },
+            { "wanderdistance", HandleNpcSetWanderDistanceCommand, SEC_GAMEMASTER2_F, Console::No },
+            { "spawntime",      HandleNpcSetSpawnTimeCommand,      SEC_GAMEMASTER2_F, Console::No },
+            { "data",           HandleNpcSetDataCommand,           SEC_GAMEMASTER2_F, Console::No }
         };
         static ChatCommandTable npcCommandTable =
         {
-            { "info",           HandleNpcInfoCommand,              SEC_GAMEMASTER, Console::No },
-            { "guid",           HandleNpcGuidCommand,              SEC_GAMEMASTER, Console::No },
-            { "near",           HandleNpcNearCommand,              SEC_GAMEMASTER, Console::No },
-            { "move",           HandleNpcMoveCommand,              SEC_GAMEMASTER, Console::No },
-            { "playemote",      HandleNpcPlayEmoteCommand,         SEC_GAMEMASTER, Console::No },
-            { "say",            HandleNpcSayCommand,               SEC_GAMEMASTER, Console::No },
-            { "textemote",      HandleNpcTextEmoteCommand,         SEC_GAMEMASTER, Console::No },
-            { "whisper",        HandleNpcWhisperCommand,           SEC_GAMEMASTER, Console::No },
-            { "yell",           HandleNpcYellCommand,              SEC_GAMEMASTER, Console::No },
-            { "tame",           HandleNpcTameCommand,              SEC_GAMEMASTER, Console::No },
+            { "info",           HandleNpcInfoCommand,              SEC_TRIAL_GAMEMASTER, Console::No },
+            { "guid",           HandleNpcGuidCommand,              SEC_TRIAL_GAMEMASTER, Console::No },
+            { "near",           HandleNpcNearCommand,              SEC_TRIAL_GAMEMASTER, Console::No },
+            { "move",           HandleNpcMoveCommand,              SEC_TRIAL_GAMEMASTER, Console::No },
+            { "playemote",      HandleNpcPlayEmoteCommand,         SEC_TRIAL_GAMEMASTER, Console::No },
+            { "say",            HandleNpcSayCommand,               SEC_TRIAL_GAMEMASTER, Console::No },
+            { "textemote",      HandleNpcTextEmoteCommand,         SEC_TRIAL_GAMEMASTER, Console::No },
+            { "whisper",        HandleNpcWhisperCommand,           SEC_TRIAL_GAMEMASTER, Console::No },
+            { "yell",           HandleNpcYellCommand,              SEC_TRIAL_GAMEMASTER, Console::No },
+            { "tame",           HandleNpcTameCommand,              SEC_TRIAL_GAMEMASTER, Console::No },
             { "add",            npcAddCommandTable },
             { "delete",         npcDeleteCommandTable },
             { "follow",         npcFollowCommandTable },

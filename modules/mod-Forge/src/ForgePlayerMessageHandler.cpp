@@ -195,7 +195,6 @@ public:
     void GenerateItem(Item* item, CustomItemTemplate itemProto, Player const* owner) override
     {
         itemProto->MakeBlankSlate();
-        itemProto->SetName("TESTING SCRIPT INJECT");
         itemProto->Save();
         owner->SendItemQueryPacket(&itemProto);
     }

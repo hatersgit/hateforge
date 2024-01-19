@@ -629,6 +629,35 @@ void CustomItemTemplate::Save()
     CharacterDatabase.CommitTransaction(trans);
 }
 
+bool CustomItemTemplate::IsWeapon() {
+    return GetClass() == ItemClass::ITEM_CLASS_WEAPON;
+}
+
+bool CustomItemTemplate::IsArmor() {
+    return GetClass() == ItemClass::ITEM_CLASS_ARMOR;
+}
+
+bool CustomItemTemplate::Is2hWeapon() {
+    return GetClass() == ItemClass::ITEM_CLASS_WEAPON && (GetSubClass() == ITEM_SUBCLASS_WEAPON_AXE2 || GetSubClass() == ITEM_SUBCLASS_WEAPON_MACE2 || GetSubClass() == ITEM_SUBCLASS_WEAPON_POLEARM || GetSubClass() == ITEM_SUBCLASS_WEAPON_SWORD2 || GetSubClass() == ITEM_SUBCLASS_WEAPON_STAFF);
+}
+
+void CustomItemTemplate::MakeBlankSlate() {
+    SetStatsCount(0);
+    SetStatType(0, 0);
+    SetStatValue(0, 0);
+    SetSpellID(0, 0);
+    SetSpellTrigger(0, 0);
+
+    if (IsWeapon()) {
+        SetDamageMaxA(0);
+        SetDamageMaxB(0);
+        SetDamageMinA(0);
+        SetDamageMinB(0);
+        SetDamageTypeA(0);
+        SetDamageTypeB(0);
+    }
+}
+
 void CustomItemTemplate::InitializeQueryData()
 {
     info->InitializeQueryData();

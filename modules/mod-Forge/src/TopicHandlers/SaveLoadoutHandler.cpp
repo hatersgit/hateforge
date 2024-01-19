@@ -82,7 +82,7 @@ public:
                     fc->_playerTalentLoadouts[guid][specId][id] = plo;
                     fc->LoadLoadoutActions(iam.player);
                 }
-                CharacterDatabase.DirectExecute("insert into `forge_character_talent_loadouts` (`guid`, `id`, `tabId`, `name`, `talentString`, `active`) values ({}, {}, {}, '{}', '{}', {}) on duplicate key update `name` = '{}', `talentString` = '{}', `active` = {}",
+                CharacterDatabase.DirectExecute("insert into `forge_character_talent_loadouts` (`guid`, `id`, `talentTabId`, `name`, `talentString`, `active`) values ({}, {}, {}, '{}', '{}', {}) on duplicate key update `name` = '{}', `talentString` = '{}', `active` = {}",
                     guid, id, specId, name, talentString, true, name, talentString, true);
             }
         }

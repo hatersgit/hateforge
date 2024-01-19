@@ -233,13 +233,10 @@ public:
     void InitializeQueryData();
     void Save();
 
-    void MakeBlankSlate() {
-        SetStatsCount(0);
-        SetStatType(0, 0);
-        SetStatValue(0, 0);
-        SetSpellID(0, 0);
-        SetSpellTrigger(0, 0);
-    }
+    bool IsWeapon();
+    bool IsArmor();
+    bool Is2hWeapon();
+    void MakeBlankSlate();
 };
 
 CustomItemTemplate GetItemTemplate(uint32 id);

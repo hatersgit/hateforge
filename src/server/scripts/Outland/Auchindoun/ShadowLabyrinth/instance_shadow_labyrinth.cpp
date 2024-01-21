@@ -115,15 +115,15 @@ class spell_mark_of_malice : public AuraScript
         return ValidateSpellInfo({ SPELL_MARK_OF_MALICE_TRIGGERED });
     }
 
-    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
     {
         PreventDefaultAction();
-        if (GetCharges() > 1)
+        if (aurEff->GetBase()->GetCharges() > 1)
         {
             return;
         }
 
-        GetTarget()->CastSpell(GetTarget(), SPELL_MARK_OF_MALICE_TRIGGERED, true);
+        GetTarget()->CastSpell(GetTarget(), SPELL_MARK_OF_MALICE_TRIGGERED, true, nullptr, aurEff);
     }
 
     void Register() override

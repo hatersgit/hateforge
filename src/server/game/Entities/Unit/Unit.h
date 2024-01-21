@@ -709,13 +709,13 @@ struct DiminishingReturn
         : DRGroup(group), stack(0), hitTime(t), hitCount(count)
     {}
 
-    DiminishingGroup        DRGroup: 16;
-    uint16                  stack: 16;
+    DiminishingGroup        DRGroup;
+    uint16                  stack;
     uint32                  hitTime;
     uint32                  hitCount;
 };
 
-enum MeleeHitOutcome
+enum MeleeHitOutcome : uint8
 {
     MELEE_HIT_EVADE, MELEE_HIT_MISS, MELEE_HIT_DODGE, MELEE_HIT_BLOCK, MELEE_HIT_PARRY,
     MELEE_HIT_GLANCING, MELEE_HIT_CRIT, MELEE_HIT_CRUSHING, MELEE_HIT_NORMAL
@@ -780,6 +780,7 @@ private:
     uint32 m_absorb;
     uint32 m_resist;
     uint32 m_block;
+    uint32 m_hitMask;
     uint32 m_cleanDamage;
     bool m_criticalBlock = false;
     uint32 m_hitInfo;
@@ -788,10 +789,9 @@ private:
     DamageInfo(DamageInfo const& dmg1, DamageInfo const& dmg2);
 
 public:
-    explicit DamageInfo(Unit* _attacker, Unit* _victim, uint32 _damage, SpellInfo const* _spellInfo, SpellSchoolMask _schoolMask, DamageEffectType _damageType, uint32 cleanDamage = 0);
-    explicit DamageInfo(CalcDamageInfo const& dmgInfo); // amalgamation wrapper
-    DamageInfo(CalcDamageInfo const& dmgInfo, uint8 damageIndex);
-    DamageInfo(SpellNonMeleeDamage const& spellNonMeleeDamage, DamageEffectType damageType);
+    DamageInfo(Unit* attacker, Unit* victim, uint32 damage, SpellInfo const* spellInfo, SpellSchoolMask schoolMask, DamageEffectType damageType, WeaponAttackType attackType); explicit DamageInfo(CalcDamageInfo const& dmgInfo); // amalgamation wrapper
+    explicit DamageInfo(CalcDamageInfo const& dmgInfo, uint8 damageIndex);
+    DamageInfo(SpellNonMeleeDamage const& spellNonMeleeDamage, DamageEffectType damageType, WeaponAttackType attackType, uint32 hitMask);
 
     void ModifyDamage(int32 amount);
     void AbsorbDamage(uint32 amount);
@@ -812,6 +812,7 @@ public:
     [[nodiscard]] uint32 GetHitInfo() const { return m_hitInfo; };
 
     [[nodiscard]] uint32 GetUnmitigatedDamage() const;
+    [[nodiscard]] uint32 GetHitMask() const;
 };
 
 class HealInfo
@@ -824,23 +825,10 @@ private:
     uint32 m_absorb;
     SpellInfo const* const m_spellInfo;
     SpellSchoolMask const m_schoolMask;
+    uint32 m_hitMask;
 public:
-    explicit HealInfo(Unit* _healer, Unit* _target, uint32 _heal, SpellInfo const* _spellInfo, SpellSchoolMask _schoolMask)
-        : m_healer(_healer), m_target(_target), m_heal(_heal), m_spellInfo(_spellInfo), m_schoolMask(_schoolMask)
-    {
-        m_absorb = 0;
-        m_effectiveHeal = 0;
-    }
-
-    void AbsorbHeal(uint32 amount)
-    {
-        amount = std::min(amount, GetHeal());
-        m_absorb += amount;
-        m_heal -= amount;
-
-        amount = std::min(amount, GetEffectiveHeal());
-        m_effectiveHeal -= amount;
-    }
+    explicit HealInfo(Unit* healer, Unit* target, uint32 heal, SpellInfo const* spellInfo, SpellSchoolMask schoolMask);
+    void AbsorbHeal(uint32 amount);
 
     void SetHeal(uint32 amount)
     {
@@ -859,6 +847,7 @@ public:
     [[nodiscard]] uint32 GetAbsorb() const { return m_absorb; }
     [[nodiscard]] SpellInfo const* GetSpellInfo() const { return m_spellInfo; };
     [[nodiscard]] SpellSchoolMask GetSchoolMask() const { return m_schoolMask; };
+    [[nodiscard]] uint32 GetHitMask() const;
 };
 
 class ProcEventInfo
@@ -935,7 +924,7 @@ struct SpellNonMeleeDamage
 {
     SpellNonMeleeDamage(Unit* _attacker, Unit* _target, SpellInfo const* _spellInfo, uint32 _schoolMask)
         : target(_target), attacker(_attacker), spellInfo(_spellInfo), damage(0), overkill(0), schoolMask(_schoolMask),
-          absorb(0), resist(0), physicalLog(false), unused(false), blocked(0), HitInfo(0), cleanDamage(0), criticalBlock(false)
+            absorb(0), resist(0), physicalLog(false), unused(false), blocked(0), HitInfo(0), cleanDamage(0), fullBlock(false)
     {}
 
     Unit* target;
@@ -950,6 +939,7 @@ struct SpellNonMeleeDamage
     bool unused;
     uint32 blocked;
     uint32 HitInfo;
+    bool fullBlock;
     // Used for help
     uint32 cleanDamage;
     bool criticalBlock = false;
@@ -970,7 +960,7 @@ struct SpellPeriodicAuraLogInfo
 };
 
 void createProcFlags(SpellInfo const* spellInfo, WeaponAttackType attackType, bool positive, uint32& procAttacker, uint32& procVictim);
-uint32 createProcExtendMask(SpellNonMeleeDamage* damageInfo, SpellMissInfo missCondition);
+uint32 createProcHitMask(SpellNonMeleeDamage* damageInfo, SpellMissInfo missCondition);
 
 struct RedirectThreatInfo
 {
@@ -1342,6 +1332,7 @@ public:
     typedef std::list<Aura*> AuraList;
     typedef std::list<AuraApplication*> AuraApplicationList;
     typedef std::list<DiminishingReturn> Diminishing;
+    typedef std::vector<std::pair<uint8 /*procEffectMask*/, AuraApplication*>> AuraApplicationProcContainer;
     typedef GuidUnorderedSet ComboPointHolderSet;
 
     typedef std::map<uint8, AuraApplication*> VisibleAuraMap;
@@ -1507,10 +1498,10 @@ public:
     void setPowerType(Powers power);
     [[nodiscard]] uint32 GetPower(Powers power) const { return GetUInt32Value(static_cast<uint16>(UNIT_FIELD_POWER1) + power); }
     [[nodiscard]] uint32 GetMaxPower(Powers power) const { return GetUInt32Value(static_cast<uint16>(UNIT_FIELD_MAXPOWER1) + power); }
-    void SetPower(Powers power, uint32 val, bool withPowerUpdate = true, bool fromRegenerate = false);
+    void SetPower(Powers power, uint32 val);
     void SetMaxPower(Powers power, uint32 val);
     // returns the change in power
-    int32 ModifyPower(Powers power, int32 val, bool withPowerUpdate = true);
+    int32 ModifyPower(Powers power, int32 val);
     int32 ModifyPowerPct(Powers power, float pct, bool apply = true);
     [[nodiscard]] bool PowerBelowPct(int32 pct) const { return GetPower(getPowerType()) > GetPowerPct(getPowerType()); }
 
@@ -1595,17 +1586,19 @@ public:
     uint16 GetMaxSkillValueForLevel(Unit const* target = nullptr) const { return (target ? getLevelForTarget(target) : GetLevel()) * 5; }
     static void DealDamageMods(Unit const* victim, uint32& damage, uint32* absorb);
     static uint32 DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage const* cleanDamage = nullptr, DamageEffectType damagetype = DIRECT_DAMAGE, SpellSchoolMask damageSchoolMask = SPELL_SCHOOL_MASK_NORMAL, SpellInfo const* spellProto = nullptr, bool durabilityLoss = true, bool allowGM = false, Spell const* spell = nullptr);
-    static void Kill(Unit* killer, Unit* victim, bool durabilityLoss = true, WeaponAttackType attackType = BASE_ATTACK, SpellInfo const* spellProto = nullptr, Spell const* spell = nullptr);
-    void KillSelf(bool durabilityLoss = true, WeaponAttackType attackType = BASE_ATTACK, SpellInfo const* spellProto = nullptr, Spell const* spell = nullptr) { Kill(this, this, durabilityLoss, attackType, spellProto, spell); };
-    static int32 DealHeal(Unit* healer, Unit* victim, uint32 addhealth);
+    static void Kill(Unit* killer, Unit* victim, bool durabilityLoss = true, WeaponAttackType attackType = BASE_ATTACK, SpellInfo const* spellProto = nullptr);
+    void KillSelf(bool durabilityLoss = true, WeaponAttackType attackType = BASE_ATTACK, SpellInfo const* spellProto = nullptr)
+    {
+        Kill(this, this, durabilityLoss, attackType, spellProto);
+    };
+    static void DealHeal(HealInfo& healInfo);
 
-    static void ProcDamageAndSpell(Unit* actor, Unit* victim, uint32 procAttacker, uint32 procVictim, uint32 procEx, uint32 amount, WeaponAttackType attType = BASE_ATTACK, SpellInfo const* procSpellInfo = nullptr, SpellInfo const* procAura = nullptr, int8 procAuraEffectIndex = -1, Spell const* procSpell = nullptr, DamageInfo* damageInfo = nullptr, HealInfo* healInfo = nullptr, uint32 procPhase = 2 /*PROC_SPELL_PHASE_HIT*/);
-    void ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, SpellInfo const* procSpellInfo, uint32 damage, SpellInfo const* procAura = nullptr, int8 procAuraEffectIndex = -1, Spell const* procSpell = nullptr, DamageInfo* damageInfo = nullptr, HealInfo* healInfo = nullptr, uint32 procPhase = 2 /*PROC_SPELL_PHASE_HIT*/);
+    void ProcSkillsAndAuras(Unit* actionTarget, uint32 typeMaskActor, uint32 typeMaskActionTarget, uint32 spellTypeMask, uint32 spellPhaseMask, uint32 hitMask, Spell* spell, DamageInfo* damageInfo, HealInfo* healInfo);
 
-    void GetProcAurasTriggeredOnEvent(std::list<AuraApplication*>& aurasTriggeringProc, std::list<AuraApplication*>* procAuras, ProcEventInfo eventInfo);
+    void GetProcAurasTriggeredOnEvent(AuraApplicationProcContainer& aurasTriggeringProc, AuraApplicationList* procAuras, ProcEventInfo& eventInfo);
     void TriggerAurasProcOnEvent(CalcDamageInfo& damageInfo);
-    void TriggerAurasProcOnEvent(std::list<AuraApplication*>* myProcAuras, std::list<AuraApplication*>* targetProcAuras, Unit* actionTarget, uint32 typeMaskActor, uint32 typeMaskActionTarget, uint32 spellTypeMask, uint32 spellPhaseMask, uint32 hitMask, Spell* spell, DamageInfo* damageInfo, HealInfo* healInfo);
-    void TriggerAurasProcOnEvent(ProcEventInfo& eventInfo, std::list<AuraApplication*>& procAuras);
+    void TriggerAurasProcOnEvent(Unit* actionTarget, uint32 typeMaskActor, uint32 typeMaskActionTarget, uint32 spellTypeMask, uint32 spellPhaseMask, uint32 hitMask, Spell* spell, DamageInfo* damageInfo, HealInfo* healInfo);
+    void TriggerAurasProcOnEvent(ProcEventInfo& eventInfo, AuraApplicationProcContainer& procAuras);
 
     void HandleEmoteCommand(uint32 emoteId);
     void AttackerStateUpdate (Unit* victim, WeaponAttackType attType = BASE_ATTACK, bool extra = false, bool ignoreCasting = false);
@@ -1615,12 +1608,7 @@ public:
     ThornsDamage CalculateThorns();
     ThornsDamage CalculateThorns(Unit* attacker, Unit* victim, bool calcMisses = true);
 
-    void HandleProcExtraAttackFor(Unit* victim, uint32 count);
-    void SetLastExtraAttackSpell(uint32 spellId) { _lastExtraAttackSpell = spellId; }
-    [[nodiscard]] uint32 GetLastExtraAttackSpell() const { return _lastExtraAttackSpell; }
-    void AddExtraAttacks(uint32 count);
-    void SetLastDamagedTargetGuid(ObjectGuid const& guid) { _lastDamagedTargetGuid = guid; }
-    [[nodiscard]] ObjectGuid const& GetLastDamagedTargetGuid() const { return _lastDamagedTargetGuid; }
+    void HandleProcExtraAttackFor(Unit* victim);
 
     void CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 damage, SpellInfo const* spellInfo, WeaponAttackType attackType = BASE_ATTACK, bool crit = false);
     void DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss, Spell const* spell = nullptr);
@@ -1779,7 +1767,7 @@ public:
     [[nodiscard]] virtual bool IsUnderWater() const;
     bool isInAccessiblePlaceFor(Creature const* c) const;
 
-    void SendHealSpellLog(HealInfo const& healInfo, bool critical = false);
+    void SendHealSpellLog(HealInfo& healInfo, bool critical = false);
     int32 HealBySpell(HealInfo& healInfo, bool critical = false);
     void SendEnergizeSpellLog(Unit* victim, uint32 SpellID, uint32 Damage, Powers powertype);
     void EnergizeBySpell(Unit* victim, uint32 SpellID, uint32 Damage, Powers powertype);
@@ -2637,13 +2625,6 @@ protected:
 
     ForgeStatMap m_forgestats;
 private:
-    bool IsTriggeredAtSpellProcEvent(Unit* victim, Aura* aura, WeaponAttackType attType, bool isVictim, bool active, SpellProcEventEntry const*& spellProcEvent, ProcEventInfo const& eventInfo);
-    bool HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggeredByAura, SpellInfo const* procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown, ProcEventInfo const& eventInfo);
-    bool HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, SpellInfo const* procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown, bool* handled);
-    bool HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* triggeredByAura, SpellInfo const* procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown, uint32 procPhase, ProcEventInfo& eventInfo);
-    bool HandleOverrideClassScriptAuraProc(Unit* victim, uint32 damage, AuraEffect* triggeredByAura, SpellInfo const* procSpell, uint32 cooldown);
-    bool HandleAuraRaidProcFromChargeWithValue(AuraEffect* triggeredByAura);
-    bool HandleAuraRaidProcFromCharge(AuraEffect* triggeredByAura);
 
     void UpdateSplineMovement(uint32 t_diff);
     void UpdateSplinePosition();
@@ -2651,6 +2632,8 @@ private:
     // player or player's pet
     [[nodiscard]] float GetCombatRatingReduction(CombatRating cr) const;
     [[nodiscard]] uint32 GetCombatRatingDamageReduction(CombatRating cr, float rate, float cap, uint32 damage) const;
+
+    void ProcSkillsAndReactives(bool isVictim, Unit* procTarget, uint32 typeMask, uint32 hitMask, WeaponAttackType attType);
 
 protected:
     void SetFeared(bool apply, Unit* fearedBy = nullptr, bool isFear = false);
@@ -2685,10 +2668,6 @@ private:
     bool _isWalkingBeforeCharm;     ///< Are we walking before we were charmed?
 
     [[nodiscard]] float processDummyAuras(float TakenTotalMod) const;
-
-    uint32 _lastExtraAttackSpell;
-    std::unordered_map<ObjectGuid /*guid*/, uint32 /*count*/> extraAttacksTargets;
-    ObjectGuid _lastDamagedTargetGuid;
 };
 
 namespace Acore

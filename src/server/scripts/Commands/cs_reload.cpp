@@ -159,7 +159,6 @@ public:
             { "spell_loot_template",           HandleReloadLootTemplatesSpellCommand,         SEC_GAMEMASTER2_F, Console::Yes },
             { "spell_linked_spell",            HandleReloadSpellLinkedSpellCommand,           SEC_GAMEMASTER2_F, Console::Yes },
             { "spell_pet_auras",               HandleReloadSpellPetAurasCommand,              SEC_GAMEMASTER2_F, Console::Yes },
-            { "spell_proc_event",              HandleReloadSpellProcEventCommand,             SEC_GAMEMASTER2_F, Console::Yes },
             { "spell_proc",                    HandleReloadSpellProcsCommand,                 SEC_GAMEMASTER2_F, Console::Yes },
             { "spell_scripts",                 HandleReloadSpellScriptsCommand,               SEC_GAMEMASTER2_F, Console::Yes },
             { "spell_target_position",         HandleReloadSpellTargetPositionCommand,        SEC_GAMEMASTER2_F, Console::Yes },
@@ -303,7 +302,6 @@ public:
         HandleReloadSpellAreaCommand(handler);
         HandleReloadSpellGroupsCommand(handler);
         HandleReloadSpellLinkedSpellCommand(handler);
-        HandleReloadSpellProcEventCommand(handler);
         HandleReloadSpellProcsCommand(handler);
         HandleReloadSpellBonusesCommand(handler);
         HandleReloadSpellTargetPositionCommand(handler);
@@ -880,14 +878,6 @@ public:
         LOG_INFO("server.loading", "Re-Loading Spell Linked Spells...");
         sSpellMgr->LoadSpellLinked();
         handler->SendGlobalGMSysMessage("DB table `spell_linked_spell` reloaded.");
-        return true;
-    }
-
-    static bool HandleReloadSpellProcEventCommand(ChatHandler* handler)
-    {
-        LOG_INFO("server.loading", "Re-Loading Spell Proc Event conditions...");
-        sSpellMgr->LoadSpellProcEvents();
-        handler->SendGlobalGMSysMessage("DB table `spell_proc_event` (spell proc trigger requirements) reloaded.");
         return true;
     }
 

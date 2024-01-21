@@ -93,8 +93,8 @@ typedef void(*bgZoneRef)(Battleground*, WorldPacket&);
 // Note: SPELLMOD_* values is aura types in fact
 enum SpellModType
 {
-    SPELLMOD_FLAT         = 107,                            // SPELL_AURA_ADD_FLAT_MODIFIER
-    SPELLMOD_PCT          = 108                             // SPELL_AURA_ADD_PCT_MODIFIER
+    SPELLMOD_FLAT         = SPELL_AURA_ADD_FLAT_MODIFIER,
+    SPELLMOD_PCT          = SPELL_AURA_ADD_PCT_MODIFIER
 };
 
 // 2^n values, Player::m_isunderwater is a bitmask. These are Trinity internal values, they are never send to any client
@@ -199,9 +199,9 @@ enum TalentTree // talent tabs
 // Spell modifier (used for modify other spells)
 struct SpellModifier
 {
-    SpellModifier(Aura* _ownerAura = nullptr) : op(SPELLMOD_DAMAGE), type(SPELLMOD_FLAT), charges(0),  mask(), ownerAura(_ownerAura) {}
-    SpellModOp   op   : 8;
-    SpellModType type : 8;
+    SpellModifier(Aura* _ownerAura = nullptr) : op(SPELLMOD_DAMAGE), type(SPELLMOD_FLAT), mask(), ownerAura(_ownerAura) {}
+    SpellModOp   op;
+    SpellModType type;
     int16 charges     : 16;
     int32 value{0};
     int32 exvalue{0};
@@ -226,7 +226,7 @@ typedef std::map<uint8 /*presetid*/, PresetData> PresetMapType;
 
 typedef std::unordered_map<uint32, PlayerTalent*> PlayerTalentMap;
 typedef std::unordered_map<uint32, PlayerSpell*> PlayerSpellMap;
-typedef std::list<SpellModifier*> SpellModList;
+typedef std::unordered_set<SpellModifier*> SpellModContainer;
 
 typedef GuidList WhisperListContainer;
 
@@ -1794,18 +1794,21 @@ public:
     [[nodiscard]] SpellCooldowns const& GetSpellCooldownMap() const { return m_spellCooldowns; }
 
     void AddSpellMod(SpellModifier* mod, bool apply);
-    bool IsAffectedBySpellmod(SpellInfo const* spellInfo, SpellModifier* mod, Spell* spell = nullptr);
+    static bool IsAffectedBySpellmod(SpellInfo const* spellInfo, SpellModifier* mod, Spell* spell = nullptr);
     bool HasSpellMod(SpellModifier* mod, Spell* spell);
-    void RemoveSpellMods(Spell* spell);
+    
     void RestoreSpellMods(Spell* spell, uint32 ownerAuraId = 0, Aura* aura = nullptr);
     void RestoreAllSpellMods(uint32 ownerAuraId = 0, Aura* aura = nullptr);
-    void DropModCharge(SpellModifier* mod, Spell* spell);
+    static void ApplyModToSpell(SpellModifier* mod, Spell* spell);
+    static bool HasSpellModApplied(SpellModifier* mod, Spell* spell);
     void SetSpellModTakingSpell(Spell* spell, bool apply);
     template <class T>
-    void ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, Spell* spell = nullptr, bool temporaryPet = false, uint32 exValue = 0);
-    template <class T>
-    void ApplySpellMod(SpellInfo const* spellInfo, SpellModOp op, T& basevalue, Spell* spell = nullptr, bool temporaryPet = false, uint32 exValue = 0);
+    void ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, Spell* spell = nullptr) const;
 
+    template <class T>
+    void ApplySpellMod(const SpellInfo* const spellInfo, SpellModOp op, T& basevalue, Spell* spell = nullptr) const {
+        return ApplySpellMod(spellInfo->Id, op, basevalue, spell);
+    }
 
     [[nodiscard]] bool HasSpellCooldown(uint32 spell_id) const override;
     [[nodiscard]] bool HasSpellItemCooldown(uint32 spell_id, uint32 itemid) const override;
@@ -2251,9 +2254,9 @@ public:
     void ApplyItemEquipSpell(Item* item, bool apply, bool form_change = false);
     void ApplyEquipSpell(SpellInfo const* spellInfo, Item* item, bool apply, bool form_change = false);
     void UpdateEquipSpellsAtFormChange();
-    void CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 procEx);
+    void CastItemCombatSpell(DamageInfo const& damageInfo);
+    void CastItemCombatSpell(DamageInfo const& damageInfo, Item* item, ItemTemplate const* proto);
     void CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8 cast_count, uint32 glyphIndex);
-    void CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 procEx, Item* item, ItemTemplate const* proto);
 
     void SendEquipmentSetList();
     void SetEquipmentSet(uint32 index, EquipmentSet eqset);
@@ -2645,7 +2648,7 @@ public:
     // mt maps
     [[nodiscard]] const PlayerTalentMap& GetTalentMap() const { return m_talents; }
     [[nodiscard]] uint32 GetNextSave() const { return m_nextSave; }
-    [[nodiscard]] SpellModList const& GetSpellModList(uint32 type) const { return m_spellMods[type]; }
+    [[nodiscard]] SpellModContainer const& GetSpellModContainer(uint32 type) const { return m_spellMods[type]; }
 
     void SetServerSideVisibility(ServerSideVisibilityType type, AccountTypes sec);
     void SetServerSideVisibilityDetect(ServerSideVisibilityType type, AccountTypes sec);
@@ -2888,7 +2891,7 @@ public:
     uint32 m_baseHealthRegen;
     int32 m_spellPenetrationItemMod;
 
-    SpellModList m_spellMods[MAX_SPELLMOD];
+    SpellModContainer m_spellMods[MAX_SPELLMOD];
     //uint32 m_pad;
     //        Spell* m_spellModTakingSpell;  // Spell for which charges are dropped in spell::finish
 

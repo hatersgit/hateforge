@@ -29,7 +29,7 @@ public:
                         auto found = specs->second.find(id);
                         if (found != specs->second.end()) {
                             specs->second.erase(id);
-                            CharacterDatabase.Execute("delete from `forge_character_talent_loadouts` where guid = {} and tabId = {} and id = {}", iam.player->GetGUID().GetCounter(), spec->CharacterSpecTabId, id);
+                            CharacterDatabase.Execute("delete from `forge_character_talent_loadouts` where guid = {} and talentTabId = {} and id = {}", iam.player->GetGUID().GetCounter(), spec->CharacterSpecTabId, id);
                         }
                     }
                 }

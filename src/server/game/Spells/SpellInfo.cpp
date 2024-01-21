@@ -539,7 +539,7 @@ float SpellEffectInfo::CalcValueMultiplier(Unit* caster, Spell* spell) const
 {
     float multiplier = ValueMultiplier;
     if (Player* modOwner = (caster ? caster->GetSpellModOwner() : nullptr))
-        modOwner->ApplySpellMod(_spellInfo, SPELLMOD_VALUE_MULTIPLIER, multiplier, spell);
+        modOwner->ApplySpellMod(_spellInfo->Id, SPELLMOD_VALUE_MULTIPLIER, multiplier, spell);
     return multiplier;
 }
 
@@ -547,7 +547,7 @@ float SpellEffectInfo::CalcDamageMultiplier(Unit* caster, Spell* spell) const
 {
     float multiplier = DamageMultiplier;
     if (Player* modOwner = (caster ? caster->GetSpellModOwner() : nullptr))
-        modOwner->ApplySpellMod(_spellInfo, SPELLMOD_DAMAGE_MULTIPLIER, multiplier, spell);
+        modOwner->ApplySpellMod(_spellInfo->Id, SPELLMOD_DAMAGE_MULTIPLIER, multiplier, spell);
     return multiplier;
 }
 
@@ -847,7 +847,7 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry)
     SpellVisual = spellEntry->SpellVisual;
     SpellIconID = spellEntry->SpellIconID;
     ActiveIconID = spellEntry->ActiveIconID;
-    SpellPriority = spellEntry->SpellPriority;
+    Priority = spellEntry->SpellPriority;
     SpellName = spellEntry->SpellName;
     Rank = spellEntry->Rank;
     MaxTargetLevel = spellEntry->MaxTargetLevel;
@@ -1311,6 +1311,26 @@ bool SpellInfo::IsAutoRepeatRangedSpell() const
     return AttributesEx2 & SPELL_ATTR2_AUTO_REPEAT;
 }
 
+bool SpellInfo::IsAffected(uint32 familyName, flag96 const& familyFlags) const
+{
+    if (!familyName)
+    {
+        return true;
+    }
+
+    if (familyName != SpellFamilyName)
+    {
+        return false;
+    }
+
+    if (familyFlags && !(familyFlags & SpellFamilyFlags))
+    {
+        return false;
+    }
+
+    return true;
+}
+
 bool SpellInfo::IsAffectedBySpellMods() const
 {
     return !(AttributesEx3 & SPELL_ATTR3_IGNORE_CASTER_MODIFIERS);
@@ -1335,15 +1355,7 @@ bool SpellInfo::IsAffectedBySpellMod(SpellModifier const* mod) const
         return true;
     }
 
-    // False if affect_spell == nullptr or spellFamily not equal
-    if (affectSpell->SpellFamilyName != SpellFamilyName)
-        return false;
-
-    // true
-    if (mod->mask & SpellFamilyFlags)
-        return true;
-
-    return false;
+    return IsAffected(affectSpell->SpellFamilyName, mod->mask);
 }
 
 bool SpellInfo::CanPierceImmuneAura(SpellInfo const* aura) const
@@ -3061,6 +3073,36 @@ bool SpellInfo::CheckElixirStacking(Unit const* caster) const
     }
 
     return true;
+}
+
+WeaponAttackType SpellInfo::GetAttackType() const
+{
+    WeaponAttackType result;
+
+    switch (DmgClass)
+    {
+    case SPELL_DAMAGE_CLASS_MELEE:
+        if (HasAttribute(SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON))
+            result = OFF_ATTACK;
+        else
+            result = BASE_ATTACK;
+
+        break;
+    case SPELL_DAMAGE_CLASS_RANGED:
+        result = IsRangedWeaponSpell() ? RANGED_ATTACK : BASE_ATTACK;
+
+        break;
+    default:
+        // Wands
+        if (IsAutoRepeatRangedSpell())
+            result = RANGED_ATTACK;
+        else
+            result = BASE_ATTACK;
+
+        break;
+    }
+
+    return result;
 }
 
 bool SpellInfo::IsHealingSpell() const

@@ -68,7 +68,7 @@ public:
                     fc->_playerTalentLoadouts[guid][specId][active->id] = active;
                     iam.player->SaveLoadoutActions(specId, active->id);
 
-                    CharacterDatabase.DirectExecute("update `forge_character_talent_loadouts` set `active` = 0 where `guid` = {} and `tabId` = {}",
+                    CharacterDatabase.DirectExecute("update `forge_character_talent_loadouts` set `active` = 0 where `guid` = {} and `talentTabId` = {}",
                         guid, active->tabId);
 
                     ForgeCache::PlayerLoadout* plo = new ForgeCache::PlayerLoadout();

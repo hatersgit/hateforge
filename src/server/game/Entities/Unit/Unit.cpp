@@ -11132,12 +11132,12 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
 
     if (val < maxPower)
     {
-        SetPower(power, 0);
+        SetPower(power, val);
         gain = val - curPower;
     }
     else if (curPower != maxPower)
     {
-        SetPower(power, 0);
+        SetPower(power, maxPower);
         gain = maxPower - curPower;
     }
 

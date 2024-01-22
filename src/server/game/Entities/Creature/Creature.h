@@ -135,6 +135,18 @@ public:
     [[nodiscard]] bool IsImmuneToKnockback() const;
     [[nodiscard]] bool IsAvoidingAOE() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_AVOID_AOE; }
 
+    Unit* SelectVictim();
+
+    using Unit::IsImmuneToAll;
+    using Unit::SetImmuneToAll;
+    void SetImmuneToAll(bool apply) override { Unit::SetImmuneToAll(apply, HasReactState(REACT_PASSIVE)); }
+    using Unit::IsImmuneToPC;
+    using Unit::SetImmuneToPC;
+    void SetImmuneToPC(bool apply) override { Unit::SetImmuneToPC(apply, HasReactState(REACT_PASSIVE)); }
+    using Unit::IsImmuneToNPC;
+    using Unit::SetImmuneToNPC;
+    void SetImmuneToNPC(bool apply) override { Unit::SetImmuneToNPC(apply, HasReactState(REACT_PASSIVE)); }
+
     uint8 getLevelForTarget(WorldObject const* target) const override; // overwrite Unit::getLevelForTarget for boss level support
 
     [[nodiscard]] bool IsInEvadeMode() const { return HasUnitState(UNIT_STATE_EVADE); }
@@ -363,8 +375,6 @@ public:
     [[nodiscard]] CreatureGroup* GetFormation() { return m_formation; }
     void SetFormation(CreatureGroup* formation) { m_formation = formation; }
 
-    Unit* SelectVictim();
-
     void SetDisableReputationGain(bool disable) { DisableReputationGain = disable; }
     [[nodiscard]] bool IsReputationGainDisabled() const { return DisableReputationGain; }
     [[nodiscard]] bool IsDamageEnoughForLootingAndReward() const;
@@ -429,6 +439,9 @@ public:
     [[nodiscard]] ObjectGuid GetSummonerGUID() const;
 
     std::string GetDebugInfo() const override;
+
+    void AtEnterCombat() override;
+    void AtExitCombat() override;
 
 protected:
     bool CreateFromProto(ObjectGuid::LowType guidlow, uint32 Entry, uint32 vehId, const CreatureData* data = nullptr);

@@ -704,6 +704,8 @@ bool Player::Create(ObjectGuid::LowType guidlow, CharacterCreateInfo* createInfo
     UpdateThorns();
     CheckAllAchievementCriteria();
 
+    GetThreatManager().Initialize();
+
     return true;
 }
 
@@ -2256,8 +2258,6 @@ void Player::SetInWater(bool apply)
 
     // remove auras that need water/land
     RemoveAurasWithInterruptFlags(apply ? AURA_INTERRUPT_FLAG_NOT_ABOVEWATER : AURA_INTERRUPT_FLAG_NOT_UNDERWATER);
-
-    getHostileRefMgr().updateThreatTables();
 }
 
 bool Player::IsInAreaTriggerRadius(AreaTrigger const* trigger, float delta) const
@@ -2293,11 +2293,9 @@ void Player::SetGameMaster(bool on)
         SetUnitFlag2(UNIT_FLAG2_ALLOW_CHEAT_SPELLS);
 
         if (Pet* pet = GetPet())
-        {
             if (GetSession()->IsGMAccount())
                 pet->SetFaction(FACTION_FRIENDLY);
-            pet->getHostileRefMgr().setOnlineOfflineState(false);
-        }
+
         if (HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP))
         {
             RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
@@ -2305,7 +2303,6 @@ void Player::SetGameMaster(bool on)
         }
         ResetContestedPvP();
 
-        getHostileRefMgr().setOnlineOfflineState(false);
         CombatStopWithPets();
 
         SetPhaseMask(uint32(PHASEMASK_ANYWHERE), false);    // see and visible in all phases
@@ -2329,7 +2326,7 @@ void Player::SetGameMaster(bool on)
         if (Pet* pet = GetPet())
         {
             pet->SetFaction(GetFaction());
-            pet->getHostileRefMgr().setOnlineOfflineState(true);
+            pet->GetThreatManager().UpdateOnlineStates();
         }
 
         // restore FFA PvP Server state
@@ -2344,7 +2341,6 @@ void Player::SetGameMaster(bool on)
         // restore FFA PvP area state, remove not allowed for GM mounts
         UpdateArea(m_areaUpdateId);
 
-        getHostileRefMgr().setOnlineOfflineState(true);
         m_serverSideVisibilityDetect.SetValue(SERVERSIDE_VISIBILITY_GM, SEC_PLAYER);
     }
 
@@ -2360,8 +2356,6 @@ void Player::SetGMVisible(bool on)
         RemoveAurasDueToSpell(VISUAL_AURA);
         m_ExtraFlags &= ~PLAYER_EXTRA_GM_INVISIBLE;
         m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GM, SEC_PLAYER);
-
-        getHostileRefMgr().setOnlineOfflineState(false);
         CombatStopWithPets();
     }
     else
@@ -10785,7 +10779,6 @@ void Player::CleanupAfterTaxiFlight()
     m_taxi.ClearTaxiDestinations();        // not destinations, clear source node
     Dismount();
     RemoveUnitFlag(UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
-    getHostileRefMgr().setOnlineOfflineState(true);
 }
 
 void Player::ContinueTaxiFlight()

@@ -70,7 +70,7 @@ struct npc_pet_hunter_snake_trap : public ScriptedAI
         if (!me->GetVictim())
             if (Unit* tgt = me->SelectNearestTarget(10.0f))
             {
-                me->AddThreat(tgt, 100000.0f);
+                me->GetThreatManager().AddThreat(tgt, 100000.0f);
                 AttackStart(tgt);
             }
     }
@@ -78,7 +78,7 @@ struct npc_pet_hunter_snake_trap : public ScriptedAI
     void EnterEvadeMode(EvadeReason /*why*/) override
     {
         // _EnterEvadeMode();
-        me->GetThreatMgr().ClearAllThreat();
+        me->GetThreatManager().ClearAllThreat();
         me->CombatStop(true);
         me->LoadCreaturesAddon(true);
         me->SetLootRecipient(nullptr);
@@ -101,7 +101,7 @@ struct npc_pet_hunter_snake_trap : public ScriptedAI
 
             if (me->IsWithinDistInMap(who, 10.0f))
             {
-                me->AddThreat(who, 100000.0f);
+                me->GetThreatManager().AddThreat(who, 100000.0f);
                 AttackStart(who);
             }
         }
@@ -222,7 +222,7 @@ class spell_pet_guard_dog : public AuraScript
         caster->CastSpell((Unit*)nullptr, SPELL_PET_GUARD_DOG_HAPPINESS, true, nullptr, aurEff);
 
         float addThreat = CalculatePct(eventInfo.GetSpellInfo()->Effects[EFFECT_0].CalcValue(caster), aurEff->GetAmount());
-        eventInfo.GetProcTarget()->AddThreat(caster, addThreat);
+        eventInfo.GetProcTarget()->GetThreatManager().AddThreat(caster, addThreat);
     }
 
     void Register() override

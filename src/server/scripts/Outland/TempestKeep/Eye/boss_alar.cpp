@@ -324,9 +324,9 @@ public:
                 else
                 {
                     me->resetAttackTimer();
-                    ThreatContainer::StorageType const& threatList = me->GetThreatMgr().GetThreatList();
-                    for (ThreatContainer::StorageType::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
-                        if (Unit* unit = ObjectAccessor::GetUnit(*me, (*itr)->getUnitGuid()))
+                    auto tlist = me->GetThreatManager().GetUnsortedThreatList();
+                    for (auto t : tlist)
+                        if (Unit* unit = ObjectAccessor::GetUnit(*me, t->GetVictim()->GetGUID()))
                             if (me->IsWithinMeleeRange(unit))
                             {
                                 me->AttackerStateUpdate(unit);

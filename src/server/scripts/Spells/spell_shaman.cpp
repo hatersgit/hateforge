@@ -1252,7 +1252,7 @@ class spell_sha_nature_guardian : public AuraScript
                 // Threat reduction is around 10% confirmed in retail and from wiki
 //                Unit* attacker = eventInfo.GetActor();
 //                if (attacker->IsAlive())
-//                    attacker->getThreatMgr().modifyThreatPercent(target, -10);
+//                    attacker->GetThreatManager().modifyThreatPercent(target, -10);
             }
         }
     }

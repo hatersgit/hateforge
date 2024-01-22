@@ -326,14 +326,14 @@ public:
                 return;
 
             // Now lets get archimode threat list
-            ThreatContainer::StorageType const& t_list = me->GetThreatMgr().GetThreatList();
+            auto tlist = me->GetThreatManager().GetUnsortedThreatList();
 
-            if (t_list.empty())
+            if (me->GetThreatManager().GetThreatListSize())
                 return;
 
-            ThreatContainer::StorageType::const_iterator itr = t_list.begin();
+            auto itr = tlist.begin();
 
-            if (Unit* target = ObjectAccessor::GetUnit(*me, (*itr)->getUnitGuid()))
+            if (Unit* target = ObjectAccessor::GetUnit(*me, (*itr)->GetVictim()->GetGUID()))
                 if (target->IsAlive() && target->GetTypeId() == TYPEID_PLAYER)
                     spellEffectTargets.push_back(target);
 
@@ -436,14 +436,13 @@ public:
                 if (victim && me->IsWithinMeleeRange(victim))
                     return false;
 
-                ThreatContainer::StorageType const& threatlist = me->GetThreatMgr().GetThreatList();
-                if (threatlist.empty())
+                if (me->GetThreatManager().GetThreatListSize() > 0)
                     return false;
 
-                auto itr = threatlist.begin();
-                for (; itr != threatlist.end(); ++itr)
+                auto tlist = me->GetThreatManager().GetUnsortedThreatList();
+                for (auto t : tlist)
                 {
-                    Unit* unit = ObjectAccessor::GetUnit(*me, (*itr)->getUnitGuid());
+                    Unit* unit = ObjectAccessor::GetUnit(*me, t->GetVictim()->GetGUID());
                     if (unit && unit->IsAlive() && me->IsWithinMeleeRange(unit))
                         fingerOfDeathTargets.push_back(unit);
                 }

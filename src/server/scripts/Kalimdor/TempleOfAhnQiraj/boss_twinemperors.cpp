@@ -164,7 +164,7 @@ struct boss_twinemperorsAI : public BossAI
                 me->SetControlled(false, UNIT_STATE_ROOT);
                 if (Unit* victim = me->SelectNearestTarget())
                 {
-                    me->AddThreat(victim, 2000.f);
+                    me->GetThreatManager().AddThreat(victim, 2000.f);
                     AttackStart(victim);
                 }
             });
@@ -400,7 +400,7 @@ struct boss_veklor : public boss_twinemperorsAI
             if (me->Attack(who, false))
             {
                 me->GetMotionMaster()->MoveChase(who, 45.0f, 0);
-                me->AddThreat(who, 0.0f);
+                me->GetThreatManager().AddThreat(who, 0.0f);
             }
         }
     }

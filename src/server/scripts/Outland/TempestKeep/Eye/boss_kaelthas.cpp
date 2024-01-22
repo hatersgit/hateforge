@@ -995,11 +995,11 @@ public:
         {
             PreventHitEffect(effIndex);
 
-            ThreatContainer::StorageType const& ThreatList = GetCaster()-> GetThreatMgr().GetThreatList();
             std::list<Unit*> targetList;
-            for (ThreatContainer::StorageType::const_iterator itr = ThreatList.begin(); itr != ThreatList.end(); ++itr)
+            auto tList = GetCaster()->GetThreatManager().GetUnsortedThreatList();
+            for (auto t : tList)
             {
-                Unit* target = ObjectAccessor::GetUnit(*GetCaster(), (*itr)->getUnitGuid());
+                Unit* target = ObjectAccessor::GetUnit(*GetCaster(), t->GetVictim()->GetGUID());
                 if (target && target->GetTypeId() == TYPEID_PLAYER)
                     targetList.push_back(target);
             }

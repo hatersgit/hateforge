@@ -240,7 +240,7 @@ struct boss_shade_of_akama : public BossAI
                 me->SetReactState(REACT_AGGRESSIVE);
                 DoResetThreatList();
                 me->GetVictim()->InterruptNonMeleeSpells(false);
-                me->AddThreat(me->GetVictim(), 1000000.0f);
+                me->GetThreatManager().AddThreat(me->GetVictim(), 1000000.0f);
                 me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
                 me->SetImmuneToAll(false);
                 summonsGenerator.DoAction(ACTION_STOP_SPAWNING);
@@ -448,7 +448,7 @@ struct npc_creature_generator_akama : public NullCreatureAI
         summon->SetInCombatWithZone();
         if (Unit* akama = ObjectAccessor::GetCreature(*me, instance->GetGuidData(NPC_AKAMA_SHADE)))
         {
-            summon->AddThreat(akama, 500.0f);
+            summon->GetThreatManager().AddThreat(akama, 500.0f);
             summon->AI()->AttackStart(akama);
         }
     }

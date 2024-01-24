@@ -411,6 +411,9 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleNoImmediateEffect,                         //348 SPELL_AURA_MOD_SCHOOL_MASK_HEALING_FROM_CASTER
     &AuraEffect::HandleNoImmediateEffect,                         //349 SPELL_AURA_MOD_MONEY_GAIN
     &AuraEffect::HandleNoImmediateEffect,                         //350 SPELL_AURA_MOD_TAXI_FLIGHT_SPEED
+    &AuraEffect::HandleAuraModForgeStat,                          //351 SPELL_AURA_MOD_FORGE_STAT
+    &AuraEffect::HandleNoImmediateEffect,                         //352 SPELL_AURA_MOD_RESTED_XP_MAX_AMOUNT implemented in Player::SetRestBonus, Spell::EffectGiveRestedExperience
+    &AuraEffect::HandleNoImmediateEffect,                         //355 SPELL_AURA_MOD_RESTED_XP_RECOVERY_RATE implemented in Player::Update
 };
 
 AuraEffect::AuraEffect(Aura* base, uint8 effIndex, int32* baseAmount, Unit* caster):
@@ -4955,6 +4958,30 @@ void AuraEffect::HandleAuraModExpertise(AuraApplication const* aurApp, uint8 mod
     target->ToPlayer()->UpdateExpertise(OFF_ATTACK);
 }
 
+void AuraEffect::HandleAuraModForgeStat(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (GetMiscValue() < 0 || GetMiscValue() > 4)
+    {
+        LOG_ERROR("spells.aura.effect", "WARNING: Spell {} effect {} has an unsupported misc value ({}) for SPELL_AURA_MOD_FORGE_STAT ", GetId(), GetEffIndex(), GetMiscValue());
+        return;
+    }
+
+    for (int32 i = FORGE_STAT_THORNS; i < FORGE_STAT_END; i++)
+    {
+        if (GetMiscValue() == i)
+        {
+            if (!GetMiscValueB())
+                target->HandleStatModifier(UnitMods(UNIT_MOD_FORGE_STAT_START + i), TOTAL_VALUE, float(GetAmount()), apply);
+            else
+                target->HandleStatModifier(UnitMods(UNIT_MOD_FORGE_STAT_START + i), BASE_PCT, float(GetAmount()), apply);
+        }
+    }
+}
 /********************************/
 /***      HEAL & ENERGIZE     ***/
 /********************************/

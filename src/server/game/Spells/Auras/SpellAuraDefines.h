@@ -411,6 +411,7 @@ enum AuraType
     SPELL_AURA_MOD_SCHOOL_MASK_HEALING_FROM_CASTER          = 348,
     SPELL_AURA_MOD_MONEY_GAIN                               = 349,
     SPELL_AURA_MOD_TAXI_FLIGHT_SPEED                        = 350,
+    SPELL_AURA_MOD_CHANGE_DAMAGE_SCHOOL_OF_SPELL            = 351,
     TOTAL_AURAS
 };
 

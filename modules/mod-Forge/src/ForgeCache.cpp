@@ -1587,24 +1587,37 @@ private:
 
             auto reqdSpellId = talentFields[1].Get<uint32>();
             auto reqSpelltab = talentFields[2].Get<uint32>();
-            ForgeTalent* lt = TalentTabs[reqSpelltab]->Talents[reqdSpellId];
 
-            if (lt != nullptr)
-                lt->Prereqs.push_back(newTalent);
-            else
-                LOG_ERROR("FORGE.ForgeCache", "Error loading AddTalentPrereqs, invaild req id: " + std::to_string(newTalent->reqId));
+            if (!TalentTabs.empty()) {
+                auto tab = TalentTabs.find(reqSpelltab);
+                if (tab != TalentTabs.end()) {
+                    auto talent = tab->second->Talents.find(reqdSpellId);
+                    if (talent != tab->second->Talents.end()) {
+                        ForgeTalent* lt = talent->second;
+                        if (lt != nullptr)
+                            lt->Prereqs.push_back(newTalent);
+                        else
+                            LOG_ERROR("FORGE.ForgeCache", "Error loading AddTalentPrereqs, invaild req id: " + std::to_string(newTalent->reqId));
 
-            auto found = _cacheTreeMetaData.find(reqSpelltab);
-            if (found != _cacheTreeMetaData.end()) {
-                TreeMetaData* tree = found->second;
-                NodeMetaData* node = tree->nodeLocation[newTalent->Talent];
-                node->unlocks.push_back(tree->nodeLocation[reqdSpellId]);
-                tree->nodeLocation[newTalent->Talent] = node;
-                tree->nodes[node->row][node->col] = node;
+                        auto found = _cacheTreeMetaData.find(reqSpelltab);
+                        if (found != _cacheTreeMetaData.end()) {
+                            TreeMetaData* tree = found->second;
+                            NodeMetaData* node = tree->nodeLocation[newTalent->Talent];
+                            node->unlocks.push_back(tree->nodeLocation[reqdSpellId]);
+                            tree->nodeLocation[newTalent->Talent] = node;
+                            tree->nodes[node->row][node->col] = node;
+                        }
+                        else
+                            LOG_ERROR("FORGE.ForgeCache", "Prereq cannot be mapped to existing talent meta data.");
+                    } else {
+                        LOG_ERROR("FORGE.ForgeCache", "Prereq spell not found in tab.");
+                    }
+                } else {
+                    LOG_ERROR("FORGE.ForgeCache", "Prereq spell tab not found.");
+                }
+            } else {
+                LOG_ERROR("FORGE.ForgeCache", "Talent tab store is empty.");
             }
-            else
-                LOG_ERROR("FORGE.ForgeCache", "Prereq cannot be mapped to existing talent meta data.");
-
         } while (preReqTalents->NextRow());
     }
 

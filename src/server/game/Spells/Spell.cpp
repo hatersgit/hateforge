@@ -2817,8 +2817,19 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     // Do damage and triggers
     else if (m_damage > 0)
     {
+        SpellSchoolMask calcSchool = m_spellSchoolMask;
         // Fill base damage struct (unitTarget - is real spell target)
-        SpellNonMeleeDamage damageInfo(caster, unitTarget, m_spellInfo, m_spellSchoolMask);
+        //
+        //plug this in here
+        auto mOwnerSchoolMods = GetCaster()->GetAuraEffectsByType(SPELL_AURA_MOD_CHANGE_DAMAGE_SCHOOL_OF_SPELL);
+        for (auto schools : mOwnerSchoolMods)
+            if (schools->GetCasterGUID() == caster->GetGUID()) {
+                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                    if (m_spellInfo->Effects[i].SpellClassMask & schools->GetSpellInfo()->SpellFamilyFlags)
+                        calcSchool = SpellSchoolMask(schools->GetMiscValue() | m_spellSchoolMask);
+            }
+
+        SpellNonMeleeDamage damageInfo = SpellNonMeleeDamage(caster, unitTarget, m_spellInfo, calcSchool);
 
         // Add bonuses and fill damageInfo struct
         // Dancing Rune Weapon...

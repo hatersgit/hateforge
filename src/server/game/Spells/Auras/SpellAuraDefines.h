@@ -414,6 +414,7 @@ enum AuraType
     SPELL_AURA_MOD_FORGE_STAT                               = 351,
     SPELL_AURA_MOD_RESTED_XP_MAX_AMOUNT                     = 352,
     SPELL_AURA_MOD_RESTED_XP_RECOVERY_RATE                  = 353,
+    SPELL_AURA_MOD_CHANGE_DAMAGE_SCHOOL_OF_SPELL            = 354,
     TOTAL_AURAS
 };
 

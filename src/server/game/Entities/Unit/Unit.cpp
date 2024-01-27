@@ -15637,39 +15637,114 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
+        uint32 CatnDisplay = 0;
+        uint32 CatnSpellID = 0;
+        uint32 CatnReqSpellID = 0;
+        
+        uint32 BearnDisplay = 0;
+        uint32 BearnSpellID = 0;
+        uint32 BearnReqSpellID = 0;
+        
+        uint32 FlynDisplay = 0;
+        uint32 FlynSpellID = 0;
+        uint32 FlynReqSpellID = 0;
+        
+        uint32 BuhonDisplay = 0;
+        uint32 BuhonSpellID = 0;
+        uint32 BuhonReqSpellID = 0;
+        
+        uint32 SeanDisplay = 0;
+        uint32 SeanSpellID = 0;
+        uint32 SeanReqSpellID = 0;
+        
+        uint32 TreenDisplay = 0;
+        uint32 TreenSpellID = 0;
+        uint32 TreenReqSpellID = 0;
+        
+        uint32 TravelnDisplay = 0;
+        uint32 TravelnSpellID = 0;
+        uint32 TravelnReqSpellID = 0;
+        
+        QueryResult resultCat = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'cat'");
+        QueryResult resultBear = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'bear'");
+        QueryResult resultFly = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'fly'");
+        QueryResult resultBuho = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'buho'");
+        QueryResult resultSea = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'sea'");
+        QueryResult resultTree = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'tree'");
+        QueryResult resultTravel = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'travel'");
+
         switch (form)
         {
             case FORM_CAT:
-                // Based on Hair color
-                if (getRace() == RACE_NIGHTELF)
+
+                if (resultCat)
                 {
-                    uint8 hairColor = GetByteValue(PLAYER_BYTES, 3);
-                    switch (hairColor)
+                    do
                     {
-                        case 7: // Violet
-                        case 8:
-                            return 29405;
-                        case 3: // Light Blue
-                            return 29406;
-                        case 0: // Green
-                        case 1: // Light Green
-                        case 2: // Dark Green
-                            return 29407;
-                        case 4: // White
-                            return 29408;
-                        default: // original - Dark Blue
-                            return 892;
-                    }
-                }
-                // Based on Skin color
-                else if (getRace() == RACE_TAUREN)
-                {
-                    uint8 skinColor = GetByteValue(PLAYER_BYTES, 0);
-                    // Male
-                    if (getGender() == GENDER_MALE)
-                    {
-                        switch (skinColor)
+                        Field* fields = resultCat->Fetch();
+                        CatnSpellID = fields[5].Get<uint32>();
+                        CatnReqSpellID = fields[6].Get<uint32>();
+
+                        if (HasSpell(CatnSpellID))
                         {
+
+                            if (CatnReqSpellID == 0)
+                            {
+                                CatnDisplay = fields[2].Get<uint32>();
+                            }
+                            else
+                            {
+                                if (HasSpell(CatnReqSpellID))
+                                {
+                                    CatnDisplay = fields[2].Get<uint32>();
+                                }
+                                else
+                                {
+                                    CatnDisplay = 0;
+                                }
+                            }
+                        }
+
+                    } while (resultCat->NextRow());
+                }
+
+                if (CatnDisplay != 0) // Violet
+                {
+                    return CatnDisplay;
+                }
+
+                else
+                {
+                    // Based on Hair color
+                    if (getRace() == RACE_NIGHTELF)
+                    {
+                        uint8 hairColor = GetByteValue(PLAYER_BYTES, 3);
+                        switch (hairColor)
+                        {
+                            case 7: // Violet
+                            case 8:
+                                return 29405;
+                            case 3: // Light Blue
+                                return 29406;
+                            case 0: // Green
+                            case 1: // Light Green
+                            case 2: // Dark Green
+                                return 29407;
+                            case 4: // White
+                                return 29408;
+                            default: // original - Dark Blue
+                                return 892;
+                        }
+                    }
+                    // Based on Skin color
+                    else if (getRace() == RACE_TAUREN)
+                    {
+                        uint8 skinColor = GetByteValue(PLAYER_BYTES, 0);
+                        // Male
+                        if (getGender() == GENDER_MALE)
+                        {
+                            switch (skinColor)
+                            {
                             case 12: // White
                             case 13:
                             case 14:
@@ -15692,32 +15767,34 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
                                 return 29412;
                             default: // original - Grey
                                 return 8571;
+                            }
+                        }
+                        // Female
+                        else switch (skinColor)
+                        {
+                        case 10: // White
+                            return 29409;
+                        case 6: // Light Brown
+                        case 7:
+                            return 29410;
+                        case 4: // Brown
+                        case 5:
+                            return 29411;
+                        case 0: // Dark
+                        case 1:
+                        case 2:
+                        case 3:
+                            return 29412;
+                        default: // original - Grey
+                            return 8571;
                         }
                     }
-                    // Female
-                    else switch (skinColor)
-                        {
-                            case 10: // White
-                                return 29409;
-                            case 6: // Light Brown
-                            case 7:
-                                return 29410;
-                            case 4: // Brown
-                            case 5:
-                                return 29411;
-                            case 0: // Dark
-                            case 1:
-                            case 2:
-                            case 3:
-                                return 29412;
-                            default: // original - Grey
-                                return 8571;
-                        }
+                    else if (Player::TeamIdForRace(getRace()) == TEAM_ALLIANCE)
+                        return 892;
+                    else
+                        return 8571;
+
                 }
-                else if (Player::TeamIdForRace(getRace()) == TEAM_ALLIANCE)
-                    return 892;
-                else
-                    return 8571;
             case FORM_DIREBEAR:
             case FORM_BEAR:
                 // Based on Hair color

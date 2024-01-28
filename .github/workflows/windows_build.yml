@@ -40,10 +40,15 @@ jobs:
           export CTOOLS_BUILD=all
           ./acore.sh compiler build
 
-      # - name: Zip dist folder
-      #   shell: powershell
-      #   run: |
-      #     Compress-Archive -Path ./env/dist/* -Destination ./env/dist.zip
+      - name: Zip Mod-Forge SQL folder
+        shell: powershell
+        run: |
+          Compress-Archive -Path ./modules/sql/* -Destination ./env/mod-forge-sql.zip
+
+      - name: Zip Data SQL folder
+        shell: powershell
+        run: |
+          Compress-Archive -Path ./data/sql/custom/* -Destination ./env/data-sql.zip
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         env:
@@ -55,3 +60,5 @@ jobs:
           title: "Release"
           files: |
             ./env/dist/worldserver.exe
+            ./env/dist/mod-forge-sql.zip
+            ./env/dist/data-sql.zip

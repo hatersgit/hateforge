@@ -44,3 +44,14 @@ jobs:
         shell: powershell
         run: |
           Compress-Archive -Path ./env/dist/* -Destination ./env/dist.zip
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          repo_token: "${{ secrets.GH_TOKEN }}"
+          automatic_release_tag: "Latest"
+          prerelease: false
+          title: "Release"
+          files: |
+            ./env/dist/*.zip

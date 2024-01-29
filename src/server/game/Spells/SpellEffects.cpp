@@ -6278,8 +6278,6 @@ void Spell::EffectRemoveAura(SpellEffIndex effIndex)
 
 void Spell::EffectCreateAreaTrigger(SpellEffIndex effIndex)
 {
-    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
-        return;
 
     if (!m_targets.HasDst())
         return;

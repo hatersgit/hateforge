@@ -1381,10 +1381,10 @@ struct areatrigger_pri_divine_star : AreaTriggerAI
         constexpr TriggerCastFlags TriggerFlags = TriggerCastFlags(TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CAST_IN_PROGRESS);
 
         if (caster->IsValidAttackTarget(unit))
-            caster->CastSpell(unit, /*at->GetSpellId() == SPELL_PRIEST_DIVINE_STAR_SHADOW ? SPELL_PRIEST_DIVINE_STAR_SHADOW_DAMAGE :*/ SPELL_PRIEST_DIVINE_STAR_HOLY_DAMAGE,
+            caster->CastSpell(unit, /*at->GetSpellId() == SPELL_PRIEST_DIVINE_STAR_SHADOW ? SPELL_PRIEST_DIVINE_STAR_SHADOW_DAMAGE :*/ /*SPELL_PRIEST_DIVINE_STAR_HOLY_DAMAGE*/ 585,
                 TriggerFlags);
         else if (caster->IsValidAssistTarget(unit))
-            caster->CastSpell(unit, /*at->GetSpellId() == SPELL_PRIEST_DIVINE_STAR_SHADOW ? SPELL_PRIEST_DIVINE_STAR_SHADOW_HEAL :*/ SPELL_PRIEST_DIVINE_STAR_HOLY_HEAL,
+            caster->CastSpell(unit, /*at->GetSpellId() == SPELL_PRIEST_DIVINE_STAR_SHADOW ? SPELL_PRIEST_DIVINE_STAR_SHADOW_HEAL :*/ /*SPELL_PRIEST_DIVINE_STAR_HOLY_HEAL*/ 331,
                 TriggerFlags);
 
         _affectedUnits.push_back(unit->GetGUID());

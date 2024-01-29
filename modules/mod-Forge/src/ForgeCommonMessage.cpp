@@ -389,6 +389,66 @@ void ForgeCommonMessage::SendTalents(Player* player)
     }
 }
 
+// hater: perks
+void ForgeCommonMessage::SendPerks(Player* player, uint8 specId)
+{
+    std::vector<CharacterSpecPerk*> spec;
+    fc->TryGetCharacterPerks(player, specId, spec);
+    std::string clientMsg = std::to_string(specId) + "^";
+    clientMsg += DoBuildPerks(spec, player);
+    player->SendForgeUIMsg(ForgeTopic::GET_PERKS, clientMsg);
+}
+
+void ForgeCommonMessage::SendAllPerks(Player* player)
+{
+    std::vector<Perk*> perks;
+    fc->TryGetAllPerks(perks);
+    std::string clientMsg = DoBuildPerkCatalogue(perks);
+    player->SendForgeUIMsg(ForgeTopic::GET_PERK_CATALOGUE, clientMsg);
+}
+
+void ForgeCommonMessage::SendPerkSelection(Player* player, std::string clientMsg)
+{
+    player->SendForgeUIMsg(ForgeTopic::OFFER_SELECTION, clientMsg);
+}
+
+std::string BuildPerk(Perk* perk)
+{
+    std::string out = "";
+    std::string dict = "~";
+
+    out = std::to_string(perk->spellId) +
+        "&" + std::to_string(perk->allowableClass) +
+        dict + std::to_string(perk->groupId) +
+        dict + std::to_string(perk->isAura) +
+        dict + std::to_string(perk->isUnique) +
+        dict + perk->tags + ","; //comma-separated tags
+
+    return out;
+}
+
+std::string ForgeCommonMessage::DoBuildPerks(std::vector<CharacterSpecPerk*> spec, Player* player)
+{
+    std::string out = "";
+    for (auto perk : spec)
+    {
+        out += BuildPerk(perk->spell) + "~" + std::to_string(perk->rank) + "*";
+    }
+    return out;
+}
+
+std::string ForgeCommonMessage::DoBuildPerkCatalogue(std::vector<Perk*> perks)
+{
+    int i = 0;
+    std::string clientMsg = "";
+    for (auto perk : perks)
+    {
+        clientMsg += BuildPerk(perk) + "*";
+    }
+    return clientMsg;
+}
+
+// hater: xmog
 void ForgeCommonMessage::SendXmogSet(Player* player, uint8 setId) {
     std::string clientMsg = std::to_string(setId) + "^";
     if (setId < (uint8)sConfigMgr->GetIntDefault("Transmogrification.MaxSets", 10)) {

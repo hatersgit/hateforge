@@ -1197,7 +1197,7 @@ SpellCastResult Unit::CastSpell(SpellCastTargets const& targets, SpellInfo const
 
     spell->m_CastItem = castItem;
     return spell->prepare(&targets, triggeredByAura);
-}
+ }
 
 SpellCastResult Unit::CastSpell(Unit* victim, uint32 spellId, bool triggered, Item* castItem, AuraEffect const* triggeredByAura, ObjectGuid originalCaster)
 {
@@ -1967,7 +1967,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
         {
             if (tDamage.second > 0)
             {
-                SpellInfo const* i_spellProto = sSpellMgr->GetSpellInfo(1570001);
+                SpellInfo const* i_spellProto = sSpellMgr->GetSpellInfo(4129999);
 
                 uint32 damage = tDamage.second > 0 ? tDamage.second : 0;
                 uint32 absorb = 0;
@@ -15637,6 +15637,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
+
         uint32 CatnDisplay = 0;
         uint32 CatnSpellID = 0;
         uint32 CatnReqSpellID = 0;
@@ -15664,20 +15665,22 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
         uint32 TravelnDisplay = 0;
         uint32 TravelnSpellID = 0;
         uint32 TravelnReqSpellID = 0;
-        
-        QueryResult resultCat = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'cat'");
-        QueryResult resultBear = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'bear'");
-        QueryResult resultFly = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'fly'");
-        QueryResult resultBuho = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'buho'");
-        QueryResult resultSea = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'sea'");
-        QueryResult resultTree = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'tree'");
-        QueryResult resultTravel = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'travel'");
+
+        /*if (getClass() == CLASS_DRUID) {
+            QueryResult resultCat = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'cat'");
+            QueryResult resultBear = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'bear'");
+            QueryResult resultFly = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'fly'");
+            QueryResult resultBuho = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'buho'");
+            QueryResult resultSea = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'sea'");
+            QueryResult resultTree = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'tree'");
+            QueryResult resultTravel = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'travel'");
+        }*/
 
         switch (form)
         {
             case FORM_CAT:
 
-                if (resultCat)
+                /*if (resultCat)
                 {
                     do
                     {
@@ -15706,7 +15709,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
                         }
 
                     } while (resultCat->NextRow());
-                }
+                }*/
 
                 if (CatnDisplay != 0) // Violet
                 {

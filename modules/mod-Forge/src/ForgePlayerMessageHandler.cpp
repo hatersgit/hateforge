@@ -19,7 +19,6 @@
 #include <UnlearnTalentHandler.cpp>
 #include <UpdateSpecHandler.cpp>
 #include <GetTalentsHandler.cpp>
-#include <PrestigeHandler.cpp>
 #include <UseSkillbook.cpp>
 #include <unordered_map>
 #include <ForgeCache.cpp>
@@ -35,8 +34,20 @@
 #include <GetCharacterLoadoutsHandler.cpp>
 #include <DeleteLoadoutHandler.cpp>
 #include <SaveLoadoutHandler.cpp>
+
+#include <GetPerksHandler.cpp>
+#include <GetPerksInspectHandler.cpp>
+#include <LearnPerkHandler.cpp>
+#include <GetPerkSelectionHandler.cpp>
+#include <RerollPerkHandler.cpp>
+#include <PrestigeHandler.cpp>
+
 #include <unordered_map>
 #include <random>
+#include <boost/lexical_cast.hpp>
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 
 // Add player scripts
 class ForgePlayerMessageHandler : public PlayerScript
@@ -53,7 +64,6 @@ public:
         // setup DB
         player->SetSpecsCount(0);
         fc->AddCharacterSpecSlot(player);
-        fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::RACIAL_TREE, fc->GetConfig("InitialPoints", 8));
         fc->UpdateCharacters(player->GetSession()->GetAccountId(), player);
 
         if (sConfigMgr->GetBoolDefault("echos", false)) {
@@ -74,6 +84,26 @@ public:
         fc->UnlearnFlaggedSpells(player);
 
         fc->LoadLoadoutActions(player);
+
+        if (fc->IsFlaggedReset(player->GetGUID().GetCounter())) {
+            ForgeCharacterSpec* spec;
+            if (fc->TryGetCharacterActiveSpec(player, spec))
+            {
+                ForgeAddonMessage msg;
+                msg.topic = "2";
+                msg.player = player;
+                std::string message = "-1;" + std::to_string(spec->Id);
+                msg.message = message;
+                sTopicRouter->Route(msg, message);
+                fc->ClearResetFlag(player->GetGUID().GetCounter());
+            }
+        }/*
+        else {
+            fc->RemoveTalents(player);
+            fc->ApplyTalents(player);
+        }*/
+        fc->ApplyActivePerks(player);
+        LearnSpellsForLevel(player);
     }
 
     void OnLogout(Player* player) override
@@ -214,13 +244,13 @@ public:
 
             switch (qual) {
             case ITEM_QUALITY_UNCOMMON:
-                formula = (ilvl + 190.f) / 80.f;
+                formula = (1.2f * ilvl + 190.f) / 80.f;
                 break;
             case ITEM_QUALITY_RARE:
-                formula = (ilvl + 140.f) / 60.f;
+                formula = (1.2f * ilvl + 140.f) / 60.f;
                 break;
             default: // epic+
-                formula = (ilvl + 94.f) / 40.f;
+                formula = (1.2f * ilvl + 94.f) / 40.f;
                 break;
             }
             auto itemSlotVal = pow(e, formula);
@@ -240,15 +270,17 @@ public:
                 auto statDist = (mainStat == ITEM_MOD_STRENGTH || mainStat == ITEM_MOD_AGILITY) ? mainStatDistributions[mainstatdistroll(gen)] : .33f;
                 auto tankDist = statDist == .50f;
 
-                auto amountForStam = (itemValue / 2.f) * statDist;
+                auto amountForStam = (itemValue / 2.f)*statDist;
+                auto bonus = tankDist ? 1.15f : 1.f;
                 itemProto->SetStatType(1, ITEM_MOD_STAMINA);
-                itemProto->SetStatValue(1, amountForStam);
+                itemProto->SetStatValue(1, (amountForStam / fc->_forgeItemStatValues[ITEM_MOD_STAMINA]) * bonus);
                 curValue -= amountForStam;
 
-                auto amountForMainstat = (itemValue / 2.f) - amountForStam;
+                auto amountForMainstat = ((itemValue / 2.f) - amountForStam);
+                bonus = tankDist ? 1.f : 1.15f;
                 itemProto->SetStatsCount(statCount);
                 itemProto->SetStatType(0, mainStat);
-                itemProto->SetStatValue(0, amountForMainstat);
+                itemProto->SetStatValue(0, (amountForMainstat / fc->_forgeItemStatValues[mainStat]) * bonus);
                 curValue -= amountForMainstat;
 
                 if (itemProto->IsWeapon()) {
@@ -257,7 +289,7 @@ public:
                     case INVTYPE_WEAPON:
                     case INVTYPE_WEAPONMAINHAND:
                     case INVTYPE_WEAPONOFFHAND:
-                        dps = 0.711f * itemSlotVal + 5.2f;
+                        dps = 0.711f * itemSlotVal + 4.2f;
                         break;
                     case INVTYPE_2HWEAPON:
                         dps = 0.98f * itemSlotVal + 11.5f;
@@ -279,11 +311,11 @@ public:
                     if (dps) {
                         if (mainStat == ITEM_MOD_INTELLECT) {
                             auto sp = itemSlotVal * 2.435;
-                            statCount++;
+                            
                             itemProto->SetStatsCount(statCount);
-                            itemProto->SetStatType(statCount - 1, ITEM_MOD_SPELL_POWER);
-                            itemProto->SetStatValue(statCount - 1, sp);
-
+                            itemProto->SetStatType(statCount, ITEM_MOD_SPELL_POWER);
+                            itemProto->SetStatValue(statCount, sp);
+                            statCount++;
                             dps -= sp / 4;
                         }
                         std::uniform_int_distribution<> dpsdistr(18, 36);
@@ -386,6 +418,12 @@ private:
     ForgeCache* fc;
     ForgeCommonMessage* cm;
 
+    uint8 GetPrestigeStatus(Player* player)
+    {
+        ForgeCharacterPoint* presCp = fc->GetCommonCharacterPoint(player, CharacterPointType::PRESTIGE_COUNT);
+        return presCp->Sum;
+    }
+
     void LearnSpellsForLevel(Player* player) {
         if (player->HasUnitState(UNIT_STATE_DIED))
             player->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
@@ -438,6 +476,11 @@ void AddForgePlayerMessageHandler()
     sTopicRouter->AddHandler(new DeleteLoadoutHandler(cache, cm));
     sTopicRouter->AddHandler(new SaveLoadoutHandler(cache, cm));
 
-    //new UseSkillBook();
-    new ForgeCacheCommands();   
+    sTopicRouter->AddHandler(new GetPerksHandler(cache, cm));
+    sTopicRouter->AddHandler(new LearnPerkHandler(cache, cm));
+    sTopicRouter->AddHandler(new GetPerkSelectionHandler(cache, cm));
+    sTopicRouter->AddHandler(new RerollPerkHandler(cache, cm));
+    sTopicRouter->AddHandler(new GetPerksInspectHandler(cache, cm));
+
+    new ForgeCacheCommands();
 }

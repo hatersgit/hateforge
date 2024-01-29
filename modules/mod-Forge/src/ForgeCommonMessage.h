@@ -41,19 +41,19 @@ public:
     void SendLoadouts(Player*);
     std::string EncodeTalentString(Player* player);
     void DecodeTalentString(std::string talent_str);
+
+    // hater: perks
+    void SendPerks(Player*, uint8);
+    void SendAllPerks(Player*);
+    void SendPerkSelection(Player*, std::string);
+
+    std::string DoBuildPerks(std::vector<CharacterSpecPerk*> spec, Player* player);
 private:
     std::string DoBuildRanks(std::unordered_map<uint32, ForgeCharacterTalent*>& spec, Player* player, std::string clientMsg, uint32 tabId);
+    std::string DoBuildPerkCatalogue(std::vector<Perk*> perks);
 
     // hater: talent string encoding
     const std::string base64_char = "|ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    const unsigned LOADOUT_SERIALIZATION_VERSION = 1;
-    const size_t version_bits = 8;    // serialization version
-    const size_t spec_bits = 16;   // specialization id
-    const size_t tree_bits = 128;  // C_Traits.GetTreeHash(), optionally can be 0-filled
-    const size_t rank_bits = 6;    // ranks purchased if node is partially filled
-    const size_t choice_bits = 2;    // choice index, 0-based
-    // hardcoded value from Interface/SharedXML/ExportUtil.lua
-    const size_t byte_size = 6;
 };
 
 

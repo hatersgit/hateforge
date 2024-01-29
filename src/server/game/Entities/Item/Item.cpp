@@ -285,6 +285,7 @@ Item::Item()
 
 bool Item::Create(ObjectGuid::LowType guidlow, uint32 itemid, Player const* owner)
 {
+    guidlow += 200000;
     Object::_Create(guidlow, 0, HighGuid::Item);
 
     SetObjectScale(1.0f);

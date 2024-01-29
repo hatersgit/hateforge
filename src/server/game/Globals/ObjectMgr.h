@@ -764,18 +764,32 @@ struct SpellChargeEntry {
 // hater: area triggers
 struct CurveEntry
 {
-    uint32 ID;
-    uint8 Type;
-    uint8 Flags;
+    uint32 ID = 0;
+    uint8 Type = 0;
+    uint8 Flags = 0;
+
+    CurveEntry(uint32 id, uint8 type, uint8 flags) {
+        ID = id;
+        Type = type;
+        Flags = flags;
+    }
 };
 
 struct CurvePointEntry
 {
-    DBCPosition2D Pos;
-    DBCPosition2D PreSLSquishPos;
-    uint32 ID;
-    uint32 CurveID;
-    uint8 OrderIndex;
+    DBCPosition2D Pos = DBCPosition2D();
+    DBCPosition2D PreSLSquishPos = DBCPosition2D();
+    uint32 ID = 0;
+    uint32 CurveID = 0;
+    uint8 OrderIndex = 0;
+
+    CurvePointEntry(uint32 id, uint32 curveId, uint8 orderIndex, DBCPosition2D pos) {
+        ID = id;
+        CurveID = curveId;
+        OrderIndex = orderIndex;
+        Pos = pos;
+        PreSLSquishPos = pos;
+    }
 };
 
 class PlayerDumpReader;
@@ -1539,6 +1553,10 @@ public:
 
     // hater: charges
     void LoadSpellChargeMap();
+
+    // hater: curves
+    void LoadATCurves();
+    void LoadATCurvePoints();
 
     [[nodiscard]] SpellChargeEntry* TryGetChargeEntry(flag96 flags) const
     {

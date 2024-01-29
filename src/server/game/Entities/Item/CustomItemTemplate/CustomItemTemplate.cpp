@@ -643,10 +643,19 @@ bool CustomItemTemplate::Is2hWeapon() {
 
 void CustomItemTemplate::MakeBlankSlate() {
     SetStatsCount(0);
-    SetStatType(0, 0);
-    SetStatValue(0, 0);
-    SetSpellID(0, 0);
-    SetSpellTrigger(0, 0);
+    for (uint8 i = 0; i < MAX_ITEM_PROTO_STATS; ++i) {
+        SetStatType(i, 0);
+        SetStatValue(i, 0);
+    }
+    for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i) {
+        SetSpellID(i, 0);
+        SetSpellTrigger(i, 0);
+    }
+    SetSocketBonus(0);
+    for (uint8 i = 0; i < MAX_ITEM_PROTO_SOCKETS; ++i) {
+        SetSocketColor(i, 0);
+        SetSocketContent(i, 0);
+    }
 
     if (IsWeapon()) {
         SetDamageMaxA(0);

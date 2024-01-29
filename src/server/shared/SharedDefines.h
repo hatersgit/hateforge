@@ -86,7 +86,20 @@ enum class ForgeTopic
     COLLECTION_SETUP_FINISHED       = 53,
     ADD_XMOG                        = 54,
     APPLY_XMOG_ERROR                = 55,
-    
+
+    // hater: perks
+    GET_PERKS = 56,
+    LEARN_PERK = 57,
+    LEARN_PERK_ERROR = 58,
+    REROLL_PERK = 59,
+    REROLL_PERK_ERROR = 60,
+    RESET_ALL_PERKS = 61,
+    OFFER_SELECTION = 62,
+    GET_PERK_CATALOGUE = 63,
+    GET_INSPECT_PERKS = 64,
+    GET_ARCHETYPES = 65,
+    GET_UTILITY_PERKS = 67,
+
     // m+
     MYTHIC_GET_WEEKLY_REWARD        = 101,
     MYTHIC_GET_MAP_STATS            = 102,

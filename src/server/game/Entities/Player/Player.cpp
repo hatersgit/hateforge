@@ -14390,138 +14390,138 @@ void Player::CompletedAchievement(AchievementEntry const* entry)
 
 void Player::LearnTalent(uint32 talentId, uint32 talentRank, bool command /*= false*/)
 {
-    // uint32 CurTalentPoints = GetFreeTalentPoints();
+    uint32 CurTalentPoints = GetFreeTalentPoints();
 
-    // if (!command)
-    // {
-    //     // xinef: check basic data
-    //     if (!CurTalentPoints)
-    //     {
-    //         return;
-    //     }
+    if (!command)
+    {
+        // xinef: check basic data
+        if (!CurTalentPoints)
+        {
+            return;
+        }
 
-    //     if (talentRank >= MAX_TALENT_RANK)
-    //     {
-    //         return;
-    //     }
-    // }
+        if (talentRank >= MAX_TALENT_RANK)
+        {
+            return;
+        }
+    }
 
-    // TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentId);
-    // if (!talentInfo)
-    //     return;
+    TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentId);
+    if (!talentInfo)
+        return;
 
-    // TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
-    // if (!talentTabInfo)
-    //     return;
+    TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
+    if (!talentTabInfo)
+        return;
 
-    // // xinef: prevent learn talent for different class (cheating)
-    // if ((getClassMask() & talentTabInfo->ClassMask) == 0)
-    //     return;
+    // xinef: prevent learn talent for different class (cheating)
+    if ((getClassMask() & talentTabInfo->ClassMask) == 0)
+        return;
 
-    // // xinef: find current talent rank
-    // uint32 currentTalentRank = 0;
-    // for (uint8 rank = 0; rank < MAX_TALENT_RANK; ++rank)
-    // {
-    //     if (talentInfo->RankID[rank] && HasTalent(talentInfo->RankID[rank], GetActiveSpec()))
-    //     {
-    //         currentTalentRank = rank + 1;
-    //         break;
-    //     }
-    // }
+    // xinef: find current talent rank
+    uint32 currentTalentRank = 0;
+    for (uint8 rank = 0; rank < MAX_TALENT_RANK; ++rank)
+    {
+        if (talentInfo->RankID[rank] && HasTalent(talentInfo->RankID[rank], GetActiveSpec()))
+        {
+            currentTalentRank = rank + 1;
+            break;
+        }
+    }
 
-    // // xinef: we already have same or higher rank talent learned
-    // if (currentTalentRank >= talentRank + 1)
-    //     return;
+    // xinef: we already have same or higher rank talent learned
+    if (currentTalentRank >= talentRank + 1)
+        return;
 
-    // uint32 talentPointsChange = (talentRank - currentTalentRank + 1);
-    // if (!command)
-    // {
-    //     // xinef: check if we have enough free talent points
-    //     if (CurTalentPoints < talentPointsChange)
-    //     {
-    //         return;
-    //     }
-    // }
+    uint32 talentPointsChange = (talentRank - currentTalentRank + 1);
+    if (!command)
+    {
+        // xinef: check if we have enough free talent points
+        if (CurTalentPoints < talentPointsChange)
+        {
+            return;
+        }
+    }
 
-    // // xinef: check if talent deponds on another talent
-    // if (talentInfo->DependsOn > 0)
-    //     if (TalentEntry const* depTalentInfo = sTalentStore.LookupEntry(talentInfo->DependsOn))
-    //     {
-    //         bool hasEnoughRank = false;
-    //         for (uint8 rank = talentInfo->DependsOnRank; rank < MAX_TALENT_RANK; rank++)
-    //         {
-    //             if (depTalentInfo->RankID[rank] != 0)
-    //                 if (HasTalent(depTalentInfo->RankID[rank], GetActiveSpec()))
-    //                 {
-    //                     hasEnoughRank = true;
-    //                     break;
-    //                 }
-    //         }
+    // xinef: check if talent deponds on another talent
+    if (talentInfo->DependsOn > 0)
+        if (TalentEntry const* depTalentInfo = sTalentStore.LookupEntry(talentInfo->DependsOn))
+        {
+            bool hasEnoughRank = false;
+            for (uint8 rank = talentInfo->DependsOnRank; rank < MAX_TALENT_RANK; rank++)
+            {
+                if (depTalentInfo->RankID[rank] != 0)
+                    if (HasTalent(depTalentInfo->RankID[rank], GetActiveSpec()))
+                    {
+                        hasEnoughRank = true;
+                        break;
+                    }
+            }
 
-    //         // xinef: does not have enough talent points spend in required talent
-    //         if (!hasEnoughRank)
-    //             return;
-    //     }
+            // xinef: does not have enough talent points spend in required talent
+            if (!hasEnoughRank)
+                return;
+        }
 
-    // if (!command)
-    // {
-    //     // xinef: check amount of points spent in current talent tree
-    //     // xinef: be smart and quick
-    //     uint32 spentPoints = 0;
-    //     if (talentInfo->Row > 0)
-    //     {
-    //         const PlayerTalentMap& talentMap = GetTalentMap();
-    //         for (PlayerTalentMap::const_iterator itr = talentMap.begin(); itr != talentMap.end(); ++itr)
-    //             if (TalentSpellPos const* talentPos = GetTalentSpellPos(itr->first))
-    //                 if (TalentEntry const* itrTalentInfo = sTalentStore.LookupEntry(talentPos->talent_id))
-    //                     if (itrTalentInfo->TalentTab == talentInfo->TalentTab)
-    //                         if (itr->second->State != PLAYERSPELL_REMOVED && itr->second->IsInSpec(GetActiveSpec())) // pussywizard
-    //                             spentPoints += talentPos->rank + 1;
-    //     }
+    if (!command)
+    {
+        // xinef: check amount of points spent in current talent tree
+        // xinef: be smart and quick
+        uint32 spentPoints = 0;
+        if (talentInfo->Row > 0)
+        {
+            const PlayerTalentMap& talentMap = GetTalentMap();
+            for (PlayerTalentMap::const_iterator itr = talentMap.begin(); itr != talentMap.end(); ++itr)
+                if (TalentSpellPos const* talentPos = GetTalentSpellPos(itr->first))
+                    if (TalentEntry const* itrTalentInfo = sTalentStore.LookupEntry(talentPos->talent_id))
+                        if (itrTalentInfo->TalentTab == talentInfo->TalentTab)
+                            if (itr->second->State != PLAYERSPELL_REMOVED && itr->second->IsInSpec(GetActiveSpec())) // pussywizard
+                                spentPoints += talentPos->rank + 1;
+        }
 
-    //     // xinef: we do not have enough talent points to add talent of this tier
-    //     if (spentPoints < (talentInfo->Row * MAX_TALENT_RANK))
-    //         return;
-    // }
+        // xinef: we do not have enough talent points to add talent of this tier
+        if (spentPoints < (talentInfo->Row * MAX_TALENT_RANK))
+            return;
+    }
 
-    // // xinef: hacking attempt, tries to learn unknown rank
-    // uint32 spellId = talentInfo->RankID[talentRank];
-    // if (spellId == 0)
-    //     return;
+    // xinef: hacking attempt, tries to learn unknown rank
+    uint32 spellId = talentInfo->RankID[talentRank];
+    if (spellId == 0)
+        return;
 
-    // SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
-    // if (!spellInfo)
-    //     return;
+    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
+    if (!spellInfo)
+        return;
 
-    // bool learned = false;
+    bool learned = false;
 
-    // // xinef: if talent info has special marker in dbc - add to spell book
-    // if (talentInfo->addToSpellBook)
-    //     if (!spellInfo->HasAttribute(SPELL_ATTR0_PASSIVE) && !spellInfo->HasEffect(SPELL_EFFECT_LEARN_SPELL))
-    //     {
-    //         learnSpell(spellId);
-    //         learned = true;
-    //     }
+    // xinef: if talent info has special marker in dbc - add to spell book
+    if (talentInfo->addToSpellBook)
+        if (!spellInfo->HasAttribute(SPELL_ATTR0_PASSIVE) && !spellInfo->HasEffect(SPELL_EFFECT_LEARN_SPELL))
+        {
+            learnSpell(spellId);
+            learned = true;
+        }
 
-    // if (!learned)
-    //     SendLearnPacket(spellId, true);
+    if (!learned)
+        SendLearnPacket(spellId, true);
 
-    // for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-    //     if (spellInfo->Effects[i].Effect == SPELL_EFFECT_LEARN_SPELL)
-    //         if (sSpellMgr->IsAdditionalTalentSpell(spellInfo->Effects[i].TriggerSpell))
-    //             learnSpell(spellInfo->Effects[i].TriggerSpell);
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (spellInfo->Effects[i].Effect == SPELL_EFFECT_LEARN_SPELL)
+            if (sSpellMgr->IsAdditionalTalentSpell(spellInfo->Effects[i].TriggerSpell))
+                learnSpell(spellInfo->Effects[i].TriggerSpell);
 
-    // addTalent(spellId, GetActiveSpecMask(), currentTalentRank);
+    addTalent(spellId, GetActiveSpecMask(), currentTalentRank);
 
-    // // xinef: update free talent points count
-    // m_usedTalentCount += talentPointsChange;
+    // xinef: update free talent points count
+    m_usedTalentCount += talentPointsChange;
 
-    // if (!command)
-    // {
-    //     SetFreeTalentPoints(CurTalentPoints - talentPointsChange);
-    // }
+    if (!command)
+    {
+        SetFreeTalentPoints(CurTalentPoints - talentPointsChange);
+    }
 
-    // sScriptMgr->OnPlayerLearnTalents(this, talentId, talentRank, spellId);
+    sScriptMgr->OnPlayerLearnTalents(this, talentId, talentRank, spellId);
 }
 
 void Player::LearnPetTalent(ObjectGuid petGuid, uint32 talentId, uint32 talentRank)

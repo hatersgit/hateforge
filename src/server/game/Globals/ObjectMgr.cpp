@@ -3292,6 +3292,7 @@ void ObjectMgr::LoadItemTemplates()
         for (ItemTemplateContainer::const_iterator itr = _itemTemplateStore.begin(); itr != _itemTemplateStore.end(); ++itr)
             if (itr->first > max)
                 max = itr->first;
+
         if (max)
         {
             _itemTemplateStoreFast.clear();
@@ -10961,6 +10962,64 @@ void ObjectMgr::LoadJumpChargeParams()
     while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded {} jump charge params from forge_spell_jump_charge_params in {} ms", _jumpChargeParams.size(), GetMSTimeDiffToNow(oldMSTime));
+}
+
+void ObjectMgr::LoadATCurves()
+{
+    uint32 oldMSTime = getMSTime();
+
+    _curves.clear();
+
+    QueryResult result = WorldDatabase.Query("SELECT * FROM forge_curve");
+
+    if (!result)
+    {
+        LOG_ERROR("sql.sql", ">> Loaded 0 curves. DB table `forge_curve` is empty.");
+        LOG_INFO("server.loading", " ");
+        return;
+    }
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 id = fields[0].Get<uint32>();
+        uint32 type = fields[1].Get<uint8>();
+        uint32 flags = fields[2].Get<uint8>();
+
+        _curves[id] = new CurveEntry(id, type, flags);
+    } while (result->NextRow());
+
+    LOG_INFO("server.loading", ">> Loaded {} curves from forge_curve in {} ms", _curves.size(), GetMSTimeDiffToNow(oldMSTime));
+}
+
+void ObjectMgr::LoadATCurvePoints()
+{
+    uint32 oldMSTime = getMSTime();
+
+    _curvePoints.clear();
+
+    QueryResult result = WorldDatabase.Query("SELECT * FROM forge_curve_points");
+
+    if (!result)
+    {
+        LOG_ERROR("sql.sql", ">> Loaded 0 curve points. DB table `forge_curve_points` is empty.");
+        LOG_INFO("server.loading", " ");
+        return;
+    }
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 id = fields[0].Get<uint32>();
+        uint32 pos1 = fields[1].Get<float>();
+        uint32 pos2 = fields[2].Get<float>();
+
+        
+    } while (result->NextRow());
+
+    LOG_INFO("server.loading", ">> Loaded {} curve points from forge_curve_points in {} ms", _curvePoints.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 MapChallengeModeEntry* ObjectMgr::GetChallengeMode(uint32 id) const

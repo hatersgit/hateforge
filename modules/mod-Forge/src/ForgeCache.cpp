@@ -1018,6 +1018,7 @@ public:
         uint8 row;
         uint8 col;
         uint8 pointReq;
+        uint8 nodeIndex;
         std::vector<NodeMetaData*> unlocks;
     };
     struct TreeMetaData {
@@ -1661,6 +1662,7 @@ private:
             node->pointReq = newTalent->TabPointReq;
             node->col = newTalent->ColumnIndex;
             node->row = newTalent->RowIndex;
+            node->nodeIndex = newTalent->nodeIndex;
 
             data->nodes[node->row][node->col] = node;
             data->nodeLocation[node->spellId] = node;

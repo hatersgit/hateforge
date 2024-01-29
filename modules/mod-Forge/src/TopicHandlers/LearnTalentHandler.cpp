@@ -141,10 +141,9 @@ public:
                                         auto rankedSpell = ft->Ranks[ct->CurrentRank];
                                         if (!iam.player->HasSpell(ct->SpellId)) {
                                             if (choiceNode) {
-                                                iam.player->learnSpell(ct->SpellId);
-
-                                                uint32 choiceId = fc->GetChoiceNodeFromindex(ct->CurrentRank);
-                                                spec->ChoiceNodesChosen[ct->SpellId] = choiceId;
+                                                auto choice = fc->_choiceNodes[ct->SpellId][ct->CurrentRank - 1];
+                                                iam.player->learnSpell(choice);
+                                                spec->ChoiceNodesChosen[ct->SpellId] = choice;
                                             }
                                             else {
                                                 iam.player->learnSpell(rankedSpell);
@@ -217,8 +216,8 @@ public:
                                                     bool choiceNode = talent->nodeType == NodeType::CHOICE;
                                                     if (col.second > 0) {
                                                         if (choiceNode) {
-                                                            uint32 choiceId = fc->GetChoiceNodeFromindex(col.second);
-                                                            if (!choiceId) {
+                                                            auto choiceId = fc->_choiceNodes.find(node->spellId);
+                                                            if (choiceId == fc->_choiceNodes.end()) {
                                                                 player->SendForgeUIMsg(ForgeTopic::LEARN_TALENT_ERROR, "Unknown choice node received.");
                                                                 return false;
                                                             }

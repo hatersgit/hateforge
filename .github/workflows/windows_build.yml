@@ -43,12 +43,12 @@ jobs:
       - name: Zip Mod-Forge SQL folder
         shell: powershell
         run: |
-          Compress-Archive -Path ./modules/mod-Forge -Destination ./env/mod-forge-sql.zip
+          Compress-Archive -Path ./modules/mod-Forge -Destination ./env/dist/mod-forge-sql.zip
 
       - name: Zip Data SQL folder
         shell: powershell
         run: |
-          Compress-Archive -Path ./data/sql/custom -Destination ./env/data-sql.zip
+          Compress-Archive -Path ./data/sql/custom -Destination ./env/dist/data-sql.zip
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         env:

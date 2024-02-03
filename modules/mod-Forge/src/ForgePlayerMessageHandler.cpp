@@ -10,6 +10,7 @@
 #include "WorldPacket.h"
 #include "TopicRouter.h"
 #include "Gamemode.h"
+#include "CustomItemTemplate.h"
 #include <ActivateSpecHandler.cpp>
 #include <GetTalentTreeHandler.cpp>
 #include <GetCharacterSpecsHandler.cpp>
@@ -97,13 +98,12 @@ public:
                 sTopicRouter->Route(msg, message);
                 fc->ClearResetFlag(player->GetGUID().GetCounter());
             }
-        }/*
-        else {
-            fc->RemoveTalents(player);
-            fc->ApplyTalents(player);
-        }*/
+        }
+
         fc->ApplyActivePerks(player);
         LearnSpellsForLevel(player);
+
+        player->SetWorldTier(Difficulty::WORLD_TIER_4);
     }
 
     void OnLogout(Player* player) override
@@ -177,6 +177,19 @@ public:
                 fc->UpdateCharacterSpec(player, spec);
                 LearnSpellsForLevel(player);
             }
+
+            if (sConfigMgr->GetBoolDefault("echos", false)) {
+                for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i) {
+                    if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i)) {
+                        if (ItemTemplate const* temp = item->GetTemplate()) {
+                            if (temp->Quality >= ITEM_QUALITY_UNCOMMON && (temp->Class == ITEM_CLASS_ARMOR || temp->Class == ITEM_CLASS_WEAPON)) {
+                                CustomItemTemplate custom = GetItemTemplate(temp->ItemId);
+                                custom->AdjustForLevel(player);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -223,100 +236,90 @@ public:
         OnAddItem(player, item->GetTemplate()->ItemId, count);
     }
 
-    void GenerateItem(Item* item, CustomItemTemplate itemProto, Player const* owner) override
+    void GenerateItem(CustomItemTemplate itemProto, Player const* owner) override
     {
         std::random_device rd; // obtain a random number from hardware
         std::mt19937 gen(rd()); // seed the generator
+        std::uniform_int_distribution<> coinflip(0, 1);
 
         itemProto->MakeBlankSlate();
+        itemProto->SetBonding(NO_BIND);
+
         auto e = 2.7183;
         auto invType = itemProto->GetInventoryType();
 
-        float mainStatDistributions[2] = {.50f, .33f};
         ItemModType stats[MAINSTATS] = {ITEM_MOD_STRENGTH, ITEM_MOD_AGILITY, ITEM_MOD_INTELLECT };
 
         auto slot = fc->_forgeItemSlotValues.find(InventoryType(invType));
         if (slot != fc->_forgeItemSlotValues.end()) {
             float slotmod = slot->second;
-            float ilvl = itemProto->GetItemLevel();
+            uint32 maxIlvlBase = sConfigMgr->GetIntDefault("WorldTier.base.level", 60);
+
+            float ilvl = float(std::min(maxIlvlBase,itemProto->GetItemLevel())) + uint8(owner->GetWorldTier())*10.f;
+            itemProto->SetItemLevel(ilvl);
+            itemProto->SetRequiredLevel(1);
             auto qual = itemProto->GetQuality();
             auto formula = 0.f;
+            auto secondaryRolls = 0;
 
             switch (qual) {
             case ITEM_QUALITY_UNCOMMON:
-                formula = (1.2f * ilvl + 190.f) / 80.f;
+                formula = (1.3f * ilvl + 180.f) / 70.f;
+                secondaryRolls = 1;
                 break;
             case ITEM_QUALITY_RARE:
-                formula = (1.2f * ilvl + 140.f) / 60.f;
+                formula = (1.3f * ilvl + 180.f) / 65.f;
+                secondaryRolls = 2;
                 break;
             default: // epic+
-                formula = (1.2f * ilvl + 94.f) / 40.f;
+                formula = (1.3f * ilvl + 180.f) / 60.f;
+                secondaryRolls = 3;
                 break;
             }
             auto itemSlotVal = pow(e, formula);
+            itemProto->SetItemSlotValue(itemSlotVal);
             auto itemValue = itemSlotVal * slot->second;
             auto curValue = itemValue;
 
             auto statCount = 2;
             if (itemValue) {
                 itemProto->SetBonding(BIND_WHEN_PICKED_UP);
-                std::uniform_int_distribution<> mainstatroll(0, 2);
-                std::uniform_int_distribution<> mainstatdistroll(0, 1);
 
-                auto mainStat = stats[mainstatroll(gen)];
-                while (mainStat == ITEM_MOD_STRENGTH && itemProto->IsArmor() && itemProto->GetSubClass() != ITEM_SUBCLASS_ARMOR_PLATE) {
-                    mainStat = stats[mainstatroll(gen)];
-                }
-                auto statDist = (mainStat == ITEM_MOD_STRENGTH || mainStat == ITEM_MOD_AGILITY) ? mainStatDistributions[mainstatdistroll(gen)] : .33f;
-                auto tankDist = statDist == .50f;
+                auto mainStat = itemProto->GenerateMainStatForItem();
+                bool tankDist = itemProto->tankPotential ? coinflip(gen) : false;
 
-                auto amountForStam = (itemValue / 2.f)*statDist;
-                auto bonus = tankDist ? 1.15f : 1.f;
-                itemProto->SetStatType(1, ITEM_MOD_STAMINA);
-                itemProto->SetStatValue(1, (amountForStam / fc->_forgeItemStatValues[ITEM_MOD_STAMINA]) * bonus);
+                float amountForAttributes = itemValue * .58f;
+                float amountForStam = amountForAttributes / 2;
+                itemProto->SetStatType(statCount - 1, ITEM_MOD_STAMINA);
+                auto amount = amountForStam / fc->_forgeItemStatValues[ITEM_MOD_STAMINA];
+                itemProto->SetStatValue(statCount - 1, amount);
+                itemProto->SetStatValueMax(statCount - 1, amount);
                 curValue -= amountForStam;
 
-                auto amountForMainstat = ((itemValue / 2.f) - amountForStam);
-                bonus = tankDist ? 1.f : 1.15f;
+                auto amountForMainStat = amountForAttributes - amountForStam;
                 itemProto->SetStatsCount(statCount);
-                itemProto->SetStatType(0, mainStat);
-                itemProto->SetStatValue(0, (amountForMainstat / fc->_forgeItemStatValues[mainStat]) * bonus);
-                curValue -= amountForMainstat;
+                itemProto->SetStatType(statCount - 2, mainStat);
+                amount = amountForMainStat / fc->_forgeItemStatValues[mainStat];
+                itemProto->SetStatValue(statCount - 2, amount);
+                itemProto->SetStatValueMax(statCount - 2, amount);
+                curValue -= amountForMainStat;
 
+                std::vector<ItemModType> rolled = {};
                 if (itemProto->IsWeapon()) {
-                    float dps = 0.f;
-                    switch (itemProto->GetInventoryType()) {
-                    case INVTYPE_WEAPON:
-                    case INVTYPE_WEAPONMAINHAND:
-                    case INVTYPE_WEAPONOFFHAND:
-                        dps = 0.711f * itemSlotVal + 4.2f;
-                        break;
-                    case INVTYPE_2HWEAPON:
-                        dps = 0.98f * itemSlotVal + 11.5f;
-                        break;
-                    case INVTYPE_RANGEDRIGHT:
-                        switch (itemProto->GetSubClass()) {
-                        case ITEM_SUBCLASS_WEAPON_WAND:
-                            dps = 1.28f * itemSlotVal + 5.5f;
-                        case ITEM_SUBCLASS_WEAPON_BOW:
-                        case ITEM_SUBCLASS_WEAPON_GUN:
-                        case ITEM_SUBCLASS_WEAPON_THROWN:
-                        case ITEM_SUBCLASS_WEAPON_CROSSBOW:
-                            dps = 0.98f * itemSlotVal + 21.5f;
-                        }
-                        break;
-                    default:
-                        break;
-                    }
+                    float dps = itemProto->CalculateDps();
                     if (dps) {
+                        
                         if (mainStat == ITEM_MOD_INTELLECT) {
                             auto sp = itemSlotVal * 2.435;
                             
                             itemProto->SetStatsCount(statCount);
                             itemProto->SetStatType(statCount, ITEM_MOD_SPELL_POWER);
                             itemProto->SetStatValue(statCount, sp);
+                            itemProto->SetStatValueMax(statCount, sp);
                             statCount++;
                             dps -= sp / 4;
+
+                            rolled.push_back(ITEM_MOD_SPELL_POWER);
                         }
                         std::uniform_int_distribution<> dpsdistr(18, 36);
 
@@ -326,51 +329,114 @@ public:
                         int low = split - var;
                         int top = split + var;
 
-                        itemProto->SetDamageTypeA(SPELL_SCHOOL_NORMAL);
                         itemProto->SetDamageMinA(low);
+                        itemProto->SetMaxDamageMinA(low);
                         itemProto->SetDamageMaxA(top);
+                        itemProto->SetMaxDamageMaxA(top);
                     }
                     else { return; }
                 } else /*armor*/ {
                     switch (itemProto->GetSubClass()) {
-                    case ITEM_SUBCLASS_ARMOR_PLATE:
-                        itemProto->SetArmor(itemProto->GetItemLevel() * 8.f);
-                        break;
-                    case ITEM_SUBCLASS_ARMOR_MAIL:
-                        itemProto->SetArmor(itemProto->GetItemLevel() * 4.5);
-                        break;
-                    case ITEM_SUBCLASS_ARMOR_LEATHER:
-                        itemProto->SetArmor(itemProto->GetItemLevel() * 2.15);
-                        break;
-                    case ITEM_SUBCLASS_ARMOR_CLOTH:
-                        itemProto->SetArmor(itemProto->GetItemLevel() * 1.08);
+                    case ITEM_SUBCLASS_ARMOR_PLATE: {
+                        auto baseArmor = itemProto->GetItemLevel() * 8.f;
+                        auto amountForArmor = curValue / 3;
+                        auto bonusArmor = amountForArmor/fc->_forgeItemStatValues[ITEM_MOD_RESILIENCE_RATING];
+
+                        itemProto->SetArmor(int32(baseArmor + bonusArmor));
+                        itemProto->SetArmorDamageModifier(int32(bonusArmor));
+                        secondaryRolls--;
+
+                        auto tankRoll = fc->_forgeItemSecondaryStatPools[ITEM_MOD_STAMINA];
+                        std::uniform_int_distribution<> statdistr(1, tankRoll.size());
+                        std::uniform_int_distribution<> secondarydistr(0, 8);
+
+                        auto roll = tankRoll[statdistr(gen) - 1];
+                        auto valueForThis = (curValue / secondaryRolls) * (1.f + (secondarydistr(gen) / 100.f));
+                        auto amountForTankStat = valueForThis / fc->_forgeItemStatValues[roll];
+                        statCount++;
+                        itemProto->SetStatsCount(statCount);
+                        itemProto->SetStatType(statCount - 1, roll);
+                        itemProto->SetStatValue(statCount - 1, amountForTankStat);
+                        itemProto->SetStatValueMax(statCount - 1, amountForTankStat);
+                        secondaryRolls--;
+                        curValue -= amountForTankStat;
+                        rolled.push_back(roll);
+
                         break;
                     }
-                }
-                auto statsToRoll = fc->_forgeItemSecondaryStatPools[tankDist && (itemProto->GetSubClass() == ITEM_SUBCLASS_ARMOR_PLATE
-                    || itemProto->GetSubClass() == ITEM_SUBCLASS_ARMOR_LEATHER) ? mainStat + ITEM_MOD_STAMINA : mainStat];
-                std::uniform_int_distribution<> statdistr(1, statsToRoll.size());
-                std::uniform_int_distribution<> secondarydistr(32, 50);
-                float secondarySplit = float(secondarydistr(gen)/100.f);
-                auto secondaryRolls = qual - 2;
+                    case ITEM_SUBCLASS_ARMOR_MAIL: {
+                        auto baseArmor = itemProto->GetItemLevel() * 4.5f;
+                        auto amountForArmor = curValue / 6;
+                        auto bonusArmor = amountForArmor / fc->_forgeItemStatValues[ITEM_MOD_RESILIENCE_RATING];
 
-                auto rolled = ITEM_MOD_STAMINA;
+                        itemProto->SetArmor(int32(baseArmor + bonusArmor));
+                        itemProto->SetArmorDamageModifier(int32(bonusArmor));
+                        break;
+                    }
+                    case ITEM_SUBCLASS_ARMOR_LEATHER: {
+                        itemProto->SetArmor(itemProto->GetItemLevel() * 2.15);
+                        auto amountForAP = (curValue / 3) / fc->_forgeItemStatValues[ITEM_MOD_SPELL_POWER];
+                        statCount++;
+                        itemProto->SetStatsCount(statCount);
+                        itemProto->SetStatType(statCount - 1, ITEM_MOD_ATTACK_POWER);
+                        itemProto->SetStatValue(statCount - 1, amountForAP);
+                        itemProto->SetStatValueMax(statCount - 1, amountForAP);
+                        secondaryRolls--;
+                        curValue -= amountForAP;
+                        rolled.push_back(ITEM_MOD_ATTACK_POWER);
+                        break;
+                    }
+                    case ITEM_SUBCLASS_ARMOR_CLOTH: {
+                        itemProto->SetArmor(itemProto->GetItemLevel() * 1.08);
+                        auto amountForSP = (curValue / 3) / fc->_forgeItemStatValues[ITEM_MOD_SPELL_POWER];
+                        statCount++;
+                        itemProto->SetStatsCount(statCount);
+                        itemProto->SetStatType(statCount - 1, ITEM_MOD_SPELL_POWER);
+                        itemProto->SetStatValue(statCount - 1, amountForSP);
+                        itemProto->SetStatValueMax(statCount - 1, amountForSP);
+                        curValue -= amountForSP;
+                        secondaryRolls--;
+                        rolled.push_back(ITEM_MOD_SPELL_POWER);
+                        break;
+                    }
+                    case ITEM_SUBCLASS_ARMOR_SHIELD: {
+                        itemProto->SetArmor(itemProto->GetItemLevel() * 36.5f);
+                        itemProto->SetBlock(1.f*ilvl);
+                        auto amountForBR = (curValue / 3) / fc->_forgeItemStatValues[ITEM_MOD_BLOCK_RATING];
+                        statCount++;
+                        itemProto->SetStatsCount(statCount);
+                        itemProto->SetStatType(statCount - 1, ITEM_MOD_BLOCK_RATING);
+                        itemProto->SetStatValue(statCount - 1, amountForBR);
+                        itemProto->SetStatValueMax(statCount - 1, amountForBR);
+                        secondaryRolls--;
+                        curValue -= amountForBR;
+                        rolled.push_back(ITEM_MOD_BLOCK_RATING);
+                    }}
+                }
+
+                
+                std::uniform_int_distribution<> secondarydistr(0, 8);
+
                 for (int i = 0; i < secondaryRolls;) {
+                    auto rolledTank = tankDist ? coinflip(gen) ? ITEM_MOD_STAMINA : mainStat : mainStat;
+                    auto statsToRoll = fc->_forgeItemSecondaryStatPools[rolledTank];
+                    std::uniform_int_distribution<> statdistr(1, statsToRoll.size());
+
                     auto roll = statdistr(gen) - 1;
                     auto generated = statsToRoll[roll];
-                    if (generated != rolled) {
-                        if (i > 0) {
-                            secondarySplit = 1.f;
-                        }
-                        auto valueForThis = curValue*secondarySplit;
-                        statCount++;
+                    if (std::find(rolled.begin(), rolled.end(), generated) == rolled.end()) {
+                        float split = secondaryRolls > 1 ? secondarydistr(gen) : 0;
+                        auto valueForThis = curValue/(secondaryRolls-i)*(1.f+split/100.f);
                         auto amount = valueForThis/fc->_forgeItemStatValues[generated];
+
+                        statCount++;
                         itemProto->SetStatsCount(statCount);
                         itemProto->SetStatType(statCount - 1, generated);
                         itemProto->SetStatValue(statCount - 1, amount);
+                        itemProto->SetStatValueMax(statCount - 1, amount);
 
                         curValue -= valueForThis;
-                        rolled = generated;
+                        rolled.push_back(generated);
                         i++;
                     }
                 }
@@ -412,6 +478,34 @@ public:
         else if (player->getLevel() <= 79)
             amount *= fc->GetConfig("Dynamic.XP.Rate.70-79", 4);
     }*/
+
+    void OnCreatureKill(Player* killer, Creature* killed) override
+    {
+        if (killed->GetCreatureType() < CREATURE_TYPE_NOT_SPECIFIED) {
+            auto chance = 100.f;
+            if (killed->isElite())
+                chance = 100.f;
+            if (killed->isWorldBoss())
+                chance = 100.f;
+
+            if (roll_chance_f(chance))
+            {
+                WorldPacket data;
+                LocaleConstant locale = killer->GetSession()->GetSessionDbLocaleIndex();
+                std::string msg = killed->GetName() + " has been denied peace in death, their soul is now one with yours.";
+                ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_BOSS_WHISPER, LANG_UNIVERSAL, killed, killer, msg, 0, "", locale);
+                killer->SendDirectMessage(&data);
+
+                auto source = killed->GetCreatureTemplate()->Entry;
+                if (auto shard = fc->GetSoulShard(source)) {
+                    fc->HandleSoulShard(killer, source);
+                } else {
+                    fc->CreateSoulShardFor(killed->GetCreatureTemplate());
+                    fc->HandleSoulShard(killer, source);
+                }
+            }
+        }
+    }
 
 private:
     TopicRouter* Router;

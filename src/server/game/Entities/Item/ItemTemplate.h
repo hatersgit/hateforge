@@ -607,12 +607,16 @@ struct _Damage
     float   DamageMin;
     float   DamageMax;
     uint32  DamageType;                                     // id from Resistances.dbc
+
+    float   maxDamageMin;
+    float   maxDamageMax;
 };
 
 struct _ItemStat
 {
     uint32  ItemStatType;
     int32   ItemStatValue;
+    int32   max;
 };
 struct _Spell
 {
@@ -723,6 +727,7 @@ struct ItemTemplate
     WorldPacket queryData;                                  // pussywizard
     std::array<WorldPacket, TOTAL_LOCALES> QueryData;
     int32 _totalAP;
+    float ItemSlotValue = 0;
 
     int32 GetTotalAPBonus() const { return _totalAP; }
 

@@ -112,10 +112,9 @@ public:
     void CopyConditions(ConditionList conditions);
     LootStoreItemList ExplicitlyChanced;                // Entries with chances defined in DB
     LootStoreItemList EqualChanced;                     // Zero chances - every entry takes the same chance
-
-private:
     LootStoreItem const* Roll(Loot& loot, Player const* player, LootStore const& store, uint16 lootMode) const;   // Rolls an item from the group, returns nullptr if all miss their chances
 
+private:
     // This class must never be copied - storing pointers
     LootGroup(LootGroup const&);
     LootGroup& operator=(LootGroup const&);
@@ -491,8 +490,9 @@ void LootItem::AddAllowedLooter(Player const* player)
 //
 
 // Inserts the item into the loot (called by LootTemplate processors)
-void Loot::AddItem(LootStoreItem const& item)
+void Loot::AddItem(LootStoreItem const& item, WorldObject* source)
 {
+
     ItemTemplate const* proto = sObjectMgr->GetItemTemplate(item.itemid);
     if (!proto)
         return;
@@ -577,10 +577,8 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
 
     // Setting access rights for group loot case
     Group* group = lootOwner->GetGroup();
-    if (!personal && group)
+    if (group)
     {
-        roundRobinPlayer = lootOwner->GetGUID();
-
         for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
         {
             if (Player* player = itr->GetSource()) // should actually be looted object instead of lootOwner but looter has to be really close so doesnt really matter
@@ -1678,29 +1676,9 @@ bool LootTemplate::CopyConditions(LootItem* li, uint32 conditionLootId) const
 }
 
 // Rolls for every item in the template and adds the rolled items the the loot
-void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, Player const* player, uint8 groupId, bool isTopLevel) const
+void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, Player const* player, uint8 groupId, bool isTopLevel, WorldObject* source) const
 {
     bool rate = store.IsRatesAllowed();
-
-    if (groupId)                                            // Group reference uses own processing of the group
-    {
-        if (groupId > Groups.size())
-            return;                                         // Error message already printed at loading stage
-
-        if (!Groups[groupId - 1])
-            return;
-
-        // Rate.Drop.Item.GroupAmount is only in effect for the top loot template level
-        if (isTopLevel)
-        {
-            Groups[groupId - 1]->Process(loot, player, store, lootMode, sWorld->getRate(RATE_DROP_ITEM_GROUP_AMOUNT));
-        }
-        else
-        {
-            Groups[groupId - 1]->Process(loot, player, store, lootMode, 0);
-        }
-        return;
-    }
 
     // Rolling non-grouped items
     for (LootStoreItemList::const_iterator i = Entries.begin(); i != Entries.end(); ++i)
@@ -1727,26 +1705,42 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, 
         {
             // Plain entries (not a reference, not grouped)
             sScriptMgr->OnBeforeDropAddItem(player, loot, rate, lootMode, item, store);
-            loot.AddItem(*item);                                // Chance is already checked, just add
+            loot.AddItem(*item, source);                                // Chance is already checked, just add
         }
     }
 
-    // Now processing groups
-    for (LootGroups::const_iterator i = Groups.begin(); i != Groups.end(); ++i)
-        if (LootGroup* group = *i)
+    if (auto group = player->GetGroup()) {
+        for (Group::member_citerator mitr = group->GetMemberSlots().begin(); mitr != group->GetMemberSlots().end(); ++mitr)
         {
-            // Rate.Drop.Item.GroupAmount is only in effect for the top loot template level
-            if (isTopLevel)
-            {
-                uint32 groupAmount = sWorld->getRate(RATE_DROP_ITEM_GROUP_AMOUNT);
-                sScriptMgr->OnAfterCalculateLootGroupAmount(player, loot, lootMode, groupAmount, store);
-                group->Process(loot, player, store, lootMode, groupAmount);
-            }
-            else
-            {
-                group->Process(loot, player, store, lootMode, 0);
-            }
+            Player* member = ObjectAccessor::FindPlayer(mitr->guid);
+            if (member)
+                if (member->GetMap()->GetId() == player->GetMap()->GetId() && member->GetWorldTier() == player->GetWorldTier())
+                {
+                    for (LootGroups::const_iterator i = Groups.begin(); i != Groups.end(); ++i)
+                        if (LootGroup* group = *i)
+                        {
+                            if (LootStoreItem const* item = group->Roll(loot, player, store, lootMode)) {
+                                // Plain entries (not a reference, not grouped)
+                                sScriptMgr->OnBeforeDropAddItem(player, loot, rate, lootMode, const_cast<LootStoreItem*>(item), store);
+                                member->AddItem(item->itemid, 1); // Chance is already checked, just add
+                                break;
+                            }
+                        }
+                }
         }
+    } else {
+        Player* ply = (Player*) player;
+        for (LootGroups::const_iterator i = Groups.begin(); i != Groups.end(); ++i)
+            if (LootGroup* group = *i)
+            {
+                if (LootStoreItem const* item = group->Roll(loot, player, store, lootMode)) {
+                    // Plain entries (not a reference, not grouped)
+                    sScriptMgr->OnBeforeDropAddItem(player, loot, rate, lootMode, const_cast<LootStoreItem*>(item), store);
+                    ply->AddItem(item->itemid, 1); // Chance is already checked, just add
+                    break;
+                }
+            }
+    }
 }
 
 // True if template includes at least 1 quest drop entry

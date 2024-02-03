@@ -20,6 +20,7 @@
 
 #include "Common.h"
 #include "Creature.h"
+#include "ChallengeModeCriteria.h"
 
 class GameObject;
 

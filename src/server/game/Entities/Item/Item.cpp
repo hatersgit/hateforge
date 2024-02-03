@@ -285,7 +285,7 @@ Item::Item()
 
 bool Item::Create(ObjectGuid::LowType guidlow, uint32 itemid, Player const* owner)
 {
-    guidlow += 200000;
+    guidlow += guidlow < 200000 ? 200000 : 0;
     Object::_Create(guidlow, 0, HighGuid::Item);
 
     SetObjectScale(1.0f);
@@ -298,13 +298,11 @@ bool Item::Create(ObjectGuid::LowType guidlow, uint32 itemid, Player const* owne
     if (!itemProto)
         return false;
 
-    if (itemProto->Quality >= ITEM_QUALITY_UNCOMMON && itemProto->RequiredLevel < 50
-        && (itemProto->Class == ITEM_CLASS_ARMOR || itemProto->Class == ITEM_CLASS_WEAPON)) {
-
+    if (itemProto->Quality >= ITEM_QUALITY_UNCOMMON && (itemProto->Class == ITEM_CLASS_ARMOR || itemProto->Class == ITEM_CLASS_WEAPON)) {
         itemProto = sObjectMgr->CreateItemTemplate(guidlow, itemid);
         CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
         SetEntry(guidlow);
-        sScriptMgr->GenerateItem(this, *custom, owner);
+        sScriptMgr->GenerateItem(*custom, owner);
         itemProto = custom->_GetInfo();
     }
     else {

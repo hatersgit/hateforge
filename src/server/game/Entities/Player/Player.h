@@ -1947,10 +1947,17 @@ public:
     void SetArenaTeamIdInvited(uint32 ArenaTeamId) { m_ArenaTeamIdInvited = ArenaTeamId; }
     uint32 GetArenaTeamIdInvited() { return m_ArenaTeamIdInvited; }
 
-    [[nodiscard]] Difficulty GetDifficulty(bool isRaid) const { return isRaid ? m_raidDifficulty : m_dungeonDifficulty; }
-    [[nodiscard]] Difficulty GetDungeonDifficulty() const { return m_dungeonDifficulty; }
-    [[nodiscard]] Difficulty GetRaidDifficulty() const { return m_raidDifficulty; }
-    [[nodiscard]] Difficulty GetStoredRaidDifficulty() const { return m_raidMapDifficulty; } // only for use in difficulty packet after exiting to raid map
+    [[nodiscard]] Difficulty GetDifficulty(bool isRaid) const { return GetWorldTier(); }
+    [[nodiscard]] Difficulty GetDungeonDifficulty() const { return GetWorldTier(); }
+    [[nodiscard]] Difficulty GetRaidDifficulty() const { return GetWorldTier(); }
+    [[nodiscard]] Difficulty GetStoredRaidDifficulty() const { return GetWorldTier(); } // only for use in difficulty packet after exiting to raid map
+
+    void SetWorldTier(Difficulty worldTier) {
+        m_worldTier = worldTier;
+        SetPhaseMask(worldTier ? 1 << (15+worldTier) : 1, true);
+    }
+    [[nodiscard]] Difficulty GetWorldTier() const { return m_worldTier; };
+
     void SetDungeonDifficulty(Difficulty dungeon_difficulty) { m_dungeonDifficulty = dungeon_difficulty; }
     void SetRaidDifficulty(Difficulty raid_difficulty) { m_raidDifficulty = raid_difficulty; }
     void StoreRaidMapDifficulty() { m_raidMapDifficulty = GetMap()->GetDifficulty(); }
@@ -2848,6 +2855,8 @@ public:
     Difficulty m_dungeonDifficulty;
     Difficulty m_raidDifficulty;
     Difficulty m_raidMapDifficulty;
+
+    Difficulty m_worldTier;
 
     uint32 m_atLoginFlags;
 

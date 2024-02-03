@@ -293,6 +293,8 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
     m_raidDifficulty = RAID_DIFFICULTY_10MAN_NORMAL;
     m_raidMapDifficulty = RAID_DIFFICULTY_10MAN_NORMAL;
 
+    m_worldTier = WORLD_TIER_1;
+
     m_lastPotionId = 0;
 
     m_activeSpec = 0;
@@ -5536,16 +5538,7 @@ float Player::GetRatingBonusValue(CombatRating cr) const
 
 float Player::GetExpertiseDodgeOrParryReduction(WeaponAttackType attType) const
 {
-    switch (attType)
-    {
-        case BASE_ATTACK:
-            return GetUInt32Value(PLAYER_EXPERTISE) / 4.0f;
-        case OFF_ATTACK:
-            return GetUInt32Value(PLAYER_OFFHAND_EXPERTISE) / 4.0f;
-        default:
-            break;
-    }
-    return 0.0f;
+    return 7.5f;
 }
 
 float Player::OCTRegenHPPerSpirit()

@@ -29,7 +29,9 @@ struct ItemTemplate;
 class CustomItemTemplate {
 private:
     ItemTemplate* info;
+    std::random_device rd;
 public:
+    bool tankPotential = false;
     bool IsNull() { return info == nullptr; };
     CustomItemTemplate(ItemTemplate* info);
     CustomItemTemplate(ItemTemplate const* info);
@@ -37,6 +39,10 @@ public:
     CustomItemTemplate* operator->() { return this; }
     operator bool() const { return info != nullptr; }
     bool operator==(CustomItemTemplate const& rhs) { return info == rhs.info; }
+
+    void AdjustForLevel(Player* player);
+    float CalculateDps();
+    void GenerateStats(float slotMod);
 
     uint32 GetEntry();
     void SetEntry(uint32 value);
@@ -98,6 +104,8 @@ public:
     void SetStatType(uint32 index, uint32 value);
     int32 GetStatValue(uint32 index);
     void SetStatValue(uint32 index, int32 value);
+    int32 GetStatValueMax(uint32 index);
+    void SetStatValueMax(uint32 index, int32 value);
     uint32 GetScalingStatDistribution();
     void SetScalingStatDistribution(uint32 value);
     uint32 GetScalingStatValue();
@@ -196,6 +204,16 @@ public:
     void SetDamageMaxA(float value);
     float GetDamageMaxB();
     void SetDamageMaxB(float value);
+
+    float GetMaxDamageMinA();
+    void SetMaxDamageMinA(float value);
+    float GetMaxDamageMaxA();
+    void SetMaxDamageMaxA(float value);
+    float GetMaxDamageMinB();
+    void SetMaxDamageMinB(float value);
+    float GetMaxDamageMaxB();
+    void SetMaxDamageMaxB(float value);
+
     uint32 GetDamageTypeA();
     void SetDamageTypeA(uint32 value);
     uint32 GetDamageTypeB();
@@ -214,6 +232,8 @@ public:
     void SetSpellPPMRate(uint32 index, uint32 value);
     uint32 GetSpellTrigger(uint32 index);
     void SetSpellTrigger(uint32 index, uint32 value);
+    float GetItemSlotValue();
+    void SetItemSlotValue(float val);
 
     bool IsCurrencyToken();
     uint32 GetMaxStackSize();
@@ -237,6 +257,7 @@ public:
     bool IsArmor();
     bool Is2hWeapon();
     void MakeBlankSlate();
+    ItemModType GenerateMainStatForItem();
 };
 
 CustomItemTemplate GetItemTemplate(uint32 id);

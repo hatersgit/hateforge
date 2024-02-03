@@ -1102,6 +1102,7 @@ public:
     void LoadCreatureQuestItems();
     void LoadTempSummons();
     void LoadCreatures();
+    void LoadWorldTieredCreatures();
     void LoadLinkedRespawn();
     bool SetCreatureLinkedRespawn(ObjectGuid::LowType guid, ObjectGuid::LowType linkedGuid);
     void LoadCreatureAddons();

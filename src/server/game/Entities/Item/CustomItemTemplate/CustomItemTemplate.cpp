@@ -16,6 +16,7 @@
  */
 #include "CustomItemTemplate.h"
 #include "ObjectMgr.h"
+#include "Player.h"
 #include <memory.h>
 // #if TRINITY
 // #include "QueryPackets.h"
@@ -409,6 +410,11 @@ void CustomItemTemplate::SetStatValue(uint32 index, int32 value) {
     info->ItemStat[index].ItemStatValue = value;
     info->m_isDirty = true;
 }
+int32 CustomItemTemplate::GetStatValueMax(uint32 index) { return info->ItemStat[index].max; }
+void CustomItemTemplate::SetStatValueMax(uint32 index, int32 value) {
+    info->ItemStat[index].max = value;
+    info->m_isDirty = true;
+}
 float CustomItemTemplate::GetDamageMinA() { return info->Damage[0].DamageMin; }
 void CustomItemTemplate::SetDamageMinA(float value) {
     info->Damage[0].DamageMin = value;
@@ -429,6 +435,29 @@ void CustomItemTemplate::SetDamageMaxB(float value) {
     info->Damage[1].DamageMax = value;
     info->m_isDirty = true;
 }
+
+float CustomItemTemplate::GetMaxDamageMinA() { return info->Damage[0].maxDamageMin; }
+void CustomItemTemplate::SetMaxDamageMinA(float value) {
+    info->Damage[0].maxDamageMin = value;
+    info->m_isDirty = true;
+}
+float CustomItemTemplate::GetMaxDamageMaxA() { return info->Damage[0].maxDamageMax; }
+void CustomItemTemplate::SetMaxDamageMaxA(float value) {
+    info->Damage[0].maxDamageMax = value;
+    info->m_isDirty = true;
+}
+
+float CustomItemTemplate::GetMaxDamageMinB() { return info->Damage[1].maxDamageMin; }
+void CustomItemTemplate::SetMaxDamageMinB(float value) {
+    info->Damage[1].maxDamageMin = value;
+    info->m_isDirty = true;
+}
+float CustomItemTemplate::GetMaxDamageMaxB() { return info->Damage[1].maxDamageMax; }
+void CustomItemTemplate::SetMaxDamageMaxB(float value) {
+    info->Damage[1].maxDamageMax = value;
+    info->m_isDirty = true;
+}
+
 uint32 CustomItemTemplate::GetDamageTypeA() { return info->Damage[0].DamageType; }
 void CustomItemTemplate::SetDamageTypeA(uint32 value) {
     info->Damage[0].DamageType = value;
@@ -474,6 +503,11 @@ void CustomItemTemplate::SetSpellTrigger(uint32 index, uint32 value) {
     info->Spells[index].SpellTrigger = value;
     info->m_isDirty = true;
 }
+float CustomItemTemplate::GetItemSlotValue() { return info->ItemSlotValue; }
+void CustomItemTemplate::SetItemSlotValue(float val) {
+    info->ItemSlotValue = val;
+    info->m_isDirty = true;
+}
 
 //extras
 bool CustomItemTemplate::IsCurrencyToken() { return info->IsCurrencyToken(); }
@@ -503,6 +537,131 @@ CustomItemTemplate GetItemTemplate(uint32 entry)
 ItemTemplate* CustomItemTemplate::_GetInfo()
 {
     return info;
+}
+
+void CustomItemTemplate::AdjustForLevel(Player* player) {
+    auto level = player->getLevel();
+
+    auto ilvl = GetItemLevel();
+    auto maxLvlScale = std::min(uint32(DEFAULT_MAX_LEVEL), ilvl);
+    auto mainStat = ITEM_MOD_MANA;
+
+    if (maxLvlScale >= level) {
+        for (int i = 0; i < MAX_ITEM_PROTO_STATS; i++) {
+            auto max = info->ItemStat[i].max;
+            if (max) {
+                switch (info->ItemStat[i].ItemStatType) {
+                case ITEM_MOD_AGILITY:
+                case ITEM_MOD_STRENGTH:
+                case ITEM_MOD_INTELLECT: {
+
+                }
+                case ITEM_MOD_STAMINA:
+                case ITEM_MOD_ATTACK_POWER:
+                case ITEM_MOD_SPELL_POWER: {
+                    float valPerLevel = float(max) / float(maxLvlScale);
+                    auto newVal = valPerLevel * level;
+                    SetStatValue(i, newVal);
+                    break;
+                }
+                default:
+                    break;
+                }
+            }
+        }
+
+        Save();
+        player->SendItemQueryPacket(this);
+    }
+}
+
+float CustomItemTemplate::CalculateDps()
+{
+    std::mt19937 gen(rd());
+    auto val = GetItemSlotValue();
+    SetDamageTypeA(SPELL_SCHOOL_NORMAL);
+    switch (GetInventoryType()) {
+    case INVTYPE_WEAPON:
+    case INVTYPE_WEAPONMAINHAND:
+    case INVTYPE_WEAPONOFFHAND:
+        return 0.711f * val + 4.2f;
+        break;
+    case INVTYPE_2HWEAPON:
+        return 0.98f * val + 11.5f;
+        break;
+    case INVTYPE_RANGEDRIGHT:
+        switch (GetSubClass()) {
+        case ITEM_SUBCLASS_WEAPON_WAND:
+            std::uniform_int_distribution<> wandschoolroll(SPELL_SCHOOL_HOLY, SPELL_SCHOOL_ARCANE);
+            SetDamageTypeA(wandschoolroll(gen));
+            return  1.28f * val + 5.5f;
+            break;
+        case ITEM_SUBCLASS_WEAPON_BOW:
+        case ITEM_SUBCLASS_WEAPON_GUN:
+        case ITEM_SUBCLASS_WEAPON_THROWN:
+        case ITEM_SUBCLASS_WEAPON_CROSSBOW:
+            return 0.98f * val + 21.5f;
+            break;
+        }
+        break;
+    default:
+        return 0.f;
+        break;
+    }
+    return 0.f;
+}
+
+ItemModType CustomItemTemplate::GenerateMainStatForItem()
+{
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> agistrint(ITEM_MOD_AGILITY, ITEM_MOD_INTELLECT);
+    std::uniform_int_distribution<> agistr(ITEM_MOD_AGILITY, ITEM_MOD_STRENGTH);
+    std::uniform_int_distribution<> strint(ITEM_MOD_STRENGTH, ITEM_MOD_INTELLECT);
+    if (IsWeapon()) {
+        switch (GetSubClass()) {
+        case ITEM_SUBCLASS_WEAPON_AXE:
+        case ITEM_SUBCLASS_WEAPON_AXE2:
+        case ITEM_SUBCLASS_WEAPON_MACE:
+        case ITEM_SUBCLASS_WEAPON_MACE2:
+        case ITEM_SUBCLASS_WEAPON_POLEARM:
+        case ITEM_SUBCLASS_WEAPON_SWORD:
+        case ITEM_SUBCLASS_WEAPON_SWORD2:
+        case ITEM_SUBCLASS_WEAPON_STAFF:
+        case ITEM_SUBCLASS_WEAPON_FIST:
+        case ITEM_SUBCLASS_WEAPON_DAGGER:
+            tankPotential = true;
+            return ItemModType(agistrint(gen));
+        case ITEM_SUBCLASS_WEAPON_THROWN:
+        case ITEM_SUBCLASS_WEAPON_CROSSBOW:
+        case ITEM_SUBCLASS_WEAPON_BOW:
+        case ITEM_SUBCLASS_WEAPON_GUN:
+            tankPotential = true;
+            return ItemModType(agistr(gen));
+        case ITEM_SUBCLASS_WEAPON_MISC:
+        case ITEM_SUBCLASS_WEAPON_WAND:
+            return ITEM_MOD_INTELLECT;
+        default:
+            return ITEM_MOD_STAMINA;
+        }
+    } else if (IsArmor()) {
+        switch (GetSubClass())
+        {
+        case ITEM_SUBCLASS_ARMOR_CLOTH:
+            return ITEM_MOD_INTELLECT;
+        case ITEM_SUBCLASS_ARMOR_LEATHER:
+            return ItemModType(agistr(gen));
+        case ITEM_SUBCLASS_ARMOR_MAIL:
+            return ItemModType(agistr(gen));
+        case ITEM_SUBCLASS_ARMOR_PLATE:
+        case ITEM_SUBCLASS_ARMOR_BUCKLER:
+        case ITEM_SUBCLASS_ARMOR_SHIELD:
+            tankPotential = true;
+            return ItemModType(agistr(gen));
+        default:
+            return ITEM_MOD_STAMINA;
+        }
+    }
+
 }
 
 void CustomItemTemplate::Save()
@@ -538,92 +697,107 @@ void CustomItemTemplate::Save()
     stmt->SetData(25, info->Stackable);
     stmt->SetData(26, info->ContainerSlots);
     stmt->SetData(27, info->StatsCount);
-    stmt->SetData(28,info->ItemStat[0].ItemStatType);
-    stmt->SetData(29,info->ItemStat[0].ItemStatValue);
-    stmt->SetData(30,info->ItemStat[1].ItemStatType);
-    stmt->SetData(31,info->ItemStat[1].ItemStatValue);
-    stmt->SetData(32,info->ItemStat[2].ItemStatType);
-    stmt->SetData(33,info->ItemStat[2].ItemStatValue);
-    stmt->SetData(34,info->ItemStat[3].ItemStatType);
-    stmt->SetData(35,info->ItemStat[3].ItemStatValue);
-    stmt->SetData(36,info->ItemStat[4].ItemStatType);
-    stmt->SetData(37,info->ItemStat[4].ItemStatValue);
-    stmt->SetData(38,info->ItemStat[5].ItemStatType);
-    stmt->SetData(39,info->ItemStat[5].ItemStatValue);
-    stmt->SetData(40,info->ItemStat[6].ItemStatType);
-    stmt->SetData(41,info->ItemStat[6].ItemStatValue);
-    stmt->SetData(42,info->ItemStat[7].ItemStatType);
-    stmt->SetData(43,info->ItemStat[7].ItemStatValue);
-    stmt->SetData(44,info->ItemStat[8].ItemStatType);
-    stmt->SetData(45,info->ItemStat[8].ItemStatValue);
-    stmt->SetData(46,info->ItemStat[9].ItemStatType);
-    stmt->SetData(47,info->ItemStat[9].ItemStatValue);
-    stmt->SetData(48, info->ScalingStatDistribution);
-    stmt->SetData(49, info->ScalingStatValue);
-    stmt->SetData(50, info->Damage[0].DamageMin);
-    stmt->SetData(51, info->Damage[0].DamageMax);
-    stmt->SetData(52, info->Damage[0].DamageType);
-    stmt->SetData(53, info->Damage[1].DamageMin);
-    stmt->SetData(54, info->Damage[1].DamageMax);
-    stmt->SetData(55, info->Damage[1].DamageType);
-    stmt->SetData(56, info->Armor);
-    stmt->SetData(57, info->HolyRes);
-    stmt->SetData(58, info->FireRes);
-    stmt->SetData(59, info->NatureRes);
-    stmt->SetData(60, info->FrostRes);
-    stmt->SetData(61, info->ShadowRes);
-    stmt->SetData(62, info->ArcaneRes);
-    stmt->SetData(63, info->Delay);
-    stmt->SetData(64, info->AmmoType);
-    stmt->SetData(65, info->RangedModRange);
+    stmt->SetData(28, info->ItemStat[0].ItemStatType);
+    stmt->SetData(29, info->ItemStat[0].ItemStatValue);
+    stmt->SetData(30, info->ItemStat[0].ItemStatValue);
+    stmt->SetData(31, info->ItemStat[1].ItemStatType);
+    stmt->SetData(32, info->ItemStat[1].ItemStatValue);
+    stmt->SetData(33, info->ItemStat[1].ItemStatValue);
+    stmt->SetData(34, info->ItemStat[2].ItemStatType);
+    stmt->SetData(35, info->ItemStat[2].ItemStatValue);
+    stmt->SetData(36, info->ItemStat[2].ItemStatValue);
+    stmt->SetData(37, info->ItemStat[3].ItemStatType);
+    stmt->SetData(38, info->ItemStat[3].ItemStatValue);
+    stmt->SetData(39, info->ItemStat[3].ItemStatValue);
+    stmt->SetData(40, info->ItemStat[4].ItemStatType);
+    stmt->SetData(41, info->ItemStat[4].ItemStatValue);
+    stmt->SetData(42, info->ItemStat[4].ItemStatValue);
+    stmt->SetData(43, info->ItemStat[5].ItemStatType);
+    stmt->SetData(44, info->ItemStat[5].ItemStatValue);
+    stmt->SetData(45, info->ItemStat[5].ItemStatValue);
+    stmt->SetData(46, info->ItemStat[6].ItemStatType);
+    stmt->SetData(47, info->ItemStat[6].ItemStatValue);
+    stmt->SetData(48, info->ItemStat[6].ItemStatValue);
+    stmt->SetData(49, info->ItemStat[7].ItemStatType);
+    stmt->SetData(50, info->ItemStat[7].ItemStatValue);
+    stmt->SetData(51, info->ItemStat[7].ItemStatValue);
+    stmt->SetData(52, info->ItemStat[8].ItemStatType);
+    stmt->SetData(53, info->ItemStat[8].ItemStatValue);
+    stmt->SetData(54, info->ItemStat[8].ItemStatValue);
+    stmt->SetData(55, info->ItemStat[9].ItemStatType);
+    stmt->SetData(56, info->ItemStat[9].ItemStatValue);
+    stmt->SetData(57, info->ItemStat[9].ItemStatValue);
+    stmt->SetData(58, info->ScalingStatDistribution);
+    stmt->SetData(59, info->ScalingStatValue);
+    stmt->SetData(60, info->Damage[0].DamageMin);
+    stmt->SetData(61, info->Damage[0].DamageMax);
+    stmt->SetData(62, info->Damage[0].DamageType);
+    stmt->SetData(63, info->Damage[1].DamageMin);
+    stmt->SetData(64, info->Damage[1].DamageMax);
+    stmt->SetData(65, info->Damage[1].DamageType);
+    stmt->SetData(66, info->Armor);
+    stmt->SetData(67, info->HolyRes);
+    stmt->SetData(68, info->FireRes);
+    stmt->SetData(69, info->NatureRes);
+    stmt->SetData(70, info->FrostRes);
+    stmt->SetData(71, info->ShadowRes);
+    stmt->SetData(72, info->ArcaneRes);
+    stmt->SetData(73, info->Delay);
+    stmt->SetData(74, info->AmmoType);
+    stmt->SetData(75, info->RangedModRange);
 
     for (int i = 0; i < 5; ++i)
     {
-        stmt->SetData( 66 + i * 7, info->Spells[i].SpellId);
-        stmt->SetData( 67 + i * 7, info->Spells[i].SpellTrigger);
-        stmt->SetData( 68 + i * 7, info->Spells[i].SpellCharges);
-        stmt->SetData( 69 + i * 7, info->Spells[i].SpellPPMRate);
-        stmt->SetData( 70 + i * 7, info->Spells[i].SpellCooldown);
-        stmt->SetData( 71 + i * 7, info->Spells[i].SpellCategory);
-        stmt->SetData( 72 + i * 7, info->Spells[i].SpellCategoryCooldown);
+        stmt->SetData( 76 + i * 7, info->Spells[i].SpellId);
+        stmt->SetData( 77 + i * 7, info->Spells[i].SpellTrigger);
+        stmt->SetData( 78 + i * 7, info->Spells[i].SpellCharges);
+        stmt->SetData( 79 + i * 7, info->Spells[i].SpellPPMRate);
+        stmt->SetData( 80 + i * 7, info->Spells[i].SpellCooldown);
+        stmt->SetData( 81 + i * 7, info->Spells[i].SpellCategory);
+        stmt->SetData( 82 + i * 7, info->Spells[i].SpellCategoryCooldown);
     }
-    stmt->SetData(101, info->Bonding);
-    stmt->SetData(102, info->Description);
-    stmt->SetData(103, info->PageText);
-    stmt->SetData(104, info->LanguageID);
-    stmt->SetData(105, info->PageMaterial);
-    stmt->SetData(106, info->StartQuest);
-    stmt->SetData(107, info->LockID);
-    stmt->SetData(108, info->Material);
-    stmt->SetData(109, info->Sheath);
-    stmt->SetData(110, info->RandomProperty);
-    stmt->SetData(111, info->RandomSuffix);
-    stmt->SetData(112, info->Block);
-    stmt->SetData(113, info->ItemSet);
-    stmt->SetData(114, info->MaxDurability);
-    stmt->SetData(115, info->Area);
-    stmt->SetData(116, info->Map);
-    stmt->SetData(117, info->BagFamily);
-    stmt->SetData(118, info->TotemCategory);
-    stmt->SetData(119, info->Socket[0].Color);
-    stmt->SetData(120, info->Socket[0].Content);
-    stmt->SetData(121, info->Socket[1].Color);
-    stmt->SetData(122, info->Socket[1].Content);
-    stmt->SetData(123, info->Socket[2].Color);
-    stmt->SetData(124, info->Socket[2].Content);
-    stmt->SetData(125, info->socketBonus);
-    stmt->SetData(126, info->GemProperties);
-    stmt->SetData(127, int32(info->RequiredDisenchantSkill));
-    stmt->SetData(128, info->ArmorDamageModifier);
-    stmt->SetData(129, info->Duration);
-    stmt->SetData(130, info->ItemLimitCategory);
-    stmt->SetData(131, info->HolidayId);
-    stmt->SetData(132, info->ScriptId);
-    stmt->SetData(133, info->DisenchantID);
-    stmt->SetData(134, info->FoodType);
-    stmt->SetData(135, info->MinMoneyLoot);
-    stmt->SetData(136, info->MaxMoneyLoot);
-    stmt->SetData(137, info->FlagsCu);
+    stmt->SetData(111, info->Bonding);
+    stmt->SetData(112, info->Description);
+    stmt->SetData(113, info->PageText);
+    stmt->SetData(114, info->LanguageID);
+    stmt->SetData(115, info->PageMaterial);
+    stmt->SetData(116, info->StartQuest);
+    stmt->SetData(117, info->LockID);
+    stmt->SetData(118, info->Material);
+    stmt->SetData(119, info->Sheath);
+    stmt->SetData(120, info->RandomProperty);
+    stmt->SetData(121, info->RandomSuffix);
+    stmt->SetData(122, info->Block);
+    stmt->SetData(123, info->ItemSet);
+    stmt->SetData(124, info->MaxDurability);
+    stmt->SetData(125, info->Area);
+    stmt->SetData(126, info->Map);
+    stmt->SetData(127, info->BagFamily);
+    stmt->SetData(128, info->TotemCategory);
+    stmt->SetData(129, info->Socket[0].Color);
+    stmt->SetData(130, info->Socket[0].Content);
+    stmt->SetData(131, info->Socket[1].Color);
+    stmt->SetData(132, info->Socket[1].Content);
+    stmt->SetData(133, info->Socket[2].Color);
+    stmt->SetData(134, info->Socket[2].Content);
+    stmt->SetData(135, info->socketBonus);
+    stmt->SetData(136, info->GemProperties);
+    stmt->SetData(137, int32(info->RequiredDisenchantSkill));
+    stmt->SetData(138, info->ArmorDamageModifier);
+    stmt->SetData(139, info->Duration);
+    stmt->SetData(140, info->ItemLimitCategory);
+    stmt->SetData(141, info->HolidayId);
+    stmt->SetData(142, info->ScriptId);
+    stmt->SetData(143, info->DisenchantID);
+    stmt->SetData(144, info->FoodType);
+    stmt->SetData(145, info->MinMoneyLoot);
+    stmt->SetData(146, info->MaxMoneyLoot);
+    stmt->SetData(147, info->FlagsCu);
+    stmt->SetData(148, info->ItemSlotValue);
+    stmt->SetData(149, info->Damage[0].maxDamageMin);
+    stmt->SetData(150, info->Damage[0].maxDamageMax);
+    stmt->SetData(151, info->Damage[1].maxDamageMin);
+    stmt->SetData(152, info->Damage[1].maxDamageMax);
     trans->Append(stmt);
 
     CharacterDatabase.CommitTransaction(trans);
@@ -665,6 +839,8 @@ void CustomItemTemplate::MakeBlankSlate() {
         SetDamageTypeA(0);
         SetDamageTypeB(0);
     }
+
+    SetFlags(GetFlags() & ~ITEM_FLAG_UNIQUE_EQUIPPABLE);
 }
 
 void CustomItemTemplate::InitializeQueryData()

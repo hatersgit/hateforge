@@ -208,7 +208,7 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
     // Give reputation and kill credit only in PvE.
     if (!_isPvP || _isBattleGround)
     {
-        float xpRate = _group ? _groupRate * float(player->GetLevel()) / _aliveSumLevel : /*Personal rate is 100%.*/ 1.0f; // Group rate depends on the sum of levels.
+        float xpRate = /*Personal rate is 100%.*/ 1.0f; // Group rate depends on the sum of levels.
         sScriptMgr->OnRewardKillRewarder(player, isDungeon, xpRate);                                              // Personal rate is 100%.
 
         if (_xp)
@@ -287,24 +287,25 @@ void KillRewarder::Reward()
     // 5. Credit instance encounter.
     if (Creature* victim = _victim->ToCreature())
         if (Map* map = _victim->FindMap())
-            if (InstanceScript* script = victim->GetInstanceScript())
-            {
-                bool boss = victim->IsDungeonBoss();
-                if (boss)
-                    map->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, _victim->GetEntry(), _victim);
-
-
-                if (auto criteria = script->GetCriteria())
+            if (map->IsDungeon()) {
+                if (InstanceScript* script = victim->GetInstanceScript())
                 {
-                    boss ? criteria->UpdateBossState(_victim->GetEntry()) : criteria->UpdateMinionCount(_victim->GetEntry());
+                    bool boss = victim->IsDungeonBoss();
+                    if (boss)
+                        map->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, _victim->GetEntry(), _victim);
 
-                    if (criteria->CheckCriteria())
-                        criteria->CompleteCriteria(_victim);
-                    else
+                    if (auto criteria = script->GetCriteria())
                     {
-                        Map::PlayerList const& players = map->GetPlayers();
-                        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                            itr->GetSource()->GetInstanceScript()->SendChallengeModeCriteria(itr->GetSource());
+                        boss ? criteria->UpdateBossState(_victim->GetEntry()) : criteria->UpdateMinionCount(_victim->GetEntry());
+
+                        if (criteria->CheckCriteria())
+                            criteria->CompleteCriteria(_victim);
+                        else
+                        {
+                            Map::PlayerList const& players = map->GetPlayers();
+                            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                                itr->GetSource()->GetInstanceScript()->SendChallengeModeCriteria(itr->GetSource());
+                        }
                     }
                 }
             }

@@ -1920,6 +1920,11 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
             continue;
         }
 
+        if (GetTypeId() != TYPEID_PLAYER) {
+            float mod = std::pow(1.7f, GetWorldTier() + 1);
+            damageInfo->damages[i].damage *= mod;
+        }
+
         // Call default DealDamage
         CleanDamage cleanDamage(damageInfo->cleanDamage, damageInfo->damages[i].absorb, damageInfo->attackType, damageInfo->hitOutCome);
         Unit::DealDamage(this, victim, damageInfo->damages[i].damage, &cleanDamage, DIRECT_DAMAGE, SpellSchoolMask(damageInfo->damages[i].damageSchoolMask), nullptr, durabilityLoss);
@@ -12242,6 +12247,17 @@ float Unit::GetWeaponDamageRange(WeaponAttackType attType, WeaponDamageRange typ
 
 void Unit::SetLevel(uint8 lvl, bool showLevelChange)
 {
+    if (lvl > DEFAULT_MAX_LEVEL && GetTypeId() != TYPEID_PLAYER) {
+        if (Creature* creature = ToCreature()) {
+            if (creature->isWorldBoss())
+                lvl = DEFAULT_MAX_LEVEL + 3;
+            else if (creature->isElite())
+                lvl = DEFAULT_MAX_LEVEL + 1;
+            else
+                lvl = DEFAULT_MAX_LEVEL;
+        }
+    }
+
     SetUInt32Value(UNIT_FIELD_LEVEL, lvl);
 
     // Xinef: unmark field bit update
@@ -12312,6 +12328,11 @@ void Unit::SetMaxHealth(uint32 val)
 {
     if (!val)
         val = 1;
+
+    if (GetTypeId() != TYPEID_PLAYER) {
+        float mod = std::pow(1.7f, GetWorldTier() + 1);
+        val = val * mod;
+    }
 
     uint32 health = GetHealth();
     SetUInt32Value(UNIT_FIELD_MAXHEALTH, val);
@@ -14259,29 +14280,30 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
         // Generate loot before updating looter
         if (creature)
         {
-            Loot* loot = &creature->loot;
-            loot->clear();
+            if (creature->isWorldBoss() && !creature->GetMap()->IsRaid() && !creature->GetMap()->IsDungeon()) {
+                Loot* loot = &creature->loot;
+                loot->clear();
 
-            if (uint32 lootid = creature->GetCreatureTemplate()->lootid)
-                loot->FillLoot(lootid, LootTemplates_Creature, looter, false, false, creature->GetLootMode(), creature);
+                if (uint32 lootid = creature->GetCreatureTemplate()->lootid)
+                    loot->FillLoot(lootid, LootTemplates_Creature, looter, false, false, creature->GetLootMode(), creature);
 
-            if (creature->GetLootMode())
-                loot->generateMoneyLoot(creature->GetCreatureTemplate()->mingold, creature->GetCreatureTemplate()->maxgold);
+                if (creature->GetLootMode())
+                    loot->generateMoneyLoot(creature->GetCreatureTemplate()->mingold, creature->GetCreatureTemplate()->maxgold);
 
-            if (group)
-            {
-                if (hasLooterGuid)
-                    group->SendLooter(creature, looter);
-                else
-                    group->SendLooter(creature, nullptr);
+                if (group)
+                {
+                    if (hasLooterGuid)
+                        group->SendLooter(creature, looter);
+                    else
+                        group->SendLooter(creature, nullptr);
 
-                // Update round robin looter only if the creature had loot
-                if (!creature->loot.empty())
-                    group->UpdateLooterGuid(creature);
+                    // Update round robin looter only if the creature had loot
+                    if (!creature->loot.empty())
+                        group->UpdateLooterGuid(creature);
+                }
             }
+            player->RewardPlayerAndGroupAtKill(victim, false);
         }
-
-        player->RewardPlayerAndGroupAtKill(victim, false);
     }
 
     // Do KILL and KILLED procs. KILL proc is called only for the unit who landed the killing blow (and its owner - for pets and totems) regardless of who tapped the victim

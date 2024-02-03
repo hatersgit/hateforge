@@ -47,6 +47,7 @@ INSERT INTO acore_world.forge_item_stat_value (id, value, name) VALUES(14, 1.00,
 INSERT INTO acore_world.forge_item_stat_value (id, value, name) VALUES(15, 1.00, 'Block');
 INSERT INTO acore_world.forge_item_stat_value (id, value, name) VALUES(31, 1.00, 'Hit');
 INSERT INTO acore_world.forge_item_stat_value (id, value, name) VALUES(32, 1.00, 'Crit');
+INSERT INTO acore_world.forge_item_stat_value (id, value, name) VALUES(35, 0.07, 'Armor');
 INSERT INTO acore_world.forge_item_stat_value (id, value, name) VALUES(36, 1.00, 'Haste');
 INSERT INTO acore_world.forge_item_stat_value (id, value, name) VALUES(38, 0.50, 'AP');
 INSERT INTO acore_world.forge_item_stat_value (id, value, name) VALUES(43, 2.50, 'MP5');

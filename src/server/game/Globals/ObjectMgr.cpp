@@ -3355,38 +3355,22 @@ ItemTemplate* ObjectMgr::CreateItemTemplate(uint32 entry, uint32 copyID)
 
 void ObjectMgr::LoadCustomItemTemplates()
 {
-    //                                                 0      1       2               3              4        5        6       7          8         9        10        11           12
     QueryResult result = CharacterDatabase.Query("SELECT entry, class, subclass, SoundOverrideSubclass, name, displayid, Quality, Flags, FlagsExtra, BuyCount, BuyPrice, SellPrice, InventoryType, "
-        //   13              14           15          16             17               18                19              20
         "AllowableClass, AllowableRace, ItemLevel, RequiredLevel, RequiredSkill, RequiredSkillRank, requiredspell, requiredhonorrank, "
-        //      23               24        25          26             27           28
         "RequiredCityRank, RequiredReputationFaction, RequiredReputationRank, maxcount, stackable, ContainerSlots, StatsCount, stat_type1, "
-        //      29           30          31           32          33           34          35           36          37           38
-        "stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, stat_type4, stat_value4, stat_type5, stat_value5, stat_type6, "
-        //    39           40          41           42           43          44           45           46           47
-        "stat_value6, stat_type7, stat_value7, stat_type8, stat_value8, stat_type9, stat_value9, stat_type10, stat_value10, "
-        //      48                    49           50        51        52         53        54         55      56      57        58
+        "stat_value1, stat_value1_max, stat_type2, stat_value2, stat_value2_max, stat_type3, stat_value3, stat_value3_max, stat_type4, stat_value4, stat_value4_max, stat_type5, stat_value5, stat_value5_max, stat_type6, "
+        "stat_value6, stat_value6_max, stat_type7, stat_value7, stat_value7_max, stat_type8, stat_value8, stat_value8_max, stat_type9, stat_value9, stat_value9_max, stat_type10, stat_value10, stat_value10_max, "
         "ScalingStatDistribution, ScalingStatValue, dmg_min1, dmg_max1, dmg_type1, dmg_min2, dmg_max2, dmg_type2, armor, holy_res, fire_res, "
-        //      59          60         61          62       63       64            65            66          67               68
         "nature_res, frost_res, shadow_res, arcane_res, delay, ammo_type, RangedModRange, spellid_1, spelltrigger_1, spellcharges_1, "
-        //     69              70                71                 72                 73           74               75
         "spellppmRate_1, spellcooldown_1, spellcategory_1, spellcategorycooldown_1, spellid_2, spelltrigger_2, spellcharges_2, "
-        //   76               77              78                  79                 80           81               82
         "spellppmRate_2, spellcooldown_2, spellcategory_2, spellcategorycooldown_2, spellid_3, spelltrigger_3, spellcharges_3, "
-        //     83               84              85                  86                 87           88               89
         "spellppmRate_3, spellcooldown_3, spellcategory_3, spellcategorycooldown_3, spellid_4, spelltrigger_4, spellcharges_4, "
-        //    90               91              92                  93                  94          95               96
         "spellppmRate_4, spellcooldown_4, spellcategory_4, spellcategorycooldown_4, spellid_5, spelltrigger_5, spellcharges_5, "
-        //    97               98              99                  100                 101        102         103       104          105
         "spellppmRate_5, spellcooldown_5, spellcategory_5, spellcategorycooldown_5, bonding, description, PageText, LanguageID, PageMaterial, "
-        //    106       107     108      109          110            111       112     113         114       115   116     117
         "startquest, lockid, Material, sheath, RandomProperty, RandomSuffix, block, itemset, MaxDurability, area, Map, BagFamily, "
-        //   118             119             120             121             122            123              124            125
         "TotemCategory, socketColor_1, socketContent_1, socketColor_2, socketContent_2, socketColor_3, socketContent_3, socketBonus, "
-        //     126                 127                     128            129            130            131         132         133
         "GemProperties, RequiredDisenchantSkill, ArmorDamageModifier, duration, ItemLimitCategory, HolidayId, ScriptName, DisenchantID, "
-        //   134        135            136,      137
-        "FoodType, minMoneyLoot, maxMoneyLoot, flagsCustom FROM custom_item_template");
+        "FoodType, minMoneyLoot, maxMoneyLoot, flagsCustom, itemSlotValue FROM custom_item_template");
 
     if (result)
         do {
@@ -3431,82 +3415,84 @@ void ObjectMgr::LoadCustomItemTemplates()
 
             for (uint8 i = 0; i < itemTemplate->StatsCount; ++i)
             {
-                itemTemplate->ItemStat[i].ItemStatType = uint32(fields[28 + i * 2].Get<uint8>());
-                itemTemplate->ItemStat[i].ItemStatValue = int32(fields[29 + i * 2].Get<int16>());
+                itemTemplate->ItemStat[i].ItemStatType = uint32(fields[28 + i * 3].Get<uint8>());
+                itemTemplate->ItemStat[i].ItemStatValue = int32(fields[29 + i * 3].Get<int16>());
+                itemTemplate->ItemStat[i].max = int32(fields[30 + i * 3].Get<int16>());
             }
 
-            itemTemplate->ScalingStatDistribution = uint32(fields[48].Get<uint16>());
-            itemTemplate->ScalingStatValue = fields[49].Get<int32>();
+            itemTemplate->ScalingStatDistribution = uint32(fields[58].Get<uint16>());
+            itemTemplate->ScalingStatValue = fields[59].Get<int32>();
 
             for (uint8 i = 0; i < MAX_ITEM_PROTO_DAMAGES; ++i)
             {
-                itemTemplate->Damage[i].DamageMin = fields[50 + i * 3].Get<float>();
-                itemTemplate->Damage[i].DamageMax = fields[51 + i * 3].Get<float>();
-                itemTemplate->Damage[i].DamageType = uint32(fields[52 + i * 3].Get<uint8>());
+                itemTemplate->Damage[i].DamageMin = fields[60 + i * 3].Get<float>();
+                itemTemplate->Damage[i].DamageMax = fields[61 + i * 3].Get<float>();
+                itemTemplate->Damage[i].DamageType = uint32(fields[62 + i * 3].Get<uint8>());
             }
 
-            itemTemplate->Armor = uint32(fields[56].Get<uint16>());
-            itemTemplate->HolyRes = uint32(fields[57].Get<uint8>());
-            itemTemplate->FireRes = uint32(fields[58].Get<uint8>());
-            itemTemplate->NatureRes = uint32(fields[59].Get<uint8>());
-            itemTemplate->FrostRes = uint32(fields[60].Get<uint8>());
-            itemTemplate->ShadowRes = uint32(fields[61].Get<uint8>());
-            itemTemplate->ArcaneRes = uint32(fields[62].Get<uint8>());
-            itemTemplate->Delay = uint32(fields[63].Get<uint16>());
-            itemTemplate->AmmoType = uint32(fields[64].Get<uint8>());
-            itemTemplate->RangedModRange = fields[65].Get<float>();
+            itemTemplate->Armor = uint32(fields[66].Get<uint16>());
+            itemTemplate->HolyRes = uint32(fields[67].Get<uint8>());
+            itemTemplate->FireRes = uint32(fields[68].Get<uint8>());
+            itemTemplate->NatureRes = uint32(fields[69].Get<uint8>());
+            itemTemplate->FrostRes = uint32(fields[70].Get<uint8>());
+            itemTemplate->ShadowRes = uint32(fields[71].Get<uint8>());
+            itemTemplate->ArcaneRes = uint32(fields[72].Get<uint8>());
+            itemTemplate->Delay = uint32(fields[73].Get<uint16>());
+            itemTemplate->AmmoType = uint32(fields[74].Get<uint8>());
+            itemTemplate->RangedModRange = fields[75].Get<float>();
 
             for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
             {
-                itemTemplate->Spells[i].SpellId = fields[66 + i * 7].Get<int32>();
-                itemTemplate->Spells[i].SpellTrigger = uint32(fields[67 + i * 7].Get<uint8>());
-                itemTemplate->Spells[i].SpellCharges = int32(fields[68 + i * 7].Get<int16>());
-                itemTemplate->Spells[i].SpellPPMRate = fields[69 + i * 7].Get<float>();
-                itemTemplate->Spells[i].SpellCooldown = fields[70 + i * 7].Get<int32>();
-                itemTemplate->Spells[i].SpellCategory = uint32(fields[71 + i * 7].Get<uint16>());
-                itemTemplate->Spells[i].SpellCategoryCooldown = fields[72 + i * 7].Get<int32>();
+                itemTemplate->Spells[i].SpellId = fields[76 + i * 7].Get<int32>();
+                itemTemplate->Spells[i].SpellTrigger = uint32(fields[77 + i * 7].Get<uint8>());
+                itemTemplate->Spells[i].SpellCharges = int32(fields[78 + i * 7].Get<int16>());
+                itemTemplate->Spells[i].SpellPPMRate = fields[79 + i * 7].Get<float>();
+                itemTemplate->Spells[i].SpellCooldown = fields[80 + i * 7].Get<int32>();
+                itemTemplate->Spells[i].SpellCategory = uint32(fields[81 + i * 7].Get<uint16>());
+                itemTemplate->Spells[i].SpellCategoryCooldown = fields[82 + i * 7].Get<int32>();
             }
 
-            itemTemplate->Bonding = uint32(fields[101].Get<uint8>());
-            itemTemplate->Description = fields[102].Get<std::string>();
-            itemTemplate->PageText = fields[103].Get<uint32>();
-            itemTemplate->LanguageID = uint32(fields[104].Get<uint8>());
-            itemTemplate->PageMaterial = uint32(fields[105].Get<uint8>());
-            itemTemplate->StartQuest = fields[106].Get<uint32>();
-            itemTemplate->LockID = fields[107].Get<uint32>();
-            itemTemplate->Material = int32(fields[108].Get<int8>());
-            itemTemplate->Sheath = uint32(fields[109].Get<uint8>());
-            itemTemplate->RandomProperty = fields[110].Get<uint32>();
-            itemTemplate->RandomSuffix = fields[111].Get<int32>();
-            itemTemplate->Block = fields[112].Get<uint32>();
-            itemTemplate->ItemSet = fields[113].Get<uint32>();
-            itemTemplate->MaxDurability = uint32(fields[114].Get<uint16>());
-            itemTemplate->Area = fields[115].Get<uint32>();
-            itemTemplate->Map = uint32(fields[116].Get<uint16>());
-            itemTemplate->BagFamily = fields[117].Get<uint32>();
-            itemTemplate->TotemCategory = fields[118].Get<uint32>();
+            itemTemplate->Bonding = uint32(fields[111].Get<uint8>());
+            itemTemplate->Description = fields[112].Get<std::string>();
+            itemTemplate->PageText = fields[113].Get<uint32>();
+            itemTemplate->LanguageID = uint32(fields[114].Get<uint8>());
+            itemTemplate->PageMaterial = uint32(fields[115].Get<uint8>());
+            itemTemplate->StartQuest = fields[116].Get<uint32>();
+            itemTemplate->LockID = fields[117].Get<uint32>();
+            itemTemplate->Material = int32(fields[118].Get<int8>());
+            itemTemplate->Sheath = uint32(fields[119].Get<uint8>());
+            itemTemplate->RandomProperty = fields[120].Get<uint32>();
+            itemTemplate->RandomSuffix = fields[121].Get<int32>();
+            itemTemplate->Block = fields[122].Get<uint32>();
+            itemTemplate->ItemSet = fields[123].Get<uint32>();
+            itemTemplate->MaxDurability = uint32(fields[124].Get<uint16>());
+            itemTemplate->Area = fields[125].Get<uint32>();
+            itemTemplate->Map = uint32(fields[126].Get<uint16>());
+            itemTemplate->BagFamily = fields[127].Get<uint32>();
+            itemTemplate->TotemCategory = fields[128].Get<uint32>();
 
             for (uint8 i = 0; i < MAX_ITEM_PROTO_SOCKETS; ++i)
             {
-                itemTemplate->Socket[i].Color = uint32(fields[119 + i * 2].Get<uint8>());
+                itemTemplate->Socket[i].Color = uint32(fields[129 + i * 2].Get<uint8>());
                 itemTemplate->Socket[i].Content = fields[120 + i * 2].Get<uint32>();
             }
 
-            itemTemplate->socketBonus = fields[125].Get<uint32>();
-            itemTemplate->GemProperties = fields[126].Get<uint32>();
-            itemTemplate->RequiredDisenchantSkill = uint32(fields[127].Get<int16>());
-            itemTemplate->ArmorDamageModifier = fields[128].Get<float>();
-            itemTemplate->Duration = fields[129].Get<uint32>();
-            itemTemplate->ItemLimitCategory = uint32(fields[130].Get<int16>());
-            itemTemplate->HolidayId = fields[131].Get<uint32>();
+            itemTemplate->socketBonus = fields[135].Get<uint32>();
+            itemTemplate->GemProperties = fields[136].Get<uint32>();
+            itemTemplate->RequiredDisenchantSkill = uint32(fields[137].Get<int16>());
+            itemTemplate->ArmorDamageModifier = fields[138].Get<float>();
+            itemTemplate->Duration = fields[139].Get<uint32>();
+            itemTemplate->ItemLimitCategory = uint32(fields[140].Get<int16>());
+            itemTemplate->HolidayId = fields[141].Get<uint32>();
             itemTemplate->ScriptId = 0;
-            itemTemplate->DisenchantID = fields[133].Get<uint32>();
-            itemTemplate->FoodType = uint32(fields[134].Get<uint8>());
-            itemTemplate->MinMoneyLoot = fields[135].Get<uint32>();
-            itemTemplate->MaxMoneyLoot = fields[136].Get<uint32>();
-            itemTemplate->FlagsCu = fields[137].Get<uint32>();
+            itemTemplate->DisenchantID = fields[143].Get<uint32>();
+            itemTemplate->FoodType = uint32(fields[144].Get<uint8>());
+            itemTemplate->MinMoneyLoot = fields[145].Get<uint32>();
+            itemTemplate->MaxMoneyLoot = fields[146].Get<uint32>();
+            itemTemplate->FlagsCu = fields[147].Get<uint32>();
             // Load cached data
             itemTemplate->_LoadTotalAP();
+            itemTemplate->ItemSlotValue = fields[148].Get<float>();
         } while (result->NextRow());
 }
 

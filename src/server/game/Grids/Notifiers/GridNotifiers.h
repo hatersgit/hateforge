@@ -119,6 +119,9 @@ namespace Acore
             if (player == i_source || (teamId != TEAM_NEUTRAL && player->GetTeamId() != teamId) || skipped_receiver == player)
                 return;
 
+            if (!player->InSamePhase(i_phaseMask))
+                return;
+
             if (!player->HaveAtClient(i_source))
                 return;
 
@@ -145,6 +148,9 @@ namespace Acore
         {
             // never send packet to self
             if (player == i_source || !player->HaveAtClient(i_source) || player->IsFriendlyTo(i_source))
+                return;
+
+            if (!player->InSamePhase(i_phaseMask))
                 return;
 
             player->GetSession()->SendPacket(i_message);

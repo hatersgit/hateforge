@@ -252,7 +252,7 @@ public:
     // Adds an entry to the group (at loading stage)
     void AddEntry(LootStoreItem* item);
     // Rolls for every item in the template and adds the rolled items the the loot
-    void Process(Loot& loot, LootStore const& store, uint16 lootMode, Player const* player, uint8 groupId = 0, bool isTopLevel = true) const;
+    void Process(Loot& loot, LootStore const& store, uint16 lootMode, Player const* player, uint8 groupId = 0, bool isTopLevel = true, WorldObject* source = nullptr) const;
     void CopyConditions(ConditionList conditions);
     bool CopyConditions(LootItem* li, uint32 conditionLootId = 0) const;
 
@@ -378,7 +378,7 @@ struct Loot
     bool FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bool personal, bool noEmptyError = false, uint16 lootMode = LOOT_MODE_DEFAULT, WorldObject* lootSource = nullptr);
 
     // Inserts the item into the loot (called by LootTemplate processors)
-    void AddItem(LootStoreItem const& item);
+    void AddItem(LootStoreItem const& item, WorldObject* source = nullptr);
 
     LootItem* LootItemInSlot(uint32 lootslot, Player* player, QuestItem** qitem = nullptr, QuestItem** ffaitem = nullptr, QuestItem** conditem = nullptr);
     uint32 GetMaxSlotInLootFor(Player* player) const;

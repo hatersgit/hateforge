@@ -2104,7 +2104,7 @@ void Creature::setDeathState(DeathState s, bool despawn)
 
         // TODO sheck zone stuff
 
-        if ((IsDungeonBoss() || GetMap()->IsDungeon()) && !m_respawnDelay)
+        if (GetMap()->IsRaid() || GetMap()->IsDungeon() || !m_respawnDelay)
             m_respawnTime = std::numeric_limits<time_t>::max();
         // always save boss respawn time at death to prevent crash cheating
         if (isWorldBoss() || GetCreatureTemplate()->rank >= CREATURE_ELITE_ELITE)

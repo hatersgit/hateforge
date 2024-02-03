@@ -1479,6 +1479,18 @@ public:
 
     void SetHealth(uint32 val);
     void SetMaxHealth(uint32 val);
+    uint8 GetWorldTier() {
+        switch (GetPhaseMask()) {
+        case WORLD_TIER_2_PHASE:
+            return WORLD_TIER_2;
+        case WORLD_TIER_3_PHASE:
+            return WORLD_TIER_3;
+        case WORLD_TIER_4_PHASE:
+            return WORLD_TIER_4;
+        default:
+            return 1;
+        }
+    }
     inline void SetFullHealth() { SetHealth(GetMaxHealth()); }
     int32 ModifyHealth(int32 val);
     int32 GetHealthGain(int32 dVal);

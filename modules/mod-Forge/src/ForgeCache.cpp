@@ -199,7 +199,6 @@ struct CharacterSpecPerk {
         return m->spell->spellId == m->spell->spellId;
     }
 };
-//////////////////////
 
 struct ForgeCharacterSpec
 {
@@ -1314,7 +1313,13 @@ private:
             AddCharacterPerks();
             AddCharacterQueuedPerks();
             AddCharacterPrestigePerks();
+
+            // hater: force talent resets
             LoadCharacterResetFlags();
+
+            // hater: soul shards
+            AddSoulShards();
+            AddPlayerSoulShards();
         }
         catch (std::exception & ex) {
             std::string error = ex.what();
@@ -2518,7 +2523,189 @@ public:
         CharacterDatabase.CommitTransaction(trans);
     }
 
+// soul shards
+public:
+    #define MAX_SOUL_GROUPS 3
+    #define SOUL_SHARD_UPGRADE_THRESHOLD 2
+
+    enum SoulShardQuality {
+        SHARD_COMMON = 1,
+        SHARD_UNCOMMON = 2,
+        SHARD_RARE = 3,
+        SHARD_EPIC = 4,
+        SHARD_LEGENDARY = 5,
+    };
+
+    struct SoulShard {
+        uint32 source;
+        SoulShardQuality quality;
+        uint8 groups[MAX_SOUL_GROUPS];
+        uint32 special;
+    };
+
+    struct PlayerSoulShard {
+        uint32 source;
+        uint8 count;
+        uint8 rank;
+        SoulShard* shard;
+
+        PlayerSoulShard(uint32 source, uint8 count, uint8 rank, SoulShard* shard) {
+            this->source = source;
+            this->count = count;
+            this->rank = rank;
+            this->shard = shard;
+        }
+    };
+
+    SoulShard* GetSoulShard(uint32 source) {
+        auto found = SoulShards.find(source);
+        return found != SoulShards.end() ? found->second : nullptr;
+    }
+
+    void CreateSoulShardFor(CreatureTemplate const* killed) {
+        auto source = killed->Entry;
+        auto groupOne = killed->type;
+
+        SoulShard shard = SoulShard();
+        switch (killed->rank) {
+        case CREATURE_ELITE_NORMAL:
+            shard.quality = SHARD_COMMON;
+            break;
+        case CREATURE_ELITE_ELITE:
+        case CREATURE_ELITE_RAREELITE:
+            shard.quality = SHARD_UNCOMMON;
+            break;
+        case CREATURE_ELITE_WORLDBOSS:
+            shard.quality = SHARD_RARE;
+            break;
+        }
+        shard.source = source;
+        shard.special = 0; // TODO: eventually map to raid
+        for (int i = 0; i < MAX_SOUL_GROUPS; i++)
+        {
+            switch (i) {
+            case 0:
+                shard.groups[i] = killed->type;
+                break;
+            case 1:
+                shard.groups[i] = 0;
+                break;
+            case 2:
+                shard.groups[i] = 0;
+                break;
+            }
+        }
+
+        WorldDatabase.DirectExecute("INSERT INTO acore_world.soul_shards (source, quality, group1, group2, group3, bonus_effect) VALUES({}, {}, {}, {}, {}, {})",
+            shard.source, shard.quality, shard.groups[0], shard.groups[1], shard.groups[2], shard.special);
+
+        SoulShards[source] = &shard;
+    }
+
 private:
+
+    std::unordered_map<uint32 /*source*/, SoulShard*> SoulShards;
+
+
+    void AddSoulShards()
+    {
+        LOG_INFO("server.load", "Loading soul shards...");
+        SoulShards.clear();
+
+        QueryResult SoulShardResult = WorldDatabase.Query("SELECT * FROM `acore_world`.`soul_shards`");
+        if (!SoulShardResult) return;
+
+        do
+        {
+            Field* SoulShardFields = SoulShardResult->Fetch();
+            uint32 source = SoulShardFields[0].Get<uint32>();
+            SoulShardQuality quality = SoulShardQuality(SoulShardFields[1].Get<uint8>());
+            SoulShard* shard = new SoulShard();
+            shard->source = source;
+            shard->quality = quality;
+
+            for (int i = 0; i < MAX_SOUL_GROUPS; i++) {
+                shard->groups[i] = SoulShardFields[2 + i].Get<uint32>();
+            }
+            shard->special = SoulShardFields[5].Get<uint32>();
+
+            SoulShards[source] = shard;
+        } while (SoulShardResult->NextRow());
+    }
+
+    std::unordered_map<uint32 /*account*/, std::unordered_map<uint32 /*source*/, PlayerSoulShard*>> _charSoulShards;
+    void AddPlayerSoulShards()
+    {
+        LOG_INFO("server.load", "Loading player soul shards...");
+        _charSoulShards.clear();
+
+        QueryResult SoulShardResult = WorldDatabase.Query("SELECT * FROM `acore_characters`.`character_soul_shards`");
+        if (!SoulShardResult) return;
+        do
+        {
+            Field* SoulShardFields = SoulShardResult->Fetch();
+            uint32 account = SoulShardFields[0].Get<uint32>();
+
+            uint32 source = SoulShardFields[1].Get<uint32>();
+            uint32 count = SoulShardFields[2].Get<uint8>();
+            uint8 rank = SoulShardFields[3].Get<uint8>();
+
+            SoulShard* realShard = SoulShards[source];
+            PlayerSoulShard* shard = new PlayerSoulShard(source, count, rank, realShard);
+            
+            _charSoulShards[account][source] = shard;
+        } while (SoulShardResult->NextRow());
+    }
+
+public:
+
+    void HandleSoulShard(Player* player, uint32 source)
+    {
+        SoulShard* shard = SoulShards[source];
+        auto account = player->GetSession()->GetAccountId();
+        auto acctFound = _charSoulShards.find(account);
+        if (acctFound != _charSoulShards.end()) {
+            auto shardFound = _charSoulShards[account].find(source);
+            if (shardFound != _charSoulShards[account].end()) {
+                PlayerSoulShard* pShard = _charSoulShards[account][source];
+                pShard->count += 1;
+                if (pShard->count > std::pow(SOUL_SHARD_UPGRADE_THRESHOLD, pShard->rank)) {
+                    pShard->count = 1;
+                    pShard->rank += 1;
+                }
+                _charSoulShards[account][source] = pShard;
+                HandleSoulShardAcquired(player, shard, false);
+                return;
+            }
+        }
+        HandleSoulShardAcquired(player, shard, true);
+    }
+
+private:
+    void HandleSoulShardAcquired(Player* player, SoulShard* shard, bool isNew)
+    {
+        auto account = player->GetSession()->GetAccountId();
+        auto source = shard->source;
+        if (isNew) {
+            PlayerSoulShard* pShard = new PlayerSoulShard(shard->source, 1, 1, shard);
+            _charSoulShards[account][source] = pShard;
+        }
+
+        HandleInsertOrUpdateShard(account, _charSoulShards[account][source], isNew);
+    }
+
+    void HandleInsertOrUpdateShard(uint32 accountId, PlayerSoulShard* shard, bool isNew) {
+        if (isNew)
+            CharacterDatabase.DirectExecute(std::format("INSERT INTO character_soul_shards (`account`, `source`, `count`, `rank`) VALUES ({}, {}, {}, {})",
+                accountId, shard->source, shard->count, shard->rank));
+        else
+            CharacterDatabase.DirectExecute("UPDATE character_soul_shards set `count` = {}, `rank` = {} where `account` = {} and `source` = {}",
+                shard->count, shard->rank, accountId, shard->source);
+    }
+
+// perks
+private:
+
     void InsertPerkSelection(Player* player, CharacterPerkType type, Perk* perk, std::string rollKey, uint8 carryover)
     {
         ForgeCharacterSpec* charSpec;

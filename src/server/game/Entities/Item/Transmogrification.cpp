@@ -882,12 +882,16 @@ bool Transmogrification::HasVisual(Player* player, uint32 transmogtype, uint32 v
     return cont.find(visual) != cont.end();
 }
 
-uint32 Transmogrification::Save(Player* player, uint32 transmogtype, uint32 visual)
+uint32 Transmogrification::Save(Player* player, uint32 transmogtype, ItemTemplate* visual)
 {
-    if (player->transmogrification_appearances[transmogtype].insert(visual).second)
-    {
-        SaveToDB(player, transmogtype, visual);
-        return visual;
+    auto foundVis = player->_tmogVisualToItem[transmogtype].find(visual->DisplayInfoID);
+    if (foundVis == player->_tmogVisualToItem[transmogtype].end()) {
+        if (player->transmogrification_appearances[transmogtype].insert(visual->ItemId).second)
+        {
+            player->_tmogVisualToItem[transmogtype][visual->DisplayInfoID] = visual->ItemId;
+            SaveToDB(player, transmogtype, visual->ItemId);
+            return visual->ItemId;
+        }
     }
     return 0;
 }
@@ -903,7 +907,7 @@ uint32 Transmogrification::AddItemVisualToCollection(Player* player, const ItemT
     if (!itemtemplate || !CanAddToCollection(player, itemtemplate) || slot == NULL_SLOT)
         return 0;   
 
-    return Save(player, slot, itemtemplate->ItemId);
+    return Save(player, slot, (ItemTemplate *) itemtemplate);
 }
 
 uint32 Transmogrification::AddEnchantVisualToCollection(Player* player, uint32 enchant_id)
@@ -918,8 +922,8 @@ uint32 Transmogrification::AddEnchantVisualToCollection(Player* player, uint32 e
     if (!enchant_id)
         return 0;
     //if (!CanAddEnchantToCollection(player, item))
-    //    return 0;
-    return Save(player, EQUIPMENT_SLOT_END, enchant_id);
+        return 0;
+    //return Save(player, EQUIPMENT_SLOT_END, enchant_id);
 }
 
 void Transmogrification::AddToCollection(Player* player, Item* item)

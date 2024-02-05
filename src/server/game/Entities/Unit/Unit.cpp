@@ -12330,7 +12330,7 @@ void Unit::SetMaxHealth(uint32 val)
         val = 1;
 
     if (GetTypeId() != TYPEID_PLAYER) {
-        float mod = std::pow(1.7f, GetWorldTier() + 1);
+        float mod = std::pow(1.53f, GetWorldTier() + 1.2)-.64f;
         val = val * mod;
     }
 

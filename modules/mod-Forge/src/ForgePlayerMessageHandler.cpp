@@ -106,6 +106,19 @@ public:
         player->SetWorldTier(Difficulty::WORLD_TIER_4);
     }
 
+    void OnEquip(Player* player, Item* item, uint8 bag, uint8 slot, bool update) override
+    {
+        if (sConfigMgr->GetBoolDefault("echos", false)) {
+            if (auto pProto = item->GetTemplate()) {
+                if (pProto->Quality >= ITEM_QUALITY_UNCOMMON && (pProto->Class == ITEM_CLASS_ARMOR || pProto->Class == ITEM_CLASS_WEAPON)
+                    && slot != EQUIPMENT_SLOT_BODY && slot != EQUIPMENT_SLOT_TABARD) {
+                    CustomItemTemplate custom = GetItemTemplate(pProto->ItemId);
+                    custom->AdjustForLevel(player);
+                }
+            }
+        }
+    }
+
     void OnLogout(Player* player) override
     {
         if (!player)
@@ -236,7 +249,7 @@ public:
         OnAddItem(player, item->GetTemplate()->ItemId, count);
     }
 
-    void GenerateItem(CustomItemTemplate itemProto, Player const* owner) override
+    void GenerateItem(CustomItemTemplate* itemProto, Player const* owner) override
     {
         std::random_device rd; // obtain a random number from hardware
         std::mt19937 gen(rd()); // seed the generator
@@ -286,7 +299,7 @@ public:
                 itemProto->SetBonding(BIND_WHEN_PICKED_UP);
 
                 auto mainStat = itemProto->GenerateMainStatForItem();
-                bool tankDist = itemProto->tankPotential ? coinflip(gen) : false;
+                bool tankDist = itemProto->CanRollTank() ? coinflip(gen) ? true : false : false;
 
                 float amountForAttributes = itemValue * .58f;
                 float amountForStam = amountForAttributes / 2;
@@ -338,7 +351,7 @@ public:
                 } else /*armor*/ {
                     switch (itemProto->GetSubClass()) {
                     case ITEM_SUBCLASS_ARMOR_PLATE: {
-                        auto baseArmor = itemProto->GetItemLevel() * 8.f;
+                        auto baseArmor = itemProto->GetItemLevel() * 8.f * slotmod;
                         auto amountForArmor = curValue / 3;
                         auto bonusArmor = amountForArmor/fc->_forgeItemStatValues[ITEM_MOD_RESILIENCE_RATING];
 
@@ -361,11 +374,10 @@ public:
                         secondaryRolls--;
                         curValue -= amountForTankStat;
                         rolled.push_back(roll);
-
                         break;
                     }
                     case ITEM_SUBCLASS_ARMOR_MAIL: {
-                        auto baseArmor = itemProto->GetItemLevel() * 4.5f;
+                        auto baseArmor = itemProto->GetItemLevel() * 4.5f * slotmod;
                         auto amountForArmor = curValue / 6;
                         auto bonusArmor = amountForArmor / fc->_forgeItemStatValues[ITEM_MOD_RESILIENCE_RATING];
 
@@ -374,7 +386,7 @@ public:
                         break;
                     }
                     case ITEM_SUBCLASS_ARMOR_LEATHER: {
-                        itemProto->SetArmor(itemProto->GetItemLevel() * 2.15);
+                        itemProto->SetArmor(itemProto->GetItemLevel() * 2.15 * slotmod);
                         auto amountForAP = (curValue / 3) / fc->_forgeItemStatValues[ITEM_MOD_SPELL_POWER];
                         statCount++;
                         itemProto->SetStatsCount(statCount);
@@ -387,7 +399,7 @@ public:
                         break;
                     }
                     case ITEM_SUBCLASS_ARMOR_CLOTH: {
-                        itemProto->SetArmor(itemProto->GetItemLevel() * 1.08);
+                        itemProto->SetArmor(itemProto->GetItemLevel() * 1.08 * slotmod);
                         auto amountForSP = (curValue / 3) / fc->_forgeItemStatValues[ITEM_MOD_SPELL_POWER];
                         statCount++;
                         itemProto->SetStatsCount(statCount);
@@ -400,7 +412,7 @@ public:
                         break;
                     }
                     case ITEM_SUBCLASS_ARMOR_SHIELD: {
-                        itemProto->SetArmor(itemProto->GetItemLevel() * 36.5f);
+                        itemProto->SetArmor(itemProto->GetItemLevel() * 36.5f * slotmod);
                         itemProto->SetBlock(1.f*ilvl);
                         auto amountForBR = (curValue / 3) / fc->_forgeItemStatValues[ITEM_MOD_BLOCK_RATING];
                         statCount++;
@@ -444,7 +456,7 @@ public:
             }
 
             itemProto->Save();
-            owner->SendItemQueryPacket(&itemProto);
+            owner->SendItemQueryPacket(itemProto);
         }
         return ;
     }
@@ -492,7 +504,7 @@ public:
             {
                 WorldPacket data;
                 LocaleConstant locale = killer->GetSession()->GetSessionDbLocaleIndex();
-                std::string msg = killed->GetName() + " has been denied peace in death, their soul is now one with yours.";
+                std::string msg = killed->GetName() + " has been denied peace in death, their soul is now yours.";
                 ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_BOSS_WHISPER, LANG_UNIVERSAL, killed, killer, msg, 0, "", locale);
                 killer->SendDirectMessage(&data);
 

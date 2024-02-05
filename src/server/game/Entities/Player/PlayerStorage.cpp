@@ -6076,7 +6076,7 @@ Item* Player::_LoadItem(CharacterDatabaseTransaction trans, uint32 zoneId, uint3
     Item* item = nullptr;
     ObjectGuid::LowType itemGuid  = fields[13].Get<uint32>();
     uint32 itemEntry = fields[14].Get<uint32>();
-    if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemEntry))
+    if (ItemTemplate const* proto = sObjectMgr->GetItemTemplateMutable(itemEntry))
     {
         bool remove = false;
         item = NewItemOrBag(proto);
@@ -6085,7 +6085,7 @@ Item* Player::_LoadItem(CharacterDatabaseTransaction trans, uint32 zoneId, uint3
             auto const transmog = item->GetTransmog();
             bool hasTemplate = transmog != NormalEntry && transmog != InvisibleEntry;
             if (transmog && hasTemplate) {
-                auto source = sObjectMgr->GetItemTemplate(transmog);
+                auto source = sObjectMgr->GetItemTemplateMutable(transmog);
                 if (!source || Transmogrification::instance().CannotTransmogrifyItemWithItem(this, proto, source, false))
                     item->SetTransmog(0); // Player swapped factions? Or settings changed.
             }

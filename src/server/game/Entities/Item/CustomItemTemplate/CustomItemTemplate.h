@@ -31,7 +31,6 @@ private:
     ItemTemplate* info;
     std::random_device rd;
 public:
-    bool tankPotential = false;
     bool IsNull() { return info == nullptr; };
     CustomItemTemplate(ItemTemplate* info);
     CustomItemTemplate(ItemTemplate const* info);
@@ -42,7 +41,6 @@ public:
 
     void AdjustForLevel(Player* player);
     float CalculateDps();
-    void GenerateStats(float slotMod);
 
     uint32 GetEntry();
     void SetEntry(uint32 value);
@@ -258,6 +256,7 @@ public:
     bool Is2hWeapon();
     void MakeBlankSlate();
     ItemModType GenerateMainStatForItem();
+    bool CanRollTank();
 };
 
 CustomItemTemplate GetItemTemplate(uint32 id);

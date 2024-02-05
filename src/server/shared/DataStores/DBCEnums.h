@@ -42,7 +42,7 @@ struct DBCPosition3D
 // also see MAX_LEVEL and STRONG_MAX_LEVEL define
 #define DEFAULT_MAX_LEVEL 60
 
-#define STATIC_STAT_LEVEL 80
+#define STATIC_STAT_LEVEL 70
 
 // client supported max level for player/pets/etc. Avoid overflow or client stability affected.
 // also see GT_MAX_LEVEL define

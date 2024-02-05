@@ -553,9 +553,7 @@ void CustomItemTemplate::AdjustForLevel(Player* player) {
                 switch (info->ItemStat[i].ItemStatType) {
                 case ITEM_MOD_AGILITY:
                 case ITEM_MOD_STRENGTH:
-                case ITEM_MOD_INTELLECT: {
-
-                }
+                case ITEM_MOD_INTELLECT:
                 case ITEM_MOD_STAMINA:
                 case ITEM_MOD_ATTACK_POWER:
                 case ITEM_MOD_SPELL_POWER: {
@@ -568,6 +566,41 @@ void CustomItemTemplate::AdjustForLevel(Player* player) {
                     break;
                 }
             }
+        }
+
+        if (GetClass() == ITEM_CLASS_WEAPON) {
+            auto max = (GetMaxDamageMaxA() / float(maxLvlScale)) * level;
+            auto min = (GetMaxDamageMinA() / float(maxLvlScale)) * level;
+
+            SetDamageMaxA(max);
+            SetDamageMinA(min);
+        } else if (GetClass() == ITEM_CLASS_ARMOR) {
+            switch (GetSubClass()) {
+            case ITEM_SUBCLASS_ARMOR_PLATE: {
+                auto baseArmor = GetItemLevel() * 8.f;
+                SetArmor(int32((baseArmor / float(maxLvlScale)) * level));
+                break;
+            }
+            case ITEM_SUBCLASS_ARMOR_MAIL: {
+                auto baseArmor = GetItemLevel() * 4.5f;
+                SetArmor(int32((baseArmor / float(maxLvlScale)) * level));
+                break;
+            }
+            case ITEM_SUBCLASS_ARMOR_LEATHER: {
+                auto baseArmor = GetItemLevel() * 2.15;
+                SetArmor(int32((baseArmor / float(maxLvlScale)) * level));
+                break;
+            }
+            case ITEM_SUBCLASS_ARMOR_CLOTH: {
+                auto baseArmor = GetItemLevel() * 1.08;
+                SetArmor(int32((baseArmor / float(maxLvlScale)) * level));
+                break;
+            }
+            case ITEM_SUBCLASS_ARMOR_SHIELD: {
+                auto baseArmor = GetItemLevel() * 36.5f;
+                SetArmor(int32((baseArmor / float(maxLvlScale)) * level));
+                SetBlock((ilvl/float(maxLvlScale))*level);
+            }}
         }
 
         Save();
@@ -591,11 +624,12 @@ float CustomItemTemplate::CalculateDps()
         break;
     case INVTYPE_RANGEDRIGHT:
         switch (GetSubClass()) {
-        case ITEM_SUBCLASS_WEAPON_WAND:
+        case ITEM_SUBCLASS_WEAPON_WAND: {
             std::uniform_int_distribution<> wandschoolroll(SPELL_SCHOOL_HOLY, SPELL_SCHOOL_ARCANE);
             SetDamageTypeA(wandschoolroll(gen));
             return  1.28f * val + 5.5f;
             break;
+        }
         case ITEM_SUBCLASS_WEAPON_BOW:
         case ITEM_SUBCLASS_WEAPON_GUN:
         case ITEM_SUBCLASS_WEAPON_THROWN:
@@ -628,15 +662,15 @@ ItemModType CustomItemTemplate::GenerateMainStatForItem()
         case ITEM_SUBCLASS_WEAPON_SWORD2:
         case ITEM_SUBCLASS_WEAPON_STAFF:
         case ITEM_SUBCLASS_WEAPON_FIST:
-        case ITEM_SUBCLASS_WEAPON_DAGGER:
-            tankPotential = true;
+        case ITEM_SUBCLASS_WEAPON_DAGGER: {
             return ItemModType(agistrint(gen));
+        }
         case ITEM_SUBCLASS_WEAPON_THROWN:
         case ITEM_SUBCLASS_WEAPON_CROSSBOW:
         case ITEM_SUBCLASS_WEAPON_BOW:
-        case ITEM_SUBCLASS_WEAPON_GUN:
-            tankPotential = true;
+        case ITEM_SUBCLASS_WEAPON_GUN: {
             return ItemModType(agistr(gen));
+        }
         case ITEM_SUBCLASS_WEAPON_MISC:
         case ITEM_SUBCLASS_WEAPON_WAND:
             return ITEM_MOD_INTELLECT;
@@ -655,13 +689,63 @@ ItemModType CustomItemTemplate::GenerateMainStatForItem()
         case ITEM_SUBCLASS_ARMOR_PLATE:
         case ITEM_SUBCLASS_ARMOR_BUCKLER:
         case ITEM_SUBCLASS_ARMOR_SHIELD:
-            tankPotential = true;
             return ItemModType(agistr(gen));
         default:
             return ITEM_MOD_STAMINA;
         }
     }
+}
 
+bool CustomItemTemplate::CanRollTank()
+{
+    if (IsWeapon()) {
+        switch (GetInventoryType())
+        {
+        case INVTYPE_WEAPONOFFHAND:
+            return false;
+        default:
+            break;
+        }
+
+        switch (GetSubClass()) {
+        case ITEM_SUBCLASS_WEAPON_AXE:
+        case ITEM_SUBCLASS_WEAPON_AXE2:
+        case ITEM_SUBCLASS_WEAPON_MACE:
+        case ITEM_SUBCLASS_WEAPON_MACE2:
+        case ITEM_SUBCLASS_WEAPON_POLEARM:
+        case ITEM_SUBCLASS_WEAPON_SWORD:
+        case ITEM_SUBCLASS_WEAPON_SWORD2:
+        case ITEM_SUBCLASS_WEAPON_STAFF:
+        case ITEM_SUBCLASS_WEAPON_FIST:
+        case ITEM_SUBCLASS_WEAPON_DAGGER: {
+            return true;
+        }
+        case ITEM_SUBCLASS_WEAPON_THROWN:
+        case ITEM_SUBCLASS_WEAPON_CROSSBOW:
+        case ITEM_SUBCLASS_WEAPON_BOW:
+        case ITEM_SUBCLASS_WEAPON_GUN: {
+            return true;
+        }
+        case ITEM_SUBCLASS_WEAPON_MISC:
+        case ITEM_SUBCLASS_WEAPON_WAND:
+        default:
+            return false;
+        }
+    }
+    else if (IsArmor()) {
+        switch (GetSubClass())
+        {
+        case ITEM_SUBCLASS_ARMOR_PLATE:
+        case ITEM_SUBCLASS_ARMOR_BUCKLER:
+        case ITEM_SUBCLASS_ARMOR_SHIELD:
+            return true;
+        case ITEM_SUBCLASS_ARMOR_CLOTH:
+        case ITEM_SUBCLASS_ARMOR_LEATHER:
+        case ITEM_SUBCLASS_ARMOR_MAIL:
+        default:
+            return false;
+        }
+    }
 }
 
 void CustomItemTemplate::Save()
@@ -699,34 +783,34 @@ void CustomItemTemplate::Save()
     stmt->SetData(27, info->StatsCount);
     stmt->SetData(28, info->ItemStat[0].ItemStatType);
     stmt->SetData(29, info->ItemStat[0].ItemStatValue);
-    stmt->SetData(30, info->ItemStat[0].ItemStatValue);
+    stmt->SetData(30, info->ItemStat[0].max);
     stmt->SetData(31, info->ItemStat[1].ItemStatType);
     stmt->SetData(32, info->ItemStat[1].ItemStatValue);
-    stmt->SetData(33, info->ItemStat[1].ItemStatValue);
+    stmt->SetData(33, info->ItemStat[1].max);
     stmt->SetData(34, info->ItemStat[2].ItemStatType);
     stmt->SetData(35, info->ItemStat[2].ItemStatValue);
-    stmt->SetData(36, info->ItemStat[2].ItemStatValue);
+    stmt->SetData(36, info->ItemStat[2].max);
     stmt->SetData(37, info->ItemStat[3].ItemStatType);
     stmt->SetData(38, info->ItemStat[3].ItemStatValue);
-    stmt->SetData(39, info->ItemStat[3].ItemStatValue);
+    stmt->SetData(39, info->ItemStat[3].max);
     stmt->SetData(40, info->ItemStat[4].ItemStatType);
     stmt->SetData(41, info->ItemStat[4].ItemStatValue);
-    stmt->SetData(42, info->ItemStat[4].ItemStatValue);
+    stmt->SetData(42, info->ItemStat[4].max);
     stmt->SetData(43, info->ItemStat[5].ItemStatType);
     stmt->SetData(44, info->ItemStat[5].ItemStatValue);
-    stmt->SetData(45, info->ItemStat[5].ItemStatValue);
+    stmt->SetData(45, info->ItemStat[5].max);
     stmt->SetData(46, info->ItemStat[6].ItemStatType);
     stmt->SetData(47, info->ItemStat[6].ItemStatValue);
-    stmt->SetData(48, info->ItemStat[6].ItemStatValue);
+    stmt->SetData(48, info->ItemStat[6].max);
     stmt->SetData(49, info->ItemStat[7].ItemStatType);
     stmt->SetData(50, info->ItemStat[7].ItemStatValue);
-    stmt->SetData(51, info->ItemStat[7].ItemStatValue);
+    stmt->SetData(51, info->ItemStat[7].max);
     stmt->SetData(52, info->ItemStat[8].ItemStatType);
     stmt->SetData(53, info->ItemStat[8].ItemStatValue);
-    stmt->SetData(54, info->ItemStat[8].ItemStatValue);
+    stmt->SetData(54, info->ItemStat[8].max);
     stmt->SetData(55, info->ItemStat[9].ItemStatType);
     stmt->SetData(56, info->ItemStat[9].ItemStatValue);
-    stmt->SetData(57, info->ItemStat[9].ItemStatValue);
+    stmt->SetData(57, info->ItemStat[9].max);
     stmt->SetData(58, info->ScalingStatDistribution);
     stmt->SetData(59, info->ScalingStatValue);
     stmt->SetData(60, info->Damage[0].DamageMin);

@@ -3370,14 +3370,17 @@ void ObjectMgr::LoadCustomItemTemplates()
         "startquest, lockid, Material, sheath, RandomProperty, RandomSuffix, block, itemset, MaxDurability, area, Map, BagFamily, "
         "TotemCategory, socketColor_1, socketContent_1, socketColor_2, socketContent_2, socketColor_3, socketContent_3, socketBonus, "
         "GemProperties, RequiredDisenchantSkill, ArmorDamageModifier, duration, ItemLimitCategory, HolidayId, ScriptName, DisenchantID, "
-        "FoodType, minMoneyLoot, maxMoneyLoot, flagsCustom, itemSlotValue FROM custom_item_template");
+        "FoodType, minMoneyLoot, maxMoneyLoot, flagsCustom, itemSlotValue, dmg_min1_max, dmg_max1_max, dmg_min2_max, dmg_max2_max  FROM custom_item_template");
 
+    auto max = 0;
     if (result)
         do {
             Field* fields = result->Fetch();
 
             uint32 entry = fields[0].Get<uint32>();
             auto itr = _itemTemplateStore.find(entry);
+            if (entry > max)
+                max = entry;
 
             // read existing pointer so we don't invalidate anything
             ItemTemplate* itemTemplate = itr != _itemTemplateStore.end()
@@ -3493,6 +3496,17 @@ void ObjectMgr::LoadCustomItemTemplates()
             // Load cached data
             itemTemplate->_LoadTotalAP();
             itemTemplate->ItemSlotValue = fields[148].Get<float>();
+
+            for (uint8 i = 0; i < MAX_ITEM_PROTO_DAMAGES; ++i)
+            {
+                itemTemplate->Damage[i].maxDamageMin = fields[149 + i * 2].Get<float>();
+                itemTemplate->Damage[i].maxDamageMax = fields[150 + i * 2].Get<float>();
+                
+            }
+
+            _itemTemplateStore[entry] = *itemTemplate;
+            _itemTemplateStoreFast[entry] = itemTemplate;
+
         } while (result->NextRow());
 }
 

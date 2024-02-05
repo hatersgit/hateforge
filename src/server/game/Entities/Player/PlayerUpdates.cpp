@@ -593,7 +593,7 @@ void Player::UpdateRating(CombatRating cr)
         if ((*i)->GetMiscValue() & (1 << cr))
         {
             uint8 level = GetLevel();
-            GtCombatRatingsEntry const* combatRating = sGtCombatRatingsStore.LookupEntry(cr * GT_MAX_LEVEL + level - 1);
+            GtCombatRatingsEntry const* combatRating = sGtCombatRatingsStore.LookupEntry(cr * GT_MAX_LEVEL + STATIC_STAT_LEVEL - 1);
             float mult = combatRating->ratio;
             amount += round((*i)->GetAmount() * mult);
         }

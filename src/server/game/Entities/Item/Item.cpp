@@ -302,7 +302,7 @@ bool Item::Create(ObjectGuid::LowType guidlow, uint32 itemid, Player const* owne
         itemProto = sObjectMgr->CreateItemTemplate(guidlow, itemid);
         CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
         SetEntry(guidlow);
-        sScriptMgr->GenerateItem(*custom, owner);
+        sScriptMgr->GenerateItem(custom, owner);
         itemProto = custom->_GetInfo();
     }
     else {

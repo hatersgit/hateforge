@@ -1,4 +1,4 @@
-drop table if exists `acore_world`.`forge_character_spec_spells`;
+DROP TABLE IF EXISTS `acore_world`.`forge_character_spec_spells`;
 CREATE TABLE `acore_world`.`forge_character_spec_spells` (
 	`class` INT(10) UNSIGNED NOT NULL,
 	`race` INT(10) UNSIGNED NOT NULL,

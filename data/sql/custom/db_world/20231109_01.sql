@@ -1,5 +1,4 @@
-drop table if exists `acore_world`.`forge_spell_charge`;
-CREATE TABLE `acore_world`.`forge_spell_charge` (
+CREATE TABLE IF NOT EXISTS `acore_world`.`forge_spell_charge` (
 	`spell` INT(10) UNSIGNED NOT NULL,
 	`timer` INT(10) UNSIGNED NOT NULL,
 	`item` INT(10) UNSIGNED NOT NULL,

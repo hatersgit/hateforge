@@ -1,6 +1,4 @@
-DROP TABLE IF EXISTS `acore_world`.`instance_difficulty_multiplier`;
-
-CREATE TABLE `acore_world`.`instance_difficulty_multiplier` (
+CREATE TABLE IF NOT EXISTS `acore_world`.`instance_difficulty_multiplier` (
   `mapId` smallint unsigned NOT NULL,
   `difficultyId` smallint unsigned NOT NULL,
   `healthMultiplier` float unsigned NOT NULL DEFAULT 1.0,

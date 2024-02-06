@@ -158,6 +158,9 @@ struct ForgeCharacterXmog
     std::unordered_map<uint8, uint32> slottedItems;
 };
 
+// hater: custom stats
+#define MAINSTATS 3
+#define TANKDIST 0
 
 class ForgeCache : public DatabaseScript
 {
@@ -1045,6 +1048,11 @@ public:
     std::unordered_map<uint32 /*guid*/,PlayerLoadout*> _playerActiveTalentLoadouts;
 
     std::unordered_map<uint32 /*class*/, uint32 /*spec*/> _playerClassFirstSpec;
+
+    // hater: custom items
+    std::unordered_map<InventoryType, float /*value*/> _forgeItemSlotValues;
+    std::unordered_map<ItemModType, float /*value*/> _forgeItemStatValues;
+    std::unordered_map<uint8, std::vector<ItemModType>> _forgeItemSecondaryStatPools;
 
     void AddDefaultLoadout(Player* player)
     {
@@ -2042,6 +2050,61 @@ private:
             _playerTalentLoadouts[guid][tabId][id] = plo;
             _playerActiveTalentLoadouts[guid] = plo;
         } while (loadouts->NextRow());
+    }
+
+    // hater: custom items
+    void AddItemSlotValue() {
+        _forgeItemSlotValues.clear();
+
+        QueryResult values = WorldDatabase.Query("select * from `acore_world`.`forge_item_slot_value`");
+
+        if (!values)
+            return;
+
+        do
+        {
+            Field* valuesFields = values->Fetch();
+            InventoryType inv = InventoryType(valuesFields[0].Get<uint32>());
+            float value = valuesFields[1].Get<float>();
+
+            _forgeItemSlotValues[inv] = value;
+        } while (values->NextRow());
+    }
+
+    void AddItemStatValue() {
+        _forgeItemStatValues.clear();
+
+        QueryResult values = WorldDatabase.Query("select * from `acore_world`.`forge_item_stat_value`");
+
+        if (!values)
+            return;
+
+        do
+        {
+            Field* valuesFields = values->Fetch();
+            ItemModType stat = ItemModType(valuesFields[0].Get<uint32>());
+            float value = valuesFields[1].Get<float>();
+
+            _forgeItemStatValues[stat] = value;
+        } while (values->NextRow());
+    }
+
+    void AddItemStatPools() {
+        _forgeItemSecondaryStatPools.clear();
+
+        QueryResult values = WorldDatabase.Query("select * from `acore_world`.`forge_item_stat_pool`");
+
+        if (!values)
+            return;
+
+        do
+        {
+            Field* valuesFields = values->Fetch();
+            uint8 mainstat = valuesFields[0].Get<uint8>();
+            ItemModType secondarystat = ItemModType(valuesFields[1].Get<uint32>());
+
+            _forgeItemSecondaryStatPools[mainstat].emplace_back(secondarystat);
+        } while (values->NextRow());
     }
 };
 

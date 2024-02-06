@@ -869,7 +869,6 @@ INSERT INTO acore_world.areatrigger_template (Id,IsServerSide,`Type`,Flags,Data0
 
 
 -- acore_world.areatrigger_template_actions definition
-
 DROP TABLE IF EXISTS acore_world.`areatrigger_template_actions`;
 CREATE TABLE acore_world.`areatrigger_template_actions` (
   `AreaTriggerId` int unsigned NOT NULL,

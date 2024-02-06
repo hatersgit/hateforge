@@ -5557,6 +5557,10 @@ bool Player::LoadFromDB(ObjectGuid playerGuid, CharacterDatabaseQueryHolder cons
             }
 
             transmogrification_appearances[type].insert(entry);
+            if (auto item = GetItemTemplate(entry)) {
+                auto visual = item->GetDisplayInfoID();
+                _tmogVisualToItem[type][visual] = entry;
+            }
         } while (result->NextRow());
     }
 

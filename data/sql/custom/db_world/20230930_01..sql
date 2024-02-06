@@ -1,6 +1,4 @@
-DROP TABLE IF EXISTS `acore_characters`.`forge_character_transmogsets`;
-
-CREATE TABLE `acore_characters`.`forge_character_transmogsets` (
+CREATE TABLE IF NOT EXISTS `acore_characters`.`forge_character_transmogsets` (
   `guid` int unsigned NOT NULL,
   `active` tinyint unsigned not null default 0,
   `setid` tinyint unsigned NOT NULL,

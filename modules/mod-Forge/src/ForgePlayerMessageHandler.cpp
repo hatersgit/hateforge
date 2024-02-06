@@ -36,11 +36,6 @@
 #include <DeleteLoadoutHandler.cpp>
 #include <SaveLoadoutHandler.cpp>
 
-#include <SetSoulShardHandler.cpp>
-#include <GetSoulsShardHandler.cpp>
-
-#include <SetWorldTierHandler.cpp>
-
 #include <unordered_map>
 #include <random>
 
@@ -525,11 +520,6 @@ void AddForgePlayerMessageHandler()
     sTopicRouter->AddHandler(new GetCharacterLoadoutsHandler(cache, cm));
     sTopicRouter->AddHandler(new DeleteLoadoutHandler(cache, cm));
     sTopicRouter->AddHandler(new SaveLoadoutHandler(cache, cm));
-
-    sTopicRouter->AddHandler(new SetWorldTierHandler(cache, cm));
-
-    sTopicRouter->AddHandler(new SetSoulShardHandler(cache, cm));
-    sTopicRouter->AddHandler(new GetSoulsShardHandler(cache, cm));
     //new UseSkillBook();
     new ForgeCacheCommands();   
 }

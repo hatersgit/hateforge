@@ -110,7 +110,7 @@ public:
     bool CanAddToCollection(Player* player, Item* item);
     bool CanAddToCollection(Player* player, ItemTemplate const* itemTemplate);
     bool CanAddEnchantToCollection(Player* player, Item* item);
-    uint32 Save(Player* player, uint32 transmogtype, uint32 visual);
+    uint32 Save(Player* player, uint32 transmogtype, ItemTemplate* visual);
     void SaveToDB(Player* player, uint32 transmogtype, uint32 visual);
 
     bool HasVisual(Player* player, uint32 transmogtype, uint32 visual);

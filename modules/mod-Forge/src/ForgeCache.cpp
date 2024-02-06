@@ -2204,6 +2204,7 @@ private:
             _forgeItemSecondaryStatPools[mainstat].emplace_back(secondarystat);
         } while (values->NextRow());
     }
+
 public:
 
     bool IsFlaggedReset(uint32 guid) {

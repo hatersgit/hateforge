@@ -1,7 +1,5 @@
 /*Table structure for table `areatrigger_create_properties` */
-
-DROP TABLE IF EXISTS `areatrigger_create_properties`;
-
+DROP TABLE IF EXISTS acore_world.`areatrigger_create_properties`;
 CREATE TABLE `areatrigger_create_properties` (
   `Id` int unsigned NOT NULL,
   `AreaTriggerId` int unsigned NOT NULL,
@@ -30,7 +28,7 @@ CREATE TABLE `areatrigger_create_properties` (
 
 /*Data for the table `areatrigger_create_properties` */
 
-insert  into `areatrigger_create_properties`(`Id`,`AreaTriggerId`,`MoveCurveId`,`ScaleCurveId`,`MorphCurveId`,`FacingCurveId`,`AnimId`,`AnimKitId`,`DecalPropertiesId`,`TimeToTarget`,`TimeToTargetScale`,`Shape`,`ShapeData0`,`ShapeData1`,`ShapeData2`,`ShapeData3`,`ShapeData4`,`ShapeData5`,`ShapeData6`,`ShapeData7`,`ScriptName`,`VerifiedBuild`) values 
+insert into `areatrigger_create_properties`(`Id`,`AreaTriggerId`,`MoveCurveId`,`ScaleCurveId`,`MorphCurveId`,`FacingCurveId`,`AnimId`,`AnimKitId`,`DecalPropertiesId`,`TimeToTarget`,`TimeToTargetScale`,`Shape`,`ShapeData0`,`ShapeData1`,`ShapeData2`,`ShapeData3`,`ShapeData4`,`ShapeData5`,`ShapeData6`,`ShapeData7`,`ScriptName`,`VerifiedBuild`) values 
 (4462,9202,1466,0,0,0,-1,0,0,2889,3000,4,1.5,1.5,3.5,3.5,0.3,0.3,0,0,'',38134),
 (337,3153,0,0,0,0,-1,0,0,0,600000,0,3,3,0,0,0,0,0,0,'at_pri_angelic_feather',52188),
 (2561,7170,0,0,0,0,-1,0,0,0,10000,0,4,4,0,0,0,0,0,0,'',48999),
@@ -2742,9 +2740,7 @@ insert  into `areatrigger_create_properties`(`Id`,`AreaTriggerId`,`MoveCurveId`,
 (28444,32293,0,0,0,0,-1,0,0,0,20000,0,18,18,0,0,0,0,0,0,'',52188);
 
 /*Table structure for table `areatrigger_create_properties_orbit` */
-
-DROP TABLE IF EXISTS `areatrigger_create_properties_orbit`;
-
+DROP TABLE IF EXISTS acore_world.`areatrigger_create_properties_orbit`;
 CREATE TABLE `areatrigger_create_properties_orbit` (
   `AreaTriggerCreatePropertiesId` int unsigned NOT NULL,
   `StartDelay` int unsigned NOT NULL DEFAULT '0',
@@ -2792,9 +2788,7 @@ insert  into `areatrigger_create_properties_orbit`(`AreaTriggerCreatePropertiesI
 (2147861365,0,6,0,0,0,0,1,52301);
 
 /*Table structure for table `areatrigger_create_properties_polygon_vertex` */
-
-DROP TABLE IF EXISTS `areatrigger_create_properties_polygon_vertex`;
-
+DROP TABLE IF EXISTS acore_world.`areatrigger_create_properties_polygon_vertex`;
 CREATE TABLE `areatrigger_create_properties_polygon_vertex` (
   `AreaTriggerCreatePropertiesId` int unsigned NOT NULL,
   `Idx` int unsigned NOT NULL,
@@ -4497,9 +4491,7 @@ insert  into `areatrigger_create_properties_polygon_vertex`(`AreaTriggerCreatePr
 (2147904063,0,-0.8,1.08,NULL,NULL,52188);
 
 /*Table structure for table `areatrigger_create_properties_spline_point` */
-
-DROP TABLE IF EXISTS `areatrigger_create_properties_spline_point`;
-
+DROP TABLE IF EXISTS acore_world.`areatrigger_create_properties_spline_point`;
 CREATE TABLE `areatrigger_create_properties_spline_point` (
   `AreaTriggerCreatePropertiesId` int unsigned NOT NULL,
   `Idx` int unsigned NOT NULL,
@@ -8191,7 +8183,6 @@ insert  into `areatrigger_create_properties_spline_point`(`AreaTriggerCreateProp
 /*Table structure for table `areatrigger_template` */
 
 DROP TABLE IF EXISTS `areatrigger_template`;
-
 CREATE TABLE `areatrigger_template` (
   `Id` int unsigned NOT NULL,
   `IsServerSide` tinyint unsigned NOT NULL,
@@ -11316,9 +11307,7 @@ insert  into `areatrigger_template`(`Id`,`IsServerSide`,`Type`,`Flags`,`Data0`,`
 (34027,0,0,0,1,1,0,0,0,0,0,0,52301);
 
 /*Table structure for table `areatrigger_template_actions` */
-
-DROP TABLE IF EXISTS `areatrigger_template_actions`;
-
+DROP TABLE IF EXISTS acore_world.`areatrigger_template_actions`;
 CREATE TABLE `areatrigger_template_actions` (
   `AreaTriggerId` int unsigned NOT NULL,
   `IsServerSide` tinyint unsigned NOT NULL,
@@ -11397,9 +11386,7 @@ insert  into `areatrigger_template_actions`(`AreaTriggerId`,`IsServerSide`,`Acti
 (30743,0,0,388072,1);
 
 /*Table structure for table `areatrigger_template_auras` */
-
-DROP TABLE IF EXISTS `areatrigger_template_auras`;
-
+DROP TABLE IF EXISTS acore_world.`areatrigger_template_auras`;
 CREATE TABLE `areatrigger_template_auras` (
   `AreaTriggerId` int unsigned NOT NULL,
   `AuraId` int unsigned NOT NULL,
@@ -11410,9 +11397,7 @@ CREATE TABLE `areatrigger_template_auras` (
 /*Data for the table `areatrigger_template_auras` */
 
 /*Table structure for table `areatrigger_template_splines` */
-
-DROP TABLE IF EXISTS `areatrigger_template_splines`;
-
+DROP TABLE IF EXISTS acore_world.`areatrigger_template_splines`;
 CREATE TABLE `areatrigger_template_splines` (
   `MoveCurveId` int unsigned NOT NULL,
   `Idx` int unsigned NOT NULL,

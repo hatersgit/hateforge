@@ -2682,6 +2682,7 @@ public:
     BasicEvent* pendingTransmogCheck = nullptr;
     typedef std::array<std::unordered_set<uint32>, EQUIPMENT_SLOT_END> AppearanceContainer;
     AppearanceContainer transmogrification_appearances;
+    std::unordered_map<uint32 /*slot*/, std::unordered_map<uint32 /*visual*/, uint32 /*item*/>> _tmogVisualToItem;
     PresetMapType presetMap;
     std::string GetDebugInfo() const override;
 

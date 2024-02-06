@@ -1,5 +1,4 @@
-DROP TABLE IF EXISTS `acore_world`.`forge_spell_jump_charge_params`;
-CREATE TABLE `acore_world`.`forge_spell_jump_charge_params` (
+CREATE TABLE IF NOT EXISTS `acore_world`.`forge_spell_jump_charge_params` (
   `id` INT UNSIGNED NOT NULL,
   `speed` FLOAT NOT NULL DEFAULT '42',
   `treatSpeedAsMoveTimeSeconds` TINYINT(1) NOT NULL DEFAULT '0',

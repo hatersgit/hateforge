@@ -67,15 +67,7 @@ public:
 
     void OnEquip(Player* player, Item* item, uint8 bag, uint8 slot, bool update) override
     {
-        if (sConfigMgr->GetBoolDefault("echos", false)) {
-            if (auto pProto = item->GetTemplate()) {
-                if (pProto->Quality >= ITEM_QUALITY_UNCOMMON && (pProto->Class == ITEM_CLASS_ARMOR || pProto->Class == ITEM_CLASS_WEAPON)
-                    && slot != EQUIPMENT_SLOT_TABARD) {
-                    CustomItemTemplate custom = GetItemTemplate(pProto->ItemId);
-                    custom->AdjustForLevel(player);
-                }
-            }
-        }
+
     }
 
     void OnLogin(Player* player) override
@@ -162,19 +154,6 @@ public:
                 LearnSpellsForLevel(player);
             }
         }
-
-        if (sConfigMgr->GetBoolDefault("echos", false)) {
-            for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i) {
-                if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i)) {
-                    if (ItemTemplate const* temp = item->GetTemplate()) {
-                        if (temp->Quality >= ITEM_QUALITY_UNCOMMON && (temp->Class == ITEM_CLASS_ARMOR || temp->Class == ITEM_CLASS_WEAPON)) {
-                            CustomItemTemplate custom = GetItemTemplate(temp->ItemId);
-                            custom->AdjustForLevel(player);
-                        }
-                    }
-                }
-            }
-        }
     }
 
     void OnLearnSpell(Player* player, uint32 spellID) 
@@ -218,11 +197,6 @@ public:
     void OnQuestRewardItem(Player* player, Item* item, uint32 count) override
     {
         OnAddItem(player, item->GetTemplate()->ItemId, count);
-    }
-
-    void GenerateItem(CustomItemTemplate itemProto, Player const* owner) override
-    {
-        
     }
 
 

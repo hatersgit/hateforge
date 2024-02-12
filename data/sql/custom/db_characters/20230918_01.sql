@@ -12,7 +12,7 @@ CREATE TABLE `forge_account_transmog` (
 -- acore_characters.forge_character_transmogsets definition
 
 DROP TABLE IF EXISTS `forge_character_transmogsets`;
-CREATE TABLE `forge_character_transmogsets`; (
+CREATE TABLE `forge_character_transmogsets` (
   `guid` int unsigned NOT NULL,
   `setid` tinyint unsigned NOT NULL,
   `setname` varchar(32) NOT NULL DEFAULT 'New Set',

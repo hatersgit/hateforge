@@ -1,6 +1,6 @@
 -- acore_characters.forge_account_transmog definition
-DROP TABLE IF EXISTS `acore_characters`.`forge_account_transmog`;
-CREATE TABLE `acore_characters`.`forge_account_transmog` (
+DROP TABLE IF EXISTS `forge_account_transmog`;
+CREATE TABLE `forge_account_transmog` (
   `accountid` int unsigned NOT NULL,
   `type` int unsigned NOT NULL,
   `entry` int unsigned NOT NULL,
@@ -11,8 +11,8 @@ CREATE TABLE `acore_characters`.`forge_account_transmog` (
 
 -- acore_characters.forge_character_transmogsets definition
 
-DROP TABLE IF EXISTS `acore_characters`.`forge_character_transmogsets`;
-CREATE TABLE `acore_characters`.`forge_character_transmogsets`; (
+DROP TABLE IF EXISTS `forge_character_transmogsets`;
+CREATE TABLE `forge_character_transmogsets`; (
   `guid` int unsigned NOT NULL,
   `setid` tinyint unsigned NOT NULL,
   `setname` varchar(32) NOT NULL DEFAULT 'New Set',

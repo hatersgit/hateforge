@@ -16199,8 +16199,6 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 
             default:
                 break;
-             default:
-                break;
         }
     }
 

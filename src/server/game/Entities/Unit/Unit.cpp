@@ -15675,10 +15675,9 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 		QueryResult resultTravel = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'travel'");
 
 
-        switch (form)
+         switch (form)
         {
             case FORM_CAT:
-			
 			if (resultCat)
 			{
 				do
@@ -15796,7 +15795,6 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
                 else
                     return 8571;
 			}	
-			
             case FORM_DIREBEAR:
             case FORM_BEAR:
 			
@@ -15830,7 +15828,6 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 
 				} while (resultBear->NextRow());
 			}
-
 			if (BearnDisplay != 0) // Violet
 			{
 				return BearnDisplay;
@@ -15914,9 +15911,9 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
                     return 2281;
                 else
                     return 2289;
-				
 			}
             case FORM_FLIGHT:
+			
 			if (resultFly)
 			{
 				do
@@ -15947,7 +15944,6 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 
 				} while (resultFly->NextRow());
 			}
-
 			if (FlynDisplay != 0) // Violet
 			{
 				return FlynDisplay;
@@ -15956,12 +15952,12 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 			{
                 if (Player::TeamIdForRace(getRace()) == TEAM_ALLIANCE)
 				{
-					return 20857;
+                    return 20857;
 				}
 				else
 				{
 					return 20872;
-				} 
+				}
 			}
             case FORM_FLIGHT_EPIC:
 			
@@ -16004,15 +16000,14 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
 			{
                 if (Player::TeamIdForRace(getRace()) == TEAM_ALLIANCE)
 				{
-					return 21243;
+                    return 21243;
 				}
 				else
 				{
 					return 21244;
 				}
 			}
-
-			case FORM_MOONKIN:
+case FORM_MOONKIN:
 
 				if (resultBuho)
 				{

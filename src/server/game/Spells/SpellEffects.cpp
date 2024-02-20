@@ -2232,8 +2232,8 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
                     {
                         int32 xpLevel = goInfo->chest.xpMinLevel;
 
-                        //Quest const* quest;
-                        //player->GiveXP(quest->XPValue(player->getLevel(), xpLevel, xpDifficulty), nullptr);
+                        Quest const* quest = sObjectMgr->GetQuestTemplate(24746);
+                        player->GiveXP(quest->XPValue(player->getLevel(), xpLevel, xpDifficulty), nullptr);
                     }
                 }
 

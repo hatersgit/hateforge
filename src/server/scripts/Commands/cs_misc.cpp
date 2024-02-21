@@ -2888,7 +2888,7 @@ public:
     {
         Creature* creatureTarget = handler->getSelectedCreature();
 
-        if (!target && !creatureTarget)
+        if (!target)
         {
             target = PlayerIdentifier::FromTargetOrSelf(handler);
         }

@@ -409,11 +409,11 @@ void ScriptMgr::OnPlayerFailedDelete(ObjectGuid guid, uint32 accountId)
     });
 }
 
-void ScriptMgr::OnPlayerBindToInstance(Player* player, Difficulty difficulty, uint32 mapid, bool permanent)
+void ScriptMgr::OnPlayerBindToInstance(Player* player, Difficulty difficulty, uint32 mapid, bool permanent, uint8 extendState)
 {
     ExecuteScript<PlayerScript>([&](PlayerScript* script)
     {
-        script->OnBindToInstance(player, difficulty, mapid, permanent);
+        script->OnBindToInstance(player, difficulty, mapid, permanent, extendState);
     });
 }
 

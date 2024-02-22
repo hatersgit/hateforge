@@ -11955,6 +11955,11 @@ float Unit::GetSpellMinRangeForTarget(Unit const* target, SpellInfo const* spell
         return spellInfo->GetMinRange();
     }
 
+    if (!target)
+    {
+        return spellInfo->GetMinRange(true);
+    }
+
     return spellInfo->GetMinRange(!IsHostileTo(target));
 }
 

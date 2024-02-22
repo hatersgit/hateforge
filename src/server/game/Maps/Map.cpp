@@ -2985,12 +2985,6 @@ Map::EnterState InstanceMap::CannotEnter(Player* player, bool loginCheck)
     if (!player->isBeingLoaded() && IsRaid() && GetInstanceScript() && GetInstanceScript()->IsEncounterInProgress())
         return CANNOT_ENTER_ZONE_IN_COMBAT;
 
-    // cannot enter if player is permanent saved to a different instance id
-    if (InstancePlayerBind* playerBind = player->GetBoundInstance(GetId(), GetDifficulty()))
-        if (playerBind->perm && playerBind->save)
-            if (playerBind->save->GetInstanceId() != GetInstanceId())
-                return CANNOT_ENTER_INSTANCE_BIND_MISMATCH;
-
     return Map::CannotEnter(player, loginCheck);
 }
 

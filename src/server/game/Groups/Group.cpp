@@ -1788,8 +1788,7 @@ void Group::BroadcastReadyCheck(WorldPacket const* packet)
     {
         Player* player = itr->GetSource();
         if (player)
-            if (IsLeader(player->GetGUID()) || IsAssistant(player->GetGUID()))
-                player->GetSession()->SendPacket(packet);
+            player->GetSession()->SendPacket(packet);
     }
 }
 

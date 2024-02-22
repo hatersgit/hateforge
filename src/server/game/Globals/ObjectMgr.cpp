@@ -2197,6 +2197,7 @@ void ObjectMgr::LoadCreatures()
                     spawnMasks[i] |= (1 << k);
 
     _worldTierCreatureInstances.clear();
+
     _creatureDataStore.rehash(result->GetRowCount());
     uint32 count = 0;
     do
@@ -2359,6 +2360,7 @@ void ObjectMgr::LoadCreatures()
         _worldTierCreatureInstances[id1].push_back(spawnId);
 
         ++count;
+        _worldTiersCreatureSpawns[data.id1].push_back(spawnId);
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded {} Creatures in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
@@ -10556,72 +10558,6 @@ uint32 ObjectMgr::GetQuestMoneyReward(uint8 level, uint32 questMoneyDifficulty) 
     return 0;
 }
 
-void ObjectMgr::LoadInstanceSavedGameobjectStateData()
-{
-    uint32 oldMSTime = getMSTime();
-
-    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SELECT_INSTANCE_SAVED_DATA);
-    PreparedQueryResult result = CharacterDatabase.Query(stmt);
-
-    if (!result)
-    {
-        // There's no gameobject with this GUID saved on the DB
-        LOG_INFO("sql.sql", ">> Loaded 0 Instance saved gameobject state data. DB table `instance_saved_go_state_data` is empty.");
-        return;
-    }
-
-    Field* fields;
-    uint32 count = 0;
-    do
-    {
-        fields = result->Fetch();
-        GameobjectInstanceSavedStateList.push_back({ fields[0].Get<uint32>(), fields[1].Get<uint32>(), fields[2].Get<unsigned short>() });
-        count++;
-    } while (result->NextRow());
-
-    LOG_INFO("server.loading", ">> Loaded {} instance saved gameobject state data in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
-    LOG_INFO("server.loading", " ");
-}
-
-uint8 ObjectMgr::GetInstanceSavedGameobjectState(uint32 id, uint32 guid)
-{
-    for (auto it = GameobjectInstanceSavedStateList.begin(); it != GameobjectInstanceSavedStateList.end(); it++)
-    {
-        if (it->m_guid == guid && it->m_instance == id)
-        {
-            return it->m_state;
-        }
-    }
-    return 3; // Any state higher than 2 to get the default state
-}
-
-bool ObjectMgr::FindInstanceSavedGameobjectState(uint32 id, uint32 guid)
-{
-    for (auto it = GameobjectInstanceSavedStateList.begin(); it != GameobjectInstanceSavedStateList.end(); it++)
-    {
-        if (it->m_guid == guid && it->m_instance == id)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-void ObjectMgr::SetInstanceSavedGameobjectState(uint32 id, uint32 guid, uint8 state)
-{
-    for (auto it = GameobjectInstanceSavedStateList.begin(); it != GameobjectInstanceSavedStateList.end(); it++)
-    {
-        if (it->m_guid == guid && it->m_instance == id)
-        {
-            it->m_state = state;
-        }
-    }
-}
-void ObjectMgr::NewInstanceSavedGameobjectState(uint32 id, uint32 guid, uint8 state)
-{
-    GameobjectInstanceSavedStateList.push_back({ id, guid, state });
-}
-
 void ObjectMgr::SendServerMail(Player* player, uint32 id, uint32 reqLevel, uint32 reqPlayTime, uint32 rewardMoneyA, uint32 rewardMoneyH, uint32 rewardItemA, uint32 rewardItemCountA, uint32 rewardItemH, uint32 rewardItemCountH, std::string subject, std::string body, uint8 active) const
 {
     if (active)
@@ -10937,26 +10873,28 @@ void ObjectMgr::LoadWorldSafeLocs()
     uint32 oldMSTime = getMSTime();
 
     //                                                   0   1      2     3     4     5
-    if (QueryResult result = WorldDatabase.Query("SELECT ID, MapID, LocX, LocY, LocZ, Facing FROM world_safe_locs"))
+    if (QueryResult result = WorldDatabase.Query("SELECT ID, Map, LocX, LocY, LocZ, Facing FROM world_safe_locs"))
     {
         do
         {
             Field* fields = result->Fetch();
             uint32 id = fields[0].Get<uint32>();
-            WorldLocation loc(fields[1].Get<uint32>(), fields[2].Get<float>(), fields[3].Get<float>(), fields[4].Get<float>(), fields[5].Get<float>());
+            uint32 map = fields[1].Get<uint32>();
+            WorldLocation loc(map, fields[2].Get<float>(), fields[3].Get<float>(), fields[4].Get<float>(), fields[5].Get<float>());
             if (!MapMgr::IsValidMapCoord(loc))
             {
-                LOG_ERROR("sql.sql", "World location (ID: %u) has a invalid position MapID: %u %s, skipped", id, loc.GetMapId(), loc.ToString().c_str());
+                LOG_ERROR("sql.sql", "World location (ID: {}) has a invalid position MapID: {} {}, skipped", id, loc.GetMapId(), loc.ToString().c_str());
                 continue;
             }
 
-            WorldSafeLocsEntry* worldSafeLocs = _worldSafeLocs[id];
+            WorldSafeLocsEntry* worldSafeLocs = new WorldSafeLocsEntry();
             worldSafeLocs->ID = id;
             worldSafeLocs->Loc.WorldRelocate(loc);
+            _worldSafeLocs[map][id] = worldSafeLocs;
 
         } while (result->NextRow());
 
-        LOG_INFO("server.loading", ">> Loaded {} world locations %u ms", _worldSafeLocs.size(), GetMSTimeDiffToNow(oldMSTime));
+        LOG_INFO("server.loading", ">> Loaded {} world locations {} ms", _worldSafeLocs.size(), GetMSTimeDiffToNow(oldMSTime));
     }
     else
         LOG_INFO("server.loading", ">> Loaded 0 world locations. DB table `world_safe_locs` is empty.");
@@ -11077,11 +11015,16 @@ MapChallengeModeEntry* ObjectMgr::GetChallengeMode(uint32 id) const
         return nullptr;
 }
 
-WorldSafeLocsEntry* ObjectMgr::GetWorldSafeLoc(uint32 id) const
+WorldSafeLocsEntry* ObjectMgr::GetWorldSafeLoc(uint32 map, uint32 id) const
 {
-    auto out = _worldSafeLocs.find(id);
-    if (out != _worldSafeLocs.end())
-        return out->second;
+    auto out = _worldSafeLocs.find(map);
+    if (out != _worldSafeLocs.end()) {
+        auto loc = out->second.find(id);
+        if (loc != out->second.end())
+            return loc->second;
+        else
+            return nullptr;
+    }
     else
         return nullptr;
 }

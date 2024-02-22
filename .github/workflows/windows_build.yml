@@ -2,9 +2,9 @@ name: windows-build
 on:
   push:
     branches:
-      - 'master'
+      - "master"
   pull_request:
-    types: ['labeled', 'opened', 'synchronize', 'reopened']
+    types: ["labeled", "opened", "synchronize", "reopened"]
 
 concurrency:
   group: ${{ github.head_ref }} || concat(${{ github.ref }}, ${{ github.workflow }})
@@ -20,10 +20,10 @@ jobs:
     name: ${{ matrix.os }}
     env:
       BOOST_ROOT: C:\local\boost_1_82_0
-    if: |
-      github.repository == 'azerothcore/azerothcore-wotlk'
-      && !github.event.pull_request.draft
-      && (github.ref == 'refs/heads/master' || contains(github.event.pull_request.labels.*.name, 'run-build') || github.event.label.name == 'run-build')
+    # if: |
+    #   github.repository == 'azerothcore/azerothcore-wotlk'
+    #   && !github.event.pull_request.draft
+    #   && (github.ref == 'refs/heads/master' || contains(github.event.pull_request.labels.*.name, 'run-build') || github.event.label.name == 'run-build')
     steps:
       - uses: actions/checkout@v4
       - name: ccache
@@ -39,3 +39,26 @@ jobs:
         run: |
           export CTOOLS_BUILD=all
           ./acore.sh compiler build
+
+      - name: Zip Mod-Forge SQL folder
+        shell: powershell
+        run: |
+          Compress-Archive -Path ./modules/mod-Forge -Destination ./env/dist/mod-forge-sql.zip
+
+      - name: Zip Data SQL folder
+        shell: powershell
+        run: |
+          Compress-Archive -Path ./data/sql/custom -Destination ./env/dist/data-sql.zip
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          repo_token: "${{ secrets.GH_TOKEN }}"
+          automatic_release_tag: "Latest"
+          prerelease: false
+          title: "Release"
+          files: |
+            ./env/dist/worldserver.exe
+            ./env/dist/mod-forge-sql.zip
+            ./env/dist/data-sql.zip

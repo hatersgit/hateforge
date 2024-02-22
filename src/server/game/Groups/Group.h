@@ -199,6 +199,7 @@ public:
     };
     typedef std::list<MemberSlot> MemberSlotList;
     typedef MemberSlotList::const_iterator member_citerator;
+    typedef std::unordered_map<Difficulty, std::unordered_map<uint32 /*mapId*/, InstanceGroupBind>> BoundInstancesMap;
 
 protected:
     typedef MemberSlotList::iterator member_witerator;
@@ -247,6 +248,8 @@ public:
     ObjectGuid GetMasterLooterGuid() const;
     ItemQualities GetLootThreshold() const;
 
+    uint32 GetDbStoreId() const { return m_dbStoreId; }
+
     // member manipulation methods
     bool IsMember(ObjectGuid guid) const;
     bool IsLeader(ObjectGuid guid) const;
@@ -287,8 +290,10 @@ public:
     Difficulty GetRaidDifficulty() const;
     void SetDungeonDifficulty(Difficulty difficulty);
     void SetRaidDifficulty(Difficulty difficulty);
-    uint16 InInstance();
-    void ResetInstances(uint8 method, bool isRaid, Player* leader);
+    Difficulty GetDifficultyID(MapEntry const* mapEntry) const;
+    Difficulty GetDungeonDifficultyID() const { return m_dungeonDifficulty; }
+    Difficulty GetRaidDifficultyID() const { return m_raidDifficulty; }
+    void ResetInstances(uint8 method, bool isRaid, bool isLegacy, Player* SendMsgTo);
 
     // -no description-
     //void SendInit(WorldSession* session);
@@ -324,6 +329,7 @@ public:
     void ResetMaxEnchantingLevel();
 
     void LinkMember(GroupReference* pRef);
+    void DelinkMember(ObjectGuid guid);
 
     // FG: evil hacks
     void BroadcastGroupUpdate(void);
@@ -352,9 +358,12 @@ public:
     InstanceGroupBind* GetBoundInstance(Difficulty difficulty, uint32 mapId);
     BoundInstancesMap::iterator GetBoundInstances(Difficulty difficulty);
     BoundInstancesMap::iterator GetBoundInstanceEnd();
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
 protected:
     void _homebindIfInstance(Player* player);
-    void _cancelHomebindIfInstance(Player* player);
 
     void _initRaidSubGroupsCounter();
     member_citerator _getMemberCSlot(ObjectGuid Guid) const;
@@ -378,6 +387,7 @@ protected:
     ItemQualities       m_lootThreshold;
     ObjectGuid          m_looterGuid;
     ObjectGuid          m_masterLooterGuid;
+    BoundInstancesMap   m_boundInstances;
     Rolls               RollId;
     BoundInstancesMap   m_boundInstances;
     uint8*              m_subGroupsCounts;
@@ -385,6 +395,7 @@ protected:
     uint32              m_counter;                      // used only in SMSG_GROUP_LIST
     uint32              m_maxEnchantingLevel;
     uint8               m_lfgGroupFlags;
+    uint32              m_dbStoreId;                    // Represents the ID used in database (Can be reused by other groups if group was disbanded)
 
     // Xinef: change difficulty prevention
     uint32 _difficultyChangePreventionTime;

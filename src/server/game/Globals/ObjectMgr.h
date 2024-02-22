@@ -1536,14 +1536,8 @@ public:
     [[nodiscard]] uint32 GetQuestMoneyReward(uint8 level, uint32 questMoneyDifficulty) const;
     void SendServerMail(Player* player, uint32 id, uint32 reqLevel, uint32 reqPlayTime, uint32 rewardMoneyA, uint32 rewardMoneyH, uint32 rewardItemA, uint32 rewardItemCountA, uint32 rewardItemH, uint32 rewardItemCountH, std::string subject, std::string body, uint8 active) const;
 
-    void LoadInstanceSavedGameobjectStateData();
-    bool FindInstanceSavedGameobjectState(uint32 id, uint32 guid);
-    uint8 GetInstanceSavedGameobjectState(uint32 id, uint32 guid);
-    void SetInstanceSavedGameobjectState(uint32 id, uint32 guid, uint8 state);
-    void NewInstanceSavedGameobjectState(uint32 id, uint32 guid, uint8 state);
-
     // hater: m+
-    WorldSafeLocsEntry* GetWorldSafeLoc(uint32 id) const;
+    WorldSafeLocsEntry* GetWorldSafeLoc(uint32 map, uint32 id) const;
     MapChallengeModeEntry* GetChallengeMode(uint32 id) const;
     void LoadWorldSafeLocs();
     void LoadMythicLevelScale();
@@ -1913,6 +1907,9 @@ private:
     CellObjectGuids _emptyCellObjectGuids;
     CreatureDataContainer _creatureDataStore;
 
+    // hater: World Tier base creature to instances map
+    std::unordered_map < uint32 /*entry*/, std::vector<uint32 /*guid*/>> _worldTiersCreatureSpawns;
+
     CreatureTemplateContainer _creatureTemplateStore;
     CreatureCustomIDsContainer _creatureCustomIDsStore;
     std::vector<CreatureTemplate*> _creatureTemplateStoreFast; // pussywizard
@@ -1957,7 +1954,7 @@ private:
     std::set<uint32> _hasDifficultyEntries[MAX_DIFFICULTY - 1]; // already loaded creatures with difficulty 1 values, used in CheckCreatureTemplate
 
     // hater: m+
-    std::unordered_map<uint32, WorldSafeLocsEntry*> _worldSafeLocs;
+    std::unordered_map< uint32 /*map id*/, std::unordered_map<uint32 /*id*/, WorldSafeLocsEntry*>> _worldSafeLocs;
     std::unordered_map<uint32, MapChallengeModeEntry*> _cacheChallengeMode;
     std::unordered_map<uint32, std::unordered_map<uint32, float>> _cacheMythicMinionValues;
     typedef std::unordered_map<uint32, std::unordered_map<uint32, InstanceDifficultyMultiplier*>> InstanceDifficultyMultiplierContainer;

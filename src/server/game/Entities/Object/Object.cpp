@@ -16,6 +16,7 @@
  */
 
 #include "Object.h"
+#include "AreaScriptMgr.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "CellImpl.h"
@@ -2341,8 +2342,10 @@ void WorldObject::SetZoneScript()
             uint32 zoneId = GetZoneId();
             if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(zoneId))
                 m_zoneScript = bf;
-            else
-                m_zoneScript = sOutdoorPvPMgr->GetZoneScript(zoneId);
+            else if (auto script = sAreaScriptMgr->GetZoneScript(zoneId))
+                m_zoneScript = script;
+            else if (auto odpvp = sOutdoorPvPMgr->GetZoneScript(zoneId))
+                m_zoneScript = odpvp;
         }
     }
 }

@@ -17,6 +17,8 @@
 
 #include "Unit.h"
 #include "AccountMgr.h"
+#include "AreaScriptMgr.h"
+#include "AreaScript.h"
 #include "ArenaSpectator.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
@@ -2961,25 +2963,25 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(Unit const* victim, WeaponAttackTy
         }
     }
 
-    // Max 40% chance to score a glancing blow against mobs that are higher level (can do only players and pets and not with ranged weapon)
-    if (attType != RANGED_ATTACK &&
-            (GetTypeId() == TYPEID_PLAYER || IsPet()) &&
-            victim->GetTypeId() != TYPEID_PLAYER && !victim->IsPet() &&
-            GetLevel() < victim->getLevelForTarget(this))
-    {
-        // cap possible value (with bonuses > max skill)
-        int32 skill = attackerWeaponSkill;
-        int32 maxskill = attackerMaxSkillValueForLevel;
-        skill = (skill > maxskill) ? maxskill : skill;
+    //// Max 40% chance to score a glancing blow against mobs that are higher level (can do only players and pets and not with ranged weapon)
+    //if (attType != RANGED_ATTACK &&
+    //        (GetTypeId() == TYPEID_PLAYER || IsPet()) &&
+    //        victim->GetTypeId() != TYPEID_PLAYER && !victim->IsPet() &&
+    //        GetLevel() < victim->getLevelForTarget(this))
+    //{
+    //    // cap possible value (with bonuses > max skill)
+    //    int32 skill = attackerWeaponSkill;
+    //    int32 maxskill = attackerMaxSkillValueForLevel;
+    //    skill = (skill > maxskill) ? maxskill : skill;
 
-        tmp = (10 + (victimDefenseSkill - skill)) * 100;
-        tmp = tmp > 4000 ? 4000 : tmp;
-        if (roll < (sum += tmp))
-        {
-            LOG_DEBUG("entities.unit", "RollMeleeOutcomeAgainst: GLANCING <{}, {})", sum - 4000, sum);
-            return MELEE_HIT_GLANCING;
-        }
-    }
+    //    tmp = (10 + (victimDefenseSkill - skill)) * 100;
+    //    tmp = tmp > 4000 ? 4000 : tmp;
+    //    if (roll < (sum += tmp))
+    //    {
+    //        LOG_DEBUG("entities.unit", "RollMeleeOutcomeAgainst: GLANCING <{}, {})", sum - 4000, sum);
+    //        return MELEE_HIT_GLANCING;
+    //    }
+    //}
 
     // mobs can score crushing blows if they're 4 or more levels above victim
     if (getLevelForTarget(victim) >= victim->getLevelForTarget(this) + 4 &&
@@ -8703,13 +8705,15 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     DoneAdvertisedBenefit += SpellBaseDamageBonusDone(spellProto->GetSchoolMask());
 
     // Check for table values
-    float coeff = spellProto->Effects[effIndex].BonusMultiplier;
+    float spCoeff = spellProto->Effects[effIndex].BonusMultiplier;
+    float apCoeff = 0.f;
+
     SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id);
     if (bonus || spellProto->Id == 1310029)
     {
         if (damagetype == DOT)
         {
-            coeff = bonus->dot_damage;
+            spCoeff = bonus->dot_damage;
             if (bonus->ap_dot_bonus > 0)
             {
                 WeaponAttackType attType = (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK;
@@ -8720,7 +8724,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
         }
         else
         {
-            coeff = bonus->direct_damage;
+            spCoeff = bonus->direct_damage;
             if (bonus->ap_bonus > 0)
             {
                 WeaponAttackType attType = (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK;
@@ -8733,24 +8737,28 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             {
                 float coeffMin = 0.89f;
                 float coeffMax = 1.06f;
-                coeff = frand(coeffMin, coeffMax);
+                spCoeff = frand(coeffMin, coeffMax);
             }
         }
     }
 
+    if (spCoeff > 0.f)
+        spCoeff = spellProto->CalculateScaledCoefficient(this, spCoeff);
+
     // Default calculation
-    if (coeff && DoneAdvertisedBenefit)
+    if (DoneAdvertisedBenefit)
     {
-        float factorMod = CalculateLevelPenalty(spellProto) * stack;
+        if (spCoeff <= 0.f)
+            spCoeff = CalculateDefaultCoefficient(spellProto, damagetype, this);  // As wowwiki says: C = (Cast Time / 3.5)
 
         if (Player* modOwner = GetSpellModOwner())
         {
-            coeff *= 100.0f;
-            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_BONUS_MULTIPLIER, coeff);
-            coeff /= 100.0f;
+            spCoeff *= 100.0f;
+            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_BONUS_MULTIPLIER, spCoeff);
+            spCoeff /= 100.0f;
         }
 
-        DoneTotal += int32(DoneAdvertisedBenefit * coeff * factorMod);
+        DoneTotal += int32(DoneAdvertisedBenefit * spCoeff);
     }
 
     if (spellProto->Id == 1310048)      // Flame Convergence calc
@@ -14481,11 +14489,10 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
 
         if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(player->GetZoneId()))
             bf->HandleKill(player, victim);
-    }
 
-    //if (victim->GetTypeId() == TYPEID_PLAYER)
-    //    if (OutdoorPvP* pvp = victim->ToPlayer()->GetOutdoorPvP())
-    //        pvp->HandlePlayerActivityChangedpVictim->ToPlayer();
+        if (AreaScript* as = sAreaScriptMgr->GetAreaScript(player->GetAreaId()))
+            as->HandleKill(player, victim);
+    }
 
     // battleground things (do this at the end, so the death state flag will be properly set to handle in the bg->handlekill)
     if (player)

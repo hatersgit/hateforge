@@ -446,6 +446,11 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
             basePoints += randvalue;
             break;
     }
+    // custom bp scaling
+    if (caster) {
+        auto level = caster->getLevel();
+        basePoints = CalculatePct(basePoints, level+std::pow(level-10, 2)*(40/2500));
+    }
 
     float value = float(basePoints);
 
@@ -3108,6 +3113,19 @@ WeaponAttackType SpellInfo::GetAttackType() const
     }
 
     return result;
+}
+
+float SpellInfo::CalculateScaledCoefficient(Unit const* caster, float coefficient) const
+{
+    if (coefficient == 0.f || !caster)
+        return coefficient;
+
+    return coefficient *= GetSpellScalingMultiplier(caster);
+}
+
+float SpellInfo::GetSpellScalingMultiplier(WorldObject const* caster, bool isPowerCostRelated /*= false*/) const
+{
+    return 1.f;
 }
 
 bool SpellInfo::IsHealingSpell() const

@@ -257,6 +257,7 @@ public:
     void MakeBlankSlate();
     ItemModType GenerateMainStatForItem();
     bool CanRollTank();
+    bool CanRollStam();
 };
 
 CustomItemTemplate GetItemTemplate(uint32 id);

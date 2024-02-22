@@ -16,6 +16,7 @@
  */
 
 #include "AchievementMgr.h"
+#include "AreaScriptMgr.h"
 #include "BattlefieldMgr.h"
 #include "CellImpl.h"
 #include "Channel.h"
@@ -1206,6 +1207,9 @@ void Player::UpdateArea(uint32 newArea)
 
     sScriptMgr->OnPlayerUpdateArea(this, m_areaUpdateId, newArea);
 
+    sAreaScriptMgr->HandlePlayerLeaveZone(this, m_areaUpdateId);
+    sAreaScriptMgr->HandlePlayerEnterZone(this, newArea);
+
     // FFA_PVP flags are area and not zone id dependent
     // so apply them accordingly
     m_areaUpdateId = newArea;
@@ -1221,7 +1225,8 @@ void Player::UpdateArea(uint32 newArea)
     {
         SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
         pvpInfo.IsInNoPvPArea = true;
-        CombatStopWithPets();
+        if (!duel && GetCombatManager().HasPvPCombat())
+            CombatStopWithPets();
     }
     else
         RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);

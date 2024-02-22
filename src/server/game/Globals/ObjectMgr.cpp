@@ -17,6 +17,8 @@
 
 #include "ObjectMgr.h"
 #include "AchievementMgr.h"
+#include "AreaScript.h"
+#include "AreaScriptMgr.h"
 #include "ArenaTeamMgr.h"
 #include "CharacterCache.h"
 #include "Chat.h"
@@ -1443,6 +1445,14 @@ void ObjectMgr::LoadCreatureAddons()
             creatureAddon.visibilityDistanceType = VisibilityDistanceType::Normal;
         }
 
+        auto isWTd = _worldTierCreatureInstances.find(creData->id1);
+        if (isWTd != _worldTierCreatureInstances.end()) {
+            for (auto spawn : isWTd->second) {
+                if (spawn != guid)
+                    _creatureAddonStore[spawn] = creatureAddon;
+            }
+        }
+
         ++count;
     } while (result->NextRow());
 
@@ -2186,6 +2196,7 @@ void ObjectMgr::LoadCreatures()
                 if (GetMapDifficultyData(i, Difficulty(k)))
                     spawnMasks[i] |= (1 << k);
 
+    _worldTierCreatureInstances.clear();
     _creatureDataStore.rehash(result->GetRowCount());
     uint32 count = 0;
     do
@@ -2344,6 +2355,8 @@ void ObjectMgr::LoadCreatures()
         // Add to grid if not managed by the game event or pool system
         if (gameEvent == 0 && PoolId == 0)
             AddCreatureToGrid(spawnId, &data);
+
+        _worldTierCreatureInstances[id1].push_back(spawnId);
 
         ++count;
     } while (result->NextRow());
@@ -6711,6 +6724,39 @@ void ObjectMgr::LoadAreaTriggerScripts()
     } while (result->NextRow());
 
     LOG_INFO("server.loading", ">> Loaded {} Areatrigger Scripts in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", " ");
+}
+
+void ObjectMgr::LoadAreaScripts()
+{
+    uint32 oldMSTime = getMSTime();
+
+    QueryResult result = WorldDatabase.Query("SELECT * FROM forge_area_scripts");
+
+    if (!result)
+    {
+        LOG_WARN("server.loading", ">> Loaded 0 Area Scripts. DB Table `forge_area_scripts` Is Empty.");
+        LOG_INFO("server.loading", " ");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+        ++count;
+
+        Field* fields = result->Fetch();
+        uint32 zone = fields[0].Get<uint32>();
+        uint32 area = fields[1].Get<uint32>();
+        uint8 goal = fields[2].Get<uint8>();
+        uint32 boss = fields[3].Get<uint32>();
+
+        AreaScript* script = new AreaScript(zone, area, goal, boss);
+        sAreaScriptMgr->AddZone(area, script);
+    } while (result->NextRow());
+
+    LOG_INFO("server.loading", ">> Loaded {} Area Scripts in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
     LOG_INFO("server.loading", " ");
 }
 

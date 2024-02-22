@@ -163,6 +163,27 @@ public:
     uint8 rollVoteMask;
 };
 
+struct InstanceGroupBind
+{
+    InstanceSave* save;
+    bool perm;
+    /* permanent InstanceGroupBinds exist if the leader has a permanent
+       PlayerInstanceBind for the same instance. */
+    InstanceGroupBind() : save(nullptr), perm(false) { }
+};
+
+struct RaidMarker
+{
+    WorldLocation Location;
+    ObjectGuid TransportGUID;
+
+    RaidMarker(uint32 mapId, float positionX, float positionY, float positionZ, ObjectGuid transportGuid = ObjectGuid::Empty)
+    {
+        Location.WorldRelocate(mapId, positionX, positionY, positionZ);
+        TransportGUID = transportGuid;
+    }
+};
+
 /** request member stats checken **/
 /** todo: uninvite people that not accepted invite **/
 class Group
@@ -200,6 +221,7 @@ public:
     bool   AddMember(Player* player);
     bool   RemoveMember(ObjectGuid guid, const RemoveMethod& method = GROUP_REMOVEMETHOD_DEFAULT, ObjectGuid kicker = ObjectGuid::Empty, const char* reason = nullptr);
     void   ChangeLeader(ObjectGuid guid);
+    static void ConvertLeaderInstancesToGroup(Player* player, Group* group, bool switchLeader);
     void   SetLootMethod(LootMethod method);
     void   SetLooterGuid(ObjectGuid guid);
     void   SetMasterLooterGuid(ObjectGuid guid);
@@ -322,6 +344,14 @@ public:
 
     DataMap CustomData;
 
+    InstanceGroupBind* BindToInstance(InstanceSave* save, bool permanent, bool load = false);
+    void UnbindInstance(uint32 mapid, uint8 difficulty, bool unload = false);
+    InstanceGroupBind* GetBoundInstance(Player* player);
+    InstanceGroupBind* GetBoundInstance(Map* aMap);
+    InstanceGroupBind* GetBoundInstance(MapEntry const* mapEntry);
+    InstanceGroupBind* GetBoundInstance(Difficulty difficulty, uint32 mapId);
+    BoundInstancesMap::iterator GetBoundInstances(Difficulty difficulty);
+    BoundInstancesMap::iterator GetBoundInstanceEnd();
 protected:
     void _homebindIfInstance(Player* player);
     void _cancelHomebindIfInstance(Player* player);
@@ -349,6 +379,7 @@ protected:
     ObjectGuid          m_looterGuid;
     ObjectGuid          m_masterLooterGuid;
     Rolls               RollId;
+    BoundInstancesMap   m_boundInstances;
     uint8*              m_subGroupsCounts;
     ObjectGuid          m_guid;
     uint32              m_counter;                      // used only in SMSG_GROUP_LIST

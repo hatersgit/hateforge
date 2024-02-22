@@ -1866,6 +1866,10 @@ private:
 
     CreatureOutfitContainer _creatureOutfitStore;
 
+public:
+    // hater: world tier creature map for pathing etc..
+    std::unordered_map<uint32 /*ct entry*/, std::vector<uint32 /*guid*/>> _worldTierCreatureInstances;
+    void LoadAreaScripts();
 private:
     void LoadScripts(ScriptsType type);
     void LoadQuestRelationsHelper(QuestRelations& map, std::string const& table, bool starter, bool go);
@@ -1908,6 +1912,7 @@ private:
     CellObjectGuidsMap _emptyCellObjectGuidsMap;
     CellObjectGuids _emptyCellObjectGuids;
     CreatureDataContainer _creatureDataStore;
+
     CreatureTemplateContainer _creatureTemplateStore;
     CreatureCustomIDsContainer _creatureCustomIDsStore;
     std::vector<CreatureTemplate*> _creatureTemplateStoreFast; // pussywizard

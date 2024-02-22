@@ -116,6 +116,16 @@ enum class ForgeTopic
     GET_LOADOUTS                    = 121,
     SAVE_LOADOUT                    = 122,
     DELETE_LOADOUT                  = 123,
+
+    // shards
+    GET_SOULSHARDS                  = 130,
+    SET_SOULSHARDS                  = 131,
+    ACTIVE_SOULSHARDS               = 132,
+
+    // worldtier
+    SEND_MAX_WORLD_TIER             = 140,
+    SHOW_WORLD_TIER_SELECT          = 141,
+    SET_WORLD_TIER                  = 142,
 };
 
 enum class ForgeError

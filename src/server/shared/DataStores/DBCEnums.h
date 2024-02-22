@@ -285,17 +285,18 @@ enum Difficulty : uint8
     RAID_DIFFICULTY_10MAN_HEROIC = 2,
     RAID_DIFFICULTY_25MAN_HEROIC = 3,
 
-    WORLD_TIER_1 = 0,
-    WORLD_TIER_2 = 1,
-    WORLD_TIER_3 = 2,
-    WORLD_TIER_4 = 3,
+    WORLD_TIER_1 = 1,
+    WORLD_TIER_2 = 2,
+    WORLD_TIER_3 = 3,
+    WORLD_TIER_4 = 4,
 };
 
 enum WorldTierPhase
 {
-    WORLD_TIER_2_PHASE = 65536,
-    WORLD_TIER_3_PHASE = 131072,
-    WORLD_TIER_4_PHASE = 262144,
+    WORLD_TIER_1_PHASE = 65536,
+    WORLD_TIER_2_PHASE = 131072,
+    WORLD_TIER_3_PHASE = 262144,
+    WORLD_TIER_4_PHASE = 524288,
 };
 
 #define RAID_DIFFICULTY_MASK_25MAN 1    // since 25man difficulties are 1 and 3, we can check them like that

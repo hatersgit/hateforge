@@ -574,6 +574,14 @@ void ScriptMgr::OnAfterPlayerDestroyItem(Player* player, Item* it, uint8 bag, ui
         });
 }
 
+void ScriptMgr::BeforeEquip(Player* player, Item* it, uint8 bag, uint8 slot, bool update)
+{
+    ExecuteScript<PlayerScript>([&](PlayerScript* script)
+        {
+            script->BeforeEquip(player, it, bag, slot, update);
+        });
+}
+
 void ScriptMgr::OnEquip(Player* player, Item* it, uint8 bag, uint8 slot, bool update)
 {
     ExecuteScript<PlayerScript>([&](PlayerScript* script)

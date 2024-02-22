@@ -923,6 +923,8 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_PET_SLOTS               = 37,
     PLAYER_LOGIN_QUERY_LOAD_SPELL_CHARGES           = 38,
     PLAYER_LOGIN_QUERY_LOAD_TRANSMOG,
+    PLAYER_LOGIN_QUERY_LOAD_WORLDTIER,
+    PLAYER_LOGIN_QUERY_LOAD_BOUND_INSTANCES,
     MAX_PLAYER_LOGIN_QUERY
 };
 
@@ -1954,7 +1956,7 @@ public:
 
     void SetWorldTier(Difficulty worldTier) {
         m_worldTier = worldTier;
-        SetPhaseMask(worldTier ? 1 << (15+worldTier) : 1, true);
+        SetPhaseMask(1 << (15+worldTier), true);
     }
     [[nodiscard]] Difficulty GetWorldTier() const { return m_worldTier; };
 
@@ -2006,7 +2008,7 @@ public:
     [[nodiscard]] float GetRatingMultiplier(CombatRating cr) const;
     [[nodiscard]] float GetMasteryMultiplier() const;
     [[nodiscard]] float GetRatingBonusValue(CombatRating cr) const;
-    uint32 GetBaseSpellPowerBonus() { return m_baseSpellPower; }
+    uint32 GetBaseSpellPowerBonus() { return m_baseSpellPower + GetStat(STAT_INTELLECT); }
     [[nodiscard]] int32 GetSpellPenetrationItemMod() const { return m_spellPenetrationItemMod; }
 
     [[nodiscard]] float GetExpertiseDodgeOrParryReduction(WeaponAttackType attType) const;
@@ -2689,6 +2691,9 @@ public:
     // hater: m+
     BasicEvent* mythicStartCheck = nullptr;
 
+    // hater: world tiers
+    BasicEvent* worldTierNpcCheck = nullptr;
+
     // hater: timed events on player
     void AddTimedDelayedOperation(uint32 spellId, int32 timeout, std::function<void()>&& function)
     {
@@ -2807,6 +2812,9 @@ public:
     void _LoadCharacterSettings(PreparedQueryResult result);
     void _LoadPetStable(uint8 petStableSlots, PreparedQueryResult result);
 
+    // hater: retail loot
+    void _LoadBoundInstances(PreparedQueryResult result);
+
     /*********************************************************/
     /***                   SAVE SYSTEM                     ***/
     /*********************************************************/
@@ -2829,6 +2837,7 @@ public:
     void _SaveCharacter(bool create, CharacterDatabaseTransaction trans);
     void _SaveInstanceTimeRestrictions(CharacterDatabaseTransaction trans);
     void _SavePlayerSettings(CharacterDatabaseTransaction trans);
+    void _SavePlayerWorldTier(CharacterDatabaseTransaction trans);
 
     /*********************************************************/
     /***              ENVIRONMENTAL SYSTEM                 ***/
@@ -3087,6 +3096,8 @@ private:
     bool                                                    emptyWarned;              ///< Warning when there are no more delayed operations
 
     bool specActivationAllowed = false;
+
+    uint8 MaxWorldTierAllowed = 1;
 };
 
 void AddItemsSetItem(Player* player, Item* item);

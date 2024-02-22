@@ -43,6 +43,10 @@
 #include <RerollPerkHandler.cpp>
 #include <PrestigeHandler.cpp>
 
+#include <SetWorldTierHandler.cpp>
+#include <GetSoulShardsHandler.cpp>
+#include <SetSoulShardHandler.cpp>
+
 #include <unordered_map>
 #include <random>
 #include <boost/lexical_cast.hpp>
@@ -69,6 +73,8 @@ public:
 
         if (sConfigMgr->GetBoolDefault("echos", false)) {
             fc->EchosDefaultLoadout(player);
+            fc->FillBlankSoulShards(player);
+            player->SetWorldTier(WORLD_TIER_1);
         }
         else {
             fc->AddDefaultLoadout(player);
@@ -103,10 +109,13 @@ public:
         fc->ApplyActivePerks(player);
         LearnSpellsForLevel(player);
 
-        player->SetWorldTier(Difficulty::WORLD_TIER_4);
+        if (sConfigMgr->GetBoolDefault("echos", false)) {
+            player->SendForgeUIMsg(ForgeTopic::SEND_MAX_WORLD_TIER, std::to_string(fc->GetCharWorldTierUnlock(player)));
+            fc->RecalculateShardBonuses(player);
+        }
     }
 
-    void OnEquip(Player* player, Item* item, uint8 bag, uint8 slot, bool update) override
+    void BeforeEquip(Player* player, Item* item, uint8 bag, uint8 slot, bool update) override
     {
         if (sConfigMgr->GetBoolDefault("echos", false)) {
             if (auto pProto = item->GetTemplate()) {
@@ -157,11 +166,6 @@ public:
             if (oldlevel < currentLevel) {
                 int levelDiff = currentLevel - oldlevel;
 
-                //if (currentLevel == fc->GetConfig("MaxLevel", 80))
-                //{
-                //    fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::PRESTIGE_TREE, fc->GetConfig("PrestigePointsAtMaxLevel", 5));
-                //}
-
                 if (currentLevel >= 10)
                 {
                     if (oldlevel < 10 && levelDiff > 1)
@@ -189,15 +193,41 @@ public:
                 cm->SendSpecInfo(player);
                 fc->UpdateCharacterSpec(player, spec);
                 LearnSpellsForLevel(player);
+
+                if (currentLevel == DEFAULT_MAX_LEVEL) {
+                    auto tier = player->GetWorldTier();
+                    auto unlock = fc->GetCharWorldTierUnlock(player);
+                    if (unlock == tier && tier < WORLD_TIER_4) {
+                        switch (tier) {
+                        case WORLD_TIER_1: {
+                            ChatHandler(player->GetSession()).SendSysMessage("|cffBC961CYou have unlocked World Tier 2.");
+                            fc->SetCharWorldTierUnlock(player, tier + 1);
+                            break;
+                        }
+                        case WORLD_TIER_2: {
+                            ChatHandler(player->GetSession()).SendSysMessage("|cffBC961CYou have unlocked World Tier 3.");
+                            fc->SetCharWorldTierUnlock(player, tier + 1);
+                            break;
+                        }
+                        case WORLD_TIER_3: {
+                            ChatHandler(player->GetSession()).SendSysMessage("|cffBC961CYou have unlocked World Tier 4.");
+                            fc->SetCharWorldTierUnlock(player, tier + 1);
+                            break;
+                        }}
+                        player->SendForgeUIMsg(ForgeTopic::SEND_MAX_WORLD_TIER, std::to_string(fc->GetCharWorldTierUnlock(player)));
+                    }
+                }
             }
 
             if (sConfigMgr->GetBoolDefault("echos", false)) {
+                player->_RemoveAllItemMods();
                 for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i) {
                     if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i)) {
                         if (ItemTemplate const* temp = item->GetTemplate()) {
                             if (temp->Quality >= ITEM_QUALITY_UNCOMMON && (temp->Class == ITEM_CLASS_ARMOR || temp->Class == ITEM_CLASS_WEAPON)) {
                                 CustomItemTemplate custom = GetItemTemplate(temp->ItemId);
                                 custom->AdjustForLevel(player);
+                                player->_ApplyItemMods(item, i, true);
                             }
                         }
                     }
@@ -268,9 +298,10 @@ public:
             float slotmod = slot->second;
             uint32 maxIlvlBase = sConfigMgr->GetIntDefault("WorldTier.base.level", 60);
 
-            float ilvl = float(std::min(maxIlvlBase,itemProto->GetItemLevel())) + uint8(owner->GetWorldTier())*10.f;
+            float ilvl = float(std::min(maxIlvlBase,itemProto->GetItemLevel())) + uint8(owner->GetWorldTier()-1)*10.f;
             itemProto->SetItemLevel(ilvl);
             itemProto->SetRequiredLevel(1);
+            itemProto->SetAllowableClass(CLASSMASK_ALL_PLAYABLE);
             auto qual = itemProto->GetQuality();
             auto formula = 0.f;
             auto secondaryRolls = 0;
@@ -296,26 +327,27 @@ public:
 
             auto statCount = 2;
             if (itemValue) {
-                itemProto->SetBonding(BIND_WHEN_PICKED_UP);
 
                 auto mainStat = itemProto->GenerateMainStatForItem();
                 bool tankDist = itemProto->CanRollTank() ? coinflip(gen) ? true : false : false;
+                bool canRollStam = itemProto->CanRollStam();
 
-                float amountForAttributes = itemValue * .58f;
-                float amountForStam = amountForAttributes / 2;
-                itemProto->SetStatType(statCount - 1, ITEM_MOD_STAMINA);
-                auto amount = amountForStam / fc->_forgeItemStatValues[ITEM_MOD_STAMINA];
-                itemProto->SetStatValue(statCount - 1, amount);
-                itemProto->SetStatValueMax(statCount - 1, amount);
-                curValue -= amountForStam;
+                float amountForAttributes = curValue * .58f;
+                if (canRollStam) {
+                    float amountForStam = amountForAttributes * .4f;
+                    itemProto->SetStatType(statCount - 1, ITEM_MOD_STAMINA);
+                    auto amount = amountForStam / fc->_forgeItemStatValues[ITEM_MOD_STAMINA];
+                    itemProto->SetStatValue(statCount - 1, amount);
+                    itemProto->SetStatValueMax(statCount - 1, amount);
+                    amountForAttributes -= amountForStam;
+                }
 
-                auto amountForMainStat = amountForAttributes - amountForStam;
                 itemProto->SetStatsCount(statCount);
                 itemProto->SetStatType(statCount - 2, mainStat);
-                amount = amountForMainStat / fc->_forgeItemStatValues[mainStat];
+                auto amount = amountForAttributes / fc->_forgeItemStatValues[mainStat];
                 itemProto->SetStatValue(statCount - 2, amount);
                 itemProto->SetStatValueMax(statCount - 2, amount);
-                curValue -= amountForMainStat;
+                curValue -= amountForAttributes;
 
                 std::vector<ItemModType> rolled = {};
                 if (itemProto->IsWeapon()) {
@@ -380,35 +412,16 @@ public:
                         auto baseArmor = itemProto->GetItemLevel() * 4.5f * slotmod;
                         auto amountForArmor = curValue / 6;
                         auto bonusArmor = amountForArmor / fc->_forgeItemStatValues[ITEM_MOD_RESILIENCE_RATING];
-
                         itemProto->SetArmor(int32(baseArmor + bonusArmor));
                         itemProto->SetArmorDamageModifier(int32(bonusArmor));
                         break;
                     }
                     case ITEM_SUBCLASS_ARMOR_LEATHER: {
                         itemProto->SetArmor(itemProto->GetItemLevel() * 2.15 * slotmod);
-                        auto amountForAP = (curValue / 3) / fc->_forgeItemStatValues[ITEM_MOD_SPELL_POWER];
-                        statCount++;
-                        itemProto->SetStatsCount(statCount);
-                        itemProto->SetStatType(statCount - 1, ITEM_MOD_ATTACK_POWER);
-                        itemProto->SetStatValue(statCount - 1, amountForAP);
-                        itemProto->SetStatValueMax(statCount - 1, amountForAP);
-                        secondaryRolls--;
-                        curValue -= amountForAP;
-                        rolled.push_back(ITEM_MOD_ATTACK_POWER);
                         break;
                     }
                     case ITEM_SUBCLASS_ARMOR_CLOTH: {
                         itemProto->SetArmor(itemProto->GetItemLevel() * 1.08 * slotmod);
-                        auto amountForSP = (curValue / 3) / fc->_forgeItemStatValues[ITEM_MOD_SPELL_POWER];
-                        statCount++;
-                        itemProto->SetStatsCount(statCount);
-                        itemProto->SetStatType(statCount - 1, ITEM_MOD_SPELL_POWER);
-                        itemProto->SetStatValue(statCount - 1, amountForSP);
-                        itemProto->SetStatValueMax(statCount - 1, amountForSP);
-                        curValue -= amountForSP;
-                        secondaryRolls--;
-                        rolled.push_back(ITEM_MOD_SPELL_POWER);
                         break;
                     }
                     case ITEM_SUBCLASS_ARMOR_SHIELD: {
@@ -452,7 +465,6 @@ public:
                         i++;
                     }
                 }
-                
             }
 
             itemProto->Save();
@@ -493,12 +505,12 @@ public:
 
     void OnCreatureKill(Player* killer, Creature* killed) override
     {
-        if (killed->GetCreatureType() < CREATURE_TYPE_NOT_SPECIFIED) {
-            auto chance = 100.f;
+        if (killed->GetCreatureType() < CREATURE_TYPE_NOT_SPECIFIED && killed->GetCreatureType() != CREATURE_TYPE_CRITTER) {
+            auto chance = 3.f;
             if (killed->isElite())
-                chance = 100.f;
+                chance = 5.f;
             if (killed->isWorldBoss())
-                chance = 100.f;
+                chance = 10.f;
 
             if (roll_chance_f(chance))
             {
@@ -588,5 +600,8 @@ void AddForgePlayerMessageHandler()
     sTopicRouter->AddHandler(new RerollPerkHandler(cache, cm));
     sTopicRouter->AddHandler(new GetPerksInspectHandler(cache, cm));
 
+    sTopicRouter->AddHandler(new SetWorldTierHandler(cache, cm));
+    sTopicRouter->AddHandler(new GetSoulShardsHandler(cache, cm));
+    sTopicRouter->AddHandler(new SetSoulShardHandler(cache, cm));
     new ForgeCacheCommands();
 }

@@ -2891,6 +2891,16 @@ bool Creature::LoadCreaturesAddon(bool reload)
         if (sWorld->getBoolConfig(CONFIG_SET_ALL_CREATURES_WITH_WAYPOINT_MOVEMENT_ACTIVE))
             setActive(true);
         m_path_id = cainfo->path_id;
+
+        if (!m_path_id) {
+            auto isWTd = sObjectMgr->_worldTierCreatureInstances.find(GetCreatureTemplate()->Entry);
+            if (isWTd != sObjectMgr->_worldTierCreatureInstances.end()) {
+                for (auto spawn : isWTd->second) {
+                    if (spawn != GetEntry())
+                        sObjectMgr->GetCreatureAddon(spawn);
+                }
+            }
+        }
     }
 
     if (!cainfo->auras.empty())

@@ -1481,6 +1481,8 @@ public:
     void SetMaxHealth(uint32 val);
     uint8 GetWorldTier() {
         switch (GetPhaseMask()) {
+        case WORLD_TIER_1_PHASE:
+            return WORLD_TIER_1;
         case WORLD_TIER_2_PHASE:
             return WORLD_TIER_2;
         case WORLD_TIER_3_PHASE:
@@ -1488,7 +1490,7 @@ public:
         case WORLD_TIER_4_PHASE:
             return WORLD_TIER_4;
         default:
-            return 1;
+            return WORLD_TIER_1;
         }
     }
     inline void SetFullHealth() { SetHealth(GetMaxHealth()); }

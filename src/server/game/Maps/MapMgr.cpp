@@ -213,7 +213,7 @@ Map::EnterState MapMgr::PlayerCannotEnter(uint32 mapid, Player* player, bool log
     }
 
     // if map exists - check for being full, etc.
-    if (!loginCheck) // for login this is done by the calling function
+    if (!loginCheck && group) // for login this is done by the calling function
     {
         uint32 destInstId = sInstanceSaveMgr->PlayerGetDestinationInstanceId(player, mapid, targetDifficulty);
         if (destInstId)

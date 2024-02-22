@@ -570,36 +570,22 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     items.reserve(MAX_NR_LOOT_ITEMS);
     quest_items.reserve(MAX_NR_QUEST_ITEMS);
 
-    // Initial group is 0, top level set to True
-    tab->Process(*this, store, lootMode, lootOwner, 0, true);          // Processing is done there, callback via Loot::AddItem()
-
-    sScriptMgr->OnAfterLootTemplateProcess(this, tab, store, lootOwner, personal, noEmptyError, lootMode);
-
-    // Setting access rights for group loot case
-    Group* group = lootOwner->GetGroup();
-    if (group)
-    {
-        for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+    if (auto group = lootOwner->GetGroup()) {
+        for (Group::member_citerator mitr = group->GetMemberSlots().begin(); mitr != group->GetMemberSlots().end(); ++mitr)
         {
-            if (Player* player = itr->GetSource()) // should actually be looted object instead of lootOwner but looter has to be really close so doesnt really matter
-            {
-                if (player->IsAtLootRewardDistance(lootSource ? lootSource : lootOwner))
+            Player* member = ObjectAccessor::FindPlayer(mitr->guid);
+            if (member)
+                if (member->GetMap()->GetId() == lootOwner->GetMap()->GetId() && member->GetWorldTier() == lootOwner->GetWorldTier())
                 {
-                    FillNotNormalLootFor(player);
+                    tab->Process(*this, store, lootMode, member, 0, true);
                 }
-            }
-        }
-
-        for (uint8 i = 0; i < items.size(); ++i)
-        {
-            if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(items[i].itemid))
-                if (proto->Quality < uint32(group->GetLootThreshold()))
-                    items[i].is_underthreshold = true;
         }
     }
-    // ... for personal loot
-    else
-        FillNotNormalLootFor(lootOwner);
+    else {
+        tab->Process(*this, store, lootMode, lootOwner, 0, true);
+    }
+
+    sScriptMgr->OnAfterLootTemplateProcess(this, tab, store, lootOwner, personal, noEmptyError, lootMode);
 
     return true;
 }
@@ -1705,41 +1691,9 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, 
         {
             // Plain entries (not a reference, not grouped)
             sScriptMgr->OnBeforeDropAddItem(player, loot, rate, lootMode, item, store);
-            loot.AddItem(*item, source);                                // Chance is already checked, just add
+            Player* ply = (Player*)player;
+            ply ->AddItem(item->itemid, 1);                                // Chance is already checked, just add
         }
-    }
-
-    if (auto group = player->GetGroup()) {
-        for (Group::member_citerator mitr = group->GetMemberSlots().begin(); mitr != group->GetMemberSlots().end(); ++mitr)
-        {
-            Player* member = ObjectAccessor::FindPlayer(mitr->guid);
-            if (member)
-                if (member->GetMap()->GetId() == player->GetMap()->GetId() && member->GetWorldTier() == player->GetWorldTier())
-                {
-                    for (LootGroups::const_iterator i = Groups.begin(); i != Groups.end(); ++i)
-                        if (LootGroup* group = *i)
-                        {
-                            if (LootStoreItem const* item = group->Roll(loot, player, store, lootMode)) {
-                                // Plain entries (not a reference, not grouped)
-                                sScriptMgr->OnBeforeDropAddItem(player, loot, rate, lootMode, const_cast<LootStoreItem*>(item), store);
-                                member->AddItem(item->itemid, 1); // Chance is already checked, just add
-                                break;
-                            }
-                        }
-                }
-        }
-    } else {
-        Player* ply = (Player*) player;
-        for (LootGroups::const_iterator i = Groups.begin(); i != Groups.end(); ++i)
-            if (LootGroup* group = *i)
-            {
-                if (LootStoreItem const* item = group->Roll(loot, player, store, lootMode)) {
-                    // Plain entries (not a reference, not grouped)
-                    sScriptMgr->OnBeforeDropAddItem(player, loot, rate, lootMode, const_cast<LootStoreItem*>(item), store);
-                    ply->AddItem(item->itemid, 1); // Chance is already checked, just add
-                    break;
-                }
-            }
     }
 }
 

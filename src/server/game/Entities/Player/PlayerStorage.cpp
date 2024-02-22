@@ -2775,6 +2775,7 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
     uint8 bag = pos >> 8;
     uint8 slot = pos & 255;
 
+    sScriptMgr->BeforeEquip(this, pItem, bag, slot, update);
     Item* pItem2 = GetItemByPos(bag, slot);
 
     if (!pItem2)
@@ -4553,60 +4554,6 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                             ApplyRatingMod(CR_CRIT_MELEE, enchant_amount, apply);
                             LOG_DEBUG("entities.player.items", "+ {} MELEE_CRIT", enchant_amount);
                             break;
-                        case ITEM_MOD_CRIT_RANGED_RATING:
-                            ApplyRatingMod(CR_CRIT_RANGED, enchant_amount, apply);
-                            LOG_DEBUG("entities.player.items", "+ {} RANGED_CRIT", enchant_amount);
-                            break;
-                        case ITEM_MOD_CRIT_SPELL_RATING:
-                            ApplyRatingMod(CR_CRIT_SPELL, enchant_amount, apply);
-                            LOG_DEBUG("entities.player.items", "+ {} SPELL_CRIT", enchant_amount);
-                            break;
-                            //                        Values from ITEM_STAT_MELEE_HA_RATING to ITEM_MOD_HASTE_RANGED_RATING are never used
-                            //                        in Enchantments
-                            //                        case ITEM_MOD_HIT_TAKEN_MELEE_RATING:
-                            //                            ApplyRatingMod(CR_HIT_TAKEN_MELEE, enchant_amount, apply);
-                            //                            break;
-                            //                        case ITEM_MOD_HIT_TAKEN_RANGED_RATING:
-                            //                            ApplyRatingMod(CR_HIT_TAKEN_RANGED, enchant_amount, apply);
-                            //                            break;
-                            //                        case ITEM_MOD_HIT_TAKEN_SPELL_RATING:
-                            //                            ApplyRatingMod(CR_HIT_TAKEN_SPELL, enchant_amount, apply);
-                            //                            break;
-                            //                        case ITEM_MOD_CRIT_TAKEN_MELEE_RATING:
-                            //                            ApplyRatingMod(CR_CRIT_TAKEN_MELEE, enchant_amount, apply);
-                            //                            break;
-                            //                        case ITEM_MOD_CRIT_TAKEN_RANGED_RATING:
-                            //                            ApplyRatingMod(CR_CRIT_TAKEN_RANGED, enchant_amount, apply);
-                            //                            break;
-                            //                        case ITEM_MOD_CRIT_TAKEN_SPELL_RATING:
-                            //                            ApplyRatingMod(CR_CRIT_TAKEN_SPELL, enchant_amount, apply);
-                            //                            break;
-                            //                        case ITEM_MOD_HASTE_MELEE_RATING:
-                            //                            ApplyRatingMod(CR_HASTE_MELEE, enchant_amount, apply);
-                            //                            break;
-                        case ITEM_MOD_HASTE_RANGED_RATING:
-                            ApplyRatingMod(CR_HASTE_RANGED, enchant_amount, apply);
-                            break;
-                        case ITEM_MOD_HASTE_SPELL_RATING:
-                            ApplyRatingMod(CR_HASTE_SPELL, enchant_amount, apply);
-                            break;
-                        case ITEM_MOD_CRIT_RATING:
-                            ApplyRatingMod(CR_CRIT_MELEE, enchant_amount, apply);
-                            ApplyRatingMod(CR_CRIT_RANGED, enchant_amount, apply);
-                            ApplyRatingMod(CR_CRIT_SPELL, enchant_amount, apply);
-                            LOG_DEBUG("entities.player.items", "+ {} CRITICAL", enchant_amount);
-                            break;
-                            //                        Values ITEM_MOD_HIT_TAKEN_RATING and ITEM_MOD_CRIT_TAKEN_RATING are never used in Enchantment
-                            //                        case ITEM_MOD_HIT_TAKEN_RATING:
-                            //                            ApplyRatingMod(CR_HIT_TAKEN_MELEE, enchant_amount, apply);
-                            //                            ApplyRatingMod(CR_HIT_TAKEN_RANGED, enchant_amount, apply);
-                            //                            ApplyRatingMod(CR_HIT_TAKEN_SPELL, enchant_amount, apply);
-                            //                            break;
-                            //                        case ITEM_MOD_CRIT_TAKEN_RATING:
-                            //                            ApplyRatingMod(CR_CRIT_TAKEN_MELEE, enchant_amount, apply);
-                            //                            ApplyRatingMod(CR_CRIT_TAKEN_RANGED, enchant_amount, apply);
-                            //                            ApplyRatingMod(CR_CRIT_TAKEN_SPELL, enchant_amount, apply);
-                            //                            break;
                         case ITEM_MOD_RESILIENCE_RATING:
                             ApplyRatingMod(CR_CRIT_TAKEN_MELEE, enchant_amount, apply);
                             ApplyRatingMod(CR_CRIT_TAKEN_RANGED, enchant_amount, apply);
@@ -4684,11 +4631,11 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                         //case ITEM_MOD_HIT_MELEE_RATING:     // deprecated
                         //case ITEM_MOD_HIT_RANGED_RATING:    // deprecated
                         //case ITEM_MOD_HIT_SPELL_RATING:     // deprecated
-                        case ITEM_MOD_HIT_RATING:           // deprecated
+                        //case ITEM_MOD_HIT_RATING:           // deprecated
                         //case ITEM_MOD_EXPERTISE_RATING:     // deprecated
                         //case ITEM_MOD_SPELL_HEALING_DONE:   // deprecated
                         //case ITEM_MOD_SPELL_DAMAGE_DONE:    // deprecated
-                        //case ITEM_MOD_ARMOR_PENETRATION_RATING:
+                        //case ITEM_MOD_ARMOR_PENETRATION_RATING: // deprecated
                         default:
                             break;
                     }
@@ -5179,6 +5126,7 @@ bool Player::LoadFromDB(ObjectGuid playerGuid, CharacterDatabaseQueryHolder cons
     SetUInt16Value(PLAYER_FIELD_KILLS, 0, fields[49].Get<uint16>());
     SetUInt16Value(PLAYER_FIELD_KILLS, 1, fields[50].Get<uint16>());
 
+    _LoadBoundInstances(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_BOUND_INSTANCES));
     _LoadInstanceTimeRestrictions(holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_INSTANCE_LOCK_TIMES));
     _LoadEntryPointData(holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_ENTRY_POINT));
 
@@ -5561,6 +5509,23 @@ bool Player::LoadFromDB(ObjectGuid playerGuid, CharacterDatabaseQueryHolder cons
                 auto visual = item->GetDisplayInfoID();
                 _tmogVisualToItem[type][visual] = entry;
             }
+        } while (result->NextRow());
+    }
+
+    if (auto result = holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_WORLDTIER))
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            uint32 tier = fields[0].Get<uint8>();
+
+            if (tier < 1 || tier > 4)
+            {
+                LOG_ERROR("custom.transmog", "Character %u has out of bounds world tier %u in character_worldtier, ignoring", GetGUID().GetCounter(), tier);
+                continue;
+            }
+
+            SetWorldTier(Difficulty(tier));
         } while (result->NextRow());
     }
 
@@ -6847,20 +6812,20 @@ bool Player::Satisfy(DungeonProgressionRequirements const* ar, uint32 target_map
             return false;
         }
 
-        Player* partyLeader = this;
-        std::string leaderName = m_session->GetAcoreString(LANG_YOU);
-        {
-            ObjectGuid leaderGuid = GetGroup() ? GetGroup()->GetLeaderGUID() : GetGUID();
-            Player* tempLeader = HashMapHolder<Player>::Find(leaderGuid);
-            if (leaderGuid != GetGUID())
+            Player* partyLeader = this;
+            std::string leaderName = m_session->GetAcoreString(LANG_YOU);
             {
-                if (tempLeader != nullptr)
+                ObjectGuid leaderGuid = GetGroup() ? GetGroup()->GetLeaderGUID() : GetGUID();
+                Player* tempLeader = HashMapHolder<Player>::Find(leaderGuid);
+                if (leaderGuid != GetGUID())
                 {
-                    partyLeader = tempLeader;
+                    if (tempLeader != nullptr)
+                    {
+                        partyLeader = tempLeader;
+                    }
+                    leaderName = GetGroup()->GetLeaderName();
                 }
-                leaderName = GetGroup()->GetLeaderName();
             }
-        }
 
         //Check all items
         std::vector<const ProgressionRequirement*> missingPlayerItems;
@@ -7227,6 +7192,7 @@ void Player::SaveToDB(CharacterDatabaseTransaction trans, bool create, bool logo
     _SaveGlyphs(trans);
     _SaveInstanceTimeRestrictions(trans);
     _SavePlayerSettings(trans);
+    _SavePlayerWorldTier(trans);
 
     // check if stats should only be saved on logout
     // save stats can be out of transaction

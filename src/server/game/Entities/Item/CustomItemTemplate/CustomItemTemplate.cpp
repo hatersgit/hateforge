@@ -555,6 +555,7 @@ void CustomItemTemplate::AdjustForLevel(Player* player) {
                 case ITEM_MOD_STRENGTH:
                 case ITEM_MOD_INTELLECT:
                 case ITEM_MOD_STAMINA:
+                case ITEM_MOD_DEFENSE_SKILL_RATING:
                 case ITEM_MOD_ATTACK_POWER:
                 case ITEM_MOD_SPELL_POWER: {
                     float valPerLevel = float(max) / float(maxLvlScale);
@@ -674,8 +675,6 @@ ItemModType CustomItemTemplate::GenerateMainStatForItem()
         case ITEM_SUBCLASS_WEAPON_MISC:
         case ITEM_SUBCLASS_WEAPON_WAND:
             return ITEM_MOD_INTELLECT;
-        default:
-            return ITEM_MOD_STAMINA;
         }
     } else if (IsArmor()) {
         switch (GetSubClass())
@@ -690,10 +689,26 @@ ItemModType CustomItemTemplate::GenerateMainStatForItem()
         case ITEM_SUBCLASS_ARMOR_BUCKLER:
         case ITEM_SUBCLASS_ARMOR_SHIELD:
             return ItemModType(agistr(gen));
-        default:
-            return ITEM_MOD_STAMINA;
         }
     }
+    return ItemModType(agistrint(gen));
+}
+
+bool CustomItemTemplate::CanRollStam()
+{
+    if (IsArmor()) {
+        switch (GetSubClass()) {
+        case ITEM_SUBCLASS_ARMOR_MISC:
+        case ITEM_SUBCLASS_ARMOR_IDOL:
+        case ITEM_SUBCLASS_ARMOR_TOTEM:
+        case ITEM_SUBCLASS_ARMOR_LIBRAM:
+        case ITEM_SUBCLASS_ARMOR_SIGIL:
+            return false;
+        default:
+            return true;
+        }
+    }
+    return true;
 }
 
 bool CustomItemTemplate::CanRollTank()
@@ -746,6 +761,7 @@ bool CustomItemTemplate::CanRollTank()
             return false;
         }
     }
+    return false;
 }
 
 void CustomItemTemplate::Save()

@@ -561,6 +561,9 @@ public:
 
     bool IsHealingSpell() const;
 
+    float CalculateScaledCoefficient(Unit const* caster, float coefficient) const;
+    float GetSpellScalingMultiplier(WorldObject const* caster, bool isPowerCostRelated = false) const;
+
 private:
     std::array<SpellEffectInfo, MAX_SPELL_EFFECTS>& _GetEffects() { return Effects; }
     SpellEffectInfo& _GetEffect(SpellEffIndex index) { ASSERT(index < Effects.size()); return Effects[index]; }

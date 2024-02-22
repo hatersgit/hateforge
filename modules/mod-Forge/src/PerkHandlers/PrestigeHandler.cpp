@@ -20,23 +20,16 @@ public:
 
     void HandleMessage(ForgeAddonMessage& iam) override
     {
-        if (HasItemEquiped(iam.player))
-        {
-            iam.player->SendForgeUIMsg(ForgeTopic::PRESTIGE_ERROR, "Must remove all equiptment before prestiging");
-            return;
-        }
-
         if (iam.player->getLevel() != 80)
         {
             iam.player->SendForgeUIMsg(ForgeTopic::PRESTIGE_ERROR, "Must be max level before prestiging");
             return;
         }
 
- 
-        iam.player->SetPhaseMask(1, false);
+        iam.player->SetPhaseMask(1, true); // TODO: hater SET WORLD TIER FROM INPUT
+
         iam.player->ClearQuestStatus();
         iam.player->resetSpells();
-
 
         // add forge spells back
         ForgeCharacterSpec* spec;
@@ -109,20 +102,8 @@ public:
 
         PlayerInfo const* info = sObjectMgr->GetPlayerInfo(iam.player->getRace(), iam.player->getClass());
         iam.player->TeleportTo(info->mapId, info->positionX, info->positionY, info->positionZ, info->orientation);
-        iam.player->GetSession()->SetLogoutStartTime(20);
+        iam.player->GetSession()->SetLogoutStartTime(1000);
     }
-
-
-    bool HasItemEquiped(Player* player)
-    {
-        for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++) {
-            if (Item* pItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 
 private:
 

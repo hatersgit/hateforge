@@ -10,28 +10,37 @@
 class GetSoulShardsHandler : public ForgeTopicHandler
 {
 public:
-    GetSoulShardsHandler(ForgeCache* cache, ForgeCommonMessage* messageCommon) : ForgeTopicHandler(ForgeTopic::GET_TALENTS)
-    {
+    GetSoulShardsHandler(ForgeCache* cache, ForgeCommonMessage* messageCommon) : ForgeTopicHandler(ForgeTopic::GET_SOULSHARDS) {
         fc = cache;
         cm = messageCommon;
-
-        // Strict spec loading for DF like class specs
-        if (sConfigMgr->GetBoolDefault("Forge.StrictSpecs", false)) {
-
-        }
     }
 
-    void HandleMessage(ForgeAddonMessage& iam) override
-    {
-        if (iam.message == "-1" || iam.message == "" || !fc->isNumber(iam.message))
-        {
-            ForgeCharacterSpec* spec;
-            if (fc->TryGetCharacterActiveSpec(iam.player, spec) && iam.player->getLevel() >= 10) {
-                cm->SendTalents(iam.player);
+    void HandleMessage(ForgeAddonMessage& iam) override {
+        auto found = fc->GetPlayerSoulShards(iam.player);
+        if (!found.empty()) {
+            if (iam.message == "collection") {
+                std::string msg = "";
+                for (auto shard : found) {
+                    msg += std::to_string(shard.second->source) + "&" + sObjectMgr->GetCreatureTemplate(shard.second->source)->Name + "&" + std::to_string(shard.second->rank) + "&" + std::to_string(shard.second->count) + "&"
+                        + std::to_string(shard.second->shard->quality) + "&" + std::to_string(shard.second->shard->special) + "&";
+                    auto groupDelim = "";
+                    int i = 0;
+                    for (auto group : shard.second->shard->groups) {
+                        if (i)
+                            groupDelim = "$";
+
+                        msg += groupDelim + std::to_string(group);
+                        i++;
+                    }
+                    msg += "~";
+                }
+                iam.player->SendForgeUIMsg(ForgeTopic::GET_SOULSHARDS, msg);
+            }
+            else if (iam.message == "active") {
+                fc->SendActiveSoulShards(iam.player);
             }
         }
     }
-
 
 private:
     ForgeCache* fc;

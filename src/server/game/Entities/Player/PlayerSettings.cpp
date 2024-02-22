@@ -112,6 +112,14 @@ void Player::_SavePlayerSettings(CharacterDatabaseTransaction trans)
     }
 }
 
+void Player::_SavePlayerWorldTier(CharacterDatabaseTransaction trans)
+{
+    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_CHAR_WORLDTIER);
+    stmt->SetData(0, GetGUID().GetCounter());
+    stmt->SetData(1, GetWorldTier());
+    trans->Append(stmt);
+}
+
 void Player::UpdatePlayerSetting(std::string source, uint8 index, uint32 value)
 {
     auto itr = m_charSettingsMap.find(source);

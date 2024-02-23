@@ -16245,7 +16245,7 @@ void Player::SendItemQueryPacket(CustomItemTemplate* curItem) const
 {
     if (curItem)
     {
-        curItem->_GetInfo()->InitializeQueryData();
+        curItem->InitializeQueryData();
         WorldPacket* response = curItem->_GetInfo()->GetQueryData();
         GetSession()->SendPacket(response);
     }

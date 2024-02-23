@@ -3346,7 +3346,9 @@ ItemTemplate* ObjectMgr::GetItemTemplateMutable(uint32 entry)
 
 ItemTemplate* ObjectMgr::CreateItemTemplate(uint32 entry, uint32 copyID)
 {
-    // hater: TY Tester for giving us the MRs for all custom item stuff :)
+    if (entry > _itemTemplateStoreFast.size())
+        _itemTemplateStoreFast.resize(entry + 200000, nullptr);
+
     ItemTemplate* copy = (_itemTemplateStoreFast[entry] = _itemTemplateStoreFast[copyID]);
     copy->ItemId = entry;
     copy->m_isDirty = true;
@@ -3389,12 +3391,15 @@ void ObjectMgr::LoadCustomItemTemplates()
         //   134        135            136,      137
         "FoodType, minMoneyLoot, maxMoneyLoot, flagsCustom FROM custom_item_template");
 
+    auto max = 0;
     if (result)
         do {
             Field* fields = result->Fetch();
 
             uint32 entry = fields[0].Get<uint32>();
             auto itr = _itemTemplateStore.find(entry);
+            if (entry > max)
+                max = entry;
 
             // read existing pointer so we don't invalidate anything
             ItemTemplate* itemTemplate = itr != _itemTemplateStore.end()
@@ -3508,7 +3513,16 @@ void ObjectMgr::LoadCustomItemTemplates()
             itemTemplate->FlagsCu = fields[137].Get<uint32>();
             // Load cached data
             itemTemplate->_LoadTotalAP();
+
+            if (max > _itemTemplateStoreFast.size()) {
+                _itemTemplateStoreFast.resize(max+10000, nullptr);
+            }
+
+            _itemTemplateStore[entry] = *itemTemplate;
+            _itemTemplateStoreFast[entry] = itemTemplate;
         } while (result->NextRow());
+
+
 }
 
 

@@ -1320,13 +1320,13 @@ private:
 
             // hater: force talent resets
             LoadCharacterResetFlags();
-
             // hater: soul shards
             AddSoulShards();
             AddPlayerSoulShards();
 
             // hater: world tiers
             AddWorldTierUnlocks();
+            AddStartingZones();
         }
         catch (std::exception & ex) {
             std::string error = ex.what();
@@ -2985,7 +2985,12 @@ public:
         return _charActiveShards[player->GetGUID().GetCounter()];
     }
 
+    WorldLocation GetRaceStartingZone(uint32 race) {
+        return _startingZones[race];
+    }
+
 private:
+    std::unordered_map<uint32 /*race*/, WorldLocation> _startingZones;
     std::unordered_map<uint32 /*source*/, SoulShard*> SoulShards;
     std::unordered_map<uint32 /*account*/, std::unordered_map<uint32 /*source*/, PlayerSoulShard*>> _charSoulShards;
     std::unordered_map<uint32 /*char*/, std::unordered_map<uint8 /*slot*/, PlayerSoulShard*>> _charActiveShards;
@@ -3094,6 +3099,26 @@ private:
                 shard->count, shard->rank, accountId, shard->source);
     }
 
+    void AddStartingZones()
+    {
+        LOG_INFO("server.load", "Loading starting zones...");
+        _startingZones.clear();
+
+        QueryResult ZoneResult = WorldDatabase.Query("SELECT * FROM `forge_starting_zone`");
+        if (!ZoneResult) return;
+        do
+        {
+            Field* ZoneFields = ZoneResult->Fetch();
+            uint32 race = ZoneFields[0].Get<uint32>();
+            uint32 map = ZoneFields[1].Get<uint32>();
+            float x = ZoneFields[2].Get<float>();
+            float y = ZoneFields[3].Get<float>();
+            float z = ZoneFields[4].Get<float>();
+            float o = ZoneFields[5].Get<float>();
+
+            _startingZones[race] = WorldLocation(map, x, y, z, o);
+        } while (ZoneResult->NextRow());
+    }
 // world tiers
 public:
     uint8 GetAccountWorldTierUnlock(Player* player) {

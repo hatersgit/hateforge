@@ -56,6 +56,34 @@ struct WorldTierRangeCheck : public BasicEvent
     uint32 lastNotSavedAlert = 0;
 };
 
+struct PortalMasterRangeCheck : public BasicEvent
+{
+    PortalMasterRangeCheck(Player* player, Creature* cre) : guid(cre->GetGUID()), player(player)
+    {
+        ASSERT(player->portalMasterNpcCheck == nullptr, "Only one Portal Master check should be active at one time");
+        player->portalMasterNpcCheck = this;
+        player->m_Events.AddEvent(this, player->m_Events.CalculateTime(500));
+    }
+
+    bool Execute(uint64, uint32) override
+    {
+        Creature const* cre = ObjectAccessor::GetCreature(*player, guid);
+        if (cre && cre->IsWithinDistInMap(player, cre->GetCombatReach() + 5.0f))
+        {
+            player->m_Events.AddEvent(this, player->m_Events.CalculateTime(500));
+            return false;
+        }
+
+        player->portalMasterNpcCheck = nullptr;
+        player->SendForgeUIMsg(ForgeTopic::SHOW_PORTAL_MASTER_SELECT, "0");
+        return true;
+    }
+
+    ObjectGuid guid;
+    Player* player;
+    uint32 lastNotSavedAlert = 0;
+};
+
 class go_worldTiers: public GameObjectScript
 {
 public:
@@ -72,7 +100,24 @@ public:
     }
 };
 
+class npc_portalmaster : public CreatureScript
+{
+public:
+    npc_portalmaster() : CreatureScript("npc_portalmaster") { }
+
+    bool OnGossipHello(Player* player, Creature* cre) override
+    {
+        WorldSession* session = player->GetSession();
+        if (!player->portalMasterNpcCheck)
+            new PortalMasterRangeCheck(player, cre);
+
+        player->SendForgeUIMsg(ForgeTopic::SHOW_PORTAL_MASTER_SELECT, "1");
+        return true;
+    }
+};
+
 void AddSC_WorldTiers()
 {
     new go_worldTiers();
+    new npc_portalmaster();
 }

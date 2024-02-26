@@ -1516,7 +1516,7 @@ public:
     [[nodiscard]] bool GetQuestRewardStatus(uint32 quest_id) const;
     [[nodiscard]] QuestStatus GetQuestStatus(uint32 quest_id) const;
     void SetQuestStatus(uint32 questId, QuestStatus status, bool update = true);
-    void ClearQuestStatus();
+    void ClearQuestStatus(std::vector<uint32> quests = {});
     void RemoveActiveQuest(uint32 questId, bool update = true);
     void RemoveRewardedQuest(uint32 questId, bool update = true);
     void SendQuestUpdate(uint32 questId);
@@ -2725,11 +2725,10 @@ public:
     PresetMapType presetMap;
     std::string GetDebugInfo() const override;
 
-    // hater: m+
+    // hater: echos range checks
     BasicEvent* mythicStartCheck = nullptr;
-
-    // hater: world tiers
     BasicEvent* worldTierNpcCheck = nullptr;
+    BasicEvent* portalMasterNpcCheck = nullptr;
 
     // hater: timed events on player
     void AddTimedDelayedOperation(uint32 spellId, int32 timeout, std::function<void()>&& function)
@@ -2849,9 +2848,6 @@ public:
     void _LoadBrewOfTheMonth(PreparedQueryResult result);
     void _LoadCharacterSettings(PreparedQueryResult result);
     void _LoadPetStable(uint8 petStableSlots, PreparedQueryResult result);
-
-    // hater: retail loot
-    void _LoadBoundInstances(PreparedQueryResult result);
 
     /*********************************************************/
     /***                   SAVE SYSTEM                     ***/

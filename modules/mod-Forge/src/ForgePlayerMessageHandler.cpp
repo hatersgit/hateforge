@@ -54,6 +54,10 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 
+enum RewardItems {
+    TOKEN_OF_PRESTIGE = 49426,
+};
+
 // Add player scripts
 class ForgePlayerMessageHandler : public PlayerScript
 {
@@ -221,6 +225,7 @@ public:
                         }}
                         player->SendForgeUIMsg(ForgeTopic::SEND_MAX_WORLD_TIER, std::to_string(fc->GetCharWorldTierUnlock(player)));
                     }
+                    player->AddItem(TOKEN_OF_PRESTIGE, 1);
                 }
             }
 
@@ -292,6 +297,7 @@ public:
 
         itemProto->MakeBlankSlate();
         itemProto->SetBonding(NO_BIND);
+        itemProto->SetStackable(0);
 
         auto e = 2.7183;
         auto invType = itemProto->GetInventoryType();
@@ -301,9 +307,10 @@ public:
         auto slot = fc->_forgeItemSlotValues.find(InventoryType(invType));
         if (slot != fc->_forgeItemSlotValues.end()) {
             float slotmod = slot->second;
-            uint32 maxIlvlBase = sConfigMgr->GetIntDefault("WorldTier.base.level", 60);
+            int maxIlvlBase = sConfigMgr->GetIntDefault("WorldTier.base.level", 60);
+            int baseIlvl = itemProto->GetItemLevel() > 60 && maxIlvlBase > 60 ? maxIlvlBase : itemProto->GetItemLevel();
 
-            float ilvl = float(std::min(maxIlvlBase,itemProto->GetItemLevel())) + uint8(owner->GetWorldTier()-1)*10.f;
+            float ilvl = baseIlvl + uint8(owner->GetWorldTier()-1)*10.f;
             itemProto->SetItemLevel(ilvl);
             itemProto->SetRequiredLevel(1);
             itemProto->SetAllowableClass(CLASSMASK_ALL_PLAYABLE);

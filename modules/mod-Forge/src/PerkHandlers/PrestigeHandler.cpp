@@ -26,8 +26,6 @@ public:
             return;
         }
 
-        iam.player->SetPhaseMask(1, true); // TODO: hater SET WORLD TIER FROM INPUT
-
         iam.player->ClearQuestStatus();
         iam.player->resetSpells();
 

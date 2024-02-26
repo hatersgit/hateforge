@@ -105,23 +105,35 @@ public:
 
                     ForgeCharacterPoint* fcp = fc->GetSpecPoints(iam.player, CharacterPointType::TALENT_TREE, spec->Id);
                     ForgeCharacterPoint* baseFcp = fc->GetCommonCharacterPoint(iam.player, CharacterPointType::TALENT_TREE);
-                    ForgeCharacterPoint* rp = fc->GetSpecPoints(iam.player, RACIAL_TREE, spec->Id);
 
                     baseFcp->Sum = 0;
                     fcp->Sum = 0;
-                    rp->Sum = 17;
 
                     fc->UpdateCharPoints(iam.player, baseFcp);
                     fc->UpdateCharPoints(iam.player, fcp);
-                    fc->UpdateCharPoints(iam.player, rp);
                     fc->UpdateCharacterSpec(iam.player, spec);
                 }
 
                 iam.player->SetUInt32Value(PLAYER_XP, 0);
                 iam.player->SetLevel(1);
+                iam.player->_RemoveAllItemMods();
+                for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i) {
+                    if (Item* item = iam.player->GetItemByPos(INVENTORY_SLOT_BAG_0, i)) {
+                        if (ItemTemplate const* temp = item->GetTemplate()) {
+                            if (temp->Quality >= ITEM_QUALITY_UNCOMMON && (temp->Class == ITEM_CLASS_ARMOR || temp->Class == ITEM_CLASS_WEAPON)) {
+                                CustomItemTemplate custom = GetItemTemplate(temp->ItemId);
+                                custom->AdjustForLevel(iam.player);
+                                iam.player->_ApplyItemMods(item, i, true);
+                            }
+                        }
+                    }
+                }
+
                 iam.player->UpdateSkillsForLevel();
                 iam.player->UpdateAllStats();
                 iam.player->SetFullHealth();
+
+                iam.player->ClearQuestStatus(DO_NOT_CLEAR_THESE_QUESTS);
 
                 iam.player->SetPower(POWER_MANA, iam.player->GetMaxPower(POWER_MANA));
                 iam.player->SetPower(POWER_ENERGY, iam.player->GetMaxPower(POWER_ENERGY));
@@ -130,15 +142,17 @@ public:
                 iam.player->SetPower(POWER_FOCUS, 0);
                 iam.player->SetPower(POWER_HAPPINESS, 0);
 
-                PlayerInfo const* info = sObjectMgr->GetPlayerInfo(iam.player->getRace(), iam.player->getClass());
-                iam.player->TeleportTo(info->mapId, info->positionX, info->positionY, info->positionZ, info->orientation);
-                iam.player->GetSession()->SetLogoutStartTime(1500);
+                iam.player->TeleportTo(fc->GetRaceStartingZone(iam.player->getRace()));
+                iam.player->GetSession()->SetLogoutStartTime(5000);
             }
-            
         }
     }
 
 private:
     ForgeCache* fc;
     ForgeCommonMessage* cm;
+
+    std::vector<uint32> DO_NOT_CLEAR_THESE_QUESTS = {90000};
+    std::vector<uint32> QUEST_TO_FLAG_AS_COMPLETE = {};
+    std::vector<uint32> QUEST_TO_FLAG_AS_ACTIVE = {};
 };

@@ -2829,7 +2829,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(Unit const* victim, WeaponAttackTy
 
     // Miss chance based on melee
     //float miss_chance = MeleeMissChanceCalc(victim, attType);
-    float miss_chance = MeleeSpellMissChance(victim, attType, int32(GetWeaponSkillValue(attType, victim)) - int32(victim->GetMaxSkillValueForLevel(this)), 0);
+    float miss_chance = 0;
 
     // Critical hit chance
     float crit_chance = GetUnitCriticalChance(attType, victim);
@@ -3236,7 +3236,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spellInfo
 
     uint32 roll = urand (0, 10000);
 
-    uint32 missChance = uint32(MeleeSpellMissChance(victim, attType, skillDiff, spellInfo->Id) * 100.0f);
+    uint32 missChance = 0;
     // Roll miss
     uint32 tmp = missChance;
     if (roll < tmp)
@@ -8703,6 +8703,9 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
 
     // Done fixed damage bonus auras
     DoneAdvertisedBenefit += SpellBaseDamageBonusDone(spellProto->GetSchoolMask());
+
+    // modify spell power by victim's SPELL_AURA_MOD_DAMAGE_TAKEN auras (eg Amplify/Dampen Magic)
+    DoneAdvertisedBenefit += victim->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_DAMAGE_TAKEN, spellProto->GetSchoolMask());
 
     // Check for table values
     float spCoeff = spellProto->Effects[effIndex].BonusMultiplier;
@@ -15657,301 +15660,114 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
     // Hardcoded cases
     switch (spellId)
     {
-        case 7090: // Bear form
-            return 29414;
-        case 35200: // Roc form
-            return 4877;
-        default:
-            break;
+    case 7090: // Bear form
+        return 29414;
+    case 35200: // Roc form
+        return 4877;
+    default:
+        break;
     }
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        /*if (getClass() == CLASS_DRUID) {
-            QueryResult resultCat = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'cat'");
-            QueryResult resultBear = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'bear'");
-            QueryResult resultFly = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'fly'");
-            QueryResult resultBuho = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'buho'");
-            QueryResult resultSea = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'sea'");
-            QueryResult resultTree = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'tree'");
-            QueryResult resultTravel = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'travel'");
-        }*/
 
-		uint32 CatnDisplay = 0;
-		uint32 CatnSpellID = 0;
-		uint32 CatnReqSpellID = 0;
+        uint32 CatnDisplay = 0;
+        uint32 CatnSpellID = 0;
+        uint32 CatnReqSpellID = 0;
 
-		uint32 BearnDisplay = 0;
-		uint32 BearnSpellID = 0;
-		uint32 BearnReqSpellID = 0;
+        uint32 BearnDisplay = 0;
+        uint32 BearnSpellID = 0;
+        uint32 BearnReqSpellID = 0;
 
-		uint32 FlynDisplay = 0;
-		uint32 FlynSpellID = 0;
-		uint32 FlynReqSpellID = 0;
+        uint32 FlynDisplay = 0;
+        uint32 FlynSpellID = 0;
+        uint32 FlynReqSpellID = 0;
 
-		uint32 BuhonDisplay = 0;
-		uint32 BuhonSpellID = 0;
-		uint32 BuhonReqSpellID = 0;
+        uint32 BuhonDisplay = 0;
+        uint32 BuhonSpellID = 0;
+        uint32 BuhonReqSpellID = 0;
 
-		uint32 SeanDisplay = 0;
-		uint32 SeanSpellID = 0;
-		uint32 SeanReqSpellID = 0;
+        uint32 SeanDisplay = 0;
+        uint32 SeanSpellID = 0;
+        uint32 SeanReqSpellID = 0;
 
-		uint32 TreenDisplay = 0;
-		uint32 TreenSpellID = 0;
-		uint32 TreenReqSpellID = 0;
+        uint32 TreenDisplay = 0;
+        uint32 TreenSpellID = 0;
+        uint32 TreenReqSpellID = 0;
 
-		uint32 TravelnDisplay = 0;
-		uint32 TravelnSpellID = 0;
-		uint32 TravelnReqSpellID = 0;
+        uint32 TravelnDisplay = 0;
+        uint32 TravelnSpellID = 0;
+        uint32 TravelnReqSpellID = 0;
 
-		QueryResult resultCat = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'cat'");
-		QueryResult resultBear = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'bear'");
-		QueryResult resultFly = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'fly'");
-		QueryResult resultBuho = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'buho'");
-		QueryResult resultSea = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'sea'");
-		QueryResult resultTree = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'tree'");
-		QueryResult resultTravel = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'travel'");
+        QueryResult resultCat = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'cat'");
+        QueryResult resultBear = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'bear'");
+        QueryResult resultFly = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'fly'");
+        QueryResult resultBuho = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'buho'");
+        QueryResult resultSea = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'sea'");
+        QueryResult resultTree = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'tree'");
+        QueryResult resultTravel = WorldDatabase.Query("SELECT type,name,display,npc,racemask,SpellId,ReqSpellID FROM custom_druid_barbershop WHERE type = 'travel'");
 
 
-         switch (form)
+        switch (form)
         {
-            case FORM_CAT:
-			if (resultCat)
-			{
-				do
-				{
-					Field *fields = resultCat->Fetch();
-					CatnSpellID = fields[5].Get<uint32>();
-					CatnReqSpellID = fields[6].Get<uint32>();
-
-<<<<<<< HEAD
-                /*if (resultCat)
-=======
-					if (HasSpell(CatnSpellID))
-					{
-
-						if (CatnReqSpellID == 0)
-						{
-							CatnDisplay = fields[2].Get<uint32>();
-						}
-						else
-						{
-							if (HasSpell(CatnReqSpellID))
-							{
-								CatnDisplay = fields[2].Get<uint32>();
-							}
-							else
-							{
-								CatnDisplay = 0;
-							}
-						}
-					}
-
-				} while (resultCat->NextRow());
-			}
-
-			if (CatnDisplay != 0) // Violet
-			{
-				return CatnDisplay;
-			}
-			
-			else
-			{
-                // Based on Hair color
-                if (getRace() == RACE_NIGHTELF)
->>>>>>> master
+        case FORM_CAT:
+            if (resultCat)
+            {
+                do
                 {
-                    uint8 hairColor = GetByteValue(PLAYER_BYTES, 3);
-                    switch (hairColor)
+                    Field* fields = resultCat->Fetch();
+                    CatnSpellID = fields[5].Get<uint32>();
+                    CatnReqSpellID = fields[6].Get<uint32>();
+
+                    if (HasSpell(CatnSpellID))
                     {
-<<<<<<< HEAD
-                        Field* fields = resultCat->Fetch();
-                        CatnSpellID = fields[5].Get<uint32>();
-                        CatnReqSpellID = fields[6].Get<uint32>();
 
-                        if (HasSpell(CatnSpellID))
+                        if (CatnReqSpellID == 0)
                         {
-
-                            if (CatnReqSpellID == 0)
+                            CatnDisplay = fields[2].Get<uint32>();
+                        }
+                        else
+                        {
+                            if (HasSpell(CatnReqSpellID))
                             {
                                 CatnDisplay = fields[2].Get<uint32>();
                             }
                             else
                             {
-                                if (HasSpell(CatnReqSpellID))
-                                {
-                                    CatnDisplay = fields[2].Get<uint32>();
-                                }
-                                else
-                                {
-                                    CatnDisplay = 0;
-                                }
+                                CatnDisplay = 0;
                             }
                         }
-
-                    } while (resultCat->NextRow());
-                }*/
-
-                if (CatnDisplay != 0) // Violet
-                {
-                    return CatnDisplay;
-                }
-
-                else
-                {
-                    // Based on Hair color
-                    if (getRace() == RACE_NIGHTELF)
-                    {
-                        uint8 hairColor = GetByteValue(PLAYER_BYTES, 3);
-                        switch (hairColor)
-                        {
-                            case 7: // Violet
-                            case 8:
-                                return 29405;
-                            case 3: // Light Blue
-                                return 29406;
-                            case 0: // Green
-                            case 1: // Light Green
-                            case 2: // Dark Green
-                                return 29407;
-                            case 4: // White
-                                return 29408;
-                            default: // original - Dark Blue
-                                return 892;
-                        }
-=======
-                        case 7: // Violet
-                        case 8:
-                            return 29405;
-                        case 3: // Light Blue
-                            return 29406;
-                        case 0: // Green
-                        case 1: // Light Green
-                        case 2: // Dark Green
-                            return 29407;
-                        case 4: // White
-                            return 29408;
-                        default: // original - Dark Blue
-                            return 892;
->>>>>>> master
                     }
-                }
-                // Based on Skin color
-                else if (getRace() == RACE_TAUREN)
-                {
-                    uint8 skinColor = GetByteValue(PLAYER_BYTES, 0);
-                    // Male
-                    if (getGender() == GENDER_MALE)
-                    {
-                        switch (skinColor)
-                        {
-                            case 12: // White
-                            case 13:
-                            case 14:
-                            case 18: // Completly White
-                                return 29409;
-                            case 9: // Light Brown
-                            case 10:
-                            case 11:
-                                return 29410;
-                            case 6: // Brown
-                            case 7:
-                            case 8:
-                                return 29411;
-                            case 0: // Dark
-                            case 1:
-                            case 2:
-                            case 3: // Dark Grey
-                            case 4:
-                            case 5:
-                                return 29412;
-                            default: // original - Grey
-                                return 8571;
-                        }
-                    }
-                    // Female
-                    else switch (skinColor)
-                        {
-                            case 10: // White
-                                return 29409;
-                            case 6: // Light Brown
-                            case 7:
-                                return 29410;
-                            case 4: // Brown
-                            case 5:
-                                return 29411;
-                            case 0: // Dark
-                            case 1:
-                            case 2:
-                            case 3:
-                                return 29412;
-                            default: // original - Grey
-                                return 8571;
-                        }
-                }
-                else if (Player::TeamIdForRace(getRace()) == TEAM_ALLIANCE)
-                    return 892;
-                else
-                    return 8571;
-			}	
-            case FORM_DIREBEAR:
-            case FORM_BEAR:
-			
-			if (resultBear)
-			{
-				do
-				{
-					Field *fields = resultBear->Fetch();
-					BearnSpellID = fields[5].Get<uint32>();
-					BearnReqSpellID = fields[6].Get<uint32>();
 
-					if (HasSpell(BearnSpellID))
-					{
+                } while (resultCat->NextRow());
+            }
 
-						if (BearnReqSpellID == 0)
-						{
-							BearnDisplay = fields[2].Get<uint32>();
-						}
-						else
-						{
-							if (HasSpell(BearnReqSpellID))
-							{
-								BearnDisplay = fields[2].Get<uint32>();
-							}
-							else
-							{
-								BearnDisplay = 0;
-							}
-						}
-					}
+            if (CatnDisplay != 0) // Violet
+            {
+                return CatnDisplay;
+            }
 
-				} while (resultBear->NextRow());
-			}
-			if (BearnDisplay != 0) // Violet
-			{
-				return BearnDisplay;
-			}
-			else
-			{
+            else
+            {
                 // Based on Hair color
                 if (getRace() == RACE_NIGHTELF)
                 {
                     uint8 hairColor = GetByteValue(PLAYER_BYTES, 3);
                     switch (hairColor)
                     {
-                        case 0: // Green
-                        case 1: // Light Green
-                        case 2: // Dark Green
-                            return 29413; // 29415?
-                        case 6: // Dark Blue
-                            return 29414;
-                        case 4: // White
-                            return 29416;
-                        case 3: // Light Blue
-                            return 29417;
-                        default: // original - Violet
-                            return 2281;
+                    case 7: // Violet
+                    case 8:
+                        return 29405;
+                    case 3: // Light Blue
+                        return 29406;
+                    case 0: // Green
+                    case 1: // Light Green
+                    case 2: // Dark Green
+                        return 29407;
+                    case 4: // White
+                        return 29408;
+                    default: // original - Dark Blue
+                        return 892;
                     }
                 }
                 // Based on Skin color
@@ -15963,337 +15779,454 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
                     {
                         switch (skinColor)
                         {
-                            case 0: // Dark (Black)
-                            case 1:
-                            case 2:
-                                return 29418;
-                            case 3: // White
-                            case 4:
-                            case 5:
-                            case 12:
-                            case 13:
-                            case 14:
-                                return 29419;
-                            case 9: // Light Brown/Grey
-                            case 10:
-                            case 11:
-                            case 15:
-                            case 16:
-                            case 17:
-                                return 29420;
-                            case 18: // Completly White
-                                return 29421;
-                            default: // original - Brown
-                                return 2289;
+                        case 12: // White
+                        case 13:
+                        case 14:
+                        case 18: // Completly White
+                            return 29409;
+                        case 9: // Light Brown
+                        case 10:
+                        case 11:
+                            return 29410;
+                        case 6: // Brown
+                        case 7:
+                        case 8:
+                            return 29411;
+                        case 0: // Dark
+                        case 1:
+                        case 2:
+                        case 3: // Dark Grey
+                        case 4:
+                        case 5:
+                            return 29412;
+                        default: // original - Grey
+                            return 8571;
                         }
                     }
                     // Female
                     else switch (skinColor)
+                    {
+                    case 10: // White
+                        return 29409;
+                    case 6: // Light Brown
+                    case 7:
+                        return 29410;
+                    case 4: // Brown
+                    case 5:
+                        return 29411;
+                    case 0: // Dark
+                    case 1:
+                    case 2:
+                    case 3:
+                        return 29412;
+                    default: // original - Grey
+                        return 8571;
+                    }
+                }
+                else if (Player::TeamIdForRace(getRace()) == TEAM_ALLIANCE)
+                    return 892;
+                else
+                    return 8571;
+            }
+        case FORM_DIREBEAR:
+        case FORM_BEAR:
+
+            if (resultBear)
+            {
+                do
+                {
+                    Field* fields = resultBear->Fetch();
+                    BearnSpellID = fields[5].Get<uint32>();
+                    BearnReqSpellID = fields[6].Get<uint32>();
+
+                    if (HasSpell(BearnSpellID))
+                    {
+
+                        if (BearnReqSpellID == 0)
                         {
-                            case 0: // Dark (Black)
-                            case 1:
-                                return 29418;
-                            case 2: // White
-                            case 3:
-                                return 29419;
-                            case 6: // Light Brown/Grey
-                            case 7:
-                            case 8:
-                            case 9:
-                                return 29420;
-                            case 10: // Completly White
-                                return 29421;
-                            default: // original - Brown
-                                return 2289;
+                            BearnDisplay = fields[2].Get<uint32>();
                         }
+                        else
+                        {
+                            if (HasSpell(BearnReqSpellID))
+                            {
+                                BearnDisplay = fields[2].Get<uint32>();
+                            }
+                            else
+                            {
+                                BearnDisplay = 0;
+                            }
+                        }
+                    }
+
+                } while (resultBear->NextRow());
+            }
+            if (BearnDisplay != 0) // Violet
+            {
+                return BearnDisplay;
+            }
+            else
+            {
+                // Based on Hair color
+                if (getRace() == RACE_NIGHTELF)
+                {
+                    uint8 hairColor = GetByteValue(PLAYER_BYTES, 3);
+                    switch (hairColor)
+                    {
+                    case 0: // Green
+                    case 1: // Light Green
+                    case 2: // Dark Green
+                        return 29413; // 29415?
+                    case 6: // Dark Blue
+                        return 29414;
+                    case 4: // White
+                        return 29416;
+                    case 3: // Light Blue
+                        return 29417;
+                    default: // original - Violet
+                        return 2281;
+                    }
+                }
+                // Based on Skin color
+                else if (getRace() == RACE_TAUREN)
+                {
+                    uint8 skinColor = GetByteValue(PLAYER_BYTES, 0);
+                    // Male
+                    if (getGender() == GENDER_MALE)
+                    {
+                        switch (skinColor)
+                        {
+                        case 0: // Dark (Black)
+                        case 1:
+                        case 2:
+                            return 29418;
+                        case 3: // White
+                        case 4:
+                        case 5:
+                        case 12:
+                        case 13:
+                        case 14:
+                            return 29419;
+                        case 9: // Light Brown/Grey
+                        case 10:
+                        case 11:
+                        case 15:
+                        case 16:
+                        case 17:
+                            return 29420;
+                        case 18: // Completly White
+                            return 29421;
+                        default: // original - Brown
+                            return 2289;
+                        }
+                    }
+                    // Female
+                    else switch (skinColor)
+                    {
+                    case 0: // Dark (Black)
+                    case 1:
+                        return 29418;
+                    case 2: // White
+                    case 3:
+                        return 29419;
+                    case 6: // Light Brown/Grey
+                    case 7:
+                    case 8:
+                    case 9:
+                        return 29420;
+                    case 10: // Completly White
+                        return 29421;
+                    default: // original - Brown
+                        return 2289;
+                    }
                 }
                 else if (Player::TeamIdForRace(getRace()) == TEAM_ALLIANCE)
                     return 2281;
                 else
                     return 2289;
-			}
-            case FORM_FLIGHT:
-			
-			if (resultFly)
-			{
-				do
-				{
-					Field *fields = resultFly->Fetch();
-					FlynSpellID = fields[5].Get<uint32>();
-					FlynReqSpellID = fields[6].Get<uint32>();
+            }
+        case FORM_FLIGHT:
 
-					if (HasSpell(FlynSpellID))
-					{
+            if (resultFly)
+            {
+                do
+                {
+                    Field* fields = resultFly->Fetch();
+                    FlynSpellID = fields[5].Get<uint32>();
+                    FlynReqSpellID = fields[6].Get<uint32>();
 
-						if (FlynReqSpellID == 0)
-						{
-							FlynDisplay = fields[2].Get<uint32>();
-						}
-						else
-						{
-							if (HasSpell(FlynReqSpellID))
-							{
-								FlynDisplay = fields[2].Get<uint32>();
-							}
-							else
-							{
-								FlynDisplay = 0;
-							}
-						}
-					}
+                    if (HasSpell(FlynSpellID))
+                    {
 
-				} while (resultFly->NextRow());
-			}
-			if (FlynDisplay != 0) // Violet
-			{
-				return FlynDisplay;
-			}
-			else
-			{
+                        if (FlynReqSpellID == 0)
+                        {
+                            FlynDisplay = fields[2].Get<uint32>();
+                        }
+                        else
+                        {
+                            if (HasSpell(FlynReqSpellID))
+                            {
+                                FlynDisplay = fields[2].Get<uint32>();
+                            }
+                            else
+                            {
+                                FlynDisplay = 0;
+                            }
+                        }
+                    }
+
+                } while (resultFly->NextRow());
+            }
+            if (FlynDisplay != 0) // Violet
+            {
+                return FlynDisplay;
+            }
+            else
+            {
                 if (Player::TeamIdForRace(getRace()) == TEAM_ALLIANCE)
-				{
+                {
                     return 20857;
-				}
-				else
-				{
-					return 20872;
-				}
-			}
-            case FORM_FLIGHT_EPIC:
-			
-			if (resultFly)
-			{
-				do
-				{
-					Field *fields = resultFly->Fetch();
-					FlynSpellID = fields[5].Get<uint32>();
-					FlynReqSpellID = fields[6].Get<uint32>();
+                }
+                else
+                {
+                    return 20872;
+                }
+            }
+        case FORM_FLIGHT_EPIC:
 
-					if (HasSpell(FlynSpellID))
-					{
+            if (resultFly)
+            {
+                do
+                {
+                    Field* fields = resultFly->Fetch();
+                    FlynSpellID = fields[5].Get<uint32>();
+                    FlynReqSpellID = fields[6].Get<uint32>();
 
-						if (FlynReqSpellID == 0)
-						{
-							FlynDisplay = fields[2].Get<uint32>();
-						}
-						else
-						{
-							if (HasSpell(FlynReqSpellID))
-							{
-								FlynDisplay = fields[2].Get<uint32>();
-							}
-							else
-							{
-								FlynDisplay = 0;
-							}
-						}
-					}
+                    if (HasSpell(FlynSpellID))
+                    {
 
-				} while (resultFly->NextRow());
-			}
+                        if (FlynReqSpellID == 0)
+                        {
+                            FlynDisplay = fields[2].Get<uint32>();
+                        }
+                        else
+                        {
+                            if (HasSpell(FlynReqSpellID))
+                            {
+                                FlynDisplay = fields[2].Get<uint32>();
+                            }
+                            else
+                            {
+                                FlynDisplay = 0;
+                            }
+                        }
+                    }
 
-			if (FlynDisplay != 0) // Violet
-			{
-				return FlynDisplay;
-			}
-			else
-			{
+                } while (resultFly->NextRow());
+            }
+
+            if (FlynDisplay != 0) // Violet
+            {
+                return FlynDisplay;
+            }
+            else
+            {
                 if (Player::TeamIdForRace(getRace()) == TEAM_ALLIANCE)
-				{
+                {
                     return 21243;
-				}
-				else
-				{
-					return 21244;
-				}
-			}
-case FORM_MOONKIN:
+                }
+                else
+                {
+                    return 21244;
+                }
+            }
+        case FORM_MOONKIN:
 
-				if (resultBuho)
-				{
-					do
-					{
-						Field *fields = resultBuho->Fetch();
-						BuhonSpellID = fields[5].Get<uint32>();
-						BuhonReqSpellID = fields[6].Get<uint32>();
+            if (resultBuho)
+            {
+                do
+                {
+                    Field* fields = resultBuho->Fetch();
+                    BuhonSpellID = fields[5].Get<uint32>();
+                    BuhonReqSpellID = fields[6].Get<uint32>();
 
-						if (HasSpell(BuhonSpellID))
-						{
+                    if (HasSpell(BuhonSpellID))
+                    {
 
-							if (BuhonReqSpellID == 0)
-							{
-								BuhonDisplay = fields[2].Get<uint32>();
-							}
-							else
-							{
-								if (HasSpell(BuhonReqSpellID))
-								{
-									BuhonDisplay = fields[2].Get<uint32>();
-								}
-								else
-								{
-									BuhonDisplay = 0;
-								}
-							}
-						}
+                        if (BuhonReqSpellID == 0)
+                        {
+                            BuhonDisplay = fields[2].Get<uint32>();
+                        }
+                        else
+                        {
+                            if (HasSpell(BuhonReqSpellID))
+                            {
+                                BuhonDisplay = fields[2].Get<uint32>();
+                            }
+                            else
+                            {
+                                BuhonDisplay = 0;
+                            }
+                        }
+                    }
 
-					} while (resultBuho->NextRow());
-				}
+                } while (resultBuho->NextRow());
+            }
 
-				if (BuhonDisplay != 0) // Violet
-				{
-					return BuhonDisplay;
-				}
-				else
-				{
-					if (Player::TeamIdForRace(getRace()) == TEAM_ALLIANCE)
-					{
-						return 15374;
-					}
-					else
-					{
-						return 15375;
-					}
-				}
-			
-			case FORM_AQUA:
+            if (BuhonDisplay != 0) // Violet
+            {
+                return BuhonDisplay;
+            }
+            else
+            {
+                if (Player::TeamIdForRace(getRace()) == TEAM_ALLIANCE)
+                {
+                    return 15374;
+                }
+                else
+                {
+                    return 15375;
+                }
+            }
 
-				if (resultSea)
-				{
-					do
-					{
-					Field *fields = resultSea->Fetch();
-						SeanSpellID = fields[5].Get<uint32>();
-						SeanReqSpellID = fields[6].Get<uint32>();
+        case FORM_AQUA:
 
-						if (HasSpell(SeanSpellID))
-						{
-							if (SeanReqSpellID == 0)
-							{
-								SeanDisplay = fields[2].Get<uint32>();
-							}
-							else
-							{
-								if (HasSpell(SeanReqSpellID))
-								{
-									SeanDisplay = fields[2].Get<uint32>();
-								}
-								else
-								{
-									SeanDisplay = 0;
-								}
-							}
-						}
-						
-					} while (resultSea->NextRow());
-				}
+            if (resultSea)
+            {
+                do
+                {
+                    Field* fields = resultSea->Fetch();
+                    SeanSpellID = fields[5].Get<uint32>();
+                    SeanReqSpellID = fields[6].Get<uint32>();
 
-				if (SeanDisplay != 0)
-				{
-					return SeanDisplay;
-				}
-				else
-				{
-					return 2428;
-				}
-			case FORM_TREE:
-		
-				if (resultTree)
-				{
-					do
-					{
-						Field *fields = resultTree->Fetch();
-						TreenSpellID = fields[5].Get<uint32>();
-						TreenReqSpellID = fields[6].Get<uint32>();
+                    if (HasSpell(SeanSpellID))
+                    {
+                        if (SeanReqSpellID == 0)
+                        {
+                            SeanDisplay = fields[2].Get<uint32>();
+                        }
+                        else
+                        {
+                            if (HasSpell(SeanReqSpellID))
+                            {
+                                SeanDisplay = fields[2].Get<uint32>();
+                            }
+                            else
+                            {
+                                SeanDisplay = 0;
+                            }
+                        }
+                    }
 
-						if (HasSpell(TreenSpellID))
-						{
+                } while (resultSea->NextRow());
+            }
 
-							if (TreenReqSpellID == 0)
-							{
-								TreenDisplay = fields[2].Get<uint32>();
-							}
-							else
-							{
-								if (HasSpell(TreenReqSpellID))
-								{
-									TreenDisplay = fields[2].Get<uint32>();
-								}
-								else
-								{
-									TreenDisplay = 0;
-								}
-							}
-						}
+            if (SeanDisplay != 0)
+            {
+                return SeanDisplay;
+            }
+            else
+            {
+                return 2428;
+            }
+        case FORM_TREE:
 
-					} while (resultTree->NextRow());
-				}
+            if (resultTree)
+            {
+                do
+                {
+                    Field* fields = resultTree->Fetch();
+                    TreenSpellID = fields[5].Get<uint32>();
+                    TreenReqSpellID = fields[6].Get<uint32>();
 
-				if (TreenDisplay != 0) // Violet
-				{
-					return TreenDisplay;
-				}
-				else
-				{
-					if (Player::TeamIdForRace(getRace()) == TEAM_ALLIANCE)
-					{
-						return 2451;
-					}
-					else
-					{
-						return 864;
-					}
-				}
-		case FORM_TRAVEL:
-			if (resultTravel)
-			{
-				do
-				{
-					Field *fields = resultTravel->Fetch();
-					TravelnSpellID = fields[5].Get<uint32>();
-					TravelnReqSpellID = fields[6].Get<uint32>();
+                    if (HasSpell(TreenSpellID))
+                    {
 
-					if (HasSpell(TravelnSpellID))
-					{
+                        if (TreenReqSpellID == 0)
+                        {
+                            TreenDisplay = fields[2].Get<uint32>();
+                        }
+                        else
+                        {
+                            if (HasSpell(TreenReqSpellID))
+                            {
+                                TreenDisplay = fields[2].Get<uint32>();
+                            }
+                            else
+                            {
+                                TreenDisplay = 0;
+                            }
+                        }
+                    }
 
-						if (TravelnReqSpellID == 0)
-						{
-							TravelnDisplay = fields[2].Get<uint32>();
-						}
-						else
-						{
-							if (HasSpell(TravelnReqSpellID))
-							{
-							TravelnDisplay = fields[2].Get<uint32>();
-							}
-							else
-							{
-								TravelnDisplay = 0;
-							}
-						}
-					}
+                } while (resultTree->NextRow());
+            }
 
-				} while (resultTravel->NextRow());
-			}
+            if (TreenDisplay != 0) // Violet
+            {
+                return TreenDisplay;
+            }
+            else
+            {
+                if (Player::TeamIdForRace(getRace()) == TEAM_ALLIANCE)
+                {
+                    return 2451;
+                }
+                else
+                {
+                    return 864;
+                }
+            }
+        case FORM_TRAVEL:
+            if (resultTravel)
+            {
+                do
+                {
+                    Field* fields = resultTravel->Fetch();
+                    TravelnSpellID = fields[5].Get<uint32>();
+                    TravelnReqSpellID = fields[6].Get<uint32>();
 
-			if (TravelnDisplay != 0) // Violet
-			{
-				return TravelnDisplay;
-			}
-			else
-			{
-				if (Player::TeamIdForRace(getRace()) == TEAM_ALLIANCE)
-				{
-					return 918;
-				}
-				else
-				{
-					return 15593;
-				}
-			}
+                    if (HasSpell(TravelnSpellID))
+                    {
 
-            default:
-                break;
+                        if (TravelnReqSpellID == 0)
+                        {
+                            TravelnDisplay = fields[2].Get<uint32>();
+                        }
+                        else
+                        {
+                            if (HasSpell(TravelnReqSpellID))
+                            {
+                                TravelnDisplay = fields[2].Get<uint32>();
+                            }
+                            else
+                            {
+                                TravelnDisplay = 0;
+                            }
+                        }
+                    }
+
+                } while (resultTravel->NextRow());
+            }
+
+            if (TravelnDisplay != 0) // Violet
+            {
+                return TravelnDisplay;
+            }
+            else
+            {
+                if (Player::TeamIdForRace(getRace()) == TEAM_ALLIANCE)
+                {
+                    return 918;
+                }
+                else
+                {
+                    return 15593;
+                }
+            }
+
+        default:
+            break;
         }
     }
 

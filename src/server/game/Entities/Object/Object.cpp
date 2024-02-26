@@ -69,6 +69,10 @@ constexpr float VisibilityDistances[AsUnderlyingType(VisibilityDistanceType::Max
     VISIBILITY_DISTANCE_INFINITE
 };
 
+enum EchosHubNpcs : uint32 {
+    PILE_OF_SKULLS = 1179915
+};
+
 Object::Object() : m_PackGUID(sizeof(uint64) + 1)
 {
     m_objectTypeId      = TYPEID_OBJECT;
@@ -1831,6 +1835,13 @@ bool WorldObject::CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth, boo
             if (thisPlayer->GetFarSightDistance() && !thisPlayer->isInFront(obj))
             {
                 return false;
+            }
+
+            if (GameObject const* object = obj->ToGameObject()) {
+                switch (object->GetGOInfo()->entry) {
+                default:
+                    break;
+                }
             }
         }
 

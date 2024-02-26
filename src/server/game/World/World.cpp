@@ -765,18 +765,18 @@ void World::LoadConfigSettings(bool reload)
     _int_configs[CONFIG_STRICT_PET_NAMES]                     = sConfigMgr->GetOption<int32> ("StrictPetNames",     0);
 
     _bool_configs[CONFIG_ALLOW_TWO_SIDE_ACCOUNTS]             = sConfigMgr->GetOption<bool>("AllowTwoSide.Accounts", true);
-    _bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_CALENDAR] = sConfigMgr->GetOption<bool>("AllowTwoSide.Interaction.Calendar", false);
-    _bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT]     = sConfigMgr->GetOption<bool>("AllowTwoSide.Interaction.Chat", false);
-    _bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL]  = sConfigMgr->GetOption<bool>("AllowTwoSide.Interaction.Channel", false);
-    _bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP]    = sConfigMgr->GetOption<bool>("AllowTwoSide.Interaction.Group", false);
-    _bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD]    = sConfigMgr->GetOption<bool>("AllowTwoSide.Interaction.Guild", false);
-    _bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_ARENA]    = sConfigMgr->GetOption<bool>("AllowTwoSide.Interaction.Arena", false);
-    _bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION]  = sConfigMgr->GetOption<bool>("AllowTwoSide.Interaction.Auction", false);
-    _bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_MAIL]     = sConfigMgr->GetOption<bool>("AllowTwoSide.Interaction.Mail", false);
-    _bool_configs[CONFIG_ALLOW_TWO_SIDE_WHO_LIST]             = sConfigMgr->GetOption<bool>("AllowTwoSide.WhoList", false);
-    _bool_configs[CONFIG_ALLOW_TWO_SIDE_ADD_FRIEND]           = sConfigMgr->GetOption<bool>("AllowTwoSide.AddFriend", false);
-    _bool_configs[CONFIG_ALLOW_TWO_SIDE_TRADE]                = sConfigMgr->GetOption<bool>("AllowTwoSide.Trade", false);
-    _bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_EMOTE]    = sConfigMgr->GetOption<bool>("AllowTwoSide.Interaction.Emote", false);
+    _bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_CALENDAR] = sConfigMgr->GetOption<bool>("AllowTwoSide.Interaction.Calendar", true);
+    _bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT]     = sConfigMgr->GetOption<bool>("AllowTwoSide.Interaction.Chat", true);
+    _bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL]  = sConfigMgr->GetOption<bool>("AllowTwoSide.Interaction.Channel", true);
+    _bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP]    = sConfigMgr->GetOption<bool>("AllowTwoSide.Interaction.Group", true);
+    _bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD]    = sConfigMgr->GetOption<bool>("AllowTwoSide.Interaction.Guild", true);
+    _bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_ARENA]    = sConfigMgr->GetOption<bool>("AllowTwoSide.Interaction.Arena", true);
+    _bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION]  = sConfigMgr->GetOption<bool>("AllowTwoSide.Interaction.Auction", true);
+    _bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_MAIL]     = sConfigMgr->GetOption<bool>("AllowTwoSide.Interaction.Mail", true);
+    _bool_configs[CONFIG_ALLOW_TWO_SIDE_WHO_LIST]             = sConfigMgr->GetOption<bool>("AllowTwoSide.WhoList", true);
+    _bool_configs[CONFIG_ALLOW_TWO_SIDE_ADD_FRIEND]           = sConfigMgr->GetOption<bool>("AllowTwoSide.AddFriend", true);
+    _bool_configs[CONFIG_ALLOW_TWO_SIDE_TRADE]                = sConfigMgr->GetOption<bool>("AllowTwoSide.Trade", true);
+    _bool_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_EMOTE]    = sConfigMgr->GetOption<bool>("AllowTwoSide.Interaction.Emote", true);
 
     _int_configs[CONFIG_MIN_PLAYER_NAME] = sConfigMgr->GetOption<int32> ("MinPlayerName",  2);
     if (_int_configs[CONFIG_MIN_PLAYER_NAME] < 1 || _int_configs[CONFIG_MIN_PLAYER_NAME] > MAX_PLAYER_NAME)

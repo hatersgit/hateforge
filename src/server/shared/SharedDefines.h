@@ -126,6 +126,8 @@ enum class ForgeTopic
     SEND_MAX_WORLD_TIER             = 140,
     SHOW_WORLD_TIER_SELECT          = 141,
     SET_WORLD_TIER                  = 142,
+    SHOW_PORTAL_MASTER_SELECT       = 143,
+    TAKE_PORTAL_TO                  = 144,
 };
 
 enum class ForgeError

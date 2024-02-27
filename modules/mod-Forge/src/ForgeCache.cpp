@@ -478,7 +478,7 @@ public:
         spec->Description = "Skill Specilization";
         spec->Visability = SpecVisibility::PRIVATE;
         spec->SpellIconId = 133743;
-        spec->CharacterSpecTabId = _playerClassFirstSpec[player->getClass()];
+        spec->CharacterSpecTabId = _playerClassFirstSpec[player->getClassMask()];
 
         player->SetSpecsCount(num);
 
@@ -1459,6 +1459,11 @@ private:
             newTab->TalentType = (CharacterPointType)talentFields[9].Get<uint8>();
             newTab->TabIndex = talentFields[10].Get<uint32>();
 
+            auto firstSpec = _playerClassFirstSpec.find(newTab->ClassMask);
+            if (firstSpec == _playerClassFirstSpec.end()) {
+                _playerClassFirstSpec[newTab->ClassMask] = newTab->Id;
+            }
+
             for (auto& race : RaceAndClassTabMap)
             {
                 auto bit = (newTab->RaceMask & (1 << (race.first - 1)));
@@ -1472,14 +1477,6 @@ private:
 
                     if (classBit != 0 || newTab->ClassMask == 0)
                     {
-                        auto firstSpec = _playerClassFirstSpec.find(classBit);
-                        if (firstSpec != _playerClassFirstSpec.end()) {
-                            if (newTab->Id < firstSpec->second)
-                                _playerClassFirstSpec[classBit] = newTab->Id;
-                        }
-                        else 
-                            _playerClassFirstSpec[classBit] = newTab->Id;
-
                         RaceAndClassTabMap[race.first][wowClass.first].insert(newTab->Id);
                         SpellToTalentTabMap[newTab->SpellIconId] = newTab->Id;
                         TalentTabToSpellMap[newTab->Id] = newTab->SpellIconId;

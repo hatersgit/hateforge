@@ -333,7 +333,7 @@ void ForgeCommonMessage::SendTalents(Player* player)
                 if (!sConfigMgr->GetBoolDefault("echos", false)) {
                     uint32 i = 0;
                     auto classTree = spec->Talents[fc->_cacheClassNodeToClassTree[player->getClass()]];
-                    auto classMap = fc->_cacheClassNodeToSpell[pClass];
+                    auto classMap = fc->_cacheClassNodeToSpell[player->getClassMask()];
 
                     auto specTree = spec->Talents[spec->CharacterSpecTabId];
                     auto specMap = fc->_cacheSpecNodeToSpell[spec->CharacterSpecTabId];

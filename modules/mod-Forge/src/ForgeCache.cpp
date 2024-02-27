@@ -1066,7 +1066,7 @@ public:
                 loadout += base64_char.substr(tab->Id, 1);
                 loadout += base64_char.substr(player->getClass(), 1);
 
-                auto classMap = _cacheClassNodeToSpell[player->getClass()];
+                auto classMap = _cacheClassNodeToSpell[player->getClassMask()];
                 for (int i = 1; i <= classMap.size(); i++)
                     loadout += base64_char.substr(1, 1);
 
@@ -1464,6 +1464,11 @@ private:
                 _playerClassFirstSpec[newTab->ClassMask] = newTab->Id;
             }
 
+            if (newTab->TalentType == CharacterPointType::CLASS_TREE) {
+                _cacheClassNodeToSpell[newTab->ClassMask] = {};
+                _cacheClassNodeToClassTree[newTab->ClassMask] = newTab->Id;
+            }
+
             for (auto& race : RaceAndClassTabMap)
             {
                 auto bit = (newTab->RaceMask & (1 << (race.first - 1)));
@@ -1481,10 +1486,6 @@ private:
                         SpellToTalentTabMap[newTab->SpellIconId] = newTab->Id;
                         TalentTabToSpellMap[newTab->Id] = newTab->SpellIconId;
                         CharacterPointTypeToTalentTabIds[newTab->TalentType].insert(newTab->Id);
-                        if (newTab->TalentType == CharacterPointType::CLASS_TREE) {
-                            _cacheClassNodeToSpell[wowClass.first] = {};
-                            _cacheClassNodeToClassTree[wowClass.first] = newTab->Id;
-                        }
                     }
                 }
             }
@@ -1532,8 +1533,7 @@ private:
             if (newTalent->TalentType != CharacterPointType::CLASS_TREE)
                 _cacheSpecNodeToSpell[newTalent->TalentTabId][newTalent->nodeIndex] = newTalent->SpellId;
             else {
-                auto demaskClass = (TalentTabs[newTalent->TalentTabId]->ClassMask >> 1) + 1;
-                _cacheClassNodeToSpell[demaskClass][newTalent->nodeIndex] = newTalent->SpellId;
+                _cacheClassNodeToSpell[TalentTabs[newTalent->TalentTabId]->ClassMask][newTalent->nodeIndex] = newTalent->SpellId;
             }
 
             auto tabItt = TalentTabs.find(newTalent->TalentTabId);

@@ -40,7 +40,7 @@ public:
         if (pClass != iam.player->getClass())
             return;
 
-        auto classMap = fc->_cacheClassNodeToSpell[pClass];
+        auto classMap = fc->_cacheClassNodeToSpell[iam.player->getClassMask()];
         auto nodeMap = fc->_cacheSpecNodeToSpell[specId];
         int reqLen = classMap.size() + nodeMap.size() + fc->META_PREFIX ;
 

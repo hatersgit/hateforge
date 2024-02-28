@@ -512,6 +512,19 @@ public:
                 }
             }
         }
+        if (TryGetForgeTalentTabs(player, CharacterPointType::CLASS_TREE, tabs)) {
+            for (auto tab : tabs) {
+                for (auto talent : tab->Talents) {
+                    ForgeCharacterTalent* ct = new ForgeCharacterTalent();
+                    ct->CurrentRank = 0;
+                    ct->SpellId = talent.second->SpellId;
+                    ct->TabId = tab->Id;
+                    ct->type = talent.second->nodeType;
+
+                    spec->Talents[tab->Id][ct->SpellId] = ct;
+                }
+            }
+        }
 
         for (auto pt : TALENT_POINT_TYPES)
         {
@@ -973,18 +986,19 @@ public:
                     if (spell.second->nodeType == NodeType::CHOICE) {
                         for (auto choice : _choiceNodesRev)
                             if (player->HasSpell(choice.first))
-                                player->removeSpell(choice.first, player->GetActiveSpecMask(), false);
+                                player->removeSpell(choice.first, SPEC_MASK_ALL, false);
                     }
                     else
                         for (auto rank : spell.second->Ranks)
-                            if (auto spellInfo = sSpellMgr->GetSpellInfo(rank.second)) {
-                                if (spellInfo->HasEffect(SPELL_EFFECT_LEARN_SPELL))
-                                    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-                                        player->removeSpell(spellInfo->Effects[i].TriggerSpell, player->GetActiveSpecMask(), false);
+                            if (player->HasSpell(rank.second))
+                                if (auto spellInfo = sSpellMgr->GetSpellInfo(rank.second)) {
+                                    if (spellInfo->HasEffect(SPELL_EFFECT_LEARN_SPELL))
+                                        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                                            player->removeSpell(spellInfo->Effects[i].TriggerSpell, SPEC_MASK_ALL, false);
 
-                                player->RemoveAura(rank.second);
-                                player->removeSpell(rank.second, player->GetActiveSpecMask(), false);
-                            }
+                                    player->removeSpell(rank.second, SPEC_MASK_ALL, false);
+                                }
+
                     auto talent = spec->Talents[tab->Id].find(spell.first);
                     if (talent != spec->Talents[tab->Id].end())
                         talent->second->CurrentRank = 0;
@@ -1001,7 +1015,7 @@ public:
         switch (pointType) {
         case CharacterPointType::TALENT_TREE:
             if (level > 1) {
-                int div = level / 2;
+               int div = level / 2;
                amount = div;
             }
             else
@@ -1022,6 +1036,7 @@ public:
             break;
         }
 
+        fcp->Max = amount;
         fcp->Sum = amount;
 
         UpdateCharPoints(player, fcp);

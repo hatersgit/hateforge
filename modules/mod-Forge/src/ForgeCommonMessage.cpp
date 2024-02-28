@@ -332,7 +332,7 @@ void ForgeCommonMessage::SendTalents(Player* player)
             case CharacterPointType::TALENT_TREE: {
                 if (!sConfigMgr->GetBoolDefault("echos", false)) {
                     uint32 i = 0;
-                    auto classTree = spec->Talents[fc->_cacheClassNodeToClassTree[player->getClass()]];
+                    auto classTree = spec->Talents[fc->_cacheClassNodeToClassTree[player->getClassMask()]];
                     auto classMap = fc->_cacheClassNodeToSpell[player->getClassMask()];
 
                     auto specTree = spec->Talents[spec->CharacterSpecTabId];

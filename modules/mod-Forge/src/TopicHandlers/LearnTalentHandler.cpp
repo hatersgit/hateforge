@@ -155,7 +155,6 @@ public:
                                 }
                             }
 
-                            iam.player->SetActiveSpec(specId);
                             fc->UpdateCharacterSpec(iam.player, spec);
 
                             cm->SendActiveSpecInfo(iam.player);

@@ -210,10 +210,7 @@ public:
         TALENT_POINT_TYPES =
         {
             CharacterPointType::TALENT_TREE,
-            CharacterPointType::CLASS_TREE,
-            CharacterPointType::FORGE_SKILL_TREE,
-            CharacterPointType::PRESTIGE_TREE,
-            CharacterPointType::RACIAL_TREE
+            CharacterPointType::CLASS_TREE
         };
     }
 

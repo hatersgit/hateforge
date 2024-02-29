@@ -490,7 +490,7 @@ void ForgeCommonMessage::SendSpecInfo(Player* player)
                 ForgeCharacterPoint* tp = fc->GetCommonCharacterPoint(player, tpt);
                 ForgeCharacterPoint* cps = fc->GetSpecPoints(player, tpt, spec->Id);
 
-                msg = msg + delimiter + std::to_string((int)tpt) + "$" + std::to_string(cps->Sum) + "$" + std::to_string(tp->Sum) + "$"  + std::to_string(m->Sum) + "$" + std::to_string(m->Max);
+                msg = msg + delimiter + std::to_string((int)tpt) + "$" + std::to_string(cps->Sum) + "$" + std::to_string(tp->Sum) + "$"  + std::to_string(cps->Max) + "$" + std::to_string(m->Max);
                 k++;
             }
 

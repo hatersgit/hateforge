@@ -6566,7 +6566,8 @@ void Player::_LoadGroup()
 
 void Player::_LoadBoundInstances(PreparedQueryResult result)
 {
-    m_boundInstances.clear();
+    for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+        m_boundInstances[Difficulty(i)].clear();
 
     Group* group = GetGroup();
 
@@ -6651,32 +6652,10 @@ InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty
     if (!mapDiff)
         return nullptr;
 
-    auto difficultyItr = m_boundInstances.find(difficulty);
-    if (difficultyItr == m_boundInstances.end())
-        return nullptr;
-
-    auto itr = difficultyItr->second.find(mapid);
-    if (itr != difficultyItr->second.end())
+    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
+    if (itr != m_boundInstances[difficulty].end())
         if (itr->second.extendState || withExpired)
             return &itr->second;
-    return nullptr;
-}
-
-InstancePlayerBind const* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty) const
-{
-    // some instances only have one difficulty
-    MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(mapid, difficulty);
-    if (!mapDiff)
-        return nullptr;
-
-    auto difficultyItr = m_boundInstances.find(difficulty);
-    if (difficultyItr == m_boundInstances.end())
-        return nullptr;
-
-    auto itr = difficultyItr->second.find(mapid);
-    if (itr != difficultyItr->second.end())
-        return &itr->second;
-
     return nullptr;
 }
 
@@ -6695,18 +6674,13 @@ InstanceSave* Player::GetInstanceSave(uint32 mapid)
 
 void Player::UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload)
 {
-    auto difficultyItr = m_boundInstances.find(difficulty);
-    if (difficultyItr != m_boundInstances.end())
-    {
-        auto itr = difficultyItr->second.find(mapid);
-        if (itr != difficultyItr->second.end())
-            UnbindInstance(itr, difficultyItr, unload);
-    }
+    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
+    UnbindInstance(itr, difficulty, unload);
 }
 
-void Player::UnbindInstance(BoundInstancesMap::mapped_type::iterator& itr, BoundInstancesMap::iterator& difficultyItr, bool unload)
+void Player::UnbindInstance(BoundInstancesMap::iterator& itr, Difficulty difficulty, bool unload)
 {
-    if (itr != difficultyItr->second.end())
+    if (itr != m_boundInstances[difficulty].end())
     {
         if (!unload)
         {
@@ -6718,11 +6692,8 @@ void Player::UnbindInstance(BoundInstancesMap::mapped_type::iterator& itr, Bound
             CharacterDatabase.Execute(stmt);
         }
 
-        if (itr->second.perm)
-            GetSession()->SendCalendarRaidLockout(itr->second.save, false);
-
         itr->second.save->RemovePlayer(this);               // save can become invalid
-        difficultyItr->second.erase(itr++);
+        m_boundInstances[difficulty].erase(itr++);
     }
 }
 
@@ -6803,7 +6774,6 @@ void Player::BindToInstance()
     if (!IsGameMaster())
     {
         BindToInstance(mapSave, true, EXTEND_STATE_KEEP);
-        GetSession()->SendCalendarRaidLockout(mapSave, true);
     }
 }
 
@@ -6818,9 +6788,9 @@ void Player::SendRaidInfo()
 
     time_t now = GameTime::GetGameTime().count();
 
-    for (auto difficultyItr = m_boundInstances.begin(); difficultyItr != m_boundInstances.end(); ++difficultyItr)
+    for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
     {
-        for (auto itr = difficultyItr->second.begin(); itr != difficultyItr->second.end(); ++itr)
+        for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
         {
             InstancePlayerBind const& bind = itr->second;
             if (bind.perm)
@@ -6849,9 +6819,9 @@ void Player::SendSavedInstances()
     bool hasBeenSaved = false;
     WorldPacket data;
 
-    for (BoundInstancesMap::const_iterator difficultyItr = m_boundInstances.begin(); difficultyItr != m_boundInstances.end(); ++difficultyItr)
+    for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
     {
-        for (auto itr = difficultyItr->second.begin(); itr != difficultyItr->second.end(); ++itr)
+        for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
         {
             InstancePlayerBind const& bind = itr->second;
             if (bind.perm)                             // only permanent binds are sent
@@ -6870,9 +6840,9 @@ void Player::SendSavedInstances()
     if (!hasBeenSaved)
         return;
 
-    for (BoundInstancesMap::const_iterator difficultyItr = m_boundInstances.begin(); difficultyItr != m_boundInstances.end(); ++difficultyItr)
+    for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
     {
-        for (auto itr = difficultyItr->second.begin(); itr != difficultyItr->second.end(); ++itr)
+        for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
         {
             InstancePlayerBind const& bind = itr->second;
             if (bind.perm)                             // only permanent binds are sent
@@ -7539,15 +7509,17 @@ void Player::SaveLoadoutActions(uint32 specId, uint8 loadoutId)
     trans->Append(stmt);
 
     for (auto button : m_actionButtons) {
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_ACTION_LOADOUT);
-        stmt->SetData(0, GetGUID().GetCounter());
-        stmt->SetData(1, specId);
-        stmt->SetData(2, loadoutId);
-        stmt->SetData(3, button.first);
-        stmt->SetData(4, button.second.GetAction());
-        stmt->SetData(5, uint8(button.second.GetType()));
+        if (button.second.uState != ACTIONBUTTON_DELETED) {
+            stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_ACTION_LOADOUT);
+            stmt->SetData(0, GetGUID().GetCounter());
+            stmt->SetData(1, specId);
+            stmt->SetData(2, loadoutId);
+            stmt->SetData(3, button.first);
+            stmt->SetData(4, button.second.GetAction());
+            stmt->SetData(5, uint8(button.second.GetType()));
 
-        trans->Append(stmt);
+            trans->Append(stmt);
+        }
     }
     CharacterDatabase.CommitTransaction(trans);
 }

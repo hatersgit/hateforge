@@ -542,7 +542,6 @@ bool Map::AddPlayerToMap(Player* player)
     if (player->IsAlive())
         ConvertCorpseToBones(player->GetGUID());
 
-    sScriptMgr->OnPlayerEnterMap(this, player);
     return true;
 }
 
@@ -3271,8 +3270,6 @@ void InstanceMap::PermBindAllPlayers()
             WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
             data << uint32(0);
             player->GetSession()->SendPacket(&data);
-            player->GetSession()->SendCalendarRaidLockout(save, true);
-
 
             // if group leader is in instance, group also gets bound
             if (Group* group = player->GetGroup())

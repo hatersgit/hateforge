@@ -128,6 +128,10 @@ enum class ForgeTopic
     SET_WORLD_TIER                  = 142,
     SHOW_PORTAL_MASTER_SELECT       = 143,
     TAKE_PORTAL_TO                  = 144,
+
+    // portals
+    SEND_PORTALS                    = 150,
+    TAKE_PORTAL                     = 151,
 };
 
 enum class ForgeError

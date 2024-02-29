@@ -385,6 +385,7 @@ private:
 
     uint32 _entranceId;
     uint32 _temporaryEntranceId;
+    bool _firstEntry = true;
 
     bool _challengeModeStarted;
     uint8 _challengeModeLevel = 1;

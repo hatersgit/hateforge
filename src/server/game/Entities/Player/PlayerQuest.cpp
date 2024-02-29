@@ -1527,11 +1527,12 @@ void Player::SetQuestStatus(uint32 questId, QuestStatus status, bool update /*= 
         SendQuestUpdate(questId);
 }
 
-void Player::ClearQuestStatus()
+void Player::ClearQuestStatus(std::vector<uint32> quests)
 {
+    CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
     for (uint16 i = 0; i < MAX_QUEST_LOG_SIZE; ++i) {
         if (uint32 questId = GetQuestSlotQuestId(i)) {
-            if (questId != 500519) {
+            if (questId != 500519 && std::find(quests.begin(), quests.end(), questId) == quests.end()) {
                 TakeQuestSourceItem(questId, true); // remove quest src item from player
                 AbandonQuest(questId); // remove all quest items player received before abandoning quest.
                 RemoveActiveQuest(questId);
@@ -1540,13 +1541,10 @@ void Player::ClearQuestStatus()
             }
         }
     }
-
+    CharacterDatabase.AsyncCommitTransaction(trans);
     CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_QUESTSTATUS_REWARDED);
-    CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
     stmt->SetData(0, this->GetGUID().GetCounter());
     trans->Append(stmt);
-    CharacterDatabase.AsyncCommitTransaction(trans);
-
 }
 
 void Player::RemoveActiveQuest(uint32 questId, bool update /*= true*/)

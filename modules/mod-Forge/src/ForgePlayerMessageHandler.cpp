@@ -6,6 +6,7 @@
 #include "Player.h"
 #include "Config.h"
 #include "Chat.h"
+#include "ChannelMgr.h"
 #include "Spell.h"
 #include "WorldPacket.h"
 #include "TopicRouter.h"
@@ -615,5 +616,7 @@ void AddForgePlayerMessageHandler()
     sTopicRouter->AddHandler(new SetWorldTierHandler(cache, cm));
     sTopicRouter->AddHandler(new GetSoulShardsHandler(cache, cm));
     sTopicRouter->AddHandler(new SetSoulShardHandler(cache, cm));
+
+    
     new ForgeCacheCommands();
 }

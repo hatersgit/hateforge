@@ -5055,10 +5055,6 @@ void Player::RepopAtGraveyard()
         if (GetMap()->IsDungeon()) {
             ResurrectPlayer(0.5f);
             SpawnCorpseBones();
-            if (script->_challengeEntranceLoc.GetPositionX() == 0) {
-                if (WorldSafeLocsEntry const* entranceSafeLocEntry = sObjectMgr->GetWorldSafeLoc(script->instance->GetId(), script->GetEntranceLocation()))
-                    script->_challengeEntranceLoc.Relocate(entranceSafeLocEntry->Loc);
-            }
             NearTeleportTo(script->_challengeEntranceLoc);
             return;
         }

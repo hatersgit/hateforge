@@ -175,6 +175,7 @@ public:
         ResetTimeByMapDifficultyMap::const_iterator itr = m_resetTimeByMapDifficulty.find(MAKE_PAIR64(mapid, d));
         return itr != m_resetTimeByMapDifficulty.end() ? itr->second : 0;
     }
+
     time_t GetSubsequentResetTime(uint32 mapid, Difficulty difficulty, time_t resetTime) const;
 
     // Use this on startup when initializing reset times
@@ -217,6 +218,7 @@ private:
     bool lock_instLists{false};
     InstanceSaveHashMap m_instanceSaveById;
     ResetTimeByMapDifficultyMap m_resetTimeByMapDifficulty;
+    ResetTimeByMapDifficultyMap m_resetExtendedTimeByMapDifficulty;
     ResetTimeQueue m_resetTimeQueue;
 };
 

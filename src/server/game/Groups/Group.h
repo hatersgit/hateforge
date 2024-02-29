@@ -358,10 +358,7 @@ public:
     InstanceGroupBind* GetBoundInstance(Difficulty difficulty, uint32 mapId);
     BoundInstancesMap::iterator GetBoundInstances(Difficulty difficulty);
     BoundInstancesMap::iterator GetBoundInstanceEnd();
-<<<<<<< HEAD
-=======
 
->>>>>>> master
 protected:
     void _homebindIfInstance(Player* player);
 
@@ -389,7 +386,6 @@ protected:
     ObjectGuid          m_masterLooterGuid;
     BoundInstancesMap   m_boundInstances;
     Rolls               RollId;
-    BoundInstancesMap   m_boundInstances;
     uint8*              m_subGroupsCounts;
     ObjectGuid          m_guid;
     uint32              m_counter;                      // used only in SMSG_GROUP_LIST

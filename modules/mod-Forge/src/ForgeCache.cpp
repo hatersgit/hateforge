@@ -11,6 +11,7 @@
 #include "DatabaseEnv.h"
 #include "SharedDefines.h"
 #include "Gamemode.h"
+#include "GameTime.h"
 #include <unordered_map>
 #include <list>
 #include <tuple>
@@ -31,6 +32,37 @@ enum CharacterPointType
     PRESTIGE_COUNT = 6,
     CLASS_TREE = 7,
     PET_TALENT = 8,
+};
+
+enum EKLocations
+{
+    STORMWIND = 0,
+    IRONFORGE = 1,
+    BOOTYBAY = 2,
+    UNDERCITY = 3,
+
+    EK_ALLIANCE_MASK = (1 << STORMWIND) | (1 << IRONFORGE) | (1 << BOOTYBAY),
+    EK_HORDE_MASK = (1 << BOOTYBAY) | (1 << UNDERCITY),
+};
+
+enum KalLocations
+{
+    DARNASSUS = 0,
+    ORGRIMMAR = 1,
+    THUNDERBLUFF = 2,
+    GADGETZAN = 3,
+
+    KAL_ALLIANCE_MASK = (1 << DARNASSUS) | (1 << GADGETZAN),
+    KAL_HORDE_MASK = (1 << ORGRIMMAR) | (1 << THUNDERBLUFF) | (1 << GADGETZAN),
+};
+
+enum TBCLocations
+{
+    SILVERMOON = 0,
+    EXODAR = 1,
+
+    TBC_ALLIANCE_MASK = (1 << SILVERMOON),
+    TBC_HORDE_MASK = (1 << EXODAR),
 };
 
 enum NodeType
@@ -2988,8 +3020,92 @@ public:
     WorldLocation GetRaceStartingZone(uint32 race) {
         return _startingZones[race];
     }
+public:
+    struct RaidRotation {
+        uint32 id = 0;
+        WorldSafeLocsEntry* raid1Loc = nullptr;
+        WorldSafeLocsEntry* raid2Loc = nullptr;
+        WorldSafeLocsEntry* raid3Loc = nullptr;
+        uint32 startTime = 0;
+        uint8 sequence = 1;
+        bool active = false;
 
+        RaidRotation(uint32 id, WorldSafeLocsEntry* r1, WorldSafeLocsEntry* r2, WorldSafeLocsEntry* r3, uint32 start, uint8 sequence, bool active) {
+            this->id = id;
+            this->raid1Loc = r1;
+            this->raid2Loc = r2;
+            this->raid3Loc = r3;
+            this->startTime = start;
+            this->sequence = sequence;
+            this->active = active;
+        }
+    };
+
+    std::vector<uint32> PORTAL_CONTINENTS = { 0, 1, 530 };
+
+    RaidRotation* _activeRaidRotation;
 private:
+    std::unordered_map<uint32 /*id*/, RaidRotation*> _raidRotations;
+    std::unordered_map<uint8 /*sequence*/, RaidRotation*> _raidRotationsBySequence;
+
+
+    void AddRaidRotation()
+    {
+        LOG_INFO("server.load", "Loading raid rotation...");
+        _raidRotations.clear();
+
+        QueryResult raidResult = WorldDatabase.Query("SELECT * FROM `forge_raid_rotation`");
+        if (!raidResult) return;
+
+        auto activeRotation = 1;
+        auto maxSequence = 0;
+        auto needsNewRotation = true;
+        do
+        {
+            Field* raidFields = raidResult->Fetch();
+            uint32 id = raidFields[0].Get<uint32>();
+            uint32 loc1 = raidFields[1].Get<uint32>();
+            uint32 loc2 = raidFields[2].Get<uint32>();
+            uint32 loc3 = raidFields[3].Get<uint32>();
+            uint32 startTime = raidFields[4].Get<uint32>();
+            bool active = raidFields[5].Get<bool>();
+            uint8 sequence = raidFields[6].Get<uint8>();
+
+            WorldSafeLocsEntry* r1 = sObjectMgr->GetWorldSafeLoc(loc1, 0);
+            WorldSafeLocsEntry* r2 = sObjectMgr->GetWorldSafeLoc(loc2, 0);
+            WorldSafeLocsEntry* r3 = sObjectMgr->GetWorldSafeLoc(loc3, 0);
+            RaidRotation* rot = new RaidRotation(id, r1, r2, r3, startTime, sequence, active);
+
+            _raidRotations[id] = rot;
+            _raidRotationsBySequence[sequence] = rot;
+
+            if (active) {
+                activeRotation = sequence;
+                if (GameTime::GetGameTime() < Seconds(startTime)) {
+                    _activeRaidRotation = rot;
+                    needsNewRotation = false;
+                }
+            }
+
+            if (sequence > maxSequence)
+                maxSequence = sequence;
+
+        } while (raidResult->NextRow());
+
+        if (needsNewRotation) {
+            WorldDatabase.DirectExecute("UPDATE 'forge_raid_rotation' set `active` = 0");
+            auto newSeq = activeRotation++;
+            if (newSeq > maxSequence)
+                newSeq = 1;
+
+            RaidRotation newRot = *_raidRotationsBySequence[newSeq];
+            newRot.startTime = GameTime::GetGameTime().count();
+            _activeRaidRotation = _raidRotationsBySequence[newSeq];
+
+            WorldDatabase.DirectExecute("UPDATE 'forge_raid_rotation' set `active` = 1 and `timeOfStart` = {} where `id` = {}", newRot.startTime, newRot.id);
+        }
+    }
+
     std::unordered_map<uint32 /*race*/, WorldLocation> _startingZones;
     std::unordered_map<uint32 /*source*/, SoulShard*> SoulShards;
     std::unordered_map<uint32 /*account*/, std::unordered_map<uint32 /*source*/, PlayerSoulShard*>> _charSoulShards;

@@ -1864,6 +1864,8 @@ public:
     // hater: world tier creature map for pathing etc..
     std::unordered_map<uint32 /*ct entry*/, std::vector<uint32 /*guid*/>> _worldTierCreatureInstances;
     void LoadAreaScripts();
+
+    std::unordered_map< uint32 /*map id*/, std::unordered_map<uint32 /*id*/, WorldSafeLocsEntry*>> _worldSafeLocs;
 private:
     void LoadScripts(ScriptsType type);
     void LoadQuestRelationsHelper(QuestRelations& map, std::string const& table, bool starter, bool go);
@@ -1954,7 +1956,6 @@ private:
     std::set<uint32> _hasDifficultyEntries[MAX_DIFFICULTY - 1]; // already loaded creatures with difficulty 1 values, used in CheckCreatureTemplate
 
     // hater: m+
-    std::unordered_map< uint32 /*map id*/, std::unordered_map<uint32 /*id*/, WorldSafeLocsEntry*>> _worldSafeLocs;
     std::unordered_map<uint32, MapChallengeModeEntry*> _cacheChallengeMode;
     std::unordered_map<uint32, std::unordered_map<uint32, float>> _cacheMythicMinionValues;
     typedef std::unordered_map<uint32, std::unordered_map<uint32, InstanceDifficultyMultiplier*>> InstanceDifficultyMultiplierContainer;

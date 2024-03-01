@@ -180,7 +180,7 @@ public:
 
     void OnLootItem(Player* player, Item* item, uint32 count, ObjectGuid lootguid) override
     {
-        OnAddItem(player, item->GetTemplate()->ItemId, count);
+
     }
 
     //called after player.additem is called. DO NOT CREATE LOOPS WITH THIS.

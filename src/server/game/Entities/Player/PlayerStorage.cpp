@@ -7548,15 +7548,17 @@ void Player::SaveLoadoutActions(uint32 specId, uint8 loadoutId)
     trans->Append(stmt);
 
     for (auto button : m_actionButtons) {
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_ACTION_LOADOUT);
-        stmt->SetData(0, GetGUID().GetCounter());
-        stmt->SetData(1, specId);
-        stmt->SetData(2, loadoutId);
-        stmt->SetData(3, button.first);
-        stmt->SetData(4, button.second.GetAction());
-        stmt->SetData(5, uint8(button.second.GetType()));
+        if (button.second.uState != ACTIONBUTTON_DELETED) {
+            stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_ACTION_LOADOUT);
+            stmt->SetData(0, GetGUID().GetCounter());
+            stmt->SetData(1, specId);
+            stmt->SetData(2, loadoutId);
+            stmt->SetData(3, button.first);
+            stmt->SetData(4, button.second.GetAction());
+            stmt->SetData(5, uint8(button.second.GetType()));
 
-        trans->Append(stmt);
+            trans->Append(stmt);
+        }
     }
     CharacterDatabase.CommitTransaction(trans);
 }

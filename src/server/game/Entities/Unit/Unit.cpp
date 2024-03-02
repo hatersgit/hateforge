@@ -14291,27 +14291,25 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
         // Generate loot before updating looter
         if (creature)
         {
-            if (creature->isWorldBoss() && !creature->GetMap()->IsRaid() && !creature->GetMap()->IsDungeon()) {
-                Loot* loot = &creature->loot;
-                loot->clear();
+            Loot* loot = &creature->loot;
+            loot->clear();
 
-                if (uint32 lootid = creature->GetCreatureTemplate()->lootid)
-                    loot->FillLoot(lootid, LootTemplates_Creature, looter, false, false, creature->GetLootMode(), creature);
+            if (uint32 lootid = creature->GetCreatureTemplate()->lootid)
+                loot->FillLoot(lootid, LootTemplates_Creature, looter, false, false, creature->GetLootMode(), creature);
 
-                if (creature->GetLootMode())
-                    loot->generateMoneyLoot(creature->GetCreatureTemplate()->mingold, creature->GetCreatureTemplate()->maxgold);
+            if (creature->GetLootMode())
+                loot->generateMoneyLoot(creature->GetCreatureTemplate()->mingold, creature->GetCreatureTemplate()->maxgold);
 
-                if (group)
-                {
-                    if (hasLooterGuid)
-                        group->SendLooter(creature, looter);
-                    else
-                        group->SendLooter(creature, nullptr);
+            if (group)
+            {
+                if (hasLooterGuid)
+                    group->SendLooter(creature, looter);
+                else
+                    group->SendLooter(creature, nullptr);
 
-                    // Update round robin looter only if the creature had loot
-                    if (!creature->loot.empty())
-                        group->UpdateLooterGuid(creature);
-                }
+                // Update round robin looter only if the creature had loot
+                if (!creature->loot.empty())
+                    group->UpdateLooterGuid(creature);
             }
             player->RewardPlayerAndGroupAtKill(victim, false);
         }

@@ -48,6 +48,9 @@
 #include <GetSoulShardsHandler.cpp>
 #include <SetSoulShardHandler.cpp>
 
+#include <TakePortalHandler.cpp>
+#include <GetPortalsHandler.cpp>
+
 #include <unordered_map>
 #include <random>
 #include <boost/lexical_cast.hpp>
@@ -366,7 +369,6 @@ public:
                 if (itemProto->IsWeapon()) {
                     float dps = itemProto->CalculateDps();
                     if (dps) {
-                        
                         if (mainStat == ITEM_MOD_INTELLECT) {
                             auto sp = itemSlotVal * 2.435;
                             
@@ -404,21 +406,23 @@ public:
                         itemProto->SetArmorDamageModifier(int32(bonusArmor));
                         secondaryRolls--;
 
-                        auto tankRoll = fc->_forgeItemSecondaryStatPools[ITEM_MOD_STAMINA];
-                        std::uniform_int_distribution<> statdistr(1, tankRoll.size());
-                        std::uniform_int_distribution<> secondarydistr(0, 8);
+                        if (secondaryRolls) {
+                            auto tankRoll = fc->_forgeItemSecondaryStatPools[ITEM_MOD_STAMINA];
+                            std::uniform_int_distribution<> statdistr(1, tankRoll.size());
+                            std::uniform_int_distribution<> secondarydistr(0, 8);
 
-                        auto roll = tankRoll[statdistr(gen) - 1];
-                        auto valueForThis = (curValue / secondaryRolls) * (1.f + (secondarydistr(gen) / 100.f));
-                        auto amountForTankStat = valueForThis / fc->_forgeItemStatValues[roll];
-                        statCount++;
-                        itemProto->SetStatsCount(statCount);
-                        itemProto->SetStatType(statCount - 1, roll);
-                        itemProto->SetStatValue(statCount - 1, amountForTankStat);
-                        itemProto->SetStatValueMax(statCount - 1, amountForTankStat);
-                        secondaryRolls--;
-                        curValue -= amountForTankStat;
-                        rolled.push_back(roll);
+                            auto roll = tankRoll[statdistr(gen) - 1];
+                            auto valueForThis = (curValue / secondaryRolls) * (1.f + (secondarydistr(gen) / 100.f));
+                            auto amountForTankStat = valueForThis / fc->_forgeItemStatValues[roll];
+                            statCount++;
+                            itemProto->SetStatsCount(statCount);
+                            itemProto->SetStatType(statCount - 1, roll);
+                            itemProto->SetStatValue(statCount - 1, amountForTankStat);
+                            itemProto->SetStatValueMax(statCount - 1, amountForTankStat);
+                            secondaryRolls--;
+                            curValue -= amountForTankStat;
+                            rolled.push_back(roll);
+                        }
                         break;
                     }
                     case ITEM_SUBCLASS_ARMOR_MAIL: {
@@ -617,6 +621,8 @@ void AddForgePlayerMessageHandler()
     sTopicRouter->AddHandler(new GetSoulShardsHandler(cache, cm));
     sTopicRouter->AddHandler(new SetSoulShardHandler(cache, cm));
 
+    sTopicRouter->AddHandler(new TakePortalHandler(cache, cm));
+    sTopicRouter->AddHandler(new GetPortalsHandler(cache, cm));
     
     new ForgeCacheCommands();
 }

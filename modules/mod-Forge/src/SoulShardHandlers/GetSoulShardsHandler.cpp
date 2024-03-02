@@ -21,18 +21,20 @@ public:
             if (iam.message == "collection") {
                 std::string msg = "";
                 for (auto shard : found) {
-                    msg += std::to_string(shard.second->source) + "&" + sObjectMgr->GetCreatureTemplate(shard.second->source)->Name + "&" + std::to_string(shard.second->rank) + "&" + std::to_string(shard.second->count) + "&"
-                        + std::to_string(shard.second->shard->quality) + "&" + std::to_string(shard.second->shard->special) + "&";
-                    auto groupDelim = "";
-                    int i = 0;
-                    for (auto group : shard.second->shard->groups) {
-                        if (i)
-                            groupDelim = "$";
+                    if (shard.second->source) {
+                        msg += std::to_string(shard.second->source) + "&" + sObjectMgr->GetCreatureTemplate(shard.second->source)->Name + "&" + std::to_string(shard.second->rank) + "&" + std::to_string(shard.second->count) + "&"
+                            + std::to_string(shard.second->shard->quality) + "&" + std::to_string(shard.second->shard->special) + "&";
+                        auto groupDelim = "";
+                        int i = 0;
+                        for (auto group : shard.second->shard->groups) {
+                            if (i)
+                                groupDelim = "$";
 
-                        msg += groupDelim + std::to_string(group);
-                        i++;
+                            msg += groupDelim + std::to_string(group);
+                            i++;
+                        }
+                        msg += "~";
                     }
-                    msg += "~";
                 }
                 iam.player->SendForgeUIMsg(ForgeTopic::GET_SOULSHARDS, msg);
             }

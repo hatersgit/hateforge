@@ -6747,7 +6747,8 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave* save, bool permanent, B
             save->AddPlayer(this);
         }
 
-        save->SetCanReset(true);
+        if (permanent)
+            save->SetCanReset(false);
 
         bind.save = save;
         bind.perm = permanent;

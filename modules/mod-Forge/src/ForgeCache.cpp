@@ -34,37 +34,6 @@ enum CharacterPointType
     PET_TALENT = 8,
 };
 
-enum EKLocations
-{
-    STORMWIND = 0,
-    IRONFORGE = 1,
-    BOOTYBAY = 2,
-    UNDERCITY = 3,
-
-    EK_ALLIANCE_MASK = (1 << STORMWIND) | (1 << IRONFORGE) | (1 << BOOTYBAY),
-    EK_HORDE_MASK = (1 << BOOTYBAY) | (1 << UNDERCITY),
-};
-
-enum KalLocations
-{
-    DARNASSUS = 0,
-    ORGRIMMAR = 1,
-    THUNDERBLUFF = 2,
-    GADGETZAN = 3,
-
-    KAL_ALLIANCE_MASK = (1 << DARNASSUS) | (1 << GADGETZAN),
-    KAL_HORDE_MASK = (1 << ORGRIMMAR) | (1 << THUNDERBLUFF) | (1 << GADGETZAN),
-};
-
-enum TBCLocations
-{
-    SILVERMOON = 0,
-    EXODAR = 1,
-
-    TBC_ALLIANCE_MASK = (1 << SILVERMOON),
-    TBC_HORDE_MASK = (1 << EXODAR),
-};
-
 enum NodeType
 {
     AURA = 0,
@@ -1359,6 +1328,8 @@ private:
             // hater: world tiers
             AddWorldTierUnlocks();
             AddStartingZones();
+
+            AddRaidRotation();
         }
         catch (std::exception & ex) {
             std::string error = ex.what();
@@ -3041,13 +3012,15 @@ public:
         }
     };
 
-    std::vector<uint32> PORTAL_CONTINENTS = { 0, 1, 530 };
-
     RaidRotation* _activeRaidRotation;
+
+    enum PortalObjects {
+        RAID = 1179916,
+        TOWN = 1179917,
+    };
 private:
     std::unordered_map<uint32 /*id*/, RaidRotation*> _raidRotations;
     std::unordered_map<uint8 /*sequence*/, RaidRotation*> _raidRotationsBySequence;
-
 
     void AddRaidRotation()
     {
@@ -3093,7 +3066,7 @@ private:
         } while (raidResult->NextRow());
 
         if (needsNewRotation) {
-            WorldDatabase.DirectExecute("UPDATE 'forge_raid_rotation' set `active` = 0");
+            WorldDatabase.DirectExecute("UPDATE `forge_raid_rotation` set `active` = 0");
             auto newSeq = activeRotation++;
             if (newSeq > maxSequence)
                 newSeq = 1;
@@ -3102,7 +3075,7 @@ private:
             newRot.startTime = GameTime::GetGameTime().count();
             _activeRaidRotation = _raidRotationsBySequence[newSeq];
 
-            WorldDatabase.DirectExecute("UPDATE 'forge_raid_rotation' set `active` = 1 and `timeOfStart` = {} where `id` = {}", newRot.startTime, newRot.id);
+            WorldDatabase.DirectExecute("UPDATE `forge_raid_rotation` set `active` = 1 and `timeOfStart` = {} where `ID` = {}", newRot.startTime, newRot.id);
         }
     }
 

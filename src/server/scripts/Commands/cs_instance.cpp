@@ -85,17 +85,14 @@ public:
         {
             for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
             {
-                auto binds = group->GetBoundInstances(Difficulty(i));
-                if (binds != group->GetBoundInstanceEnd())
+                for (auto const& [mapId, bind] : group->GetBoundInstances(Difficulty(i)))
                 {
-                    for (auto itr = binds->second.begin(); itr != binds->second.end(); ++itr)
-                    {
-                        InstanceSave* save = itr->second.save;
-                        std::string timeleft = secsToTimeString(save->GetResetTime() - time(nullptr));
-                        handler->PSendSysMessage(LANG_COMMAND_LIST_BIND_INFO, itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no", "-", save->GetDifficultyID(), save->CanReset() ? "yes" : "no", timeleft.c_str());
-                        counter++;
-                    }
+                    InstanceSave* save = bind.save;
+                    std::string timeleft = secsToTimeString(save->GetResetTime() - time(nullptr));
+                    handler->PSendSysMessage(LANG_COMMAND_LIST_BIND_INFO, mapId, save->GetInstanceId(), bind.perm ? "yes" : "no", "-", save->GetDifficultyID(), save->CanReset() ? "yes" : "no", timeleft.c_str());
+                    counter++;
                 }
+
             }
         }
         handler->PSendSysMessage(LANG_COMMAND_LIST_BIND_GROUP_BINDS, counter);

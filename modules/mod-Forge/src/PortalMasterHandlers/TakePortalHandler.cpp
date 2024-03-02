@@ -11,7 +11,7 @@
 class TakePortalHandler : public ForgeTopicHandler
 {
 public:
-    TakePortalHandler(ForgeCache* cache, ForgeCommonMessage* messageCommon) : ForgeTopicHandler(ForgeTopic::SET_SOULSHARDS)
+    TakePortalHandler(ForgeCache* cache, ForgeCommonMessage* messageCommon) : ForgeTopicHandler(ForgeTopic::TAKE_PORTAL_TO)
     {
         fc = cache;
         cm = messageCommon;
@@ -28,15 +28,11 @@ public:
         if (results.empty() || results.size() != 2)
             return;
 
-        uint32 slot = static_cast<uint32>(std::stoul(results[0]));
-        uint32 shard = static_cast<uint32>(std::stoul(results[1]));
+        uint32 id = static_cast<uint32>(std::stoul(results[0]));
+        uint32 map = static_cast<uint32>(std::stoul(results[1]));
 
-        if (slot > MAX_ACTIVE_SHARDS)
-            return;
-
-        if (auto soulshard = fc->PlayerHasSoulShard(iam.player, shard))
-            if (!fc->PlayerHasSoulShardActive(iam.player, shard))
-                fc->SetSoulShardSlotFor(soulshard, slot, iam.player);
+        if (auto loc = sObjectMgr->GetWorldSafeLoc(map, id))
+            iam.player->TeleportTo(loc->Loc);
 
         return;
     }

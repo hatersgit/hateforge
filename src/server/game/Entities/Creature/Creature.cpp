@@ -2096,16 +2096,14 @@ void Creature::setDeathState(DeathState s, bool despawn)
         auto delay = m_corpseDelay;
         CreatureTemplate const* cInfo = GetCreatureTemplate();
 
-        if (IsOutdoors() && cInfo->rank < CREATURE_ELITE_RAREELITE)
+        if (!GetMap()->IsRaid() && !GetMap()->IsDungeon() && !GetMap()->IsBattlegroundOrArena() && cInfo->rank < CREATURE_ELITE_RAREELITE)
             GetMap()->ApplyDynamicModeRespawnScaling(this, GetSpawnId(), delay);
 
         m_corpseRemoveTime = GameTime::GetGameTime().count() + delay;
         m_respawnTime = m_corpseRemoveTime + delay;
 
-        // TODO sheck zone stuff
-
         if (GetMap()->IsRaid() || GetMap()->IsDungeon() || !m_respawnDelay)
-            m_respawnTime = std::numeric_limits<time_t>::max();
+            m_respawnTime = GameTime::GetGameTime().count() + WEEK;
         // always save boss respawn time at death to prevent crash cheating
         if (isWorldBoss() || GetCreatureTemplate()->rank >= CREATURE_ELITE_ELITE)
             SaveRespawnTime();

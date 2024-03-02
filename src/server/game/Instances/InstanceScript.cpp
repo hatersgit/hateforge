@@ -149,12 +149,12 @@ void InstanceScript::OnPlayerEnter(Player* player)
 
     if (_firstEntry) {
         if (instance->GetId() == 189) {
-            auto pos = player->GetPosition();
-            if (pos.GetPositionX() == 1688.98999)
+            int32 posX = player->GetPosition().GetPositionX();
+            if (posX == 1688)
                 SetEntranceLocation(0);
-            else if (pos.GetPositionX() == 855.683)
+            else if (posX == 855)
                 SetEntranceLocation(1);
-            else if (pos.GetPositionX() == 1610.83)
+            else if (posX == 1610)
                 SetEntranceLocation(2);
             else
                 SetEntranceLocation(3);

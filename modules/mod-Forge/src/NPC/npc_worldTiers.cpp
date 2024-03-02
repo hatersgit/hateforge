@@ -58,7 +58,7 @@ struct WorldTierRangeCheck : public BasicEvent
 
 struct PortalMasterRangeCheck : public BasicEvent
 {
-    PortalMasterRangeCheck(Player* player, Creature* cre) : guid(cre->GetGUID()), player(player)
+    PortalMasterRangeCheck(Player* player, GameObject* go) : guid(go->GetGUID()), player(player)
     {
         ASSERT(player->portalMasterNpcCheck == nullptr, "Only one Portal Master check should be active at one time");
         player->portalMasterNpcCheck = this;
@@ -67,10 +67,10 @@ struct PortalMasterRangeCheck : public BasicEvent
 
     bool Execute(uint64, uint32) override
     {
-        Creature const* cre = ObjectAccessor::GetCreature(*player, guid);
-        if (cre && cre->IsWithinDistInMap(player, cre->GetCombatReach() + 5.0f))
+        GameObject const* go = ObjectAccessor::GetGameObject(*player, guid);
+        if (go && go->IsWithinDistInMap(player, go->GetCombatReach()))
         {
-            player->m_Events.AddEvent(this, player->m_Events.CalculateTime(500));
+            player->m_Events.AddEvent(this, player->m_Events.CalculateTime(250));
             return false;
         }
 
@@ -84,10 +84,10 @@ struct PortalMasterRangeCheck : public BasicEvent
     uint32 lastNotSavedAlert = 0;
 };
 
-class go_worldTiers: public GameObjectScript
+class go_worldtiers : public GameObjectScript
 {
 public:
-    go_worldTiers() : GameObjectScript("go_worldTiers") { }
+    go_worldtiers() : GameObjectScript("go_worldtiers") { }
 
     bool OnGossipHello(Player* player, GameObject* go) override
     {
@@ -100,24 +100,24 @@ public:
     }
 };
 
-class npc_portalmaster : public CreatureScript
+class go_portalmaster : public GameObjectScript
 {
 public:
-    npc_portalmaster() : CreatureScript("npc_portalmaster") { }
+    go_portalmaster() : GameObjectScript("go_portalmaster") { }
 
-    bool OnGossipHello(Player* player, Creature* cre) override
+    bool OnGossipHello(Player* player, GameObject* go) override
     {
         WorldSession* session = player->GetSession();
         if (!player->portalMasterNpcCheck)
-            new PortalMasterRangeCheck(player, cre);
+            new PortalMasterRangeCheck(player, go);
 
-        player->SendForgeUIMsg(ForgeTopic::SHOW_PORTAL_MASTER_SELECT, "1");
+        player->SendForgeUIMsg(ForgeTopic::SHOW_PORTAL_MASTER_SELECT, std::to_string(go->GetEntry()));
         return true;
     }
 };
 
 void AddSC_WorldTiers()
 {
-    new go_worldTiers();
-    new npc_portalmaster();
+    new go_worldtiers();
+    new go_portalmaster();
 }

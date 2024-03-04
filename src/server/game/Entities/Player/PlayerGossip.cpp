@@ -89,7 +89,8 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
                 }
                 case GOSSIP_OPTION_LEARNDUALSPEC:
                 case GOSSIP_OPTION_DUALSPEC_INFO:
-                    canTalk = false;
+                    if (!(GetSpecsCount() == 1 && creature->isCanTrainingAndResetTalentsOf(this) && !(GetLevel() < sWorld->getIntConfig(CONFIG_MIN_DUALSPEC_LEVEL))))
+                        canTalk = false;
                     break;
                 case GOSSIP_OPTION_UNLEARNTALENTS:
                     if (!creature->isCanTrainingAndResetTalentsOf(this))
@@ -296,7 +297,6 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
     switch (gossipOptionId)
     {
         case GOSSIP_OPTION_GOSSIP:
-        case GOSSIP_OPTION_DUALSPEC_INFO:
         {
             if (menuItemData->GossipActionPoi)
                 PlayerTalkClass->SendPointOfInterest(menuItemData->GossipActionPoi);
@@ -331,16 +331,7 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
             GetSession()->SendTrainerList(guid);
             break;
         case GOSSIP_OPTION_LEARNDUALSPEC:
-            if (GetSpecsCount() == 1 && GetLevel() >= sWorld->getIntConfig(CONFIG_MIN_DUALSPEC_LEVEL))
-            {
-                // Cast spells that teach dual spec
-                // Both are also ImplicitTarget self and must be cast by player
-                CastSpell(this, 63680, true, nullptr, nullptr, GetGUID());
-                CastSpell(this, 63624, true, nullptr, nullptr, GetGUID());
-
-                PrepareGossipMenu(source, menuItemData->GossipActionMenuId);
-                SendPreparedGossip(source);
-            }
+        case GOSSIP_OPTION_DUALSPEC_INFO:
             break;
         case GOSSIP_OPTION_UNLEARNTALENTS:
             PlayerTalkClass->SendCloseGossip();

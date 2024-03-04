@@ -304,7 +304,7 @@ bool CreatureAI::UpdateVictim()
     // xinef: if we have any victim, just return true
     else if (me->GetVictim() && me->GetExactDist(me->GetVictim()) < 30.0f)
         return true;
-    else if (me->GetThreatManager().GetThreatListSize() <= 1)
+    else if (!me->IsInCombat())
     {
         EnterEvadeMode();
         return false;

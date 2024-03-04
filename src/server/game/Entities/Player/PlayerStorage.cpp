@@ -6653,11 +6653,12 @@ InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty
     MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(mapid, difficulty);
     if (!mapDiff)
         return nullptr;
-
-    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
+    if (!m_boundInstances[difficulty].empty()) {
+        BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
         if (itr != m_boundInstances[difficulty].end())
             if (itr->second.extendState || withExpired)
                 return &itr->second;
+    }
     return nullptr;
 }
 

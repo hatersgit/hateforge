@@ -302,7 +302,7 @@ public:
 
         itemProto->MakeBlankSlate();
         itemProto->SetBonding(NO_BIND);
-        itemProto->SetStackable(0);
+        itemProto->SetStackable(1);
 
         auto e = 2.7183;
         auto invType = itemProto->GetInventoryType();

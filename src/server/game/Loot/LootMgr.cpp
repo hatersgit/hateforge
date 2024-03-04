@@ -561,7 +561,7 @@ void DishOutLoot(Loot* loot, Player* lootOwner, uint8 goldSplit)
                 lootOwner->SendNewItem(newitem, uint32(entry.count), false, false, true);
                 entry.count = 0;
                 entry.is_looted = true;
-                loot->NotifyItemRemoved(entry.itemIndex);
+                loot->items[entry.itemIndex] = entry;
                 --loot->unlootedCount;
             }
         }
@@ -577,7 +577,7 @@ void DishOutLoot(Loot* loot, Player* lootOwner, uint8 goldSplit)
                 lootOwner->SendNewItem(newitem, uint32(entry.count), false, false, true);
                 entry.count = 0;
                 entry.is_looted = true;
-                loot->NotifyItemRemoved(entry.itemIndex);
+                loot->quest_items[entry.itemIndex] = entry;
                 --loot->unlootedCount;
             }
         }

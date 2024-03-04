@@ -2507,7 +2507,7 @@ public:
     uint32 m_HomebindTimer;
     bool m_InstanceValid;
     // permanent binds and solo binds by difficulty
-    BoundInstancesMap m_boundInstances[MAX_DIFFICULTY];
+    BoundInstancesMap m_boundInstances[MAX_DIFFICULTY] = {};
     InstancePlayerBind* GetBoundInstance(uint32 mapid, Difficulty difficulty, bool withExpired = false);
     InstancePlayerBind const* GetBoundInstance(uint32 mapid, Difficulty difficulty) const;
     BoundInstancesMap& GetBoundInstances(Difficulty difficulty) { return m_boundInstances[difficulty]; }

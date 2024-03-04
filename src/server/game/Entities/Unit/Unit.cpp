@@ -1492,6 +1492,11 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss,
         return;
     }
 
+    if (GetTypeId() != TYPEID_PLAYER) {
+        float mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
+        damageInfo->damage *= mod;
+    }
+
     // Call default DealDamage
     CleanDamage cleanDamage(damageInfo->cleanDamage, damageInfo->absorb, BASE_ATTACK, MELEE_HIT_NORMAL);
     Unit::DealDamage(this, victim, damageInfo->damage, &cleanDamage, SPELL_DIRECT_DAMAGE, SpellSchoolMask(damageInfo->schoolMask), spellProto, durabilityLoss, false, spell);
@@ -1923,7 +1928,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
         }
 
         if (GetTypeId() != TYPEID_PLAYER) {
-            float mod = std::pow(1.7f, GetWorldTier() + 1);
+            float mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2)-2.54f;
             damageInfo->damages[i].damage *= mod;
         }
 
@@ -12341,7 +12346,7 @@ void Unit::SetMaxHealth(uint32 val)
         val = 1;
 
     if (GetTypeId() != TYPEID_PLAYER) {
-        float mod = std::pow(1.53f, GetWorldTier() + 1.2)-.64f;
+        float mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
         val = val * mod;
     }
 

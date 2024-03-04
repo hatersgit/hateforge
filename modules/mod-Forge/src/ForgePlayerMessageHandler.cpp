@@ -27,10 +27,10 @@
 #include <ForgeCacheCommands.cpp>
 #include <ActivateClassSpecHandler.cpp>
 #include <GetCollectionsHandler.cpp>
-/* #include <ApplyTransmogHandler.cpp>
-#include <GetTransmogHandler.cpp>
-#include <GetTransmogSetsHandler.cpp>
-#include <SaveTransmogSetHandler.cpp> */
+ /* #include <ApplyTransmogHandler.cpp>
+ #include <GetTransmogHandler.cpp>
+ #include <GetTransmogSetsHandler.cpp>
+ #include <SaveTransmogSetHandler.cpp> */
 #include <StartMythicHandler.cpp>
 #include <GetAffixesHandler.cpp>
 #include <GetCharacterLoadoutsHandler.cpp>
@@ -120,7 +120,7 @@ public:
         }
 
         fc->ApplyActivePerks(player);
-        LearnSpellsForLevel(player);
+        LearnSpellsForLevel(player, player->GetLevel());
 
         if (sConfigMgr->GetBoolDefault("echos", false)) {
             player->SendForgeUIMsg(ForgeTopic::SEND_MAX_WORLD_TIER, std::to_string(fc->GetCharWorldTierUnlock(player)));
@@ -169,7 +169,6 @@ public:
 
     void OnLevelChanged(Player* player, uint8 oldlevel) override
     {
-        player->SetFreeTalentPoints(0);
 
         ForgeCharacterSpec* spec;
         if (fc->TryGetCharacterActiveSpec(player, spec))
@@ -200,12 +199,16 @@ public:
                             fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::CLASS_TREE, 1);
                     }
 
+                    if (currentLevel > 40 && currentLevel < 61) { // temp tp equalizer until talent redo
+                        player->RewardExtraBonusTalentPoints(levelDiff * 2);
+                    }
+
                     cm->SendActiveSpecInfo(player);
                     cm->SendTalents(player);
                 }
                 cm->SendSpecInfo(player);
                 fc->UpdateCharacterSpec(player, spec);
-                LearnSpellsForLevel(player);
+                LearnSpellsForLevel(player, player->GetLevel());
 
                 if (currentLevel == DEFAULT_MAX_LEVEL) {
                     auto tier = player->GetWorldTier();
@@ -226,7 +229,8 @@ public:
                             ChatHandler(player->GetSession()).SendSysMessage("|cffBC961CYou have unlocked World Tier 4.");
                             fc->SetCharWorldTierUnlock(player, tier + 1);
                             break;
-                        }}
+                        }
+                        }
                         player->SendForgeUIMsg(ForgeTopic::SEND_MAX_WORLD_TIER, std::to_string(fc->GetCharWorldTierUnlock(player)));
                     }
                     player->AddItem(TOKEN_OF_PRESTIGE, 1);
@@ -250,7 +254,7 @@ public:
         }
     }
 
-    void OnLearnSpell(Player* player, uint32 spellID) 
+    void OnLearnSpell(Player* player, uint32 spellID)
     {
         // check if its forged.
         if (auto* fs = fc->GetTalent(player, spellID))
@@ -274,23 +278,20 @@ public:
 
     void OnLootItem(Player* player, Item* item, uint32 count, ObjectGuid lootguid) override
     {
-        OnAddItem(player, item->GetTemplate()->ItemId, count);
     }
 
     //called after player.additem is called. DO NOT CREATE LOOPS WITH THIS.
     void OnAddItem(Player* player, uint32 item, uint32 count)
     {
-        
+
     }
 
     void OnCreateItem(Player* player, Item* item, uint32 count) override
     {
-        OnAddItem(player, item->GetTemplate()->ItemId, count);
     }
 
     void OnQuestRewardItem(Player* player, Item* item, uint32 count) override
     {
-        OnAddItem(player, item->GetTemplate()->ItemId, count);
     }
 
     void GenerateItem(CustomItemTemplate* itemProto, Player const* owner) override
@@ -301,12 +302,12 @@ public:
 
         itemProto->MakeBlankSlate();
         itemProto->SetBonding(NO_BIND);
-        itemProto->SetStackable(0);
+        itemProto->SetStackable(1);
 
         auto e = 2.7183;
         auto invType = itemProto->GetInventoryType();
 
-        ItemModType stats[MAINSTATS] = {ITEM_MOD_STRENGTH, ITEM_MOD_AGILITY, ITEM_MOD_INTELLECT };
+        ItemModType stats[MAINSTATS] = { ITEM_MOD_STRENGTH, ITEM_MOD_AGILITY, ITEM_MOD_INTELLECT };
 
         auto slot = fc->_forgeItemSlotValues.find(InventoryType(invType));
         if (slot != fc->_forgeItemSlotValues.end()) {
@@ -314,7 +315,7 @@ public:
             int maxIlvlBase = sConfigMgr->GetIntDefault("WorldTier.base.level", 60);
             int baseIlvl = itemProto->GetItemLevel() > 60 && maxIlvlBase > 60 ? maxIlvlBase : itemProto->GetItemLevel();
 
-            float ilvl = baseIlvl + uint8(owner->GetWorldTier()-1)*10.f;
+            float ilvl = baseIlvl + uint8(owner->GetWorldTier() - 1) * 10.f;
             itemProto->SetItemLevel(ilvl);
             itemProto->SetRequiredLevel(1);
             itemProto->SetAllowableClass(CLASSMASK_ALL_PLAYABLE);
@@ -371,7 +372,7 @@ public:
                     if (dps) {
                         if (mainStat == ITEM_MOD_INTELLECT) {
                             auto sp = itemSlotVal * 2.435;
-                            
+
                             itemProto->SetStatsCount(statCount);
                             itemProto->SetStatType(statCount, ITEM_MOD_SPELL_POWER);
                             itemProto->SetStatValue(statCount, sp);
@@ -395,12 +396,13 @@ public:
                         itemProto->SetMaxDamageMaxA(top);
                     }
                     else { return; }
-                } else /*armor*/ {
+                }
+                else /*armor*/ {
                     switch (itemProto->GetSubClass()) {
                     case ITEM_SUBCLASS_ARMOR_PLATE: {
-                        auto baseArmor = itemProto->GetItemLevel() * 8.f * slotmod;
+                        auto baseArmor = itemProto->GetItemLevel() * 7.6f * slotmod;
                         auto amountForArmor = curValue / 3;
-                        auto bonusArmor = amountForArmor/fc->_forgeItemStatValues[ITEM_MOD_RESILIENCE_RATING];
+                        auto bonusArmor = amountForArmor / fc->_forgeItemStatValues[ITEM_MOD_RESILIENCE_RATING];
 
                         itemProto->SetArmor(int32(baseArmor + bonusArmor));
                         itemProto->SetArmorDamageModifier(int32(bonusArmor));
@@ -426,7 +428,7 @@ public:
                         break;
                     }
                     case ITEM_SUBCLASS_ARMOR_MAIL: {
-                        auto baseArmor = itemProto->GetItemLevel() * 4.5f * slotmod;
+                        auto baseArmor = itemProto->GetItemLevel() * 5.8f * slotmod;
                         auto amountForArmor = curValue / 6;
                         auto bonusArmor = amountForArmor / fc->_forgeItemStatValues[ITEM_MOD_RESILIENCE_RATING];
                         itemProto->SetArmor(int32(baseArmor + bonusArmor));
@@ -434,16 +436,16 @@ public:
                         break;
                     }
                     case ITEM_SUBCLASS_ARMOR_LEATHER: {
-                        itemProto->SetArmor(itemProto->GetItemLevel() * 2.15 * slotmod);
+                        itemProto->SetArmor(itemProto->GetItemLevel() * 3.45 * slotmod);
                         break;
                     }
                     case ITEM_SUBCLASS_ARMOR_CLOTH: {
-                        itemProto->SetArmor(itemProto->GetItemLevel() * 1.08 * slotmod);
+                        itemProto->SetArmor(itemProto->GetItemLevel() * 1.28 * slotmod);
                         break;
                     }
                     case ITEM_SUBCLASS_ARMOR_SHIELD: {
-                        itemProto->SetArmor(itemProto->GetItemLevel() * 36.5f * slotmod);
-                        itemProto->SetBlock(1.f*ilvl);
+                        itemProto->SetArmor(itemProto->GetItemLevel() * 24.5f * slotmod);
+                        itemProto->SetBlock(1.f * ilvl);
                         auto amountForBR = (curValue / 3) / fc->_forgeItemStatValues[ITEM_MOD_BLOCK_RATING];
                         statCount++;
                         itemProto->SetStatsCount(statCount);
@@ -453,10 +455,11 @@ public:
                         secondaryRolls--;
                         curValue -= amountForBR;
                         rolled.push_back(ITEM_MOD_BLOCK_RATING);
-                    }}
+                    }
+                    }
                 }
 
-                
+
                 std::uniform_int_distribution<> secondarydistr(0, 8);
 
                 for (int i = 0; i < secondaryRolls;) {
@@ -468,8 +471,8 @@ public:
                     auto generated = statsToRoll[roll];
                     if (std::find(rolled.begin(), rolled.end(), generated) == rolled.end()) {
                         float split = secondaryRolls > 1 ? secondarydistr(gen) : 0;
-                        auto valueForThis = curValue/(secondaryRolls-i)*(1.f+split/100.f);
-                        auto amount = valueForThis/fc->_forgeItemStatValues[generated];
+                        auto valueForThis = curValue / (secondaryRolls - i) * (1.f + split / 100.f);
+                        auto amount = valueForThis / fc->_forgeItemStatValues[generated];
 
                         statCount++;
                         itemProto->SetStatsCount(statCount);
@@ -487,38 +490,35 @@ public:
             itemProto->Save();
             owner->SendItemQueryPacket(itemProto);
         }
-        return ;
+        return;
     }
 
-    /*void OnGiveXP(Player* player, uint32& amount, Unit* victim) override
+    void OnGiveXP(Player* player, uint32& amount, Unit* victim, uint8 source) override
     {
-        if (Gamemode::HasGameMode(player, GameModeType::CLASSIC))
-            return;
-
         if (player->getLevel() <= 9)
-            amount *= fc->GetConfig("Dynamic.XP.Rate.1-9", 2);
+            amount *= fc->GetConfig("Dynamic.XP.Rate.1-9", 7);
 
         else if (player->getLevel() <= 19)
-            amount *= fc->GetConfig("Dynamic.XP.Rate.10-19", 2);
+            amount *= fc->GetConfig("Dynamic.XP.Rate.10-19", 7);
 
         else if (player->getLevel() <= 29)
-            amount *= fc->GetConfig("Dynamic.XP.Rate.20-29", 3);
+            amount *= fc->GetConfig("Dynamic.XP.Rate.20-29", 7);
 
         else if (player->getLevel() <= 39)
-            amount *= fc->GetConfig("Dynamic.XP.Rate.30-39", 3);
+            amount *= fc->GetConfig("Dynamic.XP.Rate.30-39", 7);
 
         else if (player->getLevel() <= 49)
-            amount *= fc->GetConfig("Dynamic.XP.Rate.40-49", 3);
+            amount *= fc->GetConfig("Dynamic.XP.Rate.40-49", 7);
 
         else if (player->getLevel() <= 59)
-            amount *= fc->GetConfig("Dynamic.XP.Rate.50-59", 3);
+            amount *= fc->GetConfig("Dynamic.XP.Rate.50-59", 7);
 
-        else if (player->getLevel() <= 69)
+        /*else if (player->getLevel() <= 69)
             amount *= fc->GetConfig("Dynamic.XP.Rate.60-69", 4);
 
         else if (player->getLevel() <= 79)
-            amount *= fc->GetConfig("Dynamic.XP.Rate.70-79", 4);
-    }*/
+            amount *= fc->GetConfig("Dynamic.XP.Rate.70-79", 4);*/
+    }
 
     void OnCreatureKill(Player* killer, Creature* killed) override
     {
@@ -537,12 +537,15 @@ public:
                 ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_BOSS_WHISPER, LANG_UNIVERSAL, killed, killer, msg, 0, "", locale);
                 killer->SendDirectMessage(&data);
 
-                auto source = killed->GetCreatureTemplate()->Entry;
-                if (auto shard = fc->GetSoulShard(source)) {
-                    fc->HandleSoulShard(killer, source);
-                } else {
-                    fc->CreateSoulShardFor(killed->GetCreatureTemplate());
-                    fc->HandleSoulShard(killer, source);
+                if (auto source = killed->GetCreatureTemplate()) {
+                    if (auto shard = fc->GetSoulShard(source->Entry)) {
+                        fc->HandleSoulShard(killer, source->Entry);
+                    }
+                    else {
+                        fc->CreateSoulShardFor(killed->GetCreatureTemplate());
+                        fc->HandleSoulShard(killer, source->Entry);
+                    }
+                    cm->SendSoulShards(killer);
                 }
             }
         }
@@ -581,6 +584,60 @@ private:
             }
         }
     }
+
+    // Functions for spells that piggyback trainers: to be deprecated
+    void LearnSpellsForLevel(Player* player, uint8 newlevel) {
+
+        // remove fake death
+        if (player->HasUnitState(UNIT_STATE_DIED))
+            player->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+
+        auto spells = sObjectMgr->getTrainerSpellsForClass();
+        if (!spells.empty()) {
+            LearnSpellsForClass(player, CLASS_DRUID + 3, newlevel, spells);
+            LearnSpellsForClass(player, player->getClass(), newlevel, spells);
+        }
+    }
+
+    void LearnSpellsForClass(Player* player, uint8 search, uint8 newLevel, CacheTrainerSpellByClassContainer pool) {
+        auto classSpells = pool.find(search);
+        if (classSpells != pool.end()) {
+            for (auto spell : classSpells->second)
+            {
+                TrainerSpell const* tSpell = &spell.second;
+
+                if (player->HasSpell(tSpell->spell))
+                    continue;
+
+                bool valid = true;
+                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                {
+                    if (!tSpell->learnedSpell[i])
+                        continue;
+                    if (!player->IsSpellFitByClassAndRace(tSpell->learnedSpell[i]))
+                    {
+                        valid = false;
+                        break;
+                    }
+                }
+
+                if (newLevel < tSpell->reqLevel)
+                    continue;
+
+                if (!valid)
+                    continue;
+
+                if (player->GetTrainerSpellState(tSpell) != TRAINER_SPELL_GREEN)
+                    continue;
+
+                // learn explicitly or cast explicitly
+                if (tSpell->IsCastable())
+                    player->CastSpell(player, tSpell->spell, true);
+                else
+                    player->learnSpell(tSpell->spell);
+            }
+        }
+    }
 };
 
 // Add all scripts in one
@@ -600,11 +657,11 @@ void AddForgePlayerMessageHandler()
     sTopicRouter->AddHandler(new UpdateSpecHandler(cache));
     sTopicRouter->AddHandler(new PrestigeHandler(cache, cm));
     sTopicRouter->AddHandler(new ActivateClassSpecHandler(cache, cm));
-/*  sTopicRouter->AddHandler(new GetCollectionsHandler(cache, cm));
-    sTopicRouter->AddHandler(new ApplyTransmogHandler(cache, cm));
-    sTopicRouter->AddHandler(new SaveTransmogSetHandler(cache, cm));
-    sTopicRouter->AddHandler(new GetTransmogSetsHandler(cache, cm));
-    sTopicRouter->AddHandler(new GetTransmogHandler(cache, cm)); */
+    /*  sTopicRouter->AddHandler(new GetCollectionsHandler(cache, cm));
+        sTopicRouter->AddHandler(new ApplyTransmogHandler(cache, cm));
+        sTopicRouter->AddHandler(new SaveTransmogSetHandler(cache, cm));
+        sTopicRouter->AddHandler(new GetTransmogSetsHandler(cache, cm));
+        sTopicRouter->AddHandler(new GetTransmogHandler(cache, cm)); */
     sTopicRouter->AddHandler(new StartMythicHandler(cache, cm));
     sTopicRouter->AddHandler(new GetAffixesHandler(cache, cm));
     sTopicRouter->AddHandler(new GetCharacterLoadoutsHandler(cache, cm));
@@ -623,6 +680,6 @@ void AddForgePlayerMessageHandler()
 
     sTopicRouter->AddHandler(new TakePortalHandler(cache, cm));
     sTopicRouter->AddHandler(new GetPortalsHandler(cache, cm));
-    
+
     new ForgeCacheCommands();
 }

@@ -1150,7 +1150,7 @@ void Map::AreaTriggerRelocation(AreaTrigger* at, float x, float y, float z, floa
     if (old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell))
     {
 #ifdef ACORE_DEBUG
-        TC_LOG_DEBUG("maps", "AreaTrigger (%s) added to moving list from grid[%u, %u]cell[%u, %u] to grid[%u, %u]cell[%u, %u].", at->GetGUID().ToString().c_str(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
+        LOG_DEBUG("maps", "AreaTrigger (%s) added to moving list from grid[%u, %u]cell[%u, %u] to grid[%u, %u]cell[%u, %u].", at->GetGUID().ToString().c_str(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
 #endif
         AddAreaTriggerToMoveList(at, x, y, z, orientation);
         // in diffcell/diffgrid case notifiers called at finishing move at in Map::MoveAllAreaTriggersInMoveList
@@ -4211,10 +4211,11 @@ void Map::ApplyDynamicModeRespawnScaling(WorldObject const* obj, ObjectGuid::Low
     uint32 const playerCount = it->second;
     if (!playerCount)
         return;
-    double const adjustFactor = obj->GetTypeId() == TYPEID_GAMEOBJECT ? sConfigMgr->GetFloatDefault("DynamicSpawn.GameObject.Step", .8) : sConfigMgr->GetFloatDefault("DynamicSpawn.Creature.Step", .8) / playerCount; // graph z/x adjust z to intended scaling and x is player count
+    double const adjustFactor = obj->GetTypeId() == TYPEID_GAMEOBJECT ? sConfigMgr->GetFloatDefault("DynamicSpawn.GameObject.Step", .1) : sConfigMgr->GetFloatDefault("DynamicSpawn.Creature.Step", .1) / playerCount; // graph z/x adjust z to intended scaling and x is player count
     if (adjustFactor >= 1.0) // nothing to do here
         return;
-    uint32 const timeMinimum = obj->GetTypeId() == TYPEID_GAMEOBJECT ? sConfigMgr->GetIntDefault("DynamicSpawn.GameObject.Min", 10) : sConfigMgr->GetIntDefault("DynamicSpawn.Creature.Min", 10);
+    uint32 timeMinimum = obj->GetTypeId() == TYPEID_GAMEOBJECT ? sConfigMgr->GetIntDefault("DynamicSpawn.GameObject.Min", 20) : sConfigMgr->GetIntDefault("DynamicSpawn.Creature.Min", 20);
+    timeMinimum *= IN_MILLISECONDS;
     if (respawnDelay <= timeMinimum)
         return;
 

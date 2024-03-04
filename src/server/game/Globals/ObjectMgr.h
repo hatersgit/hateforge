@@ -78,7 +78,7 @@ struct TempSummonGroupKey
     bool operator<(TempSummonGroupKey const& rhs) const
     {
         return std::tie(_summonerEntry, _summonerType, _summonGroup) <
-               std::tie(rhs._summonerEntry, rhs._summonerType, rhs._summonGroup);
+            std::tie(rhs._summonerEntry, rhs._summonerType, rhs._summonGroup);
     }
 
 private:
@@ -97,37 +97,37 @@ private:
 // DB scripting commands
 enum ScriptCommands
 {
-    SCRIPT_COMMAND_TALK                  = 0,                // source/target = Creature, target = any, datalong = talk type (0=say, 1=whisper, 2=yell, 3=emote text, 4=boss emote text), datalong2 & 1 = player talk (instead of creature), dataint = string_id
-    SCRIPT_COMMAND_EMOTE                 = 1,                // source/target = Creature, datalong = emote id, datalong2 = 0: set emote state; > 0: play emote state
-    SCRIPT_COMMAND_FIELD_SET             = 2,                // source/target = Creature, datalong = field id, datalog2 = value
-    SCRIPT_COMMAND_MOVE_TO               = 3,                // source/target = Creature, datalong2 = time to reach, x/y/z = destination
-    SCRIPT_COMMAND_FLAG_SET              = 4,                // source/target = Creature, datalong = field id, datalog2 = bitmask
-    SCRIPT_COMMAND_FLAG_REMOVE           = 5,                // source/target = Creature, datalong = field id, datalog2 = bitmask
-    SCRIPT_COMMAND_TELEPORT_TO           = 6,                // source/target = Creature/Player (see datalong2), datalong = map_id, datalong2 = 0: Player; 1: Creature, x/y/z = destination, o = orientation
-    SCRIPT_COMMAND_QUEST_EXPLORED        = 7,                // target/source = Player, target/source = GO/Creature, datalong = quest id, datalong2 = distance or 0
-    SCRIPT_COMMAND_KILL_CREDIT           = 8,                // target/source = Player, datalong = creature entry, datalong2 = 0: personal credit, 1: group credit
-    SCRIPT_COMMAND_RESPAWN_GAMEOBJECT    = 9,                // source = WorldObject (summoner), datalong = GO guid, datalong2 = despawn delay
-    SCRIPT_COMMAND_TEMP_SUMMON_CREATURE  = 10,               // source = WorldObject (summoner), datalong = creature entry, datalong2 = despawn delay, x/y/z = summon position, o = orientation
-    SCRIPT_COMMAND_OPEN_DOOR             = 11,               // source = Unit, datalong = GO guid, datalong2 = reset delay (min 15)
-    SCRIPT_COMMAND_CLOSE_DOOR            = 12,               // source = Unit, datalong = GO guid, datalong2 = reset delay (min 15)
-    SCRIPT_COMMAND_ACTIVATE_OBJECT       = 13,               // source = Unit, target = GO
-    SCRIPT_COMMAND_REMOVE_AURA           = 14,               // source (datalong2 != 0) or target (datalong2 == 0) = Unit, datalong = spell id
-    SCRIPT_COMMAND_CAST_SPELL            = 15,               // source and/or target = Unit, datalong2 = cast direction (0: s->t 1: s->s 2: t->t 3: t->s 4: s->creature with dataint entry), dataint & 1 = triggered flag
-    SCRIPT_COMMAND_PLAY_SOUND            = 16,               // source = WorldObject, target = none/Player, datalong = sound id, datalong2 (bitmask: 0/1=anyone/player, 0/2=without/with distance dependency, so 1|2 = 3 is target with distance dependency)
-    SCRIPT_COMMAND_CREATE_ITEM           = 17,               // target/source = Player, datalong = item entry, datalong2 = amount
-    SCRIPT_COMMAND_DESPAWN_SELF          = 18,               // target/source = Creature, datalong = despawn delay
+    SCRIPT_COMMAND_TALK = 0,                // source/target = Creature, target = any, datalong = talk type (0=say, 1=whisper, 2=yell, 3=emote text, 4=boss emote text), datalong2 & 1 = player talk (instead of creature), dataint = string_id
+    SCRIPT_COMMAND_EMOTE = 1,                // source/target = Creature, datalong = emote id, datalong2 = 0: set emote state; > 0: play emote state
+    SCRIPT_COMMAND_FIELD_SET = 2,                // source/target = Creature, datalong = field id, datalog2 = value
+    SCRIPT_COMMAND_MOVE_TO = 3,                // source/target = Creature, datalong2 = time to reach, x/y/z = destination
+    SCRIPT_COMMAND_FLAG_SET = 4,                // source/target = Creature, datalong = field id, datalog2 = bitmask
+    SCRIPT_COMMAND_FLAG_REMOVE = 5,                // source/target = Creature, datalong = field id, datalog2 = bitmask
+    SCRIPT_COMMAND_TELEPORT_TO = 6,                // source/target = Creature/Player (see datalong2), datalong = map_id, datalong2 = 0: Player; 1: Creature, x/y/z = destination, o = orientation
+    SCRIPT_COMMAND_QUEST_EXPLORED = 7,                // target/source = Player, target/source = GO/Creature, datalong = quest id, datalong2 = distance or 0
+    SCRIPT_COMMAND_KILL_CREDIT = 8,                // target/source = Player, datalong = creature entry, datalong2 = 0: personal credit, 1: group credit
+    SCRIPT_COMMAND_RESPAWN_GAMEOBJECT = 9,                // source = WorldObject (summoner), datalong = GO guid, datalong2 = despawn delay
+    SCRIPT_COMMAND_TEMP_SUMMON_CREATURE = 10,               // source = WorldObject (summoner), datalong = creature entry, datalong2 = despawn delay, x/y/z = summon position, o = orientation
+    SCRIPT_COMMAND_OPEN_DOOR = 11,               // source = Unit, datalong = GO guid, datalong2 = reset delay (min 15)
+    SCRIPT_COMMAND_CLOSE_DOOR = 12,               // source = Unit, datalong = GO guid, datalong2 = reset delay (min 15)
+    SCRIPT_COMMAND_ACTIVATE_OBJECT = 13,               // source = Unit, target = GO
+    SCRIPT_COMMAND_REMOVE_AURA = 14,               // source (datalong2 != 0) or target (datalong2 == 0) = Unit, datalong = spell id
+    SCRIPT_COMMAND_CAST_SPELL = 15,               // source and/or target = Unit, datalong2 = cast direction (0: s->t 1: s->s 2: t->t 3: t->s 4: s->creature with dataint entry), dataint & 1 = triggered flag
+    SCRIPT_COMMAND_PLAY_SOUND = 16,               // source = WorldObject, target = none/Player, datalong = sound id, datalong2 (bitmask: 0/1=anyone/player, 0/2=without/with distance dependency, so 1|2 = 3 is target with distance dependency)
+    SCRIPT_COMMAND_CREATE_ITEM = 17,               // target/source = Player, datalong = item entry, datalong2 = amount
+    SCRIPT_COMMAND_DESPAWN_SELF = 18,               // target/source = Creature, datalong = despawn delay
 
-    SCRIPT_COMMAND_LOAD_PATH             = 20,               // source = Unit, datalong = path id, datalong2 = is repeatable
-    SCRIPT_COMMAND_CALLSCRIPT_TO_UNIT    = 21,               // source = WorldObject (if present used as a search center), datalong = script id, datalong2 = unit lowguid, dataint = script table to use (see ScriptsType)
-    SCRIPT_COMMAND_KILL                  = 22,               // source/target = Creature, dataint = remove corpse attribute
+    SCRIPT_COMMAND_LOAD_PATH = 20,               // source = Unit, datalong = path id, datalong2 = is repeatable
+    SCRIPT_COMMAND_CALLSCRIPT_TO_UNIT = 21,               // source = WorldObject (if present used as a search center), datalong = script id, datalong2 = unit lowguid, dataint = script table to use (see ScriptsType)
+    SCRIPT_COMMAND_KILL = 22,               // source/target = Creature, dataint = remove corpse attribute
 
     // AzerothCore only
-    SCRIPT_COMMAND_ORIENTATION           = 30,               // source = Unit, target (datalong > 0) = Unit, datalong = > 0 turn source to face target, o = orientation
-    SCRIPT_COMMAND_EQUIP                 = 31,               // soucre = Creature, datalong = equipment id
-    SCRIPT_COMMAND_MODEL                 = 32,               // source = Creature, datalong = model id
-    SCRIPT_COMMAND_CLOSE_GOSSIP          = 33,               // source = Player
-    SCRIPT_COMMAND_PLAYMOVIE             = 34,               // source = Player, datalong = movie id
-    SCRIPT_COMMAND_MOVEMENT              = 35                // soucre = Creature, datalong = MovementType, datalong2 = MovementDistance (wander_distance f.ex.), dataint = pathid
+    SCRIPT_COMMAND_ORIENTATION = 30,               // source = Unit, target (datalong > 0) = Unit, datalong = > 0 turn source to face target, o = orientation
+    SCRIPT_COMMAND_EQUIP = 31,               // soucre = Creature, datalong = equipment id
+    SCRIPT_COMMAND_MODEL = 32,               // source = Creature, datalong = model id
+    SCRIPT_COMMAND_CLOSE_GOSSIP = 33,               // source = Player
+    SCRIPT_COMMAND_PLAYMOVIE = 34,               // source = Player, datalong = movie id
+    SCRIPT_COMMAND_MOVEMENT = 35                // soucre = Creature, datalong = MovementType, datalong2 = MovementDistance (wander_distance f.ex.), dataint = pathid
 };
 
 // Benchmarked: Faster than std::unordered_map (insert/find)
@@ -163,34 +163,34 @@ enum ScriptsType
 enum eScriptFlags
 {
     // Talk Flags
-    SF_TALK_USE_PLAYER          = 0x1,
+    SF_TALK_USE_PLAYER = 0x1,
 
     // Emote flags
-    SF_EMOTE_USE_STATE          = 0x1,
+    SF_EMOTE_USE_STATE = 0x1,
 
     // TeleportTo flags
-    SF_TELEPORT_USE_CREATURE    = 0x1,
+    SF_TELEPORT_USE_CREATURE = 0x1,
 
     // KillCredit flags
-    SF_KILLCREDIT_REWARD_GROUP  = 0x1,
+    SF_KILLCREDIT_REWARD_GROUP = 0x1,
 
     // RemoveAura flags
-    SF_REMOVEAURA_REVERSE       = 0x1,
+    SF_REMOVEAURA_REVERSE = 0x1,
 
     // CastSpell flags
     SF_CASTSPELL_SOURCE_TO_TARGET = 0,
     SF_CASTSPELL_SOURCE_TO_SOURCE = 1,
     SF_CASTSPELL_TARGET_TO_TARGET = 2,
     SF_CASTSPELL_TARGET_TO_SOURCE = 3,
-    SF_CASTSPELL_SEARCH_CREATURE  = 4,
-    SF_CASTSPELL_TRIGGERED      = 0x1,
+    SF_CASTSPELL_SEARCH_CREATURE = 4,
+    SF_CASTSPELL_TRIGGERED = 0x1,
 
     // Playsound flags
-    SF_PLAYSOUND_TARGET_PLAYER  = 0x1,
+    SF_PLAYSOUND_TARGET_PLAYER = 0x1,
     SF_PLAYSOUND_DISTANCE_SOUND = 0x2,
 
     // Orientation flags
-    SF_ORIENTATION_FACE_TARGET  = 0x1,
+    SF_ORIENTATION_FACE_TARGET = 0x1,
 };
 
 struct ScriptInfo
@@ -468,19 +468,19 @@ struct BroadcastText
         FemaleText.resize(DEFAULT_LOCALE + 1);
     }
 
-    uint32 Id{0};
-    uint32 LanguageID{0};
+    uint32 Id{ 0 };
+    uint32 LanguageID{ 0 };
     std::vector<std::string> MaleText;
     std::vector<std::string> FemaleText;
-    uint32 EmoteId1{0};
-    uint32 EmoteId2{0};
-    uint32 EmoteId3{0};
-    uint32 EmoteDelay1{0};
-    uint32 EmoteDelay2{0};
-    uint32 EmoteDelay3{0};
-    uint32 SoundEntriesId{0};
-    uint32 EmotesID{0};
-    uint32 Flags{0};
+    uint32 EmoteId1{ 0 };
+    uint32 EmoteId2{ 0 };
+    uint32 EmoteId3{ 0 };
+    uint32 EmoteDelay1{ 0 };
+    uint32 EmoteDelay2{ 0 };
+    uint32 EmoteDelay3{ 0 };
+    uint32 SoundEntriesId{ 0 };
+    uint32 EmotesID{ 0 };
+    uint32 Flags{ 0 };
     // uint32 VerifiedBuild;
 
     [[nodiscard]] std::string const& GetText(LocaleConstant locale = DEFAULT_LOCALE, uint8 gender = GENDER_MALE, bool forceGender = false) const
@@ -556,21 +556,21 @@ struct PetLevelInfo
     }
 
     std::array<uint32, MAX_STATS> stats = { };
-    uint32 health{0};
-    uint32 mana{0};
-    uint32 armor{0};
-    uint32 min_dmg{0};
-    uint32 max_dmg{0};
+    uint32 health{ 0 };
+    uint32 mana{ 0 };
+    uint32 armor{ 0 };
+    uint32 min_dmg{ 0 };
+    uint32 max_dmg{ 0 };
 };
 
 struct MailLevelReward
 {
-    MailLevelReward()  = default;
+    MailLevelReward() = default;
     MailLevelReward(uint32 _raceMask, uint32 _mailTemplateId, uint32 _senderEntry) : raceMask(_raceMask), mailTemplateId(_mailTemplateId), senderEntry(_senderEntry) {}
 
-    uint32 raceMask{0};
-    uint32 mailTemplateId{0};
-    uint32 senderEntry{0};
+    uint32 raceMask{ 0 };
+    uint32 mailTemplateId{ 0 };
+    uint32 senderEntry{ 0 };
 };
 
 typedef std::list<MailLevelReward> MailLevelRewardList;
@@ -671,25 +671,25 @@ typedef std::pair<GossipMenuItemsContainer::iterator, GossipMenuItemsContainer::
 
 struct QuestPOIPoint
 {
-    int32 x{0};
-    int32 y{0};
+    int32 x{ 0 };
+    int32 y{ 0 };
 
-    QuestPOIPoint()  = default;
+    QuestPOIPoint() = default;
     QuestPOIPoint(int32 _x, int32 _y) : x(_x), y(_y) {}
 };
 
 struct QuestPOI
 {
-    uint32 Id{0};
-    int32 ObjectiveIndex{0};
-    uint32 MapId{0};
-    uint32 AreaId{0};
-    uint32 FloorId{0};
-    uint32 Unk3{0};
-    uint32 Unk4{0};
+    uint32 Id{ 0 };
+    int32 ObjectiveIndex{ 0 };
+    uint32 MapId{ 0 };
+    uint32 AreaId{ 0 };
+    uint32 FloorId{ 0 };
+    uint32 Unk3{ 0 };
+    uint32 Unk4{ 0 };
     std::vector<QuestPOIPoint> points;
 
-    QuestPOI()  = default;
+    QuestPOI() = default;
     QuestPOI(uint32 id, int32 objIndex, uint32 mapId, uint32 areaId, uint32 floorId, uint32 unk3, uint32 unk4) : Id(id), ObjectiveIndex(objIndex), MapId(mapId), AreaId(areaId), FloorId(floorId), Unk3(unk3), Unk4(unk4) {}
 };
 
@@ -700,6 +700,8 @@ typedef std::array<std::unordered_map<uint32, QuestGreeting>, 2> QuestGreetingCo
 
 typedef std::unordered_map<uint32, VendorItemData> CacheVendorItemContainer;
 typedef std::unordered_map<uint32, TrainerSpellData> CacheTrainerSpellContainer;
+typedef std::unordered_map<uint8 /*classid*/, std::unordered_map<uint32 /*spellid*/, TrainerSpell>> CacheTrainerSpellByClassContainer;
+
 typedef std::unordered_map<uint32, ServerMail> ServerMailContainer;
 
 typedef std::vector<uint32> CreatureCustomIDsContainer;
@@ -1223,7 +1225,7 @@ public:
         if (map_itr == _mailLevelRewardStore.end())
             return nullptr;
 
-        for (const auto & set_itr : map_itr->second)
+        for (const auto& set_itr : map_itr->second)
             if (set_itr.raceMask & raceMask)
                 return &set_itr;
 
@@ -1299,7 +1301,7 @@ public:
     {
         GameObjectDataContainer::const_iterator itr = _gameObjectDataStore.find(spawnId);
         if (itr == _gameObjectDataStore.end()) return nullptr;
-            return &itr->second;
+        return &itr->second;
     }
     [[nodiscard]] CreatureLocale const* GetCreatureLocale(uint32 entry) const
     {
@@ -1467,7 +1469,7 @@ public:
         return &iter->second;
     }
 
-    CacheVendorItemContainer GetVendorData() { return _cacheVendorItemStore; }  
+    CacheVendorItemContainer GetVendorData() { return _cacheVendorItemStore; }
     std::vector<CreatureTemplate*> GetCreatureData() { return _creatureTemplateStoreFast; }
 
     void AddVendorItem(uint32 entry, uint32 item, int32 maxcount, uint32 incrtime, uint32 extendedCost, bool persist = true); // for event
@@ -1552,6 +1554,8 @@ public:
     // hater: curves
     void LoadATCurves();
     void LoadATCurvePoints();
+
+    CacheTrainerSpellByClassContainer getTrainerSpellsForClass();
 
     [[nodiscard]] SpellChargeEntry* TryGetChargeEntry(flag96 flags) const
     {
@@ -1776,7 +1780,7 @@ public:
 
         return 0.0f;
     }
-    
+
 private:
     // first free id for selected id type
     uint32 _auctionId; // pussywizard: accessed by a single thread
@@ -1949,6 +1953,7 @@ private:
 
     CacheVendorItemContainer _cacheVendorItemStore;
     CacheTrainerSpellContainer _cacheTrainerSpellStore;
+    CacheTrainerSpellByClassContainer _cacheTrainerSpellByClass;
 
     ServerMailContainer _serverMailStore;
 

@@ -24,3 +24,6 @@ CREATE TABLE `acore_characters`.`character_accountwide_mount` (
   `accountId` INT UNSIGNED NOT NULL,
   `spellId` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`accountId`, `spellId`));
+
+ALTER TABLE `item_instance` ADD COLUMN `enchant` INT UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `item_instance` ADD COLUMN `transmog` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `text`;

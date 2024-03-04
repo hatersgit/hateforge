@@ -434,7 +434,7 @@ void WorldSession::HandleBinderActivateOpcode(WorldPacket& recvData)
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    SendBindPoint(unit);
+    //SendBindPoint(unit);
 }
 
 void WorldSession::SendBindPoint(Creature* npc)

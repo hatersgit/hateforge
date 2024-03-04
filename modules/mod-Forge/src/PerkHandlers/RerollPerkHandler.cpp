@@ -42,7 +42,7 @@ public:
                 return;
             }
 
-            if (true/*iam.player->HasItemCount(REROLL_TOKEN)*/) {
+            if (iam.player->HasItemCount(REROLL_TOKEN)) {
                 for (int i = CharacterPerkType::COMBAT; i < CharacterPerkType::MAX; i++) {
                     auto type = CharacterPerkType(i);
                     auto csp = spec->perks[type].find(spellId);

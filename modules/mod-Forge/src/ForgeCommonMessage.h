@@ -47,6 +47,9 @@ public:
     void SendAllPerks(Player*);
     void SendPerkSelection(Player*, std::string);
 
+    // hater: soulshards
+    void SendSoulShards(Player*);
+
     std::string DoBuildPerks(std::vector<CharacterSpecPerk*> spec, Player* player);
 private:
     std::string DoBuildRanks(std::unordered_map<uint32, ForgeCharacterTalent*>& spec, Player* player, std::string clientMsg, uint32 tabId);

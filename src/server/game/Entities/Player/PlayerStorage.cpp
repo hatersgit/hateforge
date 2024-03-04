@@ -4550,8 +4550,10 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                             ApplyRatingMod(CR_BLOCK, enchant_amount, apply);
                             LOG_DEBUG("entities.player.items", "+ {} SHIELD_BLOCK", enchant_amount);
                             break;
-                        case ITEM_MOD_CRIT_MELEE_RATING:
+                        case ITEM_MOD_CRIT_RATING:
                             ApplyRatingMod(CR_CRIT_MELEE, enchant_amount, apply);
+                            ApplyRatingMod(CR_CRIT_RANGED, enchant_amount, apply);
+                            ApplyRatingMod(CR_CRIT_SPELL, enchant_amount, apply);
                             LOG_DEBUG("entities.player.items", "+ {} MELEE_CRIT", enchant_amount);
                             break;
                         case ITEM_MOD_RESILIENCE_RATING:
@@ -6567,7 +6569,7 @@ void Player::_LoadGroup()
 void Player::_LoadBoundInstances(PreparedQueryResult result)
 {
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
-        m_boundInstances[Difficulty(i)].clear();
+        m_boundInstances[i].clear();
 
     Group* group = GetGroup();
 
@@ -6653,9 +6655,9 @@ InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty
         return nullptr;
 
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
-    if (itr != m_boundInstances[difficulty].end())
-        if (itr->second.extendState || withExpired)
-            return &itr->second;
+        if (itr != m_boundInstances[difficulty].end())
+            if (itr->second.extendState || withExpired)
+                return &itr->second;
     return nullptr;
 }
 

@@ -230,7 +230,7 @@ class ForgeCache : public DatabaseScript
 {
 public:
 
-    static ForgeCache *instance()
+    static ForgeCache* instance()
     {
         static ForgeCache* cache;
 
@@ -442,7 +442,7 @@ public:
             }
         }
 
-    
+
         ForgeCharacterPoint* fcp = new ForgeCharacterPoint();
         fcp->PointType = pointType;
         fcp->SpecId = specId;
@@ -734,7 +734,7 @@ public:
             return fpd->second;
     }
 
-    void AddCharacterPointsToAllSpecs(Player* player, CharacterPointType pointType,  uint32 amount)
+    void AddCharacterPointsToAllSpecs(Player* player, CharacterPointType pointType, uint32 amount)
     {
         ForgeCharacterPoint* m = GetMaxPointDefaults(pointType);
         ForgeCharacterPoint* ccp = GetCommonCharacterPoint(player, pointType);
@@ -1071,7 +1071,7 @@ public:
         case CharacterPointType::TALENT_TREE:
             if (level > 1) {
                 int div = level / 2;
-               amount = div;
+                amount = div;
             }
             else
                 if (level % 2)
@@ -1117,7 +1117,7 @@ public:
     };
     // hater: player loadout storage
     std::unordered_map<uint32 /*guid*/, std::unordered_map<uint32 /*tabId*/, std::unordered_map<uint8 /*id*/, PlayerLoadout*>>> _playerTalentLoadouts;
-    std::unordered_map<uint32 /*guid*/,PlayerLoadout*> _playerActiveTalentLoadouts;
+    std::unordered_map<uint32 /*guid*/, PlayerLoadout*> _playerActiveTalentLoadouts;
 
     std::unordered_map<uint32 /*class*/, uint32 /*spec*/> _playerClassFirstSpec;
 
@@ -1174,7 +1174,7 @@ public:
                     loadout += base64_char.substr(1, 1);
                 }
             }
-            
+
             auto guid = player->GetGUID().GetCounter();
 
             PlayerLoadout* plo = new PlayerLoadout();
@@ -1260,82 +1260,75 @@ private:
             }
         }
 
-        try {
-            GetCharacters();
-            GetConfig();
-            AddTalentTrees();
-            AddTalentsToTrees();
-            AddLevelClassSpellMap();
-            AddTalentPrereqs();
-            AddTalentChoiceNodes();
-            AddTalentRanks();
-            AddTalentUnlearn();
-            AddCharacterSpecs();
-            AddTalentSpent();
-            AddCharacterTalents();
-            //AddCharacterChoiceNodes();
+        GetCharacters();
+        GetConfig();
+        AddTalentTrees();
+        AddTalentsToTrees();
+        AddLevelClassSpellMap();
+        AddTalentPrereqs();
+        AddTalentChoiceNodes();
+        AddTalentRanks();
+        AddTalentUnlearn();
+        AddCharacterSpecs();
+        AddTalentSpent();
+        AddCharacterTalents();
+        AddCharacterChoiceNodes();
 
-            AddPlayerTalentLoadouts();
+        AddPlayerTalentLoadouts();
 
-            LOG_INFO("server.load", "Loading characters points...");
-            AddCharacterPointsFromDB();
-            AddCharacterClassSpecs();
-            AddCharacterXmogSets();
+        LOG_INFO("server.load", "Loading characters points...");
+        AddCharacterPointsFromDB();
+        AddCharacterClassSpecs();
+        AddCharacterXmogSets();
 
-            LOG_INFO("server.load", "Loading m+ difficulty multipliers...");
-            sObjectMgr->LoadInstanceDifficultyMultiplier();
-            LOG_INFO("server.load", "Loading m+ difficulty level scales...");
-            sObjectMgr->LoadMythicLevelScale();
-            LOG_INFO("server.load", "Loading m+ minion values...");
-            sObjectMgr->LoadMythicMinionValue();
-            LOG_INFO("server.load", "Loading m+ keys...");
-            sObjectMgr->LoadMythicDungeonKeyMap();
-            LOG_INFO("server.load", "Loading m+ affixes...");
-            sObjectMgr->LoadMythicAffixes();
+        LOG_INFO("server.load", "Loading m+ difficulty multipliers...");
+        sObjectMgr->LoadInstanceDifficultyMultiplier();
+        LOG_INFO("server.load", "Loading m+ difficulty level scales...");
+        sObjectMgr->LoadMythicLevelScale();
+        LOG_INFO("server.load", "Loading m+ minion values...");
+        sObjectMgr->LoadMythicMinionValue();
+        LOG_INFO("server.load", "Loading m+ keys...");
+        sObjectMgr->LoadMythicDungeonKeyMap();
+        LOG_INFO("server.load", "Loading m+ affixes...");
+        sObjectMgr->LoadMythicAffixes();
 
-            LOG_INFO("server.load", "Loading npc sounds...");
-            sObjectMgr->LoadNpcSounds();
+        LOG_INFO("server.load", "Loading npc sounds...");
+        sObjectMgr->LoadNpcSounds();
 
-            LOG_INFO("server.load", "Loading character spell unlearn flags...");
-            AddSpellUnlearnFlags();
-            LOG_INFO("server.load", "Loading character spell learn additional spells...");
-            AddSpellLearnAdditionalSpells();
+        LOG_INFO("server.load", "Loading character spell unlearn flags...");
+        AddSpellUnlearnFlags();
+        LOG_INFO("server.load", "Loading character spell learn additional spells...");
+        AddSpellLearnAdditionalSpells();
 
-            LOG_INFO("server.load", "Loading curves...");
-            sObjectMgr->LoadATCurves();
-            LOG_INFO("server.load", "Loading curve points...");
-            sObjectMgr->LoadATCurvePoints();
+        LOG_INFO("server.load", "Loading curves...");
+        sObjectMgr->LoadATCurves();
+        LOG_INFO("server.load", "Loading curve points...");
+        sObjectMgr->LoadATCurvePoints();
 
-            // hater: CUSTOM ITEMS
-            AddItemSlotValue();
-            AddItemStatValue();
-            AddItemStatPools();
+        // hater: CUSTOM ITEMS
+        AddItemSlotValue();
+        AddItemStatValue();
+        AddItemStatPools();
 
-            // hater: perks
-            AddPerks();
-            AddPerkRanks();
-            AddArchetypes();
-            AddCharacterPerks();
-            AddCharacterQueuedPerks();
-            AddCharacterPrestigePerks();
+        // hater: perks
+        AddPerks();
+        AddPerkRanks();
+        AddArchetypes();
+        AddCharacterPerks();
+        AddCharacterQueuedPerks();
+        AddCharacterPrestigePerks();
 
-            // hater: force talent resets
-            LoadCharacterResetFlags();
-            // hater: soul shards
-            AddSoulShards();
-            AddPlayerSoulShards();
+        // hater: force talent resets
+        LoadCharacterResetFlags();
+        // hater: soul shards
+        AddSoulShards();
+        AddPlayerSoulShards();
 
-            // hater: world tiers
-            AddWorldTierUnlocks();
-            AddStartingZones();
+        // hater: world tiers
+        AddWorldTierUnlocks();
+        AddStartingZones();
 
-            AddRaidRotation();
-        }
-        catch (std::exception & ex) {
-            std::string error = ex.what();
-            LOG_ERROR("server.load", "ERROR IN FORGE CACHE BUILD: " + error);
-            throw ex;
-        }
+        AddRaidRotation();
     }
 
     void GetCharacters()
@@ -1436,7 +1429,7 @@ private:
 
         for (auto& kvp : spec->PointsSpent)
         {
-            if(TalentTabs[kvp.first]->TalentType != ACCOUNT_WIDE_TYPE)
+            if (TalentTabs[kvp.first]->TalentType != ACCOUNT_WIDE_TYPE)
                 trans->Append("INSERT INTO forge_character_talents_spent(`guid`,`spec`,`tabid`,`spent`) VALUES({}, {}, {}, {}) ON DUPLICATE KEY UPDATE spent = {}",
                     guid, spec->Id, kvp.first, kvp.second,
                     kvp.second);
@@ -1463,7 +1456,7 @@ private:
     {
         LOG_INFO("server.load", "Loading character xmog sets...");
         QueryResult xmogSets = CharacterDatabase.Query("SELECT * FROM `forge_character_transmogsets`");
-        
+
         if (!xmogSets)
             return;
 
@@ -1532,7 +1525,8 @@ private:
         int i = 0;
         for (auto it = playerSets.cbegin(), end = playerSets.cend();
             it != end && i == it->first; ++it, ++i)
-        { }
+        {
+        }
         return i;
     }
 
@@ -1581,7 +1575,7 @@ private:
                             if (newTab->Id < firstSpec->second)
                                 _playerClassFirstSpec[classBit] = newTab->Id;
                         }
-                        else 
+                        else
                             _playerClassFirstSpec[classBit] = newTab->Id;
 
                         RaceAndClassTabMap[race.first][wowClass.first].insert(newTab->Id);
@@ -1726,13 +1720,16 @@ private:
                         }
                         else
                             LOG_ERROR("FORGE.ForgeCache", "Prereq cannot be mapped to existing talent meta data.");
-                    } else {
+                    }
+                    else {
                         LOG_ERROR("FORGE.ForgeCache", "Prereq spell not found in tab.");
                     }
-                } else {
+                }
+                else {
                     LOG_ERROR("FORGE.ForgeCache", "Prereq spell tab not found.");
                 }
-            } else {
+            }
+            else {
                 LOG_ERROR("FORGE.ForgeCache", "Talent tab store is empty.");
             }
         } while (preReqTalents->NextRow());
@@ -1867,7 +1864,7 @@ private:
 
         if (!charSpecs)
             return;
-        
+
         do
         {
             Field* specFields = charSpecs->Fetch();
@@ -1906,13 +1903,13 @@ private:
             if (spec != ACCOUNT_WIDE_KEY)
             {
                 ObjectGuid guid = ObjectGuid::Create<HighGuid::Player>(id);
-               
+
                 CharacterSpecs[guid][spec]->PointsSpent[tabId] = talentFields[3].Get<uint8>();
             }
             else
             {
                 auto aws = AccountWideCharacterSpecs.find(id);
-                
+
 
                 if (aws == AccountWideCharacterSpecs.end())
                     AccountWideCharacterSpecs[id] = new ForgeCharacterSpec();
@@ -1950,7 +1947,7 @@ private:
             if (specId != ACCOUNT_WIDE_KEY)
             {
                 ForgeTalent* ft = TalentTabs[talent->TabId]->Talents[talent->SpellId];
-                ForgeCharacterSpec * spec = CharacterSpecs[characterGuid][specId];
+                ForgeCharacterSpec* spec = CharacterSpecs[characterGuid][specId];
                 talent->type = ft->nodeType;
                 spec->Talents[talent->TabId][talent->SpellId] = talent;
             }
@@ -2002,7 +1999,7 @@ private:
                     for (auto& ch : PlayerCharacterMap[guid])
                         for (auto& spec : CharacterSpecs[ch])
                             CharacterPoints[ch][cp->PointType][spec.first] = cp;
-                        
+
                 }
                 else
                 {
@@ -2010,40 +2007,40 @@ private:
                     CharacterPoints[og][cp->PointType][cp->SpecId] = cp;
                 }
             }
-            
+
         } while (pointsQuery->NextRow());
     }
 
     void AddCharacterClassSpecs()
     {
-       /* QueryResult specsQuery = WorldDatabase.Query("SELECT sl.DisplayName_Lang_enUS as specName, sl.SpellIconID as specIcon, src.ClassMask, src.RaceMask, sl.id FROM acore_world.db_SkillLine_12340 sl LEFT JOIN acore_world.db_SkillRaceClassInfo_12340 src ON src.SkillID = sl.id WHERE sl.CategoryID = 7 AND ClassMask IS NOT NULL AND sl.SpellIconID != 1 AND sl.SpellIconID != 0 order by src.ClassMask asc, sl.DisplayName_Lang_enUS asc");
+        /* QueryResult specsQuery = WorldDatabase.Query("SELECT sl.DisplayName_Lang_enUS as specName, sl.SpellIconID as specIcon, src.ClassMask, src.RaceMask, sl.id FROM acore_world.db_SkillLine_12340 sl LEFT JOIN acore_world.db_SkillRaceClassInfo_12340 src ON src.SkillID = sl.id WHERE sl.CategoryID = 7 AND ClassMask IS NOT NULL AND sl.SpellIconID != 1 AND sl.SpellIconID != 0 order by src.ClassMask asc, sl.DisplayName_Lang_enUS asc");
 
 
-        if (!specsQuery)
-            return;
+         if (!specsQuery)
+             return;
 
-        do
-        {
-            Field* spec = specsQuery->Fetch();
-            ClassSpecDetail* cs = new ClassSpecDetail();
-            cs->Name = spec[0].Get<std::string>();
-            cs->SpellIconId = spec[1].Get<uint32>();
-            cs->SpecId = spec[4].Get<uint32>();
+         do
+         {
+             Field* spec = specsQuery->Fetch();
+             ClassSpecDetail* cs = new ClassSpecDetail();
+             cs->Name = spec[0].Get<std::string>();
+             cs->SpellIconId = spec[1].Get<uint32>();
+             cs->SpecId = spec[4].Get<uint32>();
 
-            uint32 classMask = spec[2].Get<uint32>();
-            std::string raceMMask = spec[3].Get<std::string>();
+             uint32 classMask = spec[2].Get<uint32>();
+             std::string raceMMask = spec[3].Get<std::string>();
 
-            if (raceMMask == "-1")
-            {
-                for (const auto& race : RACE_LIST)
-                    ClassSpecDetails[race][classMask].push_back(cs);
-            }
-            else
-            {
-                ClassSpecDetails[static_cast<uint32_t>(std::stoul(raceMMask))][classMask].push_back(cs);
-            }
+             if (raceMMask == "-1")
+             {
+                 for (const auto& race : RACE_LIST)
+                     ClassSpecDetails[race][classMask].push_back(cs);
+             }
+             else
+             {
+                 ClassSpecDetails[static_cast<uint32_t>(std::stoul(raceMMask))][classMask].push_back(cs);
+             }
 
-        } while (specsQuery->NextRow());*/
+         } while (specsQuery->NextRow());*/
     }
 
     void AddPlayerSpellScaler()
@@ -2215,7 +2212,7 @@ private:
         } while (values->NextRow());
     }
 
-// perks
+    // perks
 public:
 
     // hater: perks
@@ -2763,12 +2760,12 @@ private:
         } while (prestigeQuery->NextRow());
     }
 
-// soul shards
+    // soul shards
 public:
-    #define MAX_SOUL_GROUPS 3
-    #define SOUL_SHARD_UPGRADE_THRESHOLD 2
-    #define SOUL_SHARD_UPGRADE_MAX 2
-    #define MAX_ACTIVE_SHARDS 5
+#define MAX_SOUL_GROUPS 3
+#define SOUL_SHARD_UPGRADE_THRESHOLD 2
+#define SOUL_SHARD_UPGRADE_MAX 2
+#define MAX_ACTIVE_SHARDS 5
 
     enum SoulShardQuality {
         NULLSHARD = 0,
@@ -2779,7 +2776,7 @@ public:
         SHARD_LEGENDARY = 5,
     };
 
-    #define SHARD_GROUP_SIZE 8
+#define SHARD_GROUP_SIZE 8
     enum SoulTypeGroups {
         BEAST = CREATURE_TYPE_BEAST,
         DRAGONKIN = CREATURE_TYPE_DRAGONKIN,
@@ -2839,63 +2836,66 @@ public:
         auto source = killed->Entry;
         auto groupOne = killed->type;
 
-        SoulShard shard = SoulShard();
+        SoulShard* shard = new SoulShard();
         switch (killed->rank) {
-        case CREATURE_ELITE_NORMAL:
-            shard.quality = SHARD_COMMON;
-            break;
         case CREATURE_ELITE_ELITE:
         case CREATURE_ELITE_RAREELITE:
-            shard.quality = SHARD_UNCOMMON;
+            shard->quality = SHARD_UNCOMMON;
             break;
         case CREATURE_ELITE_WORLDBOSS:
-            shard.quality = SHARD_RARE;
+            shard->quality = SHARD_RARE;
+            break;
+        default:
+            shard->quality = SHARD_COMMON;
             break;
         }
-        shard.source = source;
-        shard.special = 0; // TODO: eventually map to raid
+        shard->source = source;
+        shard->special = 0; // TODO: eventually map to raid
         for (int i = 0; i < MAX_SOUL_GROUPS; i++)
         {
             switch (i) {
             case 0:
-                shard.groups[i] = killed->type;
+                shard->groups[i] = killed->type;
                 break;
             case 1:
-                shard.groups[i] = 0;
+                shard->groups[i] = 0;
                 break;
             case 2:
-                shard.groups[i] = 0;
+                shard->groups[i] = 0;
                 break;
             }
         }
 
         WorldDatabase.DirectExecute("INSERT INTO acore_world.soul_shards (source, quality, group1, group2, group3, bonus_effect) VALUES({}, {}, {}, {}, {}, {})",
-            shard.source, shard.quality, shard.groups[0], shard.groups[1], shard.groups[2], shard.special);
+            shard->source, shard->quality, shard->groups[0], shard->groups[1], shard->groups[2], shard->special);
 
-        SoulShards[source] = &shard;
+        SoulShards[source] = shard;
     }
 
     void HandleSoulShard(Player* player, uint32 source)
     {
-        SoulShard* shard = SoulShards[source];
-        auto account = player->GetSession()->GetAccountId();
-        auto acctFound = _charSoulShards.find(account);
-        if (acctFound != _charSoulShards.end()) {
-            auto shardFound = _charSoulShards[account].find(source);
-            if (shardFound != _charSoulShards[account].end()) {
-                PlayerSoulShard* pShard = _charSoulShards[account][source];
-                pShard->count += 1;
-                if (pShard->rank < pShard->shard->quality+3)
-                if (pShard->count > std::pow(SOUL_SHARD_UPGRADE_THRESHOLD, pShard->rank)) {
-                    pShard->count = 1;
-                    pShard->rank += 1;
+        if (source) {
+            if (SoulShard* shard = GetSoulShard(source)) {
+                auto account = player->GetSession()->GetAccountId();
+                auto acctFound = _charSoulShards.find(account);
+                if (acctFound != _charSoulShards.end()) {
+                    auto shardFound = _charSoulShards[account].find(source);
+                    if (shardFound != _charSoulShards[account].end()) {
+                        PlayerSoulShard* pShard = _charSoulShards[account][source];
+                        pShard->count += 1;
+                        if (pShard->rank < pShard->shard->quality + 3)
+                            if (pShard->count > std::pow(SOUL_SHARD_UPGRADE_THRESHOLD, pShard->rank)) {
+                                pShard->count = 1;
+                                pShard->rank += 1;
+                            }
+                        _charSoulShards[account][source] = pShard;
+                        HandleSoulShardAcquired(player, shard, false);
+                        return;
+                    }
                 }
-                _charSoulShards[account][source] = pShard;
-                HandleSoulShardAcquired(player, shard, false);
-                return;
+                HandleSoulShardAcquired(player, shard, true);
             }
         }
-        HandleSoulShardAcquired(player, shard, true);
     }
 
     std::unordered_map<uint32 /*source*/, PlayerSoulShard*> GetPlayerSoulShards(Player* player) {
@@ -2936,7 +2936,7 @@ public:
     void FillBlankSoulShards(Player* player) {
         auto pChar = player->GetGUID().GetCounter();
         for (int i = 0; i < MAX_ACTIVE_SHARDS; i++)
-            _charActiveShards[pChar][i] =new PlayerSoulShard();
+            _charActiveShards[pChar][i] = new PlayerSoulShard();
 
         SaveActiveShards(player);
 
@@ -2993,15 +2993,15 @@ public:
     }
 public:
     struct RaidRotation {
-        uint32 id = 0;
-        WorldSafeLocsEntry* raid1Loc = nullptr;
-        WorldSafeLocsEntry* raid2Loc = nullptr;
-        WorldSafeLocsEntry* raid3Loc = nullptr;
-        uint32 startTime = 0;
-        uint8 sequence = 1;
-        bool active = false;
+        uint32 id;
+        uint32 raid1Loc;
+        uint32 raid2Loc;
+        uint32 raid3Loc;
+        uint32 startTime;
+        uint8 sequence;
+        bool active;
 
-        RaidRotation(uint32 id, WorldSafeLocsEntry* r1, WorldSafeLocsEntry* r2, WorldSafeLocsEntry* r3, uint32 start, uint8 sequence, bool active) {
+        RaidRotation(uint32 id, uint32 r1, uint32 r2, uint32 r3, uint32 start, uint8 sequence, bool active) {
             this->id = id;
             this->raid1Loc = r1;
             this->raid2Loc = r2;
@@ -3026,6 +3026,7 @@ private:
     {
         LOG_INFO("server.load", "Loading raid rotation...");
         _raidRotations.clear();
+        _raidRotationsBySequence.clear();
 
         QueryResult raidResult = WorldDatabase.Query("SELECT * FROM `forge_raid_rotation`");
         if (!raidResult) return;
@@ -3037,16 +3038,14 @@ private:
         {
             Field* raidFields = raidResult->Fetch();
             uint32 id = raidFields[0].Get<uint32>();
-            uint32 loc1 = raidFields[1].Get<uint32>();
-            uint32 loc2 = raidFields[2].Get<uint32>();
-            uint32 loc3 = raidFields[3].Get<uint32>();
+            uint32 r1 = raidFields[1].Get<uint32>();
+            uint32 r2 = raidFields[2].Get<uint32>();
+            uint32 r3 = raidFields[3].Get<uint32>();
             uint32 startTime = raidFields[4].Get<uint32>();
             bool active = raidFields[5].Get<bool>();
             uint8 sequence = raidFields[6].Get<uint8>();
 
-            WorldSafeLocsEntry* r1 = sObjectMgr->GetWorldSafeLoc(loc1, 0);
-            WorldSafeLocsEntry* r2 = sObjectMgr->GetWorldSafeLoc(loc2, 0);
-            WorldSafeLocsEntry* r3 = sObjectMgr->GetWorldSafeLoc(loc3, 0);
+
             RaidRotation* rot = new RaidRotation(id, r1, r2, r3, startTime, sequence, active);
 
             _raidRotations[id] = rot;
@@ -3071,11 +3070,13 @@ private:
             if (newSeq > maxSequence)
                 newSeq = 1;
 
-            RaidRotation newRot = *_raidRotationsBySequence[newSeq];
-            newRot.startTime = GameTime::GetGameTime().count();
-            _activeRaidRotation = _raidRotationsBySequence[newSeq];
+            RaidRotation* newRot = _raidRotationsBySequence[newSeq];
+            newRot->active = true;
+            newRot->startTime = GameTime::GetGameTime().count();
+            _raidRotationsBySequence[newSeq] = newRot;
+            _activeRaidRotation = newRot;
 
-            WorldDatabase.DirectExecute("UPDATE `forge_raid_rotation` set `active` = 1 and `timeOfStart` = {} where `ID` = {}", newRot.startTime, newRot.id);
+            WorldDatabase.DirectExecute("UPDATE `forge_raid_rotation` set `active` = 1 and `timeOfStart` = {} where `ID` = {}", newRot->startTime, newRot->id);
         }
     }
 
@@ -3086,7 +3087,7 @@ private:
     std::unordered_map<uint32 /*char*/, std::unordered_map<SoulTypeGroups, uint8>> _charShardBonuses;
 
     std::vector<uint32> _shardGroupBonusAuras = { 0, BEAST_AURA , DRAGONKIN_AURA, DEMON_AURA , ELEMENTAL_AURA ,
-        GIANT_AURA, UNDEAD_AURA, HUMANOID_AURA, 0, MECHANICAL_AURA};
+        GIANT_AURA, UNDEAD_AURA, HUMANOID_AURA, 0, MECHANICAL_AURA };
 
     void ApplyShardBonuses(Player* player) {
         ClearShardBonuses(player);
@@ -3162,7 +3163,7 @@ private:
 
             SoulShard* realShard = SoulShards[source];
             PlayerSoulShard* shard = new PlayerSoulShard(source, count, rank, realShard);
-            
+
             _charSoulShards[account][source] = shard;
         } while (SoulShardResult->NextRow());
     }
@@ -3208,7 +3209,7 @@ private:
             _startingZones[race] = WorldLocation(map, x, y, z, o);
         } while (ZoneResult->NextRow());
     }
-// world tiers
+    // world tiers
 public:
     uint8 GetAccountWorldTierUnlock(Player* player) {
         auto account = player->GetSession()->GetAccountId();
@@ -3277,7 +3278,7 @@ private:
         } while (chartUnlockResult->NextRow());
     }
 
-// talent resets
+    // talent resets
 public:
     bool IsFlaggedReset(uint32 guid) {
         auto flagged = std::find(FlaggedForReset.begin(), FlaggedForReset.end(), guid);

@@ -551,16 +551,37 @@ void Loot::AddItem(LootStoreItem const& item, WorldObject* source)
 
 void DishOutLoot(Loot* loot, Player* lootOwner, uint8 goldSplit)
 {
-    std::vector<uint32> looted = {};
-    for (auto entry : loot->items) {
-        if (entry.AllowedForPlayer(lootOwner, loot->sourceWorldObjectGUID))
-            if (lootOwner->GetFreeInventorySpace() > 0 && std::find(looted.begin(), looted.end(), entry.itemIndex) == looted.end()) {
-                lootOwner->AddItem(entry.itemid, entry.count);
-                looted.push_back(entry.itemIndex);
+    for (LootItem entry : loot->items) {
+        if (entry.AllowedForPlayer(lootOwner, loot->sourceWorldObjectGUID)) {
+            ItemPosCountVec dest;
+            auto canStore = lootOwner->CanStoreItem(NULL_BAG, NULL_SLOT, dest, entry.itemid, entry.count);
+            if (canStore == EQUIP_ERR_OK) {
+                AllowedLooterSet looters = entry.GetAllowedLooters();
+                Item* newitem = lootOwner->StoreNewItem(dest, entry.itemid, true, entry.randomPropertyId, looters);
+                lootOwner->SendNewItem(newitem, uint32(entry.count), false, false, true);
+                entry.count = 0;
+                entry.is_looted = true;
+                loot->NotifyItemRemoved(entry.itemIndex);
+                --loot->unlootedCount;
             }
+        }
     }
 
-    lootOwner->ModifyMoney(loot->gold/goldSplit);
+    for (auto entry : loot->quest_items) {
+        if (entry.AllowedForPlayer(lootOwner, loot->sourceWorldObjectGUID)) {
+            ItemPosCountVec dest;
+            auto canStore = lootOwner->CanStoreItem(NULL_BAG, NULL_SLOT, dest, entry.itemid, entry.count);
+            if (canStore == EQUIP_ERR_OK) {
+                AllowedLooterSet looters = entry.GetAllowedLooters();
+                Item* newitem = lootOwner->StoreNewItem(dest, entry.itemid, true, entry.randomPropertyId, looters);
+                lootOwner->SendNewItem(newitem, uint32(entry.count), false, false, true);
+                entry.count = 0;
+                entry.is_looted = true;
+                loot->NotifyItemRemoved(entry.itemIndex);
+                --loot->unlootedCount;
+            }
+        }
+    }
 }
 
 // Calls processor of corresponding LootTemplate (which handles everything including references)
@@ -589,7 +610,8 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
         {
             Player* member = ObjectAccessor::FindPlayer(mitr->guid);
             if (member)
-                if (member->GetMap()->GetId() == lootOwner->GetMap()->GetId() && member->GetWorldTier() == lootOwner->GetWorldTier())
+                if (member->GetMap()->GetId() == lootOwner->GetMap()->GetId() && member->GetWorldTier() == lootOwner->GetWorldTier() &&
+                    lootOwner->IsAtLootRewardDistance(member))
                 {
                     tab->Process(*this, store, lootMode, member, 0, true);
                     DishOutLoot(this, member, group->GetMembersCount());
@@ -602,9 +624,6 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     }
 
     sScriptMgr->OnAfterLootTemplateProcess(this, tab, store, lootOwner, personal, noEmptyError, lootMode);
-
-    gold = 0;
-    clear();
     return true;
 }
 

@@ -67,10 +67,10 @@ enum ItemModType
     //ITEM_MOD_HIT_RATING                       = 31, // Obsolete
     ITEM_MOD_SP_NATURE_FIRE = 31,
     //ITEM_MOD_CRIT_RATING                      = 32,
-    ITEM_MOD_SP_FROST_ARCANE = 32,
+    ITEM_MOD_CRIT_RATING = 32,
 
     ITEM_MOD_HIT_TAKEN_RATING = 33,
-    ITEM_MOD_CRIT_MELEE_RATING = 34,
+    ITEM_MOD_CRIT_TAKEN_RATING = 34,
     ITEM_MOD_RESILIENCE_RATING = 35,
 
     ITEM_MOD_HASTE_RATING                     = 36,

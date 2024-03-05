@@ -114,6 +114,8 @@ public:
                     fc->UpdateCharacterSpec(iam.player, spec);
                 }
 
+                iam.player->ClearBonusTalentPoints();
+                iam.player->resetAllSpecs();
                 iam.player->SetUInt32Value(PLAYER_XP, 0);
                 iam.player->SetLevel(1);
                 iam.player->_RemoveAllItemMods();
@@ -134,6 +136,7 @@ public:
                 iam.player->SetFullHealth();
 
                 iam.player->ClearQuestStatus(DO_NOT_CLEAR_THESE_QUESTS);
+                iam.player->resetSpells();
 
                 iam.player->SetPower(POWER_MANA, iam.player->GetMaxPower(POWER_MANA));
                 iam.player->SetPower(POWER_ENERGY, iam.player->GetMaxPower(POWER_ENERGY));

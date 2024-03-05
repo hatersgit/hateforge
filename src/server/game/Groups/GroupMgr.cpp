@@ -249,24 +249,25 @@ void GroupMgr::LoadGroups()
         do
         {
             Field* fields = result->Fetch();
-            Group* group = GetGroupByDbStoreId(fields[0].Get<uint32>());
-            // group will never be NULL (we have run consistency sql's before loading)
+            if (Group* group = GetGroupByDbStoreId(fields[0].Get<uint32>())) {
+                // group will never be NULL (we have run consistency sql's before loading)
 
-            MapEntry const* mapEntry = sMapStore.LookupEntry(fields[1].Get<uint16>());
-            if (!mapEntry || !mapEntry->IsDungeon())
-            {
-                LOG_INFO("sql.sql", "Incorrect entry in group_instance table : no dungeon map %d", fields[1].Get<uint16>());
-                continue;
+                MapEntry const* mapEntry = sMapStore.LookupEntry(fields[1].Get<uint16>());
+                if (!mapEntry || !mapEntry->IsDungeon())
+                {
+                    LOG_INFO("sql.sql", "Incorrect entry in group_instance table : no dungeon map %d", fields[1].Get<uint16>());
+                    continue;
+                }
+
+                uint32 diff = fields[4].Get<uint8>();
+                auto difficultyEntry = GetMapDifficultyData(mapEntry->MapID, Difficulty(diff));
+                if (!difficultyEntry)
+                    continue;
+
+                InstanceSave* save = sInstanceSaveMgr->AddInstanceSave(mapEntry->MapID, fields[2].Get<uint32>(), Difficulty(diff), time_t(fields[5].Get<uint32>()), fields[6].Get<uint32>(), fields[7].Get<uint64>() == 0, true);
+                group->BindToInstance(save, fields[3].Get<bool>(), true);
+                ++count;
             }
-
-            uint32 diff = fields[4].Get<uint8>();
-            auto difficultyEntry = GetMapDifficultyData(mapEntry->MapID, Difficulty(diff));
-            if (!difficultyEntry)
-                continue;
-
-            InstanceSave* save = sInstanceSaveMgr->AddInstanceSave(mapEntry->MapID, fields[2].Get<uint32>(), Difficulty(diff), time_t(fields[5].Get<uint32>()), fields[6].Get<uint32>(), fields[7].Get<uint64>() == 0, true);
-            group->BindToInstance(save, fields[3].Get<bool>(), true);
-            ++count;
         } while (result->NextRow());
 
         LOG_INFO("server.loading", ">> Loaded %u group-instance saves in %u ms", count, GetMSTimeDiffToNow(oldMSTime));

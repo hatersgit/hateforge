@@ -6383,6 +6383,11 @@ void Player::RewardExtraBonusTalentPoints(uint32 bonusTalentPoints)
     }
 }
 
+void Player::ClearBonusTalentPoints()
+{
+    m_extraBonusTalentCount = 0;
+}
+
 ///Calculate the amount of honor gained based on the victim
 ///and the size of the group for which the honor is divided
 ///An exact honor value can also be given (overriding the calcs)

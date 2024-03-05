@@ -1165,31 +1165,19 @@ public:
     void EchosDefaultLoadout(Player* player)
     {
         std::list<ForgeTalentTab*> tabs;
-        std::string loadout = "AD";
-        if (TryGetForgeTalentTabs(player, CharacterPointType::TALENT_TREE, tabs)) {
-            loadout += base64_char.substr(player->getClass(), 1);
-            for (auto tab : tabs) {
-                auto specMap = _cacheSpecNodeToSpell[tab->Id];
-                for (int i = 1; i <= specMap.size(); i++) {
-                    loadout += base64_char.substr(1, 1);
-                }
-            }
+        std::string loadout = "Default";
+        PlayerLoadout* plo = new PlayerLoadout();
+        plo->active = true;
+        plo->id = 1;
+        plo->name = "Default";
+        plo->tabId = 1;
+        plo->talentString = loadout;
 
-            auto guid = player->GetGUID().GetCounter();
+        _playerTalentLoadouts[player->GetGUID().GetCounter()][1][plo->id] = plo;
+        _playerActiveTalentLoadouts[player->GetGUID().GetCounter()] = plo;
 
-            PlayerLoadout* plo = new PlayerLoadout();
-            plo->active = true;
-            plo->id = 1;
-            plo->name = "Default";
-            plo->tabId = 1;
-            plo->talentString = loadout;
-
-            _playerTalentLoadouts[guid][1][plo->id] = plo;
-            _playerActiveTalentLoadouts[guid] = plo;
-
-            CharacterDatabase.Execute("insert into `forge_character_talent_loadouts` (`guid`, `id`, `talentTabId`, `name`, `talentString`, `active`) values ({}, {}, {}, '{}', '{}', {})",
-                guid, plo->id, 1, plo->name, loadout, true);
-        }
+        CharacterDatabase.Execute("insert into `forge_character_talent_loadouts` (`guid`, `id`, `talentTabId`, `name`, `talentString`, `active`) values ({}, {}, {}, '{}', '{}', {})",
+            player->GetGUID().GetCounter(), plo->id, 1, plo->name, loadout, true);
     }
 
 private:

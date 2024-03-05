@@ -123,6 +123,10 @@ public:
         LearnSpellsForLevel(player, player->GetLevel());
 
         if (sConfigMgr->GetBoolDefault("echos", false)) {
+            auto foundLoadout = fc->_playerActiveTalentLoadouts.find(player->GetGUID().GetCounter());
+            if (foundLoadout == fc->_playerActiveTalentLoadouts.end()) {
+                fc->EchosDefaultLoadout(player);
+            }
             player->SendForgeUIMsg(ForgeTopic::SEND_MAX_WORLD_TIER, std::to_string(fc->GetCharWorldTierUnlock(player)));
             fc->RecalculateShardBonuses(player);
         }
@@ -200,7 +204,7 @@ public:
                     }
 
                     if (currentLevel > 40 && currentLevel < 61) { // temp tp equalizer until talent redo
-                        player->RewardExtraBonusTalentPoints(levelDiff * 2);
+                        player->RewardExtraBonusTalentPoints(levelDiff);
                     }
 
                     cm->SendActiveSpecInfo(player);

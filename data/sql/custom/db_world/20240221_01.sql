@@ -93,4 +93,3 @@ INSERT INTO acore_world.world_safe_locs (ID, `Map`, LocX, LocY, LocZ, Facing) VA
 INSERT INTO acore_world.world_safe_locs (ID, `Map`, LocX, LocY, LocZ, Facing) VALUES(0, 658, 435.743, 212.413, 528.709, 6.25646);
 INSERT INTO acore_world.world_safe_locs (ID, `Map`, LocX, LocY, LocZ, Facing) VALUES(0, 668, 5239.01, 1932.64, 707.695, 0.800565);
 INSERT INTO acore_world.world_safe_locs (ID, `Map`, LocX, LocY, LocZ, Facing) VALUES(0, 724, 3274.0, 533.531, 87.665, 3.16);
-

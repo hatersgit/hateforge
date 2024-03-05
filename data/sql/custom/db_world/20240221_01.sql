@@ -7,7 +7,7 @@ CREATE TABLE `world_safe_locs` (
   `LocY` float NOT NULL,
   `LocZ` float NOT NULL,
   `Facing` float NOT NULL,
-  PRIMARY KEY (`Map`)
+  PRIMARY KEY (`ID`,`Map`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC;
 
 INSERT INTO acore_world.world_safe_locs (ID, `Map`, LocX, LocY, LocZ, Facing) VALUES(0, 0, -8827.66, 620.367, 94.2332, 3.7);
@@ -93,4 +93,3 @@ INSERT INTO acore_world.world_safe_locs (ID, `Map`, LocX, LocY, LocZ, Facing) VA
 INSERT INTO acore_world.world_safe_locs (ID, `Map`, LocX, LocY, LocZ, Facing) VALUES(0, 658, 435.743, 212.413, 528.709, 6.25646);
 INSERT INTO acore_world.world_safe_locs (ID, `Map`, LocX, LocY, LocZ, Facing) VALUES(0, 668, 5239.01, 1932.64, 707.695, 0.800565);
 INSERT INTO acore_world.world_safe_locs (ID, `Map`, LocX, LocY, LocZ, Facing) VALUES(0, 724, 3274.0, 533.531, 87.665, 3.16);
-

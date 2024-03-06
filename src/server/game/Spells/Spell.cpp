@@ -4568,7 +4568,7 @@ void Spell::WriteCastResultInfo(WorldPacket& data, Player* caster, SpellInfo con
                 for (int8 eff = 0; eff < MAX_SPELL_EFFECTS; eff++)
                     if (spellInfo->Effects[eff].ItemType)
                         item = spellInfo->Effects[eff].ItemType;
-                ItemTemplate const* proto = sObjectMgr->GetItemTemplate(item);
+                ItemTemplate const* proto = sObjectMgr->GetItemTemplateMutable(item);
                 if (proto && proto->ItemLimitCategory)
                     data << uint32(proto->ItemLimitCategory);
                 break;
@@ -4896,7 +4896,7 @@ void Spell::WriteAmmoToPacket(WorldPacket* data)
                 uint32 ammoID = m_caster->ToPlayer()->GetUInt32Value(PLAYER_AMMO_ID);
                 if (ammoID)
                 {
-                    ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(ammoID);
+                    ItemTemplate const* pProto = sObjectMgr->GetItemTemplateMutable(ammoID);
                     if (pProto)
                     {
                         ammoDisplayID = pProto->DisplayInfoID;
@@ -7368,7 +7368,7 @@ SpellCastResult Spell::CheckItems()
 
                     if (m_spellInfo->Effects[i].ItemType)
                     {
-                        ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(m_spellInfo->Effects[i].ItemType);
+                        ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplateMutable(m_spellInfo->Effects[i].ItemType);
                         if (!itemTemplate)
                             return SPELL_FAILED_ITEM_NOT_FOUND;
 
@@ -7631,7 +7631,7 @@ SpellCastResult Spell::CheckItems()
                             //         return SPELL_FAILED_NO_AMMO;
                             //     }
 
-                            //     ItemTemplate const* ammoProto = sObjectMgr->GetItemTemplate(ammo);
+                            //     ItemTemplate const* ammoProto = sObjectMgr->GetItemTemplateMutable(ammo);
                             //     if (!ammoProto)
                             //         return SPELL_FAILED_NO_AMMO;
 
@@ -7671,7 +7671,7 @@ SpellCastResult Spell::CheckItems()
             case SPELL_EFFECT_CREATE_MANA_GEM:
                 {
                     uint32 item_id = m_spellInfo->Effects[i].ItemType;
-                    ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(item_id);
+                    ItemTemplate const* pProto = sObjectMgr->GetItemTemplateMutable(item_id);
 
                     if (!pProto)
                         return SPELL_FAILED_ITEM_AT_MAX_CHARGES;

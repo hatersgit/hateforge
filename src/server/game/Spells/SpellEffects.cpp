@@ -1707,7 +1707,7 @@ void Spell::DoCreateItem(uint8 /*effIndex*/, uint32 itemId)
 
     uint32 newitemid = itemId;
 
-    ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(newitemid);
+    ItemTemplate const* pProto = sObjectMgr->GetItemTemplateMutable(newitemid);
     if (!pProto)
     {
         player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, nullptr, nullptr);
@@ -6314,7 +6314,7 @@ void Spell::EffectLearnTransmogSet(SpellEffIndex effIndex)
 
     for (uint32 i = 0; i < MAX_ITEM_SET_ITEMS; ++i)
         if (setEntry->itemId[i])
-            Transmogrification::instance().AddToCollection(player, sObjectMgr->GetItemTemplate(setEntry->itemId[i]));
+            Transmogrification::instance().AddToCollection(player, sObjectMgr->GetItemTemplateMutable(setEntry->itemId[i]));
 }
 
 void Spell::EffectJumpCharge(SpellEffIndex effIndex)
@@ -6566,7 +6566,7 @@ void Spell::EffectRechargeManaGem(SpellEffIndex /*effIndex*/)
 
     uint32 item_id = m_spellInfo->Effects[EFFECT_0].ItemType;
 
-    ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(item_id);
+    ItemTemplate const* pProto = sObjectMgr->GetItemTemplateMutable(item_id);
     if (!pProto)
     {
         player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, nullptr, nullptr);

@@ -636,7 +636,7 @@ bool Player::Create(ObjectGuid::LowType guidlow, CharacterCreateInfo* createInfo
             uint32 itemId = oEntry->ItemId[j];
 
             // just skip, reported in ObjectMgr::LoadItemTemplates
-            ItemTemplate const* iProto = sObjectMgr->GetItemTemplate(itemId);
+            ItemTemplate const* iProto = sObjectMgr->GetItemTemplateMutable(itemId);
             if (!iProto)
                 continue;
 
@@ -1227,7 +1227,7 @@ bool Player::BuildEnumData(PreparedQueryResult result, WorldPacket* data)
         ItemTemplate const* proto = nullptr;
         if (itemId)
         {
-            proto = sObjectMgr->GetItemTemplate(*itemId);
+            proto = sObjectMgr->GetItemTemplateMutable(*itemId);
         }
 
         if (!proto)
@@ -5946,7 +5946,7 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type)
             }
             break;
         case ACTION_BUTTON_ITEM:
-            if (!sObjectMgr->GetItemTemplate(action))
+            if (!sObjectMgr->GetItemTemplateMutable(action))
             {
                 LOG_ERROR("entities.player", "Item action {} not added into button {} for player {}: item not exist", action, button, GetName());
                 return false;
@@ -7995,7 +7995,7 @@ void Player::_ApplyAmmoBonuses()
 
     // float currentAmmoDPS;
 
-    // ItemTemplate const* ammo_proto = sObjectMgr->GetItemTemplate(ammo_id);
+    // ItemTemplate const* ammo_proto = sObjectMgr->GetItemTemplateMutable(ammo_id);
     // if (!ammo_proto || ammo_proto->Class != ITEM_CLASS_PROJECTILE || !CheckAmmoCompatibility(ammo_proto))
     //     currentAmmoDPS = 0.0f;
     // else
@@ -11070,7 +11070,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorguid, uint32 vendorslot, uin
     if (!IsAlive())
         return false;
 
-    ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(item);
+    ItemTemplate const* pProto = sObjectMgr->GetItemTemplateMutable(item);
     if (!pProto)
     {
         SendBuyError(BUY_ERR_CANT_FIND_ITEM, nullptr, item, 0);
@@ -11264,7 +11264,7 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
 
     if (itemId)
     {
-        if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId))
+        if (ItemTemplate const* proto = sObjectMgr->GetItemTemplateMutable(itemId))
         {
             for (uint8 idx = 0; idx < MAX_ITEM_SPELLS; ++idx)
             {
@@ -11581,7 +11581,7 @@ bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)
                 if (!gemid)
                     continue;
 
-                ItemTemplate const* gemProto = sObjectMgr->GetItemTemplate(gemid);
+                ItemTemplate const* gemProto = sObjectMgr->GetItemTemplateMutable(gemid);
                 if (!gemProto)
                     continue;
 
@@ -14247,7 +14247,7 @@ InventoryResult Player::CanEquipUniqueItem(Item* pItem, uint8 eslot, uint32 limi
         if (!enchantEntry)
             continue;
 
-        ItemTemplate const* pGem = sObjectMgr->GetItemTemplate(enchantEntry->GemID);
+        ItemTemplate const* pGem = sObjectMgr->GetItemTemplateMutable(enchantEntry->GemID);
         if (!pGem)
             continue;
 

@@ -1623,7 +1623,7 @@ public:
 
     static bool HandleAddItemCommand(ChatHandler* handler, Optional<PlayerIdentifier> player, ItemTemplate const* itemTemplate, Optional<int32> _count)
     {
-        if (!sObjectMgr->GetItemTemplate(itemTemplate->ItemId))
+        if (!sObjectMgr->GetItemTemplateMutable(itemTemplate->ItemId))
         {
             handler->SendErrorMessage(LANG_COMMAND_ITEMIDINVALID, itemTemplate->ItemId);
             return false;
@@ -1742,7 +1742,7 @@ public:
 
         bool found = false;
 
-        for (auto const& [itemid, itemTemplate] : *sObjectMgr->GetItemTemplateStore())
+        for (auto const& [itemid, itemTemplate] : *sObjectMgr->GetItemTemplateMutableStore())
         {
             if (itemTemplate.ItemSet == uint32(itemSetId))
             {

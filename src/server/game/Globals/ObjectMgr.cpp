@@ -3341,13 +3341,13 @@ ItemTemplate const* ObjectMgr::GetItemTemplate(uint32 entry)
 // hater: custom items
 ItemTemplate* ObjectMgr::GetItemTemplateMutable(uint32 entry)
 {
-    return _itemTemplateStoreFast[entry];
+    return &_itemTemplateStore[entry];
 }
 
 ItemTemplate* ObjectMgr::CreateItemTemplate(uint32 entry, uint32 copyID)
 {
     // hater: TY Tester for giving us the MRs for all custom item stuff :)
-    ItemTemplate* copy = (_itemTemplateStoreFast[entry] = _itemTemplateStoreFast[copyID]);
+    ItemTemplate* copy = &(_itemTemplateStore[entry] = _itemTemplateStore[copyID]);
     copy->ItemId = entry;
     copy->m_isDirty = true;
     copy->_LoadTotalAP();

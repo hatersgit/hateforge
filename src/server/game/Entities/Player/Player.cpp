@@ -14047,14 +14047,15 @@ LootItem* Player::StoreLootItem(uint8 lootSlot, Loot* loot, InventoryResult& msg
 
         --loot->unlootedCount;
 
+        if (newitem)
+            sScriptMgr->OnLootItem(this, newitem, item->count, this->GetLootGUID());
+
         SendNewItem(newitem, uint32(item->count), false, false, true);
         UpdateLootAchievements(item, loot);
 
         // LootItem is being removed (looted) from the container, delete it from the DB.
         if (loot->containerGUID)
             sLootItemStorage->RemoveStoredLootItem(loot->containerGUID, item->itemid, item->count, loot, item->itemIndex);
-
-        sScriptMgr->OnLootItem(this, newitem, item->count, this->GetLootGUID());
     }
     else
     {
@@ -16245,7 +16246,7 @@ void Player::SendItemQueryPacket(CustomItemTemplate* curItem) const
 {
     if (curItem)
     {
-        curItem->_GetInfo()->InitializeQueryData();
+        curItem->InitializeQueryData();
         WorldPacket* response = curItem->_GetInfo()->GetQueryData();
         GetSession()->SendPacket(response);
     }

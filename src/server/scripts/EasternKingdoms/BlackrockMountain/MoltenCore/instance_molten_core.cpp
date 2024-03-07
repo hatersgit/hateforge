@@ -67,8 +67,9 @@ public:
             LoadMinionData(minionData);
         }
 
-        void OnPlayerEnter(Player* /*player*/) override
+        void OnPlayerEnter(Player* player) override
         {
+            InstanceScript::OnPlayerEnter(player);
             if (CheckMajordomoExecutus())
             {
                 SummonMajordomoExecutus();

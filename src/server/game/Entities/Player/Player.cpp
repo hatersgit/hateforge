@@ -12217,7 +12217,7 @@ void Player::resetSpells()
                 spellInfo->Effects[0].Effect != 47 &&
                 spellInfo->Reagent[0] <= 0 &&
                 std::find(PRESTIGE_IGNORE_SPELLS.begin(), PRESTIGE_IGNORE_SPELLS.end(), iter->first) == PRESTIGE_IGNORE_SPELLS.end())
-                postCheckRemoveSpell(iter->first);
+                removeSpell(iter->first, SPEC_MASK_ALL, false);
         }
     }
 

@@ -571,7 +571,7 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recvData)
 
     LOG_DEBUG("network.opcode", "STORAGE: Item Query = {}", item);
 
-    ItemTemplate* pProto = sObjectMgr->GetItemTemplateMutable(item);
+    ItemTemplate* pProto = sObjectMgr->GetItemTemplate(item);
     if (pProto)
     {
         pProto->InitializeQueryData();

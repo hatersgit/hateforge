@@ -109,6 +109,7 @@ public:
 
         void OnPlayerEnter(Player* player) override
         {
+            InstanceScript::OnPlayerEnter(player);
             if (m_auiEncounter[DATA_DRAKOS] == DONE && m_auiEncounter[DATA_VAROS] != DONE)
             {
                 player->SendUpdateWorldState(WORLD_STATE_CENTRIFUGE_CONSTRUCT_SHOW, 1);

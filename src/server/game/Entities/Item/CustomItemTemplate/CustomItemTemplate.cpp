@@ -531,7 +531,7 @@ bool CustomItemTemplate::HasSignature() { return info->HasSignature(); };
 
 CustomItemTemplate GetItemTemplate(uint32 entry)
 {
-    return CustomItemTemplate(sObjectMgr->GetItemTemplateMutable(entry));
+    return CustomItemTemplate(sObjectMgr->GetItemTemplate(entry));
 }
 
 ItemTemplate* CustomItemTemplate::_GetInfo()
@@ -623,6 +623,7 @@ float CustomItemTemplate::CalculateDps()
     case INVTYPE_2HWEAPON:
         return 0.98f * val + 11.5f;
         break;
+    case INVTYPE_RANGED:
     case INVTYPE_RANGEDRIGHT:
         switch (GetSubClass()) {
         case ITEM_SUBCLASS_WEAPON_WAND: {

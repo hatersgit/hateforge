@@ -71,6 +71,7 @@ public:
 
         void OnPlayerEnter(Player* pPlayer) override
         {
+            InstanceScript::OnPlayerEnter(pPlayer);
             if (EncounterStatus == DONE)
             {
                 // destroy platform, hide iris (actually ensure, done at loading, but doesn't always work

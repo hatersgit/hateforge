@@ -170,8 +170,9 @@ public:
         std::vector<ObjectGuid> EmperorSenatorsVector;
         Position EmperorSpawnPos = Position(1380.52, -831, 115);
 
-        void OnPlayerEnter(Player* /* player */) override
+        void OnPlayerEnter(Player* player) override
         {
+            InstanceScript::OnPlayerEnter(player);
             ReplaceMoiraIfSaved(); // In case a player joins the party during the run
          //   SetData(TYPE_RING_OF_LAW, DONE);
         }

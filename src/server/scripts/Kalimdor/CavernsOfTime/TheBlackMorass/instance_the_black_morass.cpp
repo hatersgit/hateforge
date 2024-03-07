@@ -178,6 +178,7 @@ public:
 
         void OnPlayerEnter(Player* player) override
         {
+            InstanceScript::OnPlayerEnter(player);
             if (instance->GetPlayersCountExceptGMs() <= 1 && GetBossState(DATA_AEONUS) != DONE && _eventStatus != EVENT_IN_PROGRESS)
             {
                 CleanupInstance();

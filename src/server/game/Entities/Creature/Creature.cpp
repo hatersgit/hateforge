@@ -2102,7 +2102,7 @@ void Creature::setDeathState(DeathState s, bool despawn)
         m_corpseRemoveTime = GameTime::GetGameTime().count() + delay;
         m_respawnTime = m_corpseRemoveTime + delay;
 
-        if (GetMap()->IsRaid() || GetMap()->IsDungeon() || !m_respawnDelay)
+        if (GetMap()->IsRaid() || GetMap()->IsDungeon())
             m_respawnTime = GameTime::GetGameTime().count() + WEEK;
         // always save boss respawn time at death to prevent crash cheating
         if (isWorldBoss() || GetCreatureTemplate()->rank >= CREATURE_ELITE_ELITE)

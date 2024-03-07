@@ -3138,7 +3138,7 @@ private:
         LOG_INFO("server.load", "Loading player soul shards...");
         _charSoulShards.clear();
 
-        QueryResult SoulShardResult = WorldDatabase.Query("SELECT * FROM `acore_characters`.`character_soul_shards`");
+        QueryResult SoulShardResult = WorldDatabase.Query("SELECT * FROM `acore_characters`.`character_soul_shards` order by `rank` desc");
         if (!SoulShardResult) return;
         do
         {
@@ -3161,8 +3161,14 @@ private:
         auto account = player->GetSession()->GetAccountId();
         auto source = shard->source;
         if (isNew) {
-            PlayerSoulShard* pShard = new PlayerSoulShard(shard->source, 1, 1, shard);
-            _charSoulShards[account][source] = pShard;
+            if (_charSoulShards[account].size() < 30) {
+                PlayerSoulShard* pShard = new PlayerSoulShard(shard->source, 1, 1, shard);
+                _charSoulShards[account][source] = pShard;
+            }
+            else {
+                player->AddItem(1045624, shard->quality);
+                return;
+            }
         }
 
         HandleInsertOrUpdateShard(account, _charSoulShards[account][source], isNew);

@@ -74,6 +74,7 @@ public:
 
         void OnPlayerEnter(Player* player) override
         {
+            InstanceScript::OnPlayerEnter(player);
             if (player->HasAura(AURA_OF_ASHBRINGER))
             {
                 std::list<Creature*> ScarletList;
@@ -91,8 +92,6 @@ public:
                 if (!ScarletList.empty())
                     for (std::list<Creature*>::iterator itr = ScarletList.begin(); itr != ScarletList.end(); itr++) (*itr)->SetFaction(FACTION_FRIENDLY);
             }
-
-            InstanceScript::OnPlayerEnter(player);
         }
 
         void OnPlayerAreaUpdate(Player* player, uint32 /*oldArea*/, uint32 /*newArea*/) override

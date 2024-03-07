@@ -1398,6 +1398,7 @@ public:
 
         void OnPlayerEnter(Player* plr) override
         {
+            InstanceScript::OnPlayerEnter(plr);
             if( instance->IsHeroic() )
             {
                 plr->SendUpdateWorldState(UPDATE_STATE_UI_SHOW, 1);

@@ -78,6 +78,7 @@ public:
 
         void OnPlayerEnter(Player* plr) override
         {
+            InstanceScript::OnPlayerEnter(plr);
             if (Creature* c = GetCreature(DATA_DARK_RANGER_MARRAH))
             {
                 c->SetReactState(REACT_PASSIVE);

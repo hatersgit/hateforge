@@ -546,6 +546,7 @@ void InstanceSaveMgr::_ResetSave(InstanceSaveHashMap::iterator& itr)
                 shouldDelete = false;
                 continue;
             }
+
         }
         temp.push_back(player);
     }

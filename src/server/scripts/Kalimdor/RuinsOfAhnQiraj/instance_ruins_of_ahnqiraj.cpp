@@ -82,6 +82,7 @@ public:
 
         void OnPlayerEnter(Player* player) override
         {
+            InstanceScript::OnPlayerEnter(player);
             if (GetBossState(DATA_KURINNAXX) == DONE &&
                 GetBossState(DATA_RAJAXX) != DONE &&
                 _rajaxWaveCounter == 0 &&                       // if non-zero, encounter is in progress

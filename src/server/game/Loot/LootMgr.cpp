@@ -623,6 +623,12 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
         DishOutLoot(this, lootOwner, 1);
     }
 
+    if (lootSource)
+        if (GameObject* go = lootSource->ToGameObject())
+            if (go->GetGoType() == GAMEOBJECT_TYPE_CHEST) {
+                go->DespawnOrUnsummon();
+            }
+
     sScriptMgr->OnAfterLootTemplateProcess(this, tab, store, lootOwner, personal, noEmptyError, lootMode);
     return true;
 }

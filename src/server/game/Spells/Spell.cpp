@@ -54,6 +54,7 @@
 #include "Vehicle.h"
 #include "World.h"
 #include "WorldPacket.h"
+#include "AnticheatMgr.h"
 
 /// @todo: this import is not necessary for compilation and marked as unused by the IDE
 //  however, for some reasons removing it would cause a damn linking issue
@@ -6247,7 +6248,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                         m_preGeneratedPath->ShortenPathUntilDist(G3D::Vector3(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()), objSize); // move back
                     }
                     if (Player* player = m_caster->ToPlayer())
-                        player->SetCanTeleport(true);
+                    {
+                        // To prevent false positives in the Anticheat system
+                        sAnticheatMgr->SetAllowedMovement(player, true);
+                    }
                     break;
                 }
             case SPELL_EFFECT_SKINNING:

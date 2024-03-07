@@ -64,6 +64,7 @@ public:
 
         void OnPlayerEnter(Player* plr) override
         {
+            InstanceScript::OnPlayerEnter(plr);
             if (instance->GetPlayersCountExceptGMs() == 1)
                 SetData(DATA_ARTHAS_REPOSITION, 2);
 

@@ -55,8 +55,9 @@ public:
             stoned = false;
         }
 
-        void OnPlayerEnter(Player* ) override
+        void OnPlayerEnter(Player* player) override
         {
+            InstanceScript::OnPlayerEnter(player);
             if (stoned)
             {
                 for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)

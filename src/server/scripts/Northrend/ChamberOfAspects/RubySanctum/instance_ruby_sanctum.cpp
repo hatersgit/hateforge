@@ -59,8 +59,9 @@ public:
             LoadDoorData(doorData);
         }
 
-        void OnPlayerEnter(Player* /*player*/) override
+        void OnPlayerEnter(Player* player) override
         {
+            InstanceScript::OnPlayerEnter(player);
             if (GetBossState(DATA_HALION_INTRO_DONE) != DONE && GetBossState(DATA_GENERAL_ZARITHRIAN) == DONE)
             {
                 instance->LoadGrid(3156.0f, 537.0f);

@@ -522,6 +522,7 @@ public:
 
         void OnPlayerEnter(Player* plr) override
         {
+            InstanceScript::OnPlayerEnter(plr);
             if( DoNeedCleanup(plr->IsAlive()) )
                 InstanceCleanup();
 

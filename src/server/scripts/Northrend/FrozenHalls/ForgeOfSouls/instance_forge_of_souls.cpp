@@ -70,8 +70,9 @@ public:
             return false;
         }
 
-        void OnPlayerEnter(Player* /*plr*/) override
+        void OnPlayerEnter(Player* plr) override
         {
+            InstanceScript::OnPlayerEnter(plr);
             // this will happen only after crash and loading the instance from db
             if (m_auiEncounter[0] == DONE && m_auiEncounter[1] == DONE && (!NPC_LeaderSecondGUID || !instance->GetCreature(NPC_LeaderSecondGUID)))
             {

@@ -159,6 +159,9 @@ void InstanceScript::OnPlayerEnter(Player* player)
             else
                 SetEntranceLocation(3);
         }
+        else {
+            SetEntranceLocation(0);
+        }
 
         if (WorldSafeLocsEntry const* entranceSafeLocEntry = sObjectMgr->GetWorldSafeLoc(instance->GetId(), GetEntranceLocation()))
             _challengeEntranceLoc.Relocate(entranceSafeLocEntry->Loc);

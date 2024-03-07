@@ -54,24 +54,25 @@ public:
 
                         auto rankIt = spell->ranks.find(rank);
                         if (rankIt != spell->ranks.end()) {
-                            iam.player->postCheckRemoveSpell(rankIt->second);
-                        }
-                        rank--;
+                            iam.player->removeSpell(rankIt->second, SPEC_MASK_ALL, false);
 
-                        if (rank) {
-                            rankIt = spell->ranks.find(rank);
-                            if (rankIt != spell->ranks.end())
-                                iam.player->learnSpell(rankIt->second, true);
+                            rank--;
 
-                            csp->second->rank = rank;
-                        }
-                        else {
-                            csp->second->rank = rank;
-                            fc->LearnCharacterPerkInternal(iam.player, spec, csp->second, CharacterPerkType(i));
-                            spec->perks[type].erase(spellId);
-                        }
+                            if (rank) {
+                                rankIt = spell->ranks.find(rank);
+                                if (rankIt != spell->ranks.end())
+                                    iam.player->learnSpell(rankIt->second, true);
 
-                        cm->SendPerks(iam.player, spec->Id);
+                                csp->second->rank = rank;
+                            }
+                            else {
+                                csp->second->rank = rank;
+                                fc->LearnCharacterPerkInternal(iam.player, spec, csp->second, CharacterPerkType(i));
+                                spec->perks[type].erase(spellId);
+                            }
+
+                            cm->SendPerks(iam.player, spec->Id);
+                        }
                         return;
                     }
                 }

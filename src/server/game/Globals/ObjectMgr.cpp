@@ -3298,6 +3298,7 @@ void ObjectMgr::LoadItemTemplates()
                 else
                     sSpellsByCategoryStore[itemTemplate.Spells[i].SpellCategory].emplace(true, itemTemplate.Spells[i].SpellId);
             }
+        itemTemplate._LoadTotalAP();
 
         ++count;
     } while (result->NextRow());
@@ -3347,25 +3348,19 @@ void ObjectMgr::LoadItemTemplates()
     LOG_INFO("server.loading", ">> Loaded {} Item Templates in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
     LOG_INFO("server.loading", " ");
 }
-
-ItemTemplate const* ObjectMgr::GetItemTemplate(uint32 entry)
-{
-    return entry < _itemTemplateStoreFast.size() ? _itemTemplateStoreFast[entry] : nullptr;
-}
-
 // hater: custom items
-ItemTemplate* ObjectMgr::GetItemTemplateMutable(uint32 entry)
+ItemTemplate * ObjectMgr::GetItemTemplate(uint32 entry)
 {
-    return entry < _itemTemplateStoreFast.size() ? _itemTemplateStoreFast[entry] : nullptr;
+    return Acore::Containers::MapGetValuePtr(_itemTemplateStore, entry);
 }
 
 ItemTemplate* ObjectMgr::CreateItemTemplate(uint32 entry, uint32 copyID)
 {
+    // hater: TY Tester for giving us the MRs for all custom item stuff :)
     if (entry > _itemTemplateStoreFast.size())
         _itemTemplateStoreFast.resize(entry + 200000, nullptr);
 
-    // hater: TY Tester for giving us the MRs for all custom item stuff :)
-    ItemTemplate* copy = (_itemTemplateStoreFast[entry] = _itemTemplateStoreFast[copyID]);
+    ItemTemplate* copy = &(_itemTemplateStore[entry] = _itemTemplateStore[copyID]);
     copy->ItemId = entry;
     copy->m_isDirty = true;
     copy->_LoadTotalAP();

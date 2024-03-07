@@ -66,6 +66,7 @@ public:
 
         void OnPlayerEnter(Player* player) override
         {
+            InstanceScript::OnPlayerEnter(player);
             if (instance->GetPlayersCountExceptGMs() <= 1)
                 CleanupInstance();
 

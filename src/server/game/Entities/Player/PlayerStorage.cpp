@@ -4385,9 +4385,6 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
     if (!ignore_condition && pEnchant->EnchantmentCondition && !EnchantmentFitsRequirements(pEnchant->EnchantmentCondition, -1))
         return;
 
-    if (pEnchant->requiredLevel > GetLevel())
-        return;
-
     if (pEnchant->requiredSkill > 0 && pEnchant->requiredSkillValue > GetSkillValue(pEnchant->requiredSkill))
         return;
 
@@ -6022,7 +6019,7 @@ Item* Player::_LoadItem(CharacterDatabaseTransaction trans, uint32 zoneId, uint3
     Item* item = nullptr;
     ObjectGuid::LowType itemGuid  = fields[13].Get<uint32>();
     uint32 itemEntry = fields[14].Get<uint32>();
-    if (ItemTemplate const* proto = sObjectMgr->GetItemTemplateMutable(itemEntry))
+    if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemEntry))
     {
         bool remove = false;
         item = NewItemOrBag(proto);
@@ -6031,7 +6028,7 @@ Item* Player::_LoadItem(CharacterDatabaseTransaction trans, uint32 zoneId, uint3
             auto const transmog = item->GetTransmog();
             bool hasTemplate = transmog != NormalEntry && transmog != InvisibleEntry;
             if (transmog && hasTemplate) {
-                auto source = sObjectMgr->GetItemTemplateMutable(transmog);
+                auto source = sObjectMgr->GetItemTemplate(transmog);
                 if (!source || Transmogrification::instance().CannotTransmogrifyItemWithItem(this, proto, source, false))
                     item->SetTransmog(0); // Player swapped factions? Or settings changed.
             }
@@ -6653,7 +6650,7 @@ InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty
     MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(mapid, difficulty);
     if (!mapDiff)
         return nullptr;
-    if (!m_boundInstances[difficulty].empty()) {
+    if (!m_boundInstances[difficulty].empty() && m_boundInstances[difficulty].size() < 100) {
         BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
         if (itr != m_boundInstances[difficulty].end())
             if (itr->second.extendState || withExpired)

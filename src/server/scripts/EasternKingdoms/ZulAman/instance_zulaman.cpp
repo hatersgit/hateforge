@@ -114,8 +114,9 @@ public:
             return false;
         }
 
-        void OnPlayerEnter(Player* /*player*/) override
+        void OnPlayerEnter(Player* player) override
         {
+            InstanceScript::OnPlayerEnter(player);
             if (!HarrisonJonesGUID)
                 instance->SummonCreature(NPC_HARRISON_JONES, HarrisonJonesLoc);
         }

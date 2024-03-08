@@ -70,7 +70,7 @@ public:
             {
                 DoCastSelf(SPELL_ATTRACK_RAGER, true);
                 DoCastAOE(SPELL_EARTHQUAKE, true);
-                earthquakeTimer = 5000;
+                earthquakeTimer = (5000 - (500 * me->GetWorldTier()));
                 enraged = true;
             }
         }
@@ -105,7 +105,7 @@ public:
             {
                 DoCastRandomTarget(SPELL_PYROBLAST);
 
-                pyroblastTimer = 7000;
+                pyroblastTimer = 7000 - (700 * me->GetWorldTier());
             }
             else
             {
@@ -201,7 +201,7 @@ public:
             if (mangleTimer <= diff)
             {
                 DoCastVictim(SPELL_MANGLE);
-                mangleTimer = 10000;
+                mangleTimer = (10000 - (1000 * me->GetWorldTier()));
             }
             else
             {

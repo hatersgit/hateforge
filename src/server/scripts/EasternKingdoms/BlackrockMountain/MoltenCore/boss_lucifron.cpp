@@ -57,7 +57,7 @@ public:
                 case EVENT_IMPENDING_DOOM:
                 {
                     DoCastVictim(SPELL_IMPENDING_DOOM);
-                    events.RepeatEvent(20000);
+                    events.RepeatEvent(20000 - (2000 * me->GetWorldTier()));
                     break;
                 }
                 case EVENT_LUCIFRON_CURSE:
@@ -69,7 +69,7 @@ public:
                 case EVENT_SHADOW_SHOCK:
                 {
                     DoCastVictim(SPELL_SHADOW_SHOCK);
-                    events.RepeatEvent(5000);
+                    events.RepeatEvent(5000 - (500 * me->GetWorldTier()));
                     break;
                 }
             }

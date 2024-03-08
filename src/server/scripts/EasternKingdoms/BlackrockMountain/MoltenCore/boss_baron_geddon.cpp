@@ -91,7 +91,7 @@ public:
                 case EVENT_INFERNO:
                 {
                     DoCastAOE(SPELL_INFERNO);
-                    events.RepeatEvent(urand(21000, 26000));
+                    events.RepeatEvent(urand(21000, 26000) * ((10 - me->GetWorldTier()) / 10));
                     break;
                 }
                 case EVENT_IGNITE_MANA:
@@ -101,13 +101,14 @@ public:
                         DoCast(target, SPELL_IGNITE_MANA);
                     }
 
-                    events.RepeatEvent(urand(27000, 32000));
+                    events.RepeatEvent(urand(27000, 32000) * ((10 - me->GetWorldTier()) / 10));
                     break;
                 }
                 case EVENT_LIVING_BOMB:
                 {
-                    if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 0.0f, true))
-                    {
+                    std::list<Unit*> targets;
+                    SelectTargetList(targets, me->GetWorldTier(), SelectTargetMethod::Random, 0, 0.0f, true);
+                    for (auto target : targets) {
                         DoCast(target, SPELL_LIVING_BOMB);
                     }
 

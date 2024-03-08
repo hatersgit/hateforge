@@ -350,7 +350,7 @@ public:
                         {
                             Talk(SAY_WRATH);
                         }
-                        events.RepeatEvent(25000);
+                        events.RepeatEvent(25000 * ((10 - me->GetWorldTier()) / 10));
                         break;
                     }
                     case EVENT_HAND_OF_RAGNAROS:
@@ -362,7 +362,7 @@ public:
                             _isKnockbackEmoteAllowed = false;
                             extraEvents.RescheduleEvent(EVENT_RESET_KNOCKBACK_EMOTE, 5s);
                         }
-                        events.RepeatEvent(20000);
+                        events.RepeatEvent(20000 * ((10 - me->GetWorldTier()) / 10));
                         break;
                     }
                     case EVENT_LAVA_BURST:
@@ -427,7 +427,7 @@ public:
                             _hasSubmergedOnce = true;
                         }
 
-                        extraEvents.ScheduleEvent(EVENT_EMERGE, 90s, PHASE_SUBMERGED, PHASE_SUBMERGED);
+                        extraEvents.ScheduleEvent(EVENT_EMERGE, (90000 - (3000 * me->GetWorldTier())), PHASE_SUBMERGED, PHASE_SUBMERGED);
                         break;
                     }
                 }

@@ -67,7 +67,7 @@ public:
                     {
                         DoCast(target, SPELL_RAIN_OF_FIRE, true);
                     }
-                    events.RepeatEvent(6000);
+                    events.RepeatEvent((6000 - (600 * me->GetWorldTier())));
                     break;
                 }
                 case EVENT_SHADOW_BOLT:
@@ -88,7 +88,7 @@ public:
                         DoCastVictim(SPELL_SHADOW_BOLT_VICTIM);
                     }
 
-                    events.RepeatEvent(5000);
+                    events.RepeatEvent((5000 - (500 * me->GetWorldTier())));
                     break;
                 }
             }

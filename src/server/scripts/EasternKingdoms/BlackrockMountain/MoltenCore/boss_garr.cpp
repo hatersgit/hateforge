@@ -60,14 +60,14 @@ public:
     struct boss_garrAI : public BossAI
     {
         boss_garrAI(Creature* creature) : BossAI(creature, DATA_GARR),
-            massEruptionTimer(600000)   // 10 mins
+            massEruptionTimer(600000 - (30000 * me->GetWorldTier()))
         {
         }
 
         void Reset() override
         {
             _Reset();
-            massEruptionTimer = 600000;
+            massEruptionTimer = 600000 - (30000 * me->GetWorldTier());
         }
 
         void JustEngagedWith(Unit* /*attacker*/) override
@@ -76,7 +76,7 @@ public:
             DoCastSelf(SPELL_SEPARATION_ANXIETY, true);
             events.ScheduleEvent(EVENT_ANTIMAGIC_PULSE, 15s);
             events.ScheduleEvent(EVENT_MAGMA_SHACKLES, 10s);
-            massEruptionTimer = 600000; // 10 mins
+            massEruptionTimer = 600000 - (30000 * me->GetWorldTier());
         }
 
         void UpdateAI(uint32 diff) override
@@ -229,7 +229,9 @@ public:
         {
             if (Unit* target = GetHitUnit())
             {
-                target->CastSpell(target, SPELL_FRENZY);
+                for (int i = 0; i < GetCaster()->GetWorldTier(); i++) {
+                    target->CastSpell(target, SPELL_FRENZY);
+                }
             }
         }
 

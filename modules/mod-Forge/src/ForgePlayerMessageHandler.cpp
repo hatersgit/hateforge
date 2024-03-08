@@ -6,6 +6,7 @@
 #include "Player.h"
 #include "Config.h"
 #include "Chat.h"
+#include "Guild.h"
 #include "Spell.h"
 #include "WorldPacket.h"
 #include "TopicRouter.h"

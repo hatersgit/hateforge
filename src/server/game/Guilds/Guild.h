@@ -40,8 +40,6 @@ namespace WorldPackets
     }
 }
 
-#define DEFAULT_GUILD 1
-
 enum GuildMisc
 {
     GUILD_BANK_MAX_TABS                 = 6,                    // send by client for money log also

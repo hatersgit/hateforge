@@ -703,11 +703,6 @@ bool Player::Create(ObjectGuid::LowType guidlow, CharacterCreateInfo* createInfo
     }
     // all item positions resolved
     UpdateThorns();
-    if (sConfigMgr->GetBoolDefault("StarterGuild.autojoin", false)) {
-        if (Guild* guild = sGuildMgr->GetGuildById(sConfigMgr->GetIntDefault("StarterGuild.id", 0))) {
-            guild->AddMemberOnCreate(this);
-        }
-    }
 
     CheckAllAchievementCriteria();
 

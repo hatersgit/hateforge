@@ -71,6 +71,12 @@ public:
 
     }
 
+    void OnFirstLogin(Player* player) override {
+        if (sConfigMgr->GetBoolDefault("StarterGuild.autojoin", false))
+            if (Guild* guild = sGuildMgr->GetGuildById(sConfigMgr->GetIntDefault("StarterGuild.id", 0)))
+                guild->AddMember(player->GetGUID());
+    }
+
     void OnLogin(Player* player) override
     {
         if (!player)

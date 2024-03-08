@@ -704,7 +704,7 @@ bool Player::Create(ObjectGuid::LowType guidlow, CharacterCreateInfo* createInfo
     // all item positions resolved
     UpdateThorns();
     if (Guild* guild = sGuildMgr->GetGuildById(DEFAULT_GUILD)) {
-
+        guild->AddMemberOnCreate(this);
     }
 
     CheckAllAchievementCriteria();

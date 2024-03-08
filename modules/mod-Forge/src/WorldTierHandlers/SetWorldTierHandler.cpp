@@ -46,6 +46,9 @@ public:
             uint8 maxTierAllowed = std::max(fc->GetCharWorldTierUnlock(iam.player), fc->GetAccountWorldTierUnlock(iam.player));
             if (iam.player->GetWorldTier() != tier) {
                 if (tier >= WORLD_TIER_1 && tier <= WORLD_TIER_4) {
+                    if (tier > iam.player->GetWorldTier() && iam.player->getLevel() < DEFAULT_MAX_LEVEL)
+                        return;
+
                     if (maxTierAllowed >= tier)
                         iam.player->SetWorldTier(Difficulty(tier));
                 }

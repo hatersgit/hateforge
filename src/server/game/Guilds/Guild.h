@@ -761,6 +761,7 @@ public:
 
     // Members
     // Adds member to guild. If rankId == GUILD_RANK_NONE, lowest rank is assigned.
+    bool AddMemberOnCreate(Player* ply);
     bool AddMember(ObjectGuid guid, uint8 rankId = GUILD_RANK_NONE);
     void DeleteMember(ObjectGuid guid, bool isDisbanding = false, bool isKicked = false, bool canDeleteGuild = false);
     bool ChangeMemberRank(ObjectGuid guid, uint8 newRank);

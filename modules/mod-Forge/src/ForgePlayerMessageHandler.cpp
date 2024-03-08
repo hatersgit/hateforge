@@ -7,6 +7,8 @@
 #include "Config.h"
 #include "Chat.h"
 #include "ChannelMgr.h"
+#include "GuildMgr.h"
+#include "Guild.h"
 #include "Spell.h"
 #include "WorldPacket.h"
 #include "TopicRouter.h"
@@ -61,6 +63,8 @@
 enum RewardItems {
     TOKEN_OF_PRESTIGE = 49426,
 };
+
+#define STARTER_GUILD 1
 
 // Add player scripts
 class ForgePlayerMessageHandler : public PlayerScript

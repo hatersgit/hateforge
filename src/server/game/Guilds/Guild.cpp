@@ -2163,6 +2163,41 @@ void Guild::MassInviteToEvent(WorldSession* session, uint32 minLevel, uint32 max
     session->SendPacket(&data);
 }
 
+bool Guild::AddMemberOnCreate(Player* ply) {
+    auto guid = ply->GetGUID();
+    auto lowguid = guid.GetCounter();
+    auto rankId = _GetLowestRankId();
+
+    auto [memberIt, isNew] = m_members.try_emplace(lowguid, m_id, guid, rankId);
+    if (!isNew)
+    {
+        LOG_ERROR("guild", "Tried to add {} to guild '{}'. Member already exists? How did that happen?", guid.ToString(), m_name);
+        return false;
+    }
+
+    Member& member = memberIt->second;
+    std::string name;
+
+    ply->SetInGuild(m_id);
+    ply->SetGuildIdInvited(0);
+    ply->SetRank(rankId);
+    member.SetStats(ply);
+    SendLoginInfo(ply->GetSession());
+    name = ply->GetName();
+
+    CharacterDatabaseTransaction trans(nullptr);
+    member.SaveToDB(trans);
+
+    _UpdateAccountsNumber();
+    _LogEvent(GUILD_EVENT_LOG_JOIN_GUILD, guid);
+    _BroadcastEvent(GE_JOINED, guid, name);
+
+    // Call scripts if member was succesfully added (and stored to database)
+    sScriptMgr->OnGuildAddMember(this, ply, rankId);
+
+    return true;
+}
+
 // Members handling
 bool Guild::AddMember(ObjectGuid guid, uint8 rankId)
 {

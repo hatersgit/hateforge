@@ -16,6 +16,7 @@
  */
 
 #include "Common.h"
+#include "CustomItemTemplate.h"
 #include "Item.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
@@ -571,11 +572,12 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recvData)
 
     LOG_DEBUG("network.opcode", "STORAGE: Item Query = {}", item);
 
-    ItemTemplate* pProto = sObjectMgr->GetItemTemplate(item);
+    CustomItemTemplate pProto = GetItemTemplate(item);
     if (pProto)
     {
         pProto->InitializeQueryData();
-        SendPacket(pProto->GetQueryData());
+        WorldPacket* response = pProto->_GetInfo()->GetQueryData();
+        SendPacket(response);
     }
     else
     {

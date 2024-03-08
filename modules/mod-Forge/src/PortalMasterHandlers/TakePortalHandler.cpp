@@ -22,6 +22,9 @@ public:
         if (iam.message.empty())
             return;
 
+        if (!iam.player->portalMasterNpcCheck)
+            return;
+
         std::vector<std::string> results;
         boost::algorithm::split(results, iam.message, boost::is_any_of(";"));
 

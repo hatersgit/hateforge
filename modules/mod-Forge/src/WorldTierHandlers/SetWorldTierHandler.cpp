@@ -40,7 +40,7 @@ public:
         uint32 prestige = static_cast<uint32>(std::stoul(results[1]));
 
         if (tier) {
-            if (!iam.player->worldTierNpcCheck)
+            if (!iam.player->worldTierNpcCheck && !iam.player->portalMasterNpcCheck)
                 return;
 
             uint8 maxTierAllowed = std::max(fc->GetCharWorldTierUnlock(iam.player), fc->GetAccountWorldTierUnlock(iam.player));
@@ -52,6 +52,8 @@ public:
             }
 
             if (prestige) {
+                if (!iam.player->worldTierNpcCheck)
+                    return;
                 ForgeCharacterSpec* spec;
                 if (fc->TryGetCharacterActiveSpec(iam.player, spec))
                 {

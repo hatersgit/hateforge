@@ -1298,9 +1298,9 @@ Unit* Creature::SelectVictim()
     return nullptr;
 }
 
-void Creature::AtEnterCombat()
+void Creature::AtJustEngagedWith()
 {
-    Unit::AtEnterCombat();
+    Unit::AtJustEngagedWith();
 
     if (!(GetCreatureTemplate()->type_flags & CREATURE_TYPE_FLAG_ALLOW_MOUNTED_COMBAT))
         Dismount();

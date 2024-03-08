@@ -136,7 +136,7 @@ public:
             blockList.clear();
         }
 
-        void EnterCombatSelfFunction()
+        void JustEngagedWithSelfFunction()
         {
             Map::PlayerList const& PlList = me->GetMap()->GetPlayers();
             if (PlList.IsEmpty())
@@ -162,7 +162,7 @@ public:
         void JustEngagedWith(Unit* who) override
         {
             BossAI::JustEngagedWith(who);
-            EnterCombatSelfFunction();
+            JustEngagedWithSelfFunction();
             me->CastSpell(me, RAID_MODE(SPELL_FROST_AURA_10, SPELL_FROST_AURA_25), true);
             events.ScheduleEvent(EVENT_BERSERK, 15min);
             events.ScheduleEvent(EVENT_CLEAVE, 5s);

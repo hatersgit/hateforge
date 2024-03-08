@@ -1664,11 +1664,11 @@ void ScriptMgr::OnPlayerLearnTalents(Player* player, uint32 talentId, uint32 tal
     });
 }
 
-void ScriptMgr::OnPlayerEnterCombat(Player* player, Unit* enemy)
+void ScriptMgr::OnPlayerJustEngagedWith(Player* player, Unit* enemy)
 {
     ExecuteScript<PlayerScript>([&](PlayerScript* script)
     {
-        script->OnPlayerEnterCombat(player, enemy);
+        script->OnPlayerJustEngagedWith(player, enemy);
     });
 }
 

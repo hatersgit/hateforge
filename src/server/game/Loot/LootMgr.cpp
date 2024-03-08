@@ -626,6 +626,7 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     if (lootSource)
         if (GameObject* go = lootSource->ToGameObject())
             if (go->GetGoType() == GAMEOBJECT_TYPE_CHEST) {
+                go->loot.clear();
                 go->DespawnOrUnsummon();
             }
 

@@ -440,7 +440,7 @@ public:
 
     std::string GetDebugInfo() const override;
 
-    void AtEnterCombat() override;
+    void AtJustEngagedWith() override;
     void AtExitCombat() override;
 
 protected:

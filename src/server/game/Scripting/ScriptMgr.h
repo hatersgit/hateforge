@@ -450,7 +450,7 @@ public: /* PlayerScript */
     bool CanPlayerUseChat(Player* player, uint32 type, uint32 language, std::string& msg, Guild* guild);
     bool CanPlayerUseChat(Player* player, uint32 type, uint32 language, std::string& msg, Channel* channel);
     void OnPlayerLearnTalents(Player* player, uint32 talentId, uint32 talentRank, uint32 spellid);
-    void OnPlayerEnterCombat(Player* player, Unit* enemy);
+    void OnPlayerJustEngagedWith(Player* player, Unit* enemy);
     void OnPlayerLeaveCombat(Player* player);
     void OnQuestAbandon(Player* player, uint32 questId);
     bool CanSendErrorAlreadyLooted(Player* player);
@@ -551,7 +551,7 @@ public: /* UnitScript */
     void OnUnitUpdate(Unit* unit, uint32 diff);
     void OnDisplayIdChange(Unit* unit, uint32 displayId);
     void OnUnitEnterEvadeMode(Unit* unit, uint8 why);
-    void OnUnitEnterCombat(Unit* unit, Unit* victim);
+    void OnUnitJustEngagedWith(Unit* unit, Unit* victim);
     void OnUnitDeath(Unit* unit, Unit* killer);
 
 public: /* AreaTriggerEntityScript */

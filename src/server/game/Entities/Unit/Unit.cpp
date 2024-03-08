@@ -1492,7 +1492,7 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss,
         return;
     }
 
-    if (GetTypeId() != TYPEID_PLAYER) {
+    if (GetTypeId() != TYPEID_PLAYER && !IsPet() && !IsTotem()) {
         float mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
         damageInfo->damage *= mod;
     }
@@ -1927,8 +1927,8 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
             continue;
         }
 
-        if (GetTypeId() != TYPEID_PLAYER) {
-            float mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2)-2.54f;
+        if (GetTypeId() != TYPEID_PLAYER && !IsPet() && !IsTotem()) {
+            float mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
             damageInfo->damages[i].damage *= mod;
         }
 
@@ -12345,7 +12345,7 @@ void Unit::SetMaxHealth(uint32 val)
     if (!val)
         val = 1;
 
-    if (GetTypeId() != TYPEID_PLAYER) {
+    if (GetTypeId() != TYPEID_PLAYER && !IsPet() && !IsTotem()) {
         float mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
         val = val * mod;
     }

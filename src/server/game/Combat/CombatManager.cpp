@@ -377,7 +377,7 @@ bool CombatManager::UpdateOwnerCombatState() const
     if (combatState)
     {
         _owner->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
-        _owner->AtEnterCombat();
+        _owner->AtJustEngagedWith();
     }
     else
     {

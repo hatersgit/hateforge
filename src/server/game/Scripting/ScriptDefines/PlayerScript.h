@@ -505,7 +505,7 @@ public:
      * @param player Contains information about the Player
      * @param Unit Contains information about the Unit
      */
-    virtual void OnPlayerEnterCombat(Player* /*player*/, Unit* /*enemy*/) { }
+    virtual void OnPlayerJustEngagedWith(Player* /*player*/, Unit* /*enemy*/) { }
 
     /**
      * @brief This hook called after player leave combat

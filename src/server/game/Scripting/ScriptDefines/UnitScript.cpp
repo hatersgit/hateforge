@@ -228,11 +228,11 @@ void ScriptMgr::OnUnitEnterEvadeMode(Unit* unit, uint8 evadeReason)
     });
 }
 
-void ScriptMgr::OnUnitEnterCombat(Unit* unit, Unit* victim)
+void ScriptMgr::OnUnitJustEngagedWith(Unit* unit, Unit* victim)
 {
     ExecuteScript<UnitScript>([&](UnitScript* script)
     {
-        script->OnUnitEnterCombat(unit, victim);
+        script->OnUnitJustEngagedWith(unit, victim);
     });
 }
 

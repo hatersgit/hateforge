@@ -77,7 +77,7 @@ public:
         return true;
     }
 
-    void EnterCombatWithTrio(Unit* who)
+    void JustEngagedWithWithTrio(Unit* who)
     {
         BossAI::JustEngagedWith(who);
 
@@ -333,7 +333,7 @@ struct boss_kri : public boss_bug_trio
 
     void JustEngagedWith(Unit* who) override
     {
-        EnterCombatWithTrio(who);
+        JustEngagedWithWithTrio(who);
 
         _scheduler.Schedule(7s, 18s, [this](TaskContext context)
         {
@@ -361,7 +361,7 @@ struct boss_vem : public boss_bug_trio
 
     void JustEngagedWith(Unit* who) override
     {
-        EnterCombatWithTrio(who);
+        JustEngagedWithWithTrio(who);
 
         _scheduler.Schedule(15s, 27s, [this](TaskContext context)
         {
@@ -402,7 +402,7 @@ struct boss_yauj : public boss_bug_trio
 
     void JustEngagedWith(Unit* who) override
     {
-        EnterCombatWithTrio(who);
+        JustEngagedWithWithTrio(who);
 
         _scheduler.Schedule(12100ms, [this](TaskContext context)
         {

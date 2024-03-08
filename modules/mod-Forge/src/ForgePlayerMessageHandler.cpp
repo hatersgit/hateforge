@@ -7,6 +7,7 @@
 #include "Config.h"
 #include "Chat.h"
 #include "Guild.h"
+#include "GuildMgr.h"
 #include "Spell.h"
 #include "WorldPacket.h"
 #include "TopicRouter.h"
@@ -87,12 +88,6 @@ public:
         fc->UnlearnFlaggedSpells(player);
 
         fc->LoadLoadoutActions(player);
-    }
-
-    void OnFirstLogin(Player* player) override {
-        if (sConfigMgr->GetBoolDefault("StarterGuild.autojoin", false))
-            if (Guild* guild = sGuildMgr->GetGuildById(sConfigMgr->GetIntDefault("StarterGuild.id", 0)))
-                guild->AddMember(player->GetGUID());
     }
 
     void OnLogout(Player* player) override

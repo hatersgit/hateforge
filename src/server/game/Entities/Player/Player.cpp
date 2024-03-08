@@ -52,7 +52,6 @@
 #include "GroupMgr.h"
 #include "Guild.h"
 #include "GuildMgr.h"
-#include "InstanceSaveMgr.h"
 #include "InstanceScript.h"
 #include "LFGMgr.h"
 #include "Log.h"

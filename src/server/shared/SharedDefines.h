@@ -768,7 +768,7 @@ enum SpellAttr6 : uint32
     SPELL_ATTR6_VEHICLE_IMMUNITY_CATEGORY                  = 0x04000000, // TITLE Unknown attribute 26@Attr6 DESCRIPTION Player castable buff?
     SPELL_ATTR6_IGNORE_HEALTH_MODIFIERS                    = 0x08000000, // TITLE Limit applicable %healing modifiers DESCRIPTION This prevents certain healing modifiers from applying - see implementation if you really care about details
     SPELL_ATTR6_DO_NOT_SELECT_TARGET_WITH_INITIATES_COMBAT = 0x10000000, // TITLE Unknown attribute 28@Attr6 DESCRIPTION Death grip?
-    SPELL_ATTR6_IGNORE_CASTER_DAMAGE_MODIFIERS             = 0x20000000, // TITLE Limit applicable %damage modifiers DESCRIPTION This prevents certain damage modifiers from applying - see implementation if you really care about details
+    SPELL_ATTR6_IGNORE_CASTER_DAMAGE_MODIFIERS             = 0x20000000, // TITLE Limit applicable {}amage modifiers DESCRIPTION This prevents certain damage modifiers from applying - see implementation if you really care about details
     SPELL_ATTR6_DISABLE_TIED_EFFECT_POINTS                 = 0x40000000, // TITLE Unknown attribute 30@Attr6
     SPELL_ATTR6_NO_CATEGORY_COOLDOWN_MODS                  = 0x80000000  // TITLE Ignore cooldown modifiers for category cooldown
 };
@@ -3827,7 +3827,7 @@ enum GroupJoinBattlegroundResult
     ERR_BATTLEGROUND_NOT_IN_BATTLEGROUND    = -8,           // You can't do that in a battleground.
     ERR_BATTLEGROUND_JOIN_XP_GAIN           = -9,           // doesn't exist in client...
     ERR_BATTLEGROUND_JOIN_RANGE_INDEX       = -10,          // Cannot join the queue unless all members of your party are in the same battleground level range.
-    ERR_BATTLEGROUND_JOIN_TIMED_OUT         = -11,          // %s was unavailable to join the queue. (ObjectGuid guid exist in client cache)
+    ERR_BATTLEGROUND_JOIN_TIMED_OUT         = -11,          // {} was unavailable to join the queue. (ObjectGuid guid exist in client cache)
     ERR_BATTLEGROUND_JOIN_FAILED            = -12,          // Join as a group failed (ObjectGuid guid doesn't exist in client cache)
     ERR_LFG_CANT_USE_BATTLEGROUND           = -13,          // You cannot queue for a battleground or arena while using the dungeon system.
     ERR_IN_RANDOM_BG                        = -14,          // Can't do that while in a Random Battleground queue.

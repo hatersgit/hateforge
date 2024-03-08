@@ -225,7 +225,7 @@ uint32 CreatePIDFile(std::string const& filename)
 
     uint32 pid = GetPID();
 
-    fprintf(pid_file, "%u", pid);
+    fprintf(pid_file, "{}", pid);
     fclose(pid_file);
 
     return pid;
@@ -518,7 +518,7 @@ void vutf8printf(FILE* out, const char* str, va_list* ap)
     Utf8toWStr(temp_buf, temp_len, wtemp_buf, wtemp_len);
 
     CharToOemBuffW(&wtemp_buf[0], &temp_buf[0], uint32(wtemp_len + 1));
-    fprintf(out, "%s", temp_buf);
+    fprintf(out, "{}", temp_buf);
 #else
     vfprintf(out, str, *ap);
 #endif

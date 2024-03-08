@@ -172,7 +172,7 @@ int main(int argc, char** argv)
         }
         catch (std::exception const& e)
         {
-            printf("Failed to initialize timer resolution: %s\n", e.what());
+            printf("Failed to initialize timer resolution: {}\n", e.what());
         }
     }
 

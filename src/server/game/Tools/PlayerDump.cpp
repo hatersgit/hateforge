@@ -305,7 +305,7 @@ void PlayerDump::InitializeTables()
             // item0 - item18
             for (uint32 j = 0; j < EQUIPMENT_SLOT_END; ++j)
             {
-                std::string itColumn = Acore::StringFormat("item%u", j);
+                std::string itColumn = Acore::StringFormat("item{}", j);
                 MarkDependentColumn(t, itColumn, GUID_TYPE_ITEM);
             }
             break;
@@ -738,7 +738,7 @@ DumpReturn PlayerDumpWriter::WriteDumpToFile(std::string const& file, ObjectGuid
     if (!GetDump(guid, dump))
         ret = DUMP_CHARACTER_DELETED;
 
-    fprintf(fout.get(), "%s", dump.c_str());
+    fprintf(fout.get(), "{}", dump.c_str());
     return ret;
 }
 

@@ -68,7 +68,7 @@ Log::Log(const std::string& filename, int stripFromStackBottom) :
     fprintf(logFile, "Application Log\n");
     time_t t;
     time(&t);
-    fprintf(logFile, "Start: %s\n", ctime(&t));
+    fprintf(logFile, "Start: {}\n", ctime(&t));
     fflush(logFile);
 
     if (commonLog == NULL) {
@@ -112,7 +112,7 @@ std::string Log::getCommonLogFilename() {
 
 void Log::section(const std::string& s) {
     fprintf(logFile, "_____________________________________________________\n");
-    fprintf(logFile, "\n    ###    %s    ###\n\n", s.c_str());
+    fprintf(logFile, "\n    ###    {}    ###\n\n", s.c_str());
 }
 
 
@@ -136,13 +136,13 @@ void __cdecl Log::lazyvprintf(const char* fmt, va_list argPtr) {
 
 
 void Log::print(const std::string& s) {
-    fprintf(logFile, "%s", s.c_str());
+    fprintf(logFile, "{}", s.c_str());
     fflush(logFile);
 }
 
 
 void Log::println(const std::string& s) {
-    fprintf(logFile, "%s\n", s.c_str());
+    fprintf(logFile, "{}\n", s.c_str());
     fflush(logFile);
 }
 

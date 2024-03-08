@@ -66,7 +66,7 @@ void BIH::subdivide(int left, int right, std::vector<uint32>& tempTree, buildDat
         {
             if (nodeBox.hi[i] < gridBox.lo[i] || nodeBox.lo[i] > gridBox.hi[i])
             {
-                //UI.printError(Module.ACCEL, "Reached tree area in error - discarding node with: %d objects", right - left + 1);
+                //UI.printError(Module.ACCEL, "Reached tree area in error - discarding node with: {} objects", right - left + 1);
                 throw std::logic_error("invalid node overlap");
             }
         }
@@ -317,20 +317,20 @@ void BIH::BuildStats::updateLeaf(int depth, int n)
 void BIH::BuildStats::printStats()
 {
     printf("Tree stats:\n");
-    printf("  * Nodes:          %d\n", numNodes);
-    printf("  * Leaves:         %d\n", numLeaves);
-    printf("  * Objects: min    %d\n", minObjects);
+    printf("  * Nodes:          {}\n", numNodes);
+    printf("  * Leaves:         {}\n", numLeaves);
+    printf("  * Objects: min    {}\n", minObjects);
     printf("             avg    %.2f\n", (float) sumObjects / numLeaves);
     printf("           avg(n>0) %.2f\n", (float) sumObjects / (numLeaves - numLeavesN[0]));
-    printf("             max    %d\n", maxObjects);
-    printf("  * Depth:   min    %d\n", minDepth);
+    printf("             max    {}\n", maxObjects);
+    printf("  * Depth:   min    {}\n", minDepth);
     printf("             avg    %.2f\n", (float) sumDepth / numLeaves);
-    printf("             max    %d\n", maxDepth);
+    printf("             max    {}\n", maxDepth);
     printf("  * Leaves w/: N=0  %3d%%\n", 100 * numLeavesN[0] / numLeaves);
     printf("               N=1  %3d%%\n", 100 * numLeavesN[1] / numLeaves);
     printf("               N=2  %3d%%\n", 100 * numLeavesN[2] / numLeaves);
     printf("               N=3  %3d%%\n", 100 * numLeavesN[3] / numLeaves);
     printf("               N=4  %3d%%\n", 100 * numLeavesN[4] / numLeaves);
     printf("               N>4  %3d%%\n", 100 * numLeavesN[5] / numLeaves);
-    printf("  * BVH2 nodes:     %d (%3d%%)\n", numBVH2, 100 * numBVH2 / (numNodes + numLeaves - 2 * numBVH2));
+    printf("  * BVH2 nodes:     {} (%3d%%)\n", numBVH2, 100 * numBVH2 / (numNodes + numLeaves - 2 * numBVH2));
 }

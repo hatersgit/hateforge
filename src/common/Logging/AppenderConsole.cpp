@@ -155,7 +155,7 @@ void AppenderConsole::SetColor(bool stdout_stream, ColorTypes color)
         FG_WHITE                                           // LWHITE
     };
 
-    fprintf((stdout_stream ? stdout : stderr), "\x1b[%d%sm", UnixColorFG[color], (color >= YELLOW && color < NUM_COLOR_TYPES ? ";1" : ""));
+    fprintf((stdout_stream ? stdout : stderr), "\x1b[{}{}m", UnixColorFG[color], (color >= YELLOW && color < NUM_COLOR_TYPES ? ";1" : ""));
 #endif
 }
 
@@ -202,11 +202,11 @@ void AppenderConsole::_write(LogMessage const* message)
         }
 
         SetColor(stdout_stream, _colors[index]);
-        utf8printf(stdout_stream ? stdout : stderr, "%s%s\n", message->prefix.c_str(), message->text.c_str());
+        utf8printf(stdout_stream ? stdout : stderr, "{}{}\n", message->prefix.c_str(), message->text.c_str());
         ResetColor(stdout_stream);
     }
     else
     {
-        utf8printf(stdout_stream ? stdout : stderr, "%s%s\n", message->prefix.c_str(), message->text.c_str());
+        utf8printf(stdout_stream ? stdout : stderr, "{}{}\n", message->prefix.c_str(), message->text.c_str());
     }
 }

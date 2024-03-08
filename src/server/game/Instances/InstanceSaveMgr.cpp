@@ -434,7 +434,7 @@ time_t InstanceSaveMgr::GetSubsequentResetTime(uint32 mapid, Difficulty difficul
     MapDifficulty const* mapDiff = GetMapDifficultyData(mapid, difficulty);
     if (!mapDiff || !mapDiff->resetTime)
     {
-        LOG_ERROR("misc", "InstanceSaveManager::GetSubsequentResetTime: not valid difficulty or no reset delay for map %u", mapid);
+        LOG_ERROR("misc", "InstanceSaveManager::GetSubsequentResetTime: not valid difficulty or no reset delay for map {}", mapid);
         return 0;
     }
 
@@ -483,7 +483,7 @@ void InstanceSaveMgr::ScheduleReset(bool add, time_t time, InstResetEvent event)
             }
 
             if (itr == m_resetTimeQueue.end())
-                LOG_ERROR("misc", "InstanceSaveManager::ScheduleReset: cannot cancel the reset, the event(%d, %d, %d) was not found!", event.type, event.mapid, event.instanceId);
+                LOG_ERROR("misc", "InstanceSaveManager::ScheduleReset: cannot cancel the reset, the event({}, {}, {}) was not found!", event.type, event.mapid, event.instanceId);
         }
     }
     else
@@ -597,7 +597,7 @@ void InstanceSaveMgr::_ResetSave(InstanceSaveHashMap::iterator& itr)
 
 void InstanceSaveMgr::_ResetInstance(uint32 mapid, uint32 instanceId)
 {
-    LOG_DEBUG("maps", "InstanceSaveMgr::_ResetInstance %u, %u", mapid, instanceId);
+    LOG_DEBUG("maps", "InstanceSaveMgr::_ResetInstance {}, {}", mapid, instanceId);
     Map const* map = sMapMgr->CreateBaseMap(mapid);
     if (!map->Instanceable())
         return;

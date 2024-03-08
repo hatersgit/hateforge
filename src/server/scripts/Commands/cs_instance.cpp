@@ -122,24 +122,26 @@ public:
 
         for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
         {
-            Player::BoundInstancesMap& binds = player->GetBoundInstances(Difficulty(i));
-            for (Player::BoundInstancesMap::iterator itr = binds.begin(); itr != binds.end();)
+            auto binds = player->GetBoundInstances(Difficulty(i));
+            if (binds != player->m_boundInstances.end())
             {
-                InstanceSave const* save = itr->second.save;
-                if (itr->first != player->GetMapId() && (!mapId || mapId == itr->first) && (!difficultyArg || difficultyArg == save->GetDifficultyID()))
+                for (auto itr = binds->second.begin(); itr != binds->second.end();)
                 {
-                    std::string timeleft = secsToTimeString(save->GetResetTime() - time(nullptr));
-                    handler->PSendSysMessage(LANG_COMMAND_INST_UNBIND_UNBINDING, itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no", save->GetDifficultyID(), save->CanReset() ? "yes" : "no", timeleft.c_str());
-                    player->UnbindInstance(itr, Difficulty(i));
-                    counter++;
+                    InstanceSave const* save = itr->second.save;
+                    if (itr->first != player->GetMapId() && (!mapId || mapId == itr->first) && (!difficultyArg || difficultyArg == save->GetDifficultyID()))
+                    {
+                        std::string timeleft = secsToTimeString(save->GetResetTime() - time(nullptr));
+                        handler->PSendSysMessage(LANG_COMMAND_INST_UNBIND_UNBINDING, itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no", save->GetDifficultyID(), save->CanReset() ? "yes" : "no", timeleft.c_str());
+                        player->UnbindInstance(itr, binds);
+                        counter++;
+                    }
+                    else
+                        ++itr;
                 }
-                else
-                    ++itr;
-
             }
         }
 
-        handler->PSendSysMessage("instances unbound: %d", counter);
+        handler->PSendSysMessage("instances unbound: {}", counter);
 
         return true;
     }
@@ -148,13 +150,13 @@ public:
     {
         uint32 dungeon = 0, battleground = 0, arena = 0, spectators = 0;
         sMapMgr->GetNumInstances(dungeon, battleground, arena);
-        handler->PSendSysMessage("instances loaded: dungeons (%d), battlegrounds (%d), arenas (%d)", dungeon, battleground, arena);
+        handler->PSendSysMessage("instances loaded: dungeons ({}), battlegrounds ({}), arenas ({})", dungeon, battleground, arena);
         dungeon = 0;
         battleground = 0;
         arena = 0;
         spectators = 0;
         sMapMgr->GetNumPlayersInInstances(dungeon, battleground, arena, spectators);
-        handler->SendErrorMessage("players in instances: dungeons (%d), battlegrounds (%d), arenas (%d + %d spect)", dungeon, battleground, arena, spectators);
+        handler->SendErrorMessage("players in instances: dungeons ({}), battlegrounds ({}), arenas ({} + {} spect)", dungeon, battleground, arena, spectators);
         return false;
     }
 

@@ -734,7 +734,7 @@ static void mergeRegionHoles(rcContext* ctx, rcContourRegion& region)
 	rcScopedDelete<rcPotentialDiagonal> diags((rcPotentialDiagonal*)rcAlloc(sizeof(rcPotentialDiagonal)*maxVerts, RC_ALLOC_TEMP));
 	if (!diags)
 	{
-		ctx->log(RC_LOG_WARNING, "mergeRegionHoles: Failed to allocated diags %d.", maxVerts);
+		ctx->log(RC_LOG_WARNING, "mergeRegionHoles: Failed to allocated diags {}.", maxVerts);
 		return;
 	}
 	
@@ -860,7 +860,7 @@ bool rcBuildContours(rcContext* ctx, rcCompactHeightfield& chf,
 	rcScopedDelete<unsigned char> flags((unsigned char*)rcAlloc(sizeof(unsigned char)*chf.spanCount, RC_ALLOC_TEMP));
 	if (!flags)
 	{
-		ctx->log(RC_LOG_ERROR, "rcBuildContours: Out of memory 'flags' (%d).", chf.spanCount);
+		ctx->log(RC_LOG_ERROR, "rcBuildContours: Out of memory 'flags' ({}).", chf.spanCount);
 		return false;
 	}
 	
@@ -955,7 +955,7 @@ bool rcBuildContours(rcContext* ctx, rcCompactHeightfield& chf,
 						rcFree(cset.conts);
 						cset.conts = newConts;
 						
-						ctx->log(RC_LOG_WARNING, "rcBuildContours: Expanding max contours from %d to %d.", oldMax, maxContours);
+						ctx->log(RC_LOG_WARNING, "rcBuildContours: Expanding max contours from {} to {}.", oldMax, maxContours);
 					}
 					
 					rcContour* cont = &cset.conts[cset.nconts++];
@@ -964,7 +964,7 @@ bool rcBuildContours(rcContext* ctx, rcCompactHeightfield& chf,
 					cont->verts = (int*)rcAlloc(sizeof(int)*cont->nverts*4, RC_ALLOC_PERM);
 					if (!cont->verts)
 					{
-						ctx->log(RC_LOG_ERROR, "rcBuildContours: Out of memory 'verts' (%d).", cont->nverts);
+						ctx->log(RC_LOG_ERROR, "rcBuildContours: Out of memory 'verts' ({}).", cont->nverts);
 						return false;
 					}
 					memcpy(cont->verts, &simplified[0], sizeof(int)*cont->nverts*4);
@@ -983,7 +983,7 @@ bool rcBuildContours(rcContext* ctx, rcCompactHeightfield& chf,
 					cont->rverts = (int*)rcAlloc(sizeof(int)*cont->nrverts*4, RC_ALLOC_PERM);
 					if (!cont->rverts)
 					{
-						ctx->log(RC_LOG_ERROR, "rcBuildContours: Out of memory 'rverts' (%d).", cont->nrverts);
+						ctx->log(RC_LOG_ERROR, "rcBuildContours: Out of memory 'rverts' ({}).", cont->nrverts);
 						return false;
 					}
 					memcpy(cont->rverts, &verts[0], sizeof(int)*cont->nrverts*4);
@@ -1012,7 +1012,7 @@ bool rcBuildContours(rcContext* ctx, rcCompactHeightfield& chf,
 		rcScopedDelete<char> winding((char*)rcAlloc(sizeof(char)*cset.nconts, RC_ALLOC_TEMP));
 		if (!winding)
 		{
-			ctx->log(RC_LOG_ERROR, "rcBuildContours: Out of memory 'hole' (%d).", cset.nconts);
+			ctx->log(RC_LOG_ERROR, "rcBuildContours: Out of memory 'hole' ({}).", cset.nconts);
 			return false;
 		}
 		int nholes = 0;
@@ -1033,7 +1033,7 @@ bool rcBuildContours(rcContext* ctx, rcCompactHeightfield& chf,
 			rcScopedDelete<rcContourRegion> regions((rcContourRegion*)rcAlloc(sizeof(rcContourRegion)*nregions, RC_ALLOC_TEMP));
 			if (!regions)
 			{
-				ctx->log(RC_LOG_ERROR, "rcBuildContours: Out of memory 'regions' (%d).", nregions);
+				ctx->log(RC_LOG_ERROR, "rcBuildContours: Out of memory 'regions' ({}).", nregions);
 				return false;
 			}
 			memset(regions, 0, sizeof(rcContourRegion)*nregions);
@@ -1041,7 +1041,7 @@ bool rcBuildContours(rcContext* ctx, rcCompactHeightfield& chf,
 			rcScopedDelete<rcContourHole> holes((rcContourHole*)rcAlloc(sizeof(rcContourHole)*cset.nconts, RC_ALLOC_TEMP));
 			if (!holes)
 			{
-				ctx->log(RC_LOG_ERROR, "rcBuildContours: Out of memory 'holes' (%d).", cset.nconts);
+				ctx->log(RC_LOG_ERROR, "rcBuildContours: Out of memory 'holes' ({}).", cset.nconts);
 				return false;
 			}
 			memset(holes, 0, sizeof(rcContourHole)*cset.nconts);
@@ -1053,7 +1053,7 @@ bool rcBuildContours(rcContext* ctx, rcCompactHeightfield& chf,
 				if (winding[i] > 0)
 				{
 					if (regions[cont.reg].outline)
-						ctx->log(RC_LOG_ERROR, "rcBuildContours: Multiple outlines for region %d.", cont.reg);
+						ctx->log(RC_LOG_ERROR, "rcBuildContours: Multiple outlines for region {}.", cont.reg);
 					regions[cont.reg].outline = &cont;
 				}
 				else
@@ -1094,7 +1094,7 @@ bool rcBuildContours(rcContext* ctx, rcCompactHeightfield& chf,
 					// The region does not have an outline.
 					// This can happen if the contour becaomes selfoverlapping because of
 					// too aggressive simplification settings.
-					ctx->log(RC_LOG_ERROR, "rcBuildContours: Bad outline for region %d, contour simplification is likely too aggressive.", i);
+					ctx->log(RC_LOG_ERROR, "rcBuildContours: Bad outline for region {}, contour simplification is likely too aggressive.", i);
 				}
 			}
 		}

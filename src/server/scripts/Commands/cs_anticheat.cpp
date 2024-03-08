@@ -158,7 +158,7 @@ public:
             return false;
         }
         sAnticheatMgr->AnticheatDeleteCommand(player->GetGUID().GetCounter());
-        handler->PSendSysMessage("Anticheat players_reports_status deleted for player %s", player->GetName().c_str());
+        handler->PSendSysMessage("Anticheat players_reports_status deleted for player {}", player->GetName().c_str());
         return true;
     }
     static bool HandleAntiCheatPurgeCommand(ChatHandler* handler)
@@ -212,15 +212,15 @@ public:
         if (!handler->IsConsole())
         {
             // account ban info
-            QueryResult resultADB = LoginDatabase.Query("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE id = '%u' ORDER BY bandate ASC", player->GetConnectedPlayer()->GetSession()->GetAccountId());
+            QueryResult resultADB = LoginDatabase.Query("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE id = '{}' ORDER BY bandate ASC", player->GetConnectedPlayer()->GetSession()->GetAccountId());
             // character ban info
-            QueryResult resultCDB = CharacterDatabase.Query("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM character_banned WHERE guid = '%u' ORDER BY bandate ASC", player->GetConnectedPlayer()->GetSession()->GetAccountId());
+            QueryResult resultCDB = CharacterDatabase.Query("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM character_banned WHERE guid = '{}' ORDER BY bandate ASC", player->GetConnectedPlayer()->GetSession()->GetAccountId());
             //                                                           0      1      2     3
-            QueryResult resultLDB = CharacterDatabase.Query("SELECT accountId, type, time, data FROM account_data WHERE `data` LIKE '%%CastSpellByName%%' AND accountId ='%u'", player->GetConnectedPlayer()->GetSession()->GetAccountId());
+            QueryResult resultLDB = CharacterDatabase.Query("SELECT accountId, type, time, data FROM account_data WHERE `data` LIKE '%%CastSpellByName%%' AND accountId ='{}'", player->GetConnectedPlayer()->GetSession()->GetAccountId());
 
             handler->PSendSysMessage("|cFFFFA500-----------------------------------------------------------------");
-            handler->PSendSysMessage("|cFF20B2AAInformation about player: |cffffff00%s", player->GetName().c_str());
-            handler->PSendSysMessage("|cffff0000IP Address: |cffffff00%s |cffff0000Latency |cffffff00%u ms", player->GetConnectedPlayer()->GetSession()->GetRemoteAddress().c_str(), latency);
+            handler->PSendSysMessage("|cFF20B2AAInformation about player: |cffffff00{}", player->GetName().c_str());
+            handler->PSendSysMessage("|cffff0000IP Address: |cffffff00{} |cffff0000Latency |cffffff00{} ms", player->GetConnectedPlayer()->GetSession()->GetRemoteAddress().c_str(), latency);
             if (resultADB)
             {
                 do
@@ -230,8 +230,8 @@ public:
                     std::string bannedReason = fields[4].Get<std::string>();
                     std::string bannedBy = fields[5].Get<std::string>();
                     handler->PSendSysMessage("|cffff0000Account Previously Banned: |cffffff00Yes");
-                    handler->PSendSysMessage("|cffff0000Ban Ended: |cffffff00%s", startbanEnd.c_str());
-                    handler->PSendSysMessage("|cffff0000Ban by: |cffffff00%s |cffff0000Ban Reason: |cffffff00%s", bannedBy.c_str(), bannedReason.c_str());
+                    handler->PSendSysMessage("|cffff0000Ban Ended: |cffffff00{}", startbanEnd.c_str());
+                    handler->PSendSysMessage("|cffff0000Ban by: |cffffff00{} |cffff0000Ban Reason: |cffffff00{}", bannedBy.c_str(), bannedReason.c_str());
                 } while (resultADB->NextRow());
             }
             if (!resultADB)
@@ -247,8 +247,8 @@ public:
                     std::string bannedReason = fields[4].Get<std::string>();
                     std::string bannedBy = fields[5].Get<std::string>();
                     handler->PSendSysMessage("|cffff0000Character Previously Banned: |cffffff00Yes");
-                    handler->PSendSysMessage("|cffff0000Ban Ended: |cffffff00%s", startbanEnd.c_str());
-                    handler->PSendSysMessage("|cffff0000Ban by: |cffffff00%s |cffff0000Ban Reason: |cffffff00%s", bannedBy.c_str(), bannedReason.c_str());
+                    handler->PSendSysMessage("|cffff0000Ban Ended: |cffffff00{}", startbanEnd.c_str());
+                    handler->PSendSysMessage("|cffff0000Ban by: |cffffff00{} |cffff0000Ban Reason: |cffffff00{}", bannedBy.c_str(), bannedReason.c_str());
                 } while (resultCDB->NextRow());
             }
             if (!resultCDB)
@@ -266,28 +266,28 @@ public:
             {
                 handler->PSendSysMessage("|cffff0000Macro Requiring Lua unlock Detected: |cffffff00No");
             }
-            handler->PSendSysMessage("|cffff0000Counter Measures Deployed: |cffffff00%u", counter_measures_reports);
-            handler->PSendSysMessage("|cffff0000Average: |cffffff00%f |cffff0000Total Reports: |cffffff00%u ", average, total_reports);
-            handler->PSendSysMessage("|cffff0000Speed Reports: |cffffff00%u |cffff0000Fly Reports: |cffffff00%u |cffff0000Jump Reports: |cffffff00%u ", speed_reports, fly_reports, jump_reports);
-            handler->PSendSysMessage("|cffff0000Walk On Water Reports:|cffffff00 %u |cffff0000Teleport To Plane Reports: |cffffff00%u", waterwalk_reports, teleportplane_reports);
-            handler->PSendSysMessage("|cffff0000Teleport Reports: |cffffff00%u |cffff0000Climb Reports: |cffffff00%u", teleport_reports, climb_reports);
-            handler->PSendSysMessage("|cffff0000Ignore Control Reports: |cffffff00%u |cffff0000Ignore Z-Axis Reports: |cffffff00%u", ignorecontrol_reports, zaxis_reports);
-            handler->PSendSysMessage("|cffff0000Ignore Anti-Swim Reports: |cffffff00%u |cffff0000Gravity Reports: |cffffff00%u", antiswim_reports, gravity_reports);
-            handler->PSendSysMessage("|cffff0000Anti-Knock Back Reports: |cffffff00%u |cffff0000No Fall Damage Reports: |cffffff00%u", antiknockback_reports, no_fall_damage_reports);
-            handler->PSendSysMessage("|cffff0000Op Ack Reports: |cffffff00%u", op_ack_reports);
+            handler->PSendSysMessage("|cffff0000Counter Measures Deployed: |cffffff00{}", counter_measures_reports);
+            handler->PSendSysMessage("|cffff0000Average: |cffffff00{} |cffff0000Total Reports: |cffffff00{} ", average, total_reports);
+            handler->PSendSysMessage("|cffff0000Speed Reports: |cffffff00{} |cffff0000Fly Reports: |cffffff00{} |cffff0000Jump Reports: |cffffff00{} ", speed_reports, fly_reports, jump_reports);
+            handler->PSendSysMessage("|cffff0000Walk On Water Reports:|cffffff00 {} |cffff0000Teleport To Plane Reports: |cffffff00{}", waterwalk_reports, teleportplane_reports);
+            handler->PSendSysMessage("|cffff0000Teleport Reports: |cffffff00{} |cffff0000Climb Reports: |cffffff00{}", teleport_reports, climb_reports);
+            handler->PSendSysMessage("|cffff0000Ignore Control Reports: |cffffff00{} |cffff0000Ignore Z-Axis Reports: |cffffff00{}", ignorecontrol_reports, zaxis_reports);
+            handler->PSendSysMessage("|cffff0000Ignore Anti-Swim Reports: |cffffff00{} |cffff0000Gravity Reports: |cffffff00{}", antiswim_reports, gravity_reports);
+            handler->PSendSysMessage("|cffff0000Anti-Knock Back Reports: |cffffff00{} |cffff0000No Fall Damage Reports: |cffffff00{}", antiknockback_reports, no_fall_damage_reports);
+            handler->PSendSysMessage("|cffff0000Op Ack Reports: |cffffff00{}", op_ack_reports);
         }
         if (handler->IsConsole())
         {
             // account ban info
-            QueryResult resultADB = LoginDatabase.Query("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE id = '%u' ORDER BY bandate ASC", player->GetConnectedPlayer()->GetSession()->GetAccountId());
+            QueryResult resultADB = LoginDatabase.Query("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE id = '{}' ORDER BY bandate ASC", player->GetConnectedPlayer()->GetSession()->GetAccountId());
             // character ban info
-            QueryResult resultCDB = CharacterDatabase.Query("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM character_banned WHERE guid = '%u' ORDER BY bandate ASC", player->GetConnectedPlayer()->GetSession()->GetAccountId());
+            QueryResult resultCDB = CharacterDatabase.Query("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM character_banned WHERE guid = '{}' ORDER BY bandate ASC", player->GetConnectedPlayer()->GetSession()->GetAccountId());
             //                                                           0      1      2     3
-            QueryResult resultLDB = CharacterDatabase.Query("SELECT accountId, type, time, data FROM account_data WHERE `data` LIKE '%%CastSpellByName%%' AND accountId ='%u'", player->GetConnectedPlayer()->GetSession()->GetAccountId());
+            QueryResult resultLDB = CharacterDatabase.Query("SELECT accountId, type, time, data FROM account_data WHERE `data` LIKE '%%CastSpellByName%%' AND accountId ='{}'", player->GetConnectedPlayer()->GetSession()->GetAccountId());
 
             handler->PSendSysMessage("-----------------------------------------------------------------");
-            handler->PSendSysMessage("Information about player %s", player->GetName().c_str());
-            handler->PSendSysMessage("IP Address: %s || Latency %u ms", player->GetConnectedPlayer()->GetSession()->GetRemoteAddress().c_str(), latency);
+            handler->PSendSysMessage("Information about player {}", player->GetName().c_str());
+            handler->PSendSysMessage("IP Address: {} || Latency {} ms", player->GetConnectedPlayer()->GetSession()->GetRemoteAddress().c_str(), latency);
             if (resultADB)
             {
                 do
@@ -297,8 +297,8 @@ public:
                     std::string bannedReason = fields[4].Get<std::string>();
                     std::string bannedBy = fields[5].Get<std::string>();
                     handler->PSendSysMessage("Account Previously Banned: Yes");
-                    handler->PSendSysMessage("Ban Ended: %s", startbanEnd.c_str());
-                    handler->PSendSysMessage("Ban by: %s || Ban Reason: %s", bannedBy.c_str(), bannedReason.c_str());
+                    handler->PSendSysMessage("Ban Ended: {}", startbanEnd.c_str());
+                    handler->PSendSysMessage("Ban by: {} || Ban Reason: {}", bannedBy.c_str(), bannedReason.c_str());
                 } while (resultADB->NextRow());
             }
             if (!resultADB)
@@ -314,8 +314,8 @@ public:
                     std::string bannedReason = fields[4].Get<std::string>();
                     std::string bannedBy = fields[5].Get<std::string>();
                     handler->PSendSysMessage("Character Previously Banned: Yes");
-                    handler->PSendSysMessage("Ban Ended: %s", startbanEnd.c_str());
-                    handler->PSendSysMessage("Ban by: %s || Ban Reason: %s", bannedBy.c_str(), bannedReason.c_str());
+                    handler->PSendSysMessage("Ban Ended: {}", startbanEnd.c_str());
+                    handler->PSendSysMessage("Ban by: {} || Ban Reason: {}", bannedBy.c_str(), bannedReason.c_str());
                 } while (resultCDB->NextRow());
             }
             if (!resultCDB)
@@ -333,15 +333,15 @@ public:
             {
                 handler->PSendSysMessage("Macro Requiring Lua unlock Detected: No");
             }
-            handler->PSendSysMessage("Counter Measures Deployed: %u", counter_measures_reports);
-            handler->PSendSysMessage("Average: %f || Total Reports: %u ", average, total_reports);
-            handler->PSendSysMessage("Speed Reports: %u || Fly Reports: %u || Jump Reports: %u ", speed_reports, fly_reports, jump_reports);
-            handler->PSendSysMessage("Walk On Water Reports: %u  || Teleport To Plane Reports: %u", waterwalk_reports, teleportplane_reports);
-            handler->PSendSysMessage("Teleport Reports: %u || Climb Reports: %u", teleport_reports, climb_reports);
-            handler->PSendSysMessage("Ignore Control Reports: %u || Ignore Z-Axis Reports: %u", ignorecontrol_reports, zaxis_reports);
-            handler->PSendSysMessage("Ignore Anti-Swim Reports: %u || Gravity Reports: %u", antiswim_reports, gravity_reports);
-            handler->PSendSysMessage("Anti-Knock Back Reports: %u || No Fall Damage Reports: %u", antiknockback_reports, no_fall_damage_reports);
-            handler->PSendSysMessage("Op Ack Reports: %u", op_ack_reports);
+            handler->PSendSysMessage("Counter Measures Deployed: {}", counter_measures_reports);
+            handler->PSendSysMessage("Average: {} || Total Reports: {} ", average, total_reports);
+            handler->PSendSysMessage("Speed Reports: {} || Fly Reports: {} || Jump Reports: {} ", speed_reports, fly_reports, jump_reports);
+            handler->PSendSysMessage("Walk On Water Reports: {}  || Teleport To Plane Reports: {}", waterwalk_reports, teleportplane_reports);
+            handler->PSendSysMessage("Teleport Reports: {} || Climb Reports: {}", teleport_reports, climb_reports);
+            handler->PSendSysMessage("Ignore Control Reports: {} || Ignore Z-Axis Reports: {}", ignorecontrol_reports, zaxis_reports);
+            handler->PSendSysMessage("Ignore Anti-Swim Reports: {} || Gravity Reports: {}", antiswim_reports, gravity_reports);
+            handler->PSendSysMessage("Anti-Knock Back Reports: {} || No Fall Damage Reports: {}", antiknockback_reports, no_fall_damage_reports);
+            handler->PSendSysMessage("Op Ack Reports: {}", op_ack_reports);
         }
         return true;
     }

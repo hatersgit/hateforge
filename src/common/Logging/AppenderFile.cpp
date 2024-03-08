@@ -67,7 +67,7 @@ AppenderFile::AppenderFile(uint8 id, std::string const& name, LogLevel level, Ap
         }
     }
 
-    _dynamicName = std::string::npos != _fileName.find("%s");
+    _dynamicName = std::string::npos != _fileName.find("{}");
     _backup = (flags & APPENDER_FLAGS_MAKE_FILE_BACKUP) != 0;
 
     if (!_dynamicName)
@@ -97,7 +97,7 @@ void AppenderFile::_write(LogMessage const* message)
             return;
         }
 
-        fprintf(file, "%s%s\n", message->prefix.c_str(), message->text.c_str());
+        fprintf(file, "{}{}\n", message->prefix.c_str(), message->text.c_str());
         fflush(file);
         _fileSize += uint64(message->Size());
         fclose(file);
@@ -114,7 +114,7 @@ void AppenderFile::_write(LogMessage const* message)
         return;
     }
 
-    fprintf(logfile, "%s%s\n", message->prefix.c_str(), message->text.c_str());
+    fprintf(logfile, "{}{}\n", message->prefix.c_str(), message->text.c_str());
     fflush(logfile);
     _fileSize += uint64(message->Size());
 }

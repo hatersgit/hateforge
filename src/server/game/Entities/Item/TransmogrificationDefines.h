@@ -87,7 +87,7 @@ inline const char* CanTransmogrifyResultMessage(TransmogResult result)
     return nullptr;
 };
 const char* const TransmogResult_Ok_PendingMessage = "Pending transmog added";
-const char* const AddToCollectionMessageFmt = "%s has been added to your appearance collection.";
+const char* const AddToCollectionMessageFmt = "{} has been added to your appearance collection.";
 const uint32 InvisibleEntry = std::numeric_limits<uint32>::max();
 const uint32 NormalEntry = InvisibleEntry - 1;
 const uint32 RemovePending = NormalEntry - 1;

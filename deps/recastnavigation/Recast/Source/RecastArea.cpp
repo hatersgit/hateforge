@@ -46,7 +46,7 @@ bool rcErodeWalkableArea(rcContext* ctx, int radius, rcCompactHeightfield& chf)
 	unsigned char* dist = (unsigned char*)rcAlloc(sizeof(unsigned char)*chf.spanCount, RC_ALLOC_TEMP);
 	if (!dist)
 	{
-		ctx->log(RC_LOG_ERROR, "erodeWalkableArea: Out of memory 'dist' (%d).", chf.spanCount);
+		ctx->log(RC_LOG_ERROR, "erodeWalkableArea: Out of memory 'dist' ({}).", chf.spanCount);
 		return false;
 	}
 	
@@ -248,7 +248,7 @@ bool rcMedianFilterWalkableArea(rcContext* ctx, rcCompactHeightfield& chf)
 	unsigned char* areas = (unsigned char*)rcAlloc(sizeof(unsigned char)*chf.spanCount, RC_ALLOC_TEMP);
 	if (!areas)
 	{
-		ctx->log(RC_LOG_ERROR, "medianFilterWalkableArea: Out of memory 'areas' (%d).", chf.spanCount);
+		ctx->log(RC_LOG_ERROR, "medianFilterWalkableArea: Out of memory 'areas' ({}).", chf.spanCount);
 		return false;
 	}
 	

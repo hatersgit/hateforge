@@ -220,7 +220,7 @@ void System::init() {
         uint64_t maxAddr = reinterpret_cast<uint64_t>(systemInfo.lpMaximumApplicationAddress);
         {
             char c[1024];
-            sprintf(c, "%d - %s cores",
+            sprintf(c, "{} - {} cores",
                     systemInfo.dwNumberOfProcessors,
                     arch);
             m_cpuArch = c;
@@ -232,7 +232,7 @@ void System::init() {
 
         if (success) {
             char c[1000];
-            sprintf(c, "Windows %d.%d build %d Platform %d %s",
+            sprintf(c, "Windows {}.{} build {} Platform {} {}",
                 osVersionInfo.dwMajorVersion,
                 osVersionInfo.dwMinorVersion,
                 osVersionInfo.dwBuildNumber,
@@ -337,14 +337,14 @@ void getG3DVersion(std::string& s) {
 
     char cstr[100];
     if ((G3D_VER % 100) != 0) {
-        sprintf(cstr, "G3D Innovation Engine %d.%02d beta %d, %s%s",
+        sprintf(cstr, "G3D Innovation Engine {}.%02d beta {}, {}{}",
                 G3D_VER / 10000,
                 (G3D_VER / 100) % 100,
                 G3D_VER % 100,
                 build,
                 debug);
     } else {
-        sprintf(cstr, "G3D Innovation Engine %d.%02d, %s%s",
+        sprintf(cstr, "G3D Innovation Engine {}.%02d, {}{}",
                 G3D_VER / 10000,
                 (G3D_VER / 100) % 100,
                 build,
@@ -362,7 +362,7 @@ static Table<std::string, std::string> lastFound;
 static Array<std::string> directoryArray;
 
 #define MARK_LOG()
-//#define MARK_LOG() logPrintf("%s(%d)\n", __FILE__, __LINE__)
+//#define MARK_LOG() logPrintf("{}({})\n", __FILE__, __LINE__)
 std::string System::findDataFile
 (const std::string&  _full,
  bool                errorIfNotFound,
@@ -438,7 +438,7 @@ MARK_LOG();
             {"font", "gui", "shader", "model", "cubemap", "icon", "material", "image", "md2", "md3", "ifs", "3ds", "sky", "music", "sound", "scene", ""};
         for (int j = 0; j < baseDirArray.size(); ++j) {
             std::string d = baseDirArray[j];
-//logPrintf("%s", d.c_str());
+//logPrintf("{}", d.c_str());
             if ((d == "") || FileSystem::exists(d)) {
 //logPrintf(" exists\n");
                 directoryArray.append(d);
@@ -453,7 +453,7 @@ MARK_LOG();
             }
         }
 
-        logLazyPrintf("Initializing System::findDataFile took %fs\n", System::time() - t0);
+        logLazyPrintf("Initializing System::findDataFile took {}s\n", System::time() - t0);
 
     }
 MARK_LOG();
@@ -497,7 +497,7 @@ MARK_LOG();
         msg += "\nFilenames tested:\n" + locations;
 
 MARK_LOG();
-logPrintf("%s\n", msg.c_str());
+logPrintf("{}\n", msg.c_str());
         throw FileNotFound(full, msg);
         alwaysAssertM(false, msg);
     }
@@ -760,7 +760,7 @@ std::string System::currentProgramFilename() {
         FILE* fd;
         char cmd[80];
         pid = getpid();
-        sprintf(cmd, "ps -p %d -o comm=\"\"", pid);
+        sprintf(cmd, "ps -p {} -o comm=\"\"", pid);
 
         fd = popen(cmd, "r");
         int s = fread(filename, 1, sizeof(filename), fd);
@@ -1311,7 +1311,7 @@ public:
                 System::outOfMemoryCallback()(USERSIZE_TO_REALSIZE(bytes), false);
             }
 #           ifdef G3D_DEBUG
-            debugPrintf("::malloc(%d) returned NULL\n", (int)USERSIZE_TO_REALSIZE(bytes));
+            debugPrintf("::malloc({}) returned NULL\n", (int)USERSIZE_TO_REALSIZE(bytes));
 #           endif
             debugAssertM(ptr != NULL, 
                          "::malloc returned NULL. Either the "
@@ -1374,8 +1374,8 @@ public:
 
             int total = totalMallocs;
 
-            return format("malloc performance: %5.1f%% <= %db, %5.1f%% <= %db, "
-                          "%5.1f%% <= %db, %5.1f%% > %db",
+            return format("malloc performance: %5.1f%% <= {}b, %5.1f%% <= {}b, "
+                          "%5.1f%% <= {}b, %5.1f%% > {}b",
                           100.0 * mallocsFromTinyPool  / total,
                           BufferPool::tinyBufferSize,
                           100.0 * mallocsFromSmallPool / total,
@@ -1390,7 +1390,7 @@ public:
     }
 
     std::string status() const {
-        return format("preallocated shared buffers: %5d/%d x %db",
+        return format("preallocated shared buffers: %5d/{} x {}b",
             maxTinyBuffers - tinyPoolSize, maxTinyBuffers, tinyBufferSize);
     }
 };
@@ -1676,7 +1676,7 @@ std::string System::currentDateString() {
     time_t t1;
     ::time(&t1);
     tm* t = localtime(&t1);
-    return format("%d-%02d-%02d", t->tm_year + 1900, t->tm_mon + 1, t->tm_mday); 
+    return format("{}-%02d-%02d", t->tm_year + 1900, t->tm_mon + 1, t->tm_mday); 
 }
 
 std::string System::currentTimeString() {

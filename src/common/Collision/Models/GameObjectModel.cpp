@@ -284,7 +284,7 @@ bool GameObjectModel::UpdatePosition()
     // ignore models with no bounds
     if (mdl_box == G3D::AABox::zero())
     {
-        //VMAP_ERROR_LOG("misc", "GameObject model %s has zero bounds, loading skipped", it->second.name.c_str());
+        //VMAP_ERROR_LOG("misc", "GameObject model {} has zero bounds, loading skipped", it->second.name.c_str());
         return false;
     }
 

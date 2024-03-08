@@ -701,8 +701,8 @@ enum AcoreStrings
     LANG_BG_DISABLED                    = 747,
     LANG_ARENA_DISABLED                 = 748,
     //                                      = 749, see LANG_PINFO_ACC_OS
-    LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING = 750,       // "Not enough players. This game will close in %u mins."
-    LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING_SECS = 751,  // "Not enough players. This game will close in %u seconds."
+    LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING = 750,       // "Not enough players. This game will close in {} mins."
+    LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING_SECS = 751,  // "Not enough players. This game will close in {} seconds."
     //                                      = 752, see LANG_PINFO_ACC_IP
 
     // Room for BG/ARENA                = 779-784, 788-799 not used
@@ -1177,7 +1177,7 @@ enum AcoreStrings
     LANG_GM_NOTIFY                       = 6614,
     LANG_GM_ANNOUNCE_COLOR               = 6615,
 
-    LANG_GM_SILENCE                      = 6616,              // "Silence is ON for %s" - Spell 1852
+    LANG_GM_SILENCE                      = 6616,              // "Silence is ON for {}" - Spell 1852
 
     // Used for .string command
     LANG_NO_ACORE_STRING_FOUND           = 6617,
@@ -1275,8 +1275,8 @@ enum AcoreStrings
     LANG_BG_SA_START_ONE_MINUTE             = 10057,
     LANG_BG_SA_START_HALF_MINUTE            = 10058,
     LANG_BG_SA_HAS_BEGUN                    = 10059,
-    LANG_BG_SA_IS_UNDER_ATTACK              = 10060, //The %s is under attack!
-    LANG_BG_SA_WAS_DESTROYED                = 10061, //The %s was destroyed!
+    LANG_BG_SA_IS_UNDER_ATTACK              = 10060, //The {} is under attack!
+    LANG_BG_SA_WAS_DESTROYED                = 10061, //The {} was destroyed!
     LANG_BG_SA_ROUND_ONE_END                = 10062, //Round 1 - finished!
     LANG_BG_SA_ALLIANCE_CAPTURED_RELIC      = 10063, //The Alliance captured the titan portal!
     LANG_BG_SA_HORDE_CAPTURED_RELIC         = 10064, //The Horde captured the titan portal!

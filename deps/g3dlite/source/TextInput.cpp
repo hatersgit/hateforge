@@ -874,7 +874,7 @@ numLabel:
     }
 
     // Some unknown token
-    throw format("Unrecognized token type beginning with character '%c' (ASCII %d)", c, c);
+    throw format("Unrecognized token type beginning with character '%c' (ASCII {})", c, c);
     return;
 }
 
@@ -1244,7 +1244,7 @@ const std::string& TextInput::filename() const {
 TextInput::TokenException::TokenException(
     const std::string&  src,
     int                 ln,
-    int                 ch) : ParseError(src, ln, ch, format("%s(%d) : ", src.c_str(), ln)),
+    int                 ch) : ParseError(src, ln, ch, format("{}({}) : ", src.c_str(), ln)),
                               sourceFile(src) {
 }
 
@@ -1276,7 +1276,7 @@ TextInput::WrongTokenType::WrongTokenType(
     Token::Type         a) :
     TokenException(src, ln, ch), expected(e), actual(a) {
          
-    message += format("Expected token of type %s, found type %s.",
+    message += format("Expected token of type {}, found type {}.",
                       tokenTypeToString(e), tokenTypeToString(a));
 }
 
@@ -1297,7 +1297,7 @@ TextInput::WrongSymbol::WrongSymbol(
     const std::string&  a) : 
     TokenException(src, ln, ch), expected(e), actual(a) {
 
-    message += format("Expected symbol '%s', found symbol '%s'.",
+    message += format("Expected symbol '{}', found symbol '{}'.",
                       e.c_str(), a.c_str());
 }
 
@@ -1310,7 +1310,7 @@ TextInput::WrongString::WrongString(
     const std::string&  a) : 
     TokenException(src, ln, ch), expected(e), actual(a) {
 
-    message += format("Expected string '%s', found string '%s'.",
+    message += format("Expected string '{}', found string '{}'.",
                       e.c_str(), a.c_str());
 }
 

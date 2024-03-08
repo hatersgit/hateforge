@@ -6536,7 +6536,7 @@ void Unit::SendSpellNonMeleeReflectLog(SpellNonMeleeDamage* log, Unit* attacker)
     data << uint8 (log->schoolMask);                        // damage school
     data << uint32(absorb);                                 // AbsorbedDamage
     data << uint32(log->resist);                            // resist
-    data << uint8 (log->physicalLog);                       // if 1, then client show spell name (example: %s's ranged shot hit %s for %u school or %s suffers %u school damage from %s's spell_name
+    data << uint8 (log->physicalLog);                       // if 1, then client show spell name (example: {}'s ranged shot hit {} for {} school or {} suffers {} school damage from {}'s spell_name
     data << uint8 (log->unused);                            // unused
     data << uint32(log->blocked);                           // blocked
     data << uint32(log->HitInfo);
@@ -6564,7 +6564,7 @@ void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log)
     data << uint8 (log->schoolMask);                        // damage school
     data << uint32(absorb);                                 // AbsorbedDamage
     data << uint32(log->resist);                            // resist
-    data << uint8 (log->physicalLog);                       // if 1, then client show spell name (example: %s's ranged shot hit %s for %u school or %s suffers %u school damage from %s's spell_name
+    data << uint8 (log->physicalLog);                       // if 1, then client show spell name (example: {}'s ranged shot hit {} for {} school or {} suffers {} school damage from {}'s spell_name
     data << uint8 (log->unused);                            // unused
     data << uint32(log->blocked);                           // blocked
     data << uint32(log->HitInfo);

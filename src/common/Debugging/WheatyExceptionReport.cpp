@@ -47,7 +47,7 @@ inline LPTSTR ErrorMessage(DWORD dw)
     else
     {
         LPTSTR msgBuf = (LPTSTR)LocalAlloc(LPTR, 30);
-        sprintf(msgBuf, "Unknown error: %u", dw);
+        sprintf(msgBuf, "Unknown error: {}", dw);
         return msgBuf;
     }
 }
@@ -141,7 +141,7 @@ LONG WINAPI WheatyExceptionReport::WheatyUnhandledExceptionFilter(
     ++pos;
 
     TCHAR crash_folder_path[MAX_PATH];
-    sprintf_s(crash_folder_path, "%s\\%s", module_folder_name, CrashFolder);
+    sprintf_s(crash_folder_path, "{}\\{}", module_folder_name, CrashFolder);
     if (!CreateDirectory(crash_folder_path, nullptr))
     {
         if (GetLastError() != ERROR_ALREADY_EXISTS)
@@ -152,10 +152,10 @@ LONG WINAPI WheatyExceptionReport::WheatyUnhandledExceptionFilter(
 
     SYSTEMTIME systime;
     GetLocalTime(&systime);
-    sprintf(m_szDumpFileName, "%s\\%s_%s_[%u-%u_%u-%u-%u].dmp",
+    sprintf(m_szDumpFileName, "{}\\{}_{}_[{}-{}_{}-{}-{}].dmp",
             crash_folder_path, GitRevision::GetHash(), pos, systime.wDay, systime.wMonth, systime.wHour, systime.wMinute, systime.wSecond);
 
-    sprintf(m_szLogFileName, "%s\\%s_%s_[%u-%u_%u-%u-%u].txt",
+    sprintf(m_szLogFileName, "{}\\{}_{}_[{}-{}_{}-{}-{}].txt",
             crash_folder_path, GitRevision::GetHash(), pos, systime.wDay, systime.wMonth, systime.wHour, systime.wMinute, systime.wSecond);
 
     m_hDumpFile = CreateFile(m_szDumpFileName,
@@ -476,13 +476,13 @@ BOOL WheatyExceptionReport::_GetWindowsVersion(TCHAR* szVersion, DWORD cntMax)
                 lRet = ::RegOpenKeyEx(HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Hotfix\\Q246009"), 0, KEY_QUERY_VALUE, &hKey);
                 if (lRet == ERROR_SUCCESS)
                 {
-                    _stprintf(wszTmp, _T("Service Pack 6a (Version %d.%d, Build %d)"),
+                    _stprintf(wszTmp, _T("Service Pack 6a (Version {}.{}, Build {})"),
                               osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber & 0xFFFF);
                     _tcsncat(szVersion, wszTmp, cntMax);
                 }
                 else                                            // Windows NT 4.0 prior to SP6a
                 {
-                    _stprintf(wszTmp, _T("%s (Version %d.%d, Build %d)"),
+                    _stprintf(wszTmp, _T("{} (Version {}.{}, Build {})"),
                               szCSDVersion, osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber & 0xFFFF);
                     _tcsncat(szVersion, wszTmp, cntMax);
                 }
@@ -491,17 +491,17 @@ BOOL WheatyExceptionReport::_GetWindowsVersion(TCHAR* szVersion, DWORD cntMax)
             else                                                // Windows NT 3.51 and earlier or Windows 2000 and later
             {
                 if (!_tcslen(szCSDVersion))
-                    _stprintf(wszTmp, _T("(Version %d.%d, Build %d)"),
+                    _stprintf(wszTmp, _T("(Version {}.{}, Build {})"),
                               osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber & 0xFFFF);
                 else
-                    _stprintf(wszTmp, _T("%s (Version %d.%d, Build %d)"),
+                    _stprintf(wszTmp, _T("{} (Version {}.{}, Build {})"),
                               szCSDVersion, osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber & 0xFFFF);
                 _tcsncat(szVersion, wszTmp, cntMax);
             }
             break;
         }
         default:
-            _stprintf(wszTmp, _T("%s (Version %d.%d, Build %d)"),
+            _stprintf(wszTmp, _T("{} (Version {}.{}, Build {})"),
                       szCSDVersion, osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber & 0xFFFF);
             _tcsncat(szVersion, wszTmp, cntMax);
             break;
@@ -521,15 +521,15 @@ void WheatyExceptionReport::PrintSystemInfo()
     TCHAR sString[1024];
     Log(_T("//=====================================================\r\n"));
     if (_GetProcessorName(sString, countof(sString)))
-        Log(_T("*** Hardware ***\r\nProcessor: %s\r\nNumber Of Processors: %d\r\nPhysical Memory: %d KB (Available: %d KB)\r\nCommit Charge Limit: %d KB\r\n"),
+        Log(_T("*** Hardware ***\r\nProcessor: {}\r\nNumber Of Processors: {}\r\nPhysical Memory: {} KB (Available: {} KB)\r\nCommit Charge Limit: {} KB\r\n"),
             sString, SystemInfo.dwNumberOfProcessors, MemoryStatus.dwTotalPhys / 0x400, MemoryStatus.dwAvailPhys / 0x400, MemoryStatus.dwTotalPageFile / 0x400);
     else
-        Log(_T("*** Hardware ***\r\nProcessor: <unknown>\r\nNumber Of Processors: %d\r\nPhysical Memory: %d KB (Available: %d KB)\r\nCommit Charge Limit: %d KB\r\n"),
+        Log(_T("*** Hardware ***\r\nProcessor: <unknown>\r\nNumber Of Processors: {}\r\nPhysical Memory: {} KB (Available: {} KB)\r\nCommit Charge Limit: {} KB\r\n"),
             SystemInfo.dwNumberOfProcessors, MemoryStatus.dwTotalPhys / 0x400, MemoryStatus.dwAvailPhys / 0x400, MemoryStatus.dwTotalPageFile / 0x400);
 
     if (_GetWindowsVersion(sString, countof(sString)))
     {
-        Log(_T("\r\n*** Operation System ***\r\n%s\r\n"), sString);
+        Log(_T("\r\n*** Operation System ***\r\n{}\r\n"), sString);
     }
     else
     {
@@ -601,20 +601,20 @@ void WheatyExceptionReport::GenerateExceptionReport(
         GetLocalTime(&systime);
 
         // Start out with a banner
-        Log(_T("Revision: %s\r\n"), GitRevision::GetFullVersion());
-        Log(_T("Date %u:%u:%u. Time %u:%u \r\n"), systime.wDay, systime.wMonth, systime.wYear, systime.wHour, systime.wMinute);
+        Log(_T("Revision: {}\r\n"), GitRevision::GetFullVersion());
+        Log(_T("Date {}:{}:{}. Time {}:{} \r\n"), systime.wDay, systime.wMonth, systime.wYear, systime.wHour, systime.wMinute);
         PEXCEPTION_RECORD pExceptionRecord = pExceptionInfo->ExceptionRecord;
 
         PrintSystemInfo();
         // First print information about the type of fault
         Log(_T("\r\n//=====================================================\r\n"));
-        Log(_T("Exception code: %08X %s\r\n"),
+        Log(_T("Exception code: %08X {}\r\n"),
             pExceptionRecord->ExceptionCode,
             GetExceptionString(pExceptionRecord->ExceptionCode));
         if (pExceptionRecord->ExceptionCode == EXCEPTION_ASSERTION_FAILURE && pExceptionRecord->NumberParameters >= 2)
         {
             pExceptionRecord->ExceptionAddress = reinterpret_cast<PVOID>(pExceptionRecord->ExceptionInformation[1]);
-            Log(_T("Assertion message: %s\r\n"), pExceptionRecord->ExceptionInformation[0]);
+            Log(_T("Assertion message: {}\r\n"), pExceptionRecord->ExceptionInformation[0]);
         }
 
         // Now print information about where the fault occured
@@ -627,12 +627,12 @@ void WheatyExceptionReport::GenerateExceptionReport(
                           section, offset);
 
 #ifdef _M_IX86
-        Log(_T("Fault address:  %08X %02X:%08X %s\r\n"),
+        Log(_T("Fault address:  %08X %02X:%08X {}\r\n"),
             pExceptionRecord->ExceptionAddress,
             section, offset, szFaultingModule);
 #endif
 #ifdef _M_X64
-        Log(_T("Fault address:  %016I64X %02X:%016I64X %s\r\n"),
+        Log(_T("Fault address:  %016I64X %02X:%016I64X {}\r\n"),
             pExceptionRecord->ExceptionAddress,
             section, offset, szFaultingModule);
 #endif
@@ -678,7 +678,7 @@ void WheatyExceptionReport::GenerateExceptionReport(
             Log(_T("----\r\n"));
             Log(_T("SYMBOL HANDLER ERROR (THIS IS NOT THE CRASH ERROR)\r\n\r\n"));
             Log(_T("Couldn't initialize symbol handler for process when generating crash report\r\n"));
-            Log(_T("Error: %s\r\n"), ErrorMessage(GetLastError()));
+            Log(_T("Error: {}\r\n"), ErrorMessage(GetLastError()));
             Log(_T("THE BELOW CALL STACKS MIGHT HAVE MISSING OR INACCURATE FILE/FUNCTION NAMES\r\n\r\n"));
             Log(_T("----\r\n"));
         }
@@ -916,10 +916,10 @@ void WheatyExceptionReport::WriteStackDetails(
             GetLogicalAddress((PVOID)sf.AddrPC.Offset,
                               szModule, sizeof(szModule), section, offset);
 #ifdef _M_IX86
-            Log(_T("%04X:%08X %s"), section, offset, szModule);
+            Log(_T("%04X:%08X {}"), section, offset, szModule);
 #endif
 #ifdef _M_X64
-            Log(_T("%04X:%016I64X %s"), section, offset, szModule);
+            Log(_T("%04X:%016I64X {}"), section, offset, szModule);
 #endif
         }
 
@@ -929,7 +929,7 @@ void WheatyExceptionReport::WriteStackDetails(
         if (SymGetLineFromAddr64(m_hProcess, sf.AddrPC.Offset,
                                  &dwLineDisplacement, &lineInfo))
         {
-            Log(_T("  %s line %u"), lineInfo.FileName, lineInfo.LineNumber);
+            Log(_T("  {} line {}"), lineInfo.FileName, lineInfo.LineNumber);
         }
 
         Log(_T("\r\n"));
@@ -966,7 +966,7 @@ BOOL CALLBACK WheatyExceptionReport::EnumerateSymbolsCallback(
     }
     __except (EXCEPTION_EXECUTE_HANDLER)
     {
-        Log(_T("punting on symbol %s, partial output:\r\n"), pSymInfo->Name);
+        Log(_T("punting on symbol {}, partial output:\r\n"), pSymInfo->Name);
     }
 
     return TRUE;
@@ -1492,7 +1492,7 @@ void WheatyExceptionReport::FormatOutputValue(char* pszCurrBuffer,
                 }
                 else
                 {
-                    pszCurrBuffer += sprintf(pszCurrBuffer, "\"%s\"", value->c_str());
+                    pszCurrBuffer += sprintf(pszCurrBuffer, "\"{}\"", value->c_str());
                 }
                 break;
             }
@@ -1510,7 +1510,7 @@ void WheatyExceptionReport::FormatOutputValue(char* pszCurrBuffer,
                 {
                     if (basicType == btFloat)
                     {
-                        pszCurrBuffer += sprintf(pszCurrBuffer, "%f", *(PFLOAT)pAddress);
+                        pszCurrBuffer += sprintf(pszCurrBuffer, "{}", *(PFLOAT)pAddress);
                     }
                     else
                     {
@@ -1521,7 +1521,7 @@ void WheatyExceptionReport::FormatOutputValue(char* pszCurrBuffer,
                 {
                     if (basicType == btFloat)
                     {
-                        pszCurrBuffer += sprintf(pszCurrBuffer, "%f",
+                        pszCurrBuffer += sprintf(pszCurrBuffer, "{}",
                                                  *(double*)pAddress);
                     }
                     else
@@ -1682,7 +1682,7 @@ void WheatyExceptionReport::PrintSymbolDetail()
         Log(_T("\t"));
     }
 
-    Log(_T("%s\r\n"), symbolDetails.top().ToString().c_str());
+    Log(_T("{}\r\n"), symbolDetails.top().ToString().c_str());
 
     return;
 }

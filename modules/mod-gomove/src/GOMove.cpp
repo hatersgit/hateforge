@@ -35,7 +35,7 @@ void GOMove::SendAddonMessage(Player * player, const char * msg)
         return;
 
     char buf[256];
-    snprintf(buf, 256, "GOMOVE\t%s", msg);
+    snprintf(buf, 256, "GOMOVE\t{}", msg);
 
     // copy paste addon message packet
     WorldPacket data; // Needs a custom built packet since TC doesnt send guid
@@ -66,14 +66,14 @@ void GOMove::SendAdd(Player * player, ObjectGuid::LowType lowguid)
     if (!temp)
         return;
     char msg[256];
-    snprintf(msg, 256, "ADD|%u|%s|%u", lowguid, temp->name.c_str(), data->id);
+    snprintf(msg, 256, "ADD|{}|{}|{}", lowguid, temp->name.c_str(), data->id);
     SendAddonMessage(player, msg);
 }
 
 void GOMove::SendRemove(Player * player, ObjectGuid::LowType lowguid)
 {
     char msg[256];
-    snprintf(msg, 256, "REMOVE|%u||0", lowguid);
+    snprintf(msg, 256, "REMOVE|{}||0", lowguid);
 
     SendAddonMessage(player, msg);
 }

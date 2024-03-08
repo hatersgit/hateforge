@@ -259,11 +259,11 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_ignore_element(struct soap *soap)
 {
 	if (!soap_peek_element(soap))
 	{	int t;
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Unexpected element '%s' in input at level = %u body = %d)\n", soap->tag, soap->level, soap->body));
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Unexpected element '{}' in input at level = {} body = {})\n", soap->tag, soap->level, soap->body));
 		if (soap->mustUnderstand && !soap->other && !soap->fignore)
 			return soap->error = SOAP_MUSTUNDERSTAND;
 		if (((soap->mode & SOAP_XML_STRICT) && !soap->fignore && soap->part != SOAP_IN_HEADER) || !soap_match_tag(soap, soap->tag, "SOAP-ENV:"))
-		{	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "REJECTING element '%s'\n", soap->tag));
+		{	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "REJECTING element '{}'\n", soap->tag));
 			return soap->error = SOAP_TAG_MISMATCH;
 		}
 		if (!*soap->id || !soap_getelement(soap, NULL, &t))
@@ -272,7 +272,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_ignore_element(struct soap *soap)
 				soap->error = soap->fignore(soap, soap->tag);
 			else
 				soap->error = SOAP_OK;
-			DBGLOG(TEST, if (!soap->error) SOAP_MESSAGE(fdebug, "IGNORING element '%s'\n", soap->tag));
+			DBGLOG(TEST, if (!soap->error) SOAP_MESSAGE(fdebug, "IGNORING element '{}'\n", soap->tag));
 			if (!soap->error && soap->body && soap_ignore(soap))
 				return soap->error;
 		}
@@ -319,7 +319,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 	case 0:
 		return SOAP_OK;
 	}
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_putelement '%s' failed for type %d in soapC.cpp\n", tag ? tag : "", type));
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_putelement '{}' failed for type {} in soapC.cpp\n", tag ? tag : "", type));
 	return soap_element_empty(soap, tag); /* unknown type to serialize */
 }
 #ifdef __cplusplus
@@ -504,45 +504,45 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_finsert(struct soap *soap, int t, int tt, void *
 	switch (tt)
 	{
 	case SOAP_TYPE_ns1__executeCommandResponse:
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copy struct ns1__executeCommandResponse type=%d location=%p object=%p\n", t, p, q));
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copy struct ns1__executeCommandResponse type={} location=%p object=%p\n", t, p, q));
 		*(struct ns1__executeCommandResponse*)p = *(struct ns1__executeCommandResponse*)q;
 		break;
 	case SOAP_TYPE_ns1__executeCommand:
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copy struct ns1__executeCommand type=%d location=%p object=%p\n", t, p, q));
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copy struct ns1__executeCommand type={} location=%p object=%p\n", t, p, q));
 		*(struct ns1__executeCommand*)p = *(struct ns1__executeCommand*)q;
 		break;
 #ifndef WITH_NOGLOBAL
 	case SOAP_TYPE_SOAP_ENV__Header:
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copy struct SOAP_ENV__Header type=%d location=%p object=%p\n", t, p, q));
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copy struct SOAP_ENV__Header type={} location=%p object=%p\n", t, p, q));
 		*(struct SOAP_ENV__Header*)p = *(struct SOAP_ENV__Header*)q;
 		break;
 #endif
 #ifndef WITH_NOGLOBAL
 	case SOAP_TYPE_SOAP_ENV__Code:
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copy struct SOAP_ENV__Code type=%d location=%p object=%p\n", t, p, q));
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copy struct SOAP_ENV__Code type={} location=%p object=%p\n", t, p, q));
 		*(struct SOAP_ENV__Code*)p = *(struct SOAP_ENV__Code*)q;
 		break;
 #endif
 #ifndef WITH_NOGLOBAL
 	case SOAP_TYPE_SOAP_ENV__Detail:
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copy struct SOAP_ENV__Detail type=%d location=%p object=%p\n", t, p, q));
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copy struct SOAP_ENV__Detail type={} location=%p object=%p\n", t, p, q));
 		*(struct SOAP_ENV__Detail*)p = *(struct SOAP_ENV__Detail*)q;
 		break;
 #endif
 #ifndef WITH_NOGLOBAL
 	case SOAP_TYPE_SOAP_ENV__Reason:
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copy struct SOAP_ENV__Reason type=%d location=%p object=%p\n", t, p, q));
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copy struct SOAP_ENV__Reason type={} location=%p object=%p\n", t, p, q));
 		*(struct SOAP_ENV__Reason*)p = *(struct SOAP_ENV__Reason*)q;
 		break;
 #endif
 #ifndef WITH_NOGLOBAL
 	case SOAP_TYPE_SOAP_ENV__Fault:
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copy struct SOAP_ENV__Fault type=%d location=%p object=%p\n", t, p, q));
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copy struct SOAP_ENV__Fault type={} location=%p object=%p\n", t, p, q));
 		*(struct SOAP_ENV__Fault*)p = *(struct SOAP_ENV__Fault*)q;
 		break;
 #endif
 	default:
-		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Could not insert type=%d in %d\n", t, tt));
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Could not insert type={} in {}\n", t, tt));
 	}
 }
 #ifdef WIN32
@@ -774,7 +774,7 @@ SOAP_FMAC3 struct SOAP_ENV__Fault * SOAP_FMAC4 soap_in_SOAP_ENV__Fault(struct so
 
 SOAP_FMAC1 struct SOAP_ENV__Fault * SOAP_FMAC2 soap_instantiate_SOAP_ENV__Fault(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_SOAP_ENV__Fault(%p, %d, %s, %s)\n", (void*)soap, n, type?type:"", arrayType?arrayType:""));
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_SOAP_ENV__Fault(%p, {}, {}, {})\n", (void*)soap, n, type?type:"", arrayType?arrayType:""));
 	(void)type; (void)arrayType; /* appease -Wall -Werror */
 	struct SOAP_ENV__Fault *p;
 	size_t k = sizeof(struct SOAP_ENV__Fault);
@@ -788,7 +788,7 @@ SOAP_FMAC1 struct SOAP_ENV__Fault * SOAP_FMAC2 soap_instantiate_SOAP_ENV__Fault(
 	{	p = SOAP_NEW_ARRAY(soap, struct SOAP_ENV__Fault, n);
 		k *= n;
 	}
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated struct SOAP_ENV__Fault location=%p n=%d\n", (void*)p, n));
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated struct SOAP_ENV__Fault location=%p n={}\n", (void*)p, n));
 	if (size)
 		*size = k;
 	if (!p)
@@ -883,7 +883,7 @@ SOAP_FMAC3 struct SOAP_ENV__Reason * SOAP_FMAC4 soap_in_SOAP_ENV__Reason(struct 
 
 SOAP_FMAC1 struct SOAP_ENV__Reason * SOAP_FMAC2 soap_instantiate_SOAP_ENV__Reason(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_SOAP_ENV__Reason(%p, %d, %s, %s)\n", (void*)soap, n, type?type:"", arrayType?arrayType:""));
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_SOAP_ENV__Reason(%p, {}, {}, {})\n", (void*)soap, n, type?type:"", arrayType?arrayType:""));
 	(void)type; (void)arrayType; /* appease -Wall -Werror */
 	struct SOAP_ENV__Reason *p;
 	size_t k = sizeof(struct SOAP_ENV__Reason);
@@ -897,7 +897,7 @@ SOAP_FMAC1 struct SOAP_ENV__Reason * SOAP_FMAC2 soap_instantiate_SOAP_ENV__Reaso
 	{	p = SOAP_NEW_ARRAY(soap, struct SOAP_ENV__Reason, n);
 		k *= n;
 	}
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated struct SOAP_ENV__Reason location=%p n=%d\n", (void*)p, n));
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated struct SOAP_ENV__Reason location=%p n={}\n", (void*)p, n));
 	if (size)
 		*size = k;
 	if (!p)
@@ -1001,7 +1001,7 @@ SOAP_FMAC3 struct SOAP_ENV__Detail * SOAP_FMAC4 soap_in_SOAP_ENV__Detail(struct 
 
 SOAP_FMAC1 struct SOAP_ENV__Detail * SOAP_FMAC2 soap_instantiate_SOAP_ENV__Detail(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_SOAP_ENV__Detail(%p, %d, %s, %s)\n", (void*)soap, n, type?type:"", arrayType?arrayType:""));
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_SOAP_ENV__Detail(%p, {}, {}, {})\n", (void*)soap, n, type?type:"", arrayType?arrayType:""));
 	(void)type; (void)arrayType; /* appease -Wall -Werror */
 	struct SOAP_ENV__Detail *p;
 	size_t k = sizeof(struct SOAP_ENV__Detail);
@@ -1015,7 +1015,7 @@ SOAP_FMAC1 struct SOAP_ENV__Detail * SOAP_FMAC2 soap_instantiate_SOAP_ENV__Detai
 	{	p = SOAP_NEW_ARRAY(soap, struct SOAP_ENV__Detail, n);
 		k *= n;
 	}
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated struct SOAP_ENV__Detail location=%p n=%d\n", (void*)p, n));
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated struct SOAP_ENV__Detail location=%p n={}\n", (void*)p, n));
 	if (size)
 		*size = k;
 	if (!p)
@@ -1121,7 +1121,7 @@ SOAP_FMAC3 struct SOAP_ENV__Code * SOAP_FMAC4 soap_in_SOAP_ENV__Code(struct soap
 
 SOAP_FMAC1 struct SOAP_ENV__Code * SOAP_FMAC2 soap_instantiate_SOAP_ENV__Code(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_SOAP_ENV__Code(%p, %d, %s, %s)\n", (void*)soap, n, type?type:"", arrayType?arrayType:""));
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_SOAP_ENV__Code(%p, {}, {}, {})\n", (void*)soap, n, type?type:"", arrayType?arrayType:""));
 	(void)type; (void)arrayType; /* appease -Wall -Werror */
 	struct SOAP_ENV__Code *p;
 	size_t k = sizeof(struct SOAP_ENV__Code);
@@ -1135,7 +1135,7 @@ SOAP_FMAC1 struct SOAP_ENV__Code * SOAP_FMAC2 soap_instantiate_SOAP_ENV__Code(st
 	{	p = SOAP_NEW_ARRAY(soap, struct SOAP_ENV__Code, n);
 		k *= n;
 	}
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated struct SOAP_ENV__Code location=%p n=%d\n", (void*)p, n));
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated struct SOAP_ENV__Code location=%p n={}\n", (void*)p, n));
 	if (size)
 		*size = k;
 	if (!p)
@@ -1217,7 +1217,7 @@ SOAP_FMAC3 struct SOAP_ENV__Header * SOAP_FMAC4 soap_in_SOAP_ENV__Header(struct 
 
 SOAP_FMAC1 struct SOAP_ENV__Header * SOAP_FMAC2 soap_instantiate_SOAP_ENV__Header(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_SOAP_ENV__Header(%p, %d, %s, %s)\n", (void*)soap, n, type?type:"", arrayType?arrayType:""));
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_SOAP_ENV__Header(%p, {}, {}, {})\n", (void*)soap, n, type?type:"", arrayType?arrayType:""));
 	(void)type; (void)arrayType; /* appease -Wall -Werror */
 	struct SOAP_ENV__Header *p;
 	size_t k = sizeof(struct SOAP_ENV__Header);
@@ -1231,7 +1231,7 @@ SOAP_FMAC1 struct SOAP_ENV__Header * SOAP_FMAC2 soap_instantiate_SOAP_ENV__Heade
 	{	p = SOAP_NEW_ARRAY(soap, struct SOAP_ENV__Header, n);
 		k *= n;
 	}
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated struct SOAP_ENV__Header location=%p n=%d\n", (void*)p, n));
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated struct SOAP_ENV__Header location=%p n={}\n", (void*)p, n));
 	if (size)
 		*size = k;
 	if (!p)
@@ -1322,7 +1322,7 @@ SOAP_FMAC3 struct ns1__executeCommand * SOAP_FMAC4 soap_in_ns1__executeCommand(s
 
 SOAP_FMAC1 struct ns1__executeCommand * SOAP_FMAC2 soap_instantiate_ns1__executeCommand(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__executeCommand(%p, %d, %s, %s)\n", (void*)soap, n, type?type:"", arrayType?arrayType:""));
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__executeCommand(%p, {}, {}, {})\n", (void*)soap, n, type?type:"", arrayType?arrayType:""));
 	(void)type; (void)arrayType; /* appease -Wall -Werror */
 	struct ns1__executeCommand *p;
 	size_t k = sizeof(struct ns1__executeCommand);
@@ -1336,7 +1336,7 @@ SOAP_FMAC1 struct ns1__executeCommand * SOAP_FMAC2 soap_instantiate_ns1__execute
 	{	p = SOAP_NEW_ARRAY(soap, struct ns1__executeCommand, n);
 		k *= n;
 	}
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated struct ns1__executeCommand location=%p n=%d\n", (void*)p, n));
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated struct ns1__executeCommand location=%p n={}\n", (void*)p, n));
 	if (size)
 		*size = k;
 	if (!p)
@@ -1425,7 +1425,7 @@ SOAP_FMAC3 struct ns1__executeCommandResponse * SOAP_FMAC4 soap_in_ns1__executeC
 
 SOAP_FMAC1 struct ns1__executeCommandResponse * SOAP_FMAC2 soap_instantiate_ns1__executeCommandResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__executeCommandResponse(%p, %d, %s, %s)\n", (void*)soap, n, type?type:"", arrayType?arrayType:""));
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__executeCommandResponse(%p, {}, {}, {})\n", (void*)soap, n, type?type:"", arrayType?arrayType:""));
 	(void)type; (void)arrayType; /* appease -Wall -Werror */
 	struct ns1__executeCommandResponse *p;
 	size_t k = sizeof(struct ns1__executeCommandResponse);
@@ -1439,7 +1439,7 @@ SOAP_FMAC1 struct ns1__executeCommandResponse * SOAP_FMAC2 soap_instantiate_ns1_
 	{	p = SOAP_NEW_ARRAY(soap, struct ns1__executeCommandResponse, n);
 		k *= n;
 	}
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated struct ns1__executeCommandResponse location=%p n=%d\n", (void*)p, n));
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated struct ns1__executeCommandResponse location=%p n={}\n", (void*)p, n));
 	if (size)
 		*size = k;
 	if (!p)

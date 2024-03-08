@@ -23,7 +23,7 @@ if(WITHOUT_GIT)
   set(rev_hash "unknown")
   set(rev_branch "Archived")
   # No valid git commit date, use today
-  string(TIMESTAMP rev_date_fallback "%Y-%m-%d %H:%M:%S" UTC)
+  string(TIMESTAMP rev_date_fallback "%Y-%m-{} %H:%M:{}" UTC)
 else()
   # Workaround for not correctly detecting git
   if (NOT GIT_EXECUTABLE)
@@ -70,7 +70,7 @@ else()
     set(rev_hash "unknown")
     set(rev_branch "Archived")
     # No valid git commit date, use today
-    string(TIMESTAMP rev_date_fallback "%Y-%m-%d %H:%M:%S" UTC)
+    string(TIMESTAMP rev_date_fallback "%Y-%m-{} %H:%M:{}" UTC)
   else()
     # We have valid date from git commit, use that
     set(rev_date_fallback ${rev_date})

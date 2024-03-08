@@ -3960,7 +3960,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
             const char* gender = "his";
             if (m_caster->getGender() > 0)
                 gender = "her";
-            snprintf(buf, sizeof(buf), "%s rubs %s [Decahedral Dwarven Dice] between %s hands and rolls. One %u and one %u.", m_caster->GetName().c_str(), gender, gender, urand(1, 10), urand(1, 10));
+            snprintf(buf, sizeof(buf), "{} rubs {} [Decahedral Dwarven Dice] between {} hands and rolls. One {} and one {}.", m_caster->GetName().c_str(), gender, gender, urand(1, 10), urand(1, 10));
             m_caster->TextEmote(buf);
             break;
         }
@@ -6508,7 +6508,7 @@ void Spell::EffectGiveHonor(SpellEffIndex effIndex)
     playerTarget->ModifyHonorPoints(spellAmount);
 
     if (showChatMessage)
-        ChatHandler(playerTarget->GetSession()).PSendSysMessage("Rewarded %u honor.", spellAmount);
+        ChatHandler(playerTarget->GetSession()).PSendSysMessage("Rewarded {} honor.", spellAmount);
 }
 
 void Spell::EffectReceiveItem(SpellEffIndex effIndex)

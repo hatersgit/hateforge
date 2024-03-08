@@ -2283,6 +2283,11 @@ bool Player::IsInAreaTriggerRadius(AreaTrigger const* trigger, float delta) cons
     return true;
 }
 
+bool Player::CanBeGameMaster() const
+{
+    return GetSession()->GetSecurity() > 2;
+}
+
 void Player::SetGameMaster(bool on)
 {
     if (on)
@@ -15439,7 +15444,7 @@ void Player::_SaveCharacter(bool create, CharacterDatabaseTransaction trans)
 
 void Player::_LoadGlyphs(PreparedQueryResult result)
 {
-    // SELECT talentGroup, glyph1, glyph2, glyph3, glyph4, glyph5, glyph6 from character_glyphs WHERE guid = '%u'
+    // SELECT talentGroup, glyph1, glyph2, glyph3, glyph4, glyph5, glyph6 from character_glyphs WHERE guid = '{}'
     if (!result)
         return;
 

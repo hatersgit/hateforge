@@ -107,8 +107,8 @@ public:
         bool result = path.CalculatePath(x, y, z, false);
 
         Movement::PointsArray const& pointPath = path.GetPath();
-        handler->PSendSysMessage("%s's path to %s:", target->GetName().c_str(), player->GetName().c_str());
-        handler->PSendSysMessage("Building: %s", useStraightPath ? "StraightPath" : useRaycast ? "Raycast" : "SmoothPath");
+        handler->PSendSysMessage("{}'s path to {}:", target->GetName().c_str(), player->GetName().c_str());
+        handler->PSendSysMessage("Building: {}", useStraightPath ? "StraightPath" : useRaycast ? "Raycast" : "SmoothPath");
         handler->PSendSysMessage(Acore::StringFormatFmt("Result: {} - Length: {} - Type: {}", (result ? "true" : "false"), pointPath.size(), path.GetPathType()).c_str());
 
         G3D::Vector3 const& start = path.GetStartPosition();
@@ -219,10 +219,10 @@ public:
     static bool HandleMmapStatsCommand(ChatHandler* handler)
     {
         handler->PSendSysMessage("mmap stats:");
-        //handler->PSendSysMessage("  global mmap pathfinding is %sabled", DisableMgr::IsPathfindingEnabled(mapId) ? "en" : "dis");
+        //handler->PSendSysMessage("  global mmap pathfinding is {}abled", DisableMgr::IsPathfindingEnabled(mapId) ? "en" : "dis");
 
         MMAP::MMapMgr* manager = MMAP::MMapFactory::createOrGetMMapMgr();
-        handler->PSendSysMessage(" %u maps loaded with %u tiles overall", manager->getLoadedMapsCount(), manager->getLoadedTilesCount());
+        handler->PSendSysMessage(" {} maps loaded with {} tiles overall", manager->getLoadedMapsCount(), manager->getLoadedTilesCount());
 
         dtNavMesh const* navmesh = manager->GetNavMesh(handler->GetSession()->GetPlayer()->GetMapId());
         if (!navmesh)
@@ -254,10 +254,10 @@ public:
         }
 
         handler->PSendSysMessage("Navmesh stats:");
-        handler->PSendSysMessage(" %u tiles loaded", tileCount);
-        handler->PSendSysMessage(" %u BVTree nodes", nodeCount);
-        handler->PSendSysMessage(" %u polygons (%u vertices)", polyCount, vertCount);
-        handler->PSendSysMessage(" %u triangles (%u vertices)", triCount, triVertCount);
+        handler->PSendSysMessage(" {} tiles loaded", tileCount);
+        handler->PSendSysMessage(" {} BVTree nodes", nodeCount);
+        handler->PSendSysMessage(" {} polygons ({} vertices)", polyCount, vertCount);
+        handler->PSendSysMessage(" {} triangles ({} vertices)", triCount, triVertCount);
         handler->PSendSysMessage(" %.2f MB of data (not including pointers)", ((float)dataSize / sizeof(unsigned char)) / 1048576);
 
         return true;
@@ -294,7 +294,7 @@ public:
             handler->PSendSysMessage("Generated %i paths in %i ms", paths, uPathLoadTime);
         }
         else
-            handler->PSendSysMessage("No creatures in %f yard range.", radius);
+            handler->PSendSysMessage("No creatures in {} yard range.", radius);
 
         return true;
     }

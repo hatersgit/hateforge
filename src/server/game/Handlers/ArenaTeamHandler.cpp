@@ -415,7 +415,7 @@ void WorldSession::SendArenaTeamCommandResult(uint32 teamAction, const std::stri
 
 void WorldSession::SendNotInArenaTeamPacket(uint8 type)
 {
-    WorldPacket data(SMSG_ARENA_ERROR, 4 + 1);              // 886 - You are not in a %uv%u arena team
+    WorldPacket data(SMSG_ARENA_ERROR, 4 + 1);              // 886 - You are not in a {}v{} arena team
     uint32 unk = 0;
     data << uint32(unk);                                    // unk(0)
     if (!unk)
@@ -424,42 +424,42 @@ void WorldSession::SendNotInArenaTeamPacket(uint8 type)
 }
 
 /*
-+ERR_ARENA_NO_TEAM_II "You are not in a %dv%d arena team"
++ERR_ARENA_NO_TEAM_II "You are not in a {}v{} arena team"
 
-+ERR_ARENA_TEAM_CREATE_S "%s created.  To disband, use /teamdisband [2v2, 3v3, 5v5]."
-+ERR_ARENA_TEAM_INVITE_SS "You have invited %s to join %s"
-+ERR_ARENA_TEAM_QUIT_S "You are no longer a member of %s"
-ERR_ARENA_TEAM_FOUNDER_S "Congratulations, you are a founding member of %s!  To leave, use /teamquit [2v2, 3v3, 5v5]."
++ERR_ARENA_TEAM_CREATE_S "{} created.  To disband, use /teamdisband [2v2, 3v3, 5v5]."
++ERR_ARENA_TEAM_INVITE_SS "You have invited {} to join {}"
++ERR_ARENA_TEAM_QUIT_S "You are no longer a member of {}"
+ERR_ARENA_TEAM_FOUNDER_S "Congratulations, you are a founding member of {}!  To leave, use /teamquit [2v2, 3v3, 5v5]."
 
 +ERR_ARENA_TEAM_INTERNAL "Internal arena team error"
 +ERR_ALREADY_IN_ARENA_TEAM "You are already in an arena team of that size"
-+ERR_ALREADY_IN_ARENA_TEAM_S "%s is already in an arena team of that size"
++ERR_ALREADY_IN_ARENA_TEAM_S "{} is already in an arena team of that size"
 +ERR_INVITED_TO_ARENA_TEAM "You have already been invited into an arena team"
-+ERR_ALREADY_INVITED_TO_ARENA_TEAM_S "%s has already been invited to an arena team"
++ERR_ALREADY_INVITED_TO_ARENA_TEAM_S "{} has already been invited to an arena team"
 +ERR_ARENA_TEAM_NAME_INVALID "That name contains invalid characters, please enter a new name"
-+ERR_ARENA_TEAM_NAME_EXISTS_S "There is already an arena team named \"%s\""
++ERR_ARENA_TEAM_NAME_EXISTS_S "There is already an arena team named \"{}\""
 +ERR_ARENA_TEAM_LEADER_LEAVE_S "You must promote a new team captain using /teamcaptain before leaving the team"
 +ERR_ARENA_TEAM_PERMISSIONS "You don't have permission to do that"
 +ERR_ARENA_TEAM_PLAYER_NOT_IN_TEAM "You are not in an arena team of that size"
-+ERR_ARENA_TEAM_PLAYER_NOT_IN_TEAM_SS "%s is not in %s"
-+ERR_ARENA_TEAM_PLAYER_NOT_FOUND_S "\"%s\" not found"
++ERR_ARENA_TEAM_PLAYER_NOT_IN_TEAM_SS "{} is not in {}"
++ERR_ARENA_TEAM_PLAYER_NOT_FOUND_S "\"{}\" not found"
 +ERR_ARENA_TEAM_NOT_ALLIED "You cannot invite players from the opposing alliance"
 
-+ERR_ARENA_TEAM_JOIN_SS "%s has joined %s"
-+ERR_ARENA_TEAM_YOU_JOIN_S "You have joined %s.  To leave, use /teamquit [2v2, 3v3, 5v5]."
++ERR_ARENA_TEAM_JOIN_SS "{} has joined {}"
++ERR_ARENA_TEAM_YOU_JOIN_S "You have joined {}.  To leave, use /teamquit [2v2, 3v3, 5v5]."
 
-+ERR_ARENA_TEAM_LEAVE_SS "%s has left %s"
++ERR_ARENA_TEAM_LEAVE_SS "{} has left {}"
 
-+ERR_ARENA_TEAM_LEADER_IS_SS "%s is the captain of %s"
-+ERR_ARENA_TEAM_LEADER_CHANGED_SSS "%s has made %s the new captain of %s"
++ERR_ARENA_TEAM_LEADER_IS_SS "{} is the captain of {}"
++ERR_ARENA_TEAM_LEADER_CHANGED_SSS "{} has made {} the new captain of {}"
 
-+ERR_ARENA_TEAM_REMOVE_SSS "%s has been kicked out of %s by %s"
++ERR_ARENA_TEAM_REMOVE_SSS "{} has been kicked out of {} by {}"
 
-+ERR_ARENA_TEAM_DISBANDED_S "%s has disbanded %s"
++ERR_ARENA_TEAM_DISBANDED_S "{} has disbanded {}"
 
-ERR_ARENA_TEAM_TARGET_TOO_LOW_S "%s is not high enough level to join your team"
+ERR_ARENA_TEAM_TARGET_TOO_LOW_S "{} is not high enough level to join your team"
 
-ERR_ARENA_TEAM_TOO_MANY_MEMBERS_S "%s is full"
+ERR_ARENA_TEAM_TOO_MANY_MEMBERS_S "{} is full"
 
-ERR_ARENA_TEAM_LEVEL_TOO_LOW_I "You must be level %d to form an arena team"
+ERR_ARENA_TEAM_LEVEL_TOO_LOW_I "You must be level {} to form an arena team"
 */

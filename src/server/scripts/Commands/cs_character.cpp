@@ -941,7 +941,7 @@ public:
                     std::ostringstream ItemString;
                     ItemString << std::hex << ItemQualityColors[item->GetTemplate()->Quality];
 
-                    handler->PSendSysMessage("%u - |c%s|Hitem:%u:0:0:0:0:0:0:0:0:0|h[%s]|h|r - %u", Counter, ItemString.str().c_str(), item->GetEntry(), item->GetTemplate()->Name1.c_str(), item->GetCount());
+                    handler->PSendSysMessage("{} - |c{}|Hitem:{}:0:0:0:0:0:0:0:0:0|h[{}]|h|r - {}", Counter, ItemString.str().c_str(), item->GetEntry(), item->GetTemplate()->Name1.c_str(), item->GetCount());
                 }
             }
         }
@@ -957,7 +957,7 @@ public:
                         std::ostringstream ItemString;
                         ItemString << std::hex << ItemQualityColors[item->GetTemplate()->Quality];
 
-                        handler->PSendSysMessage("%u - |c%s|Hitem:%u:0:0:0:0:0:0:0:0:0|h[%s]|h|r - %u", Counter, ItemString.str().c_str(), item->GetEntry(), item->GetTemplate()->Name1.c_str(), item->GetCount());
+                        handler->PSendSysMessage("{} - |c{}|Hitem:{}:0:0:0:0:0:0:0:0:0|h[{}]|h|r - {}", Counter, ItemString.str().c_str(), item->GetEntry(), item->GetTemplate()->Name1.c_str(), item->GetCount());
                     }
                 }
             }
@@ -997,43 +997,43 @@ public:
                 switch (SkillID)
                 {
                     case SKILL_ALCHEMY:
-                        handler->PSendSysMessage("%u - Alchemy - %u", Counter, player->GetSkillValue(SkillID));
+                        handler->PSendSysMessage("{} - Alchemy - {}", Counter, player->GetSkillValue(SkillID));
                         break;
                     case SKILL_BLACKSMITHING:
-                        handler->PSendSysMessage("%u - Blacksmithing - %u", Counter, player->GetSkillValue(SkillID));
+                        handler->PSendSysMessage("{} - Blacksmithing - {}", Counter, player->GetSkillValue(SkillID));
                         break;
                     case SKILL_ENCHANTING:
-                        handler->PSendSysMessage("%u - Enchanting - %u", Counter, player->GetSkillValue(SkillID));
+                        handler->PSendSysMessage("{} - Enchanting - {}", Counter, player->GetSkillValue(SkillID));
                         break;
                     case SKILL_ENGINEERING:
-                        handler->PSendSysMessage("%u - Engineering - %u", Counter, player->GetSkillValue(SkillID));
+                        handler->PSendSysMessage("{} - Engineering - {}", Counter, player->GetSkillValue(SkillID));
                         break;
                     case SKILL_INSCRIPTION:
-                        handler->PSendSysMessage("%u - Inscription - %u", Counter, player->GetSkillValue(SkillID));
+                        handler->PSendSysMessage("{} - Inscription - {}", Counter, player->GetSkillValue(SkillID));
                         break;
                     case SKILL_JEWELCRAFTING:
-                        handler->PSendSysMessage("%u - Jewelcrafting - %u", Counter, player->GetSkillValue(SkillID));
+                        handler->PSendSysMessage("{} - Jewelcrafting - {}", Counter, player->GetSkillValue(SkillID));
                         break;
                     case SKILL_LEATHERWORKING:
-                        handler->PSendSysMessage("%u - Leatherworking - %u", Counter, player->GetSkillValue(SkillID));
+                        handler->PSendSysMessage("{} - Leatherworking - {}", Counter, player->GetSkillValue(SkillID));
                         break;
                     case SKILL_TAILORING:
-                        handler->PSendSysMessage("%u - Tailoring - %u", Counter, player->GetSkillValue(SkillID));
+                        handler->PSendSysMessage("{} - Tailoring - {}", Counter, player->GetSkillValue(SkillID));
                         break;
                     case SKILL_SKINNING:
-                        handler->PSendSysMessage("%u - Skinning - %u", Counter, player->GetSkillValue(SkillID));
+                        handler->PSendSysMessage("{} - Skinning - {}", Counter, player->GetSkillValue(SkillID));
                         break;
                     case SKILL_HERBALISM:
-                        handler->PSendSysMessage("%u - Herbalism - %u", Counter, player->GetSkillValue(SkillID));
+                        handler->PSendSysMessage("{} - Herbalism - {}", Counter, player->GetSkillValue(SkillID));
                         break;
                     case SKILL_MINING:
-                        handler->PSendSysMessage("%u - Mining - %u", Counter, player->GetSkillValue(SkillID));
+                        handler->PSendSysMessage("{} - Mining - {}", Counter, player->GetSkillValue(SkillID));
                         break;
                     case SKILL_COOKING:
-                        handler->PSendSysMessage("%u - Cooking - %u", Counter, player->GetSkillValue(SkillID));
+                        handler->PSendSysMessage("{} - Cooking - {}", Counter, player->GetSkillValue(SkillID));
                         break;
                     case SKILL_FIRST_AID:
-                        handler->PSendSysMessage("%u - First Aid - %u", Counter, player->GetSkillValue(SkillID));
+                        handler->PSendSysMessage("{} - First Aid - {}", Counter, player->GetSkillValue(SkillID));
                         break;
                     default:
                         break;

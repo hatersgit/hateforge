@@ -1209,7 +1209,7 @@ public:
         ObjectGuid::LowType lowguid = creature->GetSpawnId();
         if (creature->GetFormation())
         {
-            handler->PSendSysMessage("Selected creature is already member of group %u", creature->GetFormation()->GetId());
+            handler->PSendSysMessage("Selected creature is already member of group {}", creature->GetFormation()->GetId());
             return false;
         }
 
@@ -1235,7 +1235,7 @@ public:
 
         WorldDatabase.Execute(stmt);
 
-        handler->PSendSysMessage("Creature %u added to formation with leader %u", lowguid, leaderGUID);
+        handler->PSendSysMessage("Creature {} added to formation with leader {}", lowguid, leaderGUID);
 
         return true;
     }
@@ -1252,17 +1252,17 @@ public:
 
         if (!creature->GetSpawnId())
         {
-            handler->SendErrorMessage("Selected creature %u isn't in creature table", creature->GetGUID().GetCounter());
+            handler->SendErrorMessage("Selected creature {} isn't in creature table", creature->GetGUID().GetCounter());
             return false;
         }
 
         if (!sObjectMgr->SetCreatureLinkedRespawn(creature->GetSpawnId(), linkguid))
         {
-            handler->SendErrorMessage("Selected creature can't link with guid '%u'", linkguid);
+            handler->SendErrorMessage("Selected creature can't link with guid '{}'", linkguid);
             return false;
         }
 
-        handler->PSendSysMessage("LinkGUID '%u' added to creature with DBTableGUID: '%u'", linkguid, creature->GetSpawnId());
+        handler->PSendSysMessage("LinkGUID '{}' added to creature with DBTableGUID: '{}'", linkguid, creature->GetSpawnId());
         return true;
     }
 };

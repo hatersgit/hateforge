@@ -255,7 +255,7 @@ void GroupMgr::LoadGroups()
             MapEntry const* mapEntry = sMapStore.LookupEntry(fields[1].Get<uint16>());
             if (!mapEntry || !mapEntry->IsDungeon())
             {
-                LOG_INFO("sql.sql", "Incorrect entry in group_instance table : no dungeon map %d", fields[1].Get<uint16>());
+                LOG_INFO("sql.sql", "Incorrect entry in group_instance table : no dungeon map {}", fields[1].Get<uint16>());
                 continue;
             }
 
@@ -269,6 +269,6 @@ void GroupMgr::LoadGroups()
             ++count;
         } while (result->NextRow());
 
-        LOG_INFO("server.loading", ">> Loaded %u group-instance saves in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+        LOG_INFO("server.loading", ">> Loaded {} group-instance saves in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
     }
 }

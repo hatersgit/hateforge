@@ -1238,7 +1238,7 @@ class spell_sha_nature_guardian : public AuraScript
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
-        int32 healthpct = aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue(); // %s2 - the 30% threshold for health
+        int32 healthpct = aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue(); // {}2 - the 30% threshold for health
 
         if (Unit* target = eventInfo.GetActionTarget())
         {

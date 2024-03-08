@@ -94,7 +94,7 @@ public:
             {
                 GameObject* target = GOMove::GetGameObject(player, lowguid);
                 if (!target)
-                    ChatHandler(player->GetSession()).PSendSysMessage("Object GUID: %u not found.", lowguid);
+                    ChatHandler(player->GetSession()).PSendSysMessage("Object GUID: {} not found.", lowguid);
                 else
                 {
                     float x, y, z, o;
@@ -137,7 +137,7 @@ public:
                 switch (ID)
                 {
                 case TEST:
-                    session->SendAreaTriggerMessage("%s", player->GetName().c_str());
+                    session->SendAreaTriggerMessage("{}", player->GetName().c_str());
                     break;
                 case FACE:
                 {
@@ -155,7 +155,7 @@ public:
                     else
                     {
                         GOMove::SendAdd(player, object->GetSpawnId());
-                        session->SendAreaTriggerMessage("Selected %s", object->GetName().c_str());
+                        session->SendAreaTriggerMessage("Selected {}", object->GetName().c_str());
                     }
                 } break;
                 }
@@ -167,7 +167,7 @@ public:
             {
                 GameObject* target = GOMove::GetGameObject(player, lowguid);
                 if (!target)
-                    ChatHandler(player->GetSession()).PSendSysMessage("Object GUID: %u not found", lowguid);
+                    ChatHandler(player->GetSession()).PSendSysMessage("Object GUID: {} not found", lowguid);
                 else
                 {
                     float x, y, z, o;

@@ -301,18 +301,18 @@ void FAR *out_desc;
             DROPBITS(1);
             switch (BITS(2)) {
             case 0:                             /* stored block */
-                Tracev((stderr, "inflate:     stored block%s\n",
+                Tracev((stderr, "inflate:     stored block{}\n",
                         state->last ? " (last)" : ""));
                 state->mode = STORED;
                 break;
             case 1:                             /* fixed block */
                 fixedtables(state);
-                Tracev((stderr, "inflate:     fixed codes block%s\n",
+                Tracev((stderr, "inflate:     fixed codes block{}\n",
                         state->last ? " (last)" : ""));
                 state->mode = LEN;              /* decode codes */
                 break;
             case 2:                             /* dynamic block */
-                Tracev((stderr, "inflate:     dynamic codes block%s\n",
+                Tracev((stderr, "inflate:     dynamic codes block{}\n",
                         state->last ? " (last)" : ""));
                 state->mode = TABLE;
                 break;
@@ -333,7 +333,7 @@ void FAR *out_desc;
                 break;
             }
             state->length = (unsigned)hold & 0xffff;
-            Tracev((stderr, "inflate:       stored length %u\n",
+            Tracev((stderr, "inflate:       stored length {}\n",
                     state->length));
             INITBITS();
 
@@ -542,7 +542,7 @@ void FAR *out_desc;
                 state->length += BITS(state->extra);
                 DROPBITS(state->extra);
             }
-            Tracevv((stderr, "inflate:         length %u\n", state->length));
+            Tracevv((stderr, "inflate:         length {}\n", state->length));
 
             /* get distance code */
             for (;;) {
@@ -581,7 +581,7 @@ void FAR *out_desc;
                 state->mode = BAD;
                 break;
             }
-            Tracevv((stderr, "inflate:         distance %u\n", state->offset));
+            Tracevv((stderr, "inflate:         distance {}\n", state->offset));
 
             /* copy match from window to output */
             do {

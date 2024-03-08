@@ -797,7 +797,7 @@ static bool mergeAndFilterRegions(rcContext* ctx, int minRegionArea, int mergeRe
 	const int nreg = maxRegionId+1;
 	rcTempVector<rcRegion> regions;
 	if (!regions.reserve(nreg)) {
-		ctx->log(RC_LOG_ERROR, "mergeAndFilterRegions: Out of memory 'regions' (%d).", nreg);
+		ctx->log(RC_LOG_ERROR, "mergeAndFilterRegions: Out of memory 'regions' ({}).", nreg);
 		return false;
 	}
 
@@ -1054,7 +1054,7 @@ static bool mergeAndFilterLayerRegions(rcContext* ctx, int minRegionArea,
 	
 	// Construct regions
 	if (!regions.reserve(nreg)) {
-		ctx->log(RC_LOG_ERROR, "mergeAndFilterLayerRegions: Out of memory 'regions' (%d).", nreg);
+		ctx->log(RC_LOG_ERROR, "mergeAndFilterLayerRegions: Out of memory 'regions' ({}).", nreg);
 		return false;
 	}
 	for (int i = 0; i < nreg; ++i)
@@ -1266,13 +1266,13 @@ bool rcBuildDistanceField(rcContext* ctx, rcCompactHeightfield& chf)
 	unsigned short* src = (unsigned short*)rcAlloc(sizeof(unsigned short)*chf.spanCount, RC_ALLOC_TEMP);
 	if (!src)
 	{
-		ctx->log(RC_LOG_ERROR, "rcBuildDistanceField: Out of memory 'src' (%d).", chf.spanCount);
+		ctx->log(RC_LOG_ERROR, "rcBuildDistanceField: Out of memory 'src' ({}).", chf.spanCount);
 		return false;
 	}
 	unsigned short* dst = (unsigned short*)rcAlloc(sizeof(unsigned short)*chf.spanCount, RC_ALLOC_TEMP);
 	if (!dst)
 	{
-		ctx->log(RC_LOG_ERROR, "rcBuildDistanceField: Out of memory 'dst' (%d).", chf.spanCount);
+		ctx->log(RC_LOG_ERROR, "rcBuildDistanceField: Out of memory 'dst' ({}).", chf.spanCount);
 		rcFree(src);
 		return false;
 	}
@@ -1364,7 +1364,7 @@ bool rcBuildRegionsMonotone(rcContext* ctx, rcCompactHeightfield& chf,
 	rcScopedDelete<unsigned short> srcReg((unsigned short*)rcAlloc(sizeof(unsigned short)*chf.spanCount, RC_ALLOC_TEMP));
 	if (!srcReg)
 	{
-		ctx->log(RC_LOG_ERROR, "rcBuildRegionsMonotone: Out of memory 'src' (%d).", chf.spanCount);
+		ctx->log(RC_LOG_ERROR, "rcBuildRegionsMonotone: Out of memory 'src' ({}).", chf.spanCount);
 		return false;
 	}
 	memset(srcReg,0,sizeof(unsigned short)*chf.spanCount);
@@ -1373,7 +1373,7 @@ bool rcBuildRegionsMonotone(rcContext* ctx, rcCompactHeightfield& chf,
 	rcScopedDelete<rcSweepSpan> sweeps((rcSweepSpan*)rcAlloc(sizeof(rcSweepSpan)*nsweeps, RC_ALLOC_TEMP));
 	if (!sweeps)
 	{
-		ctx->log(RC_LOG_ERROR, "rcBuildRegionsMonotone: Out of memory 'sweeps' (%d).", nsweeps);
+		ctx->log(RC_LOG_ERROR, "rcBuildRegionsMonotone: Out of memory 'sweeps' ({}).", nsweeps);
 		return false;
 	}
 	
@@ -1536,7 +1536,7 @@ bool rcBuildRegions(rcContext* ctx, rcCompactHeightfield& chf,
 	rcScopedDelete<unsigned short> buf((unsigned short*)rcAlloc(sizeof(unsigned short)*chf.spanCount*2, RC_ALLOC_TEMP));
 	if (!buf)
 	{
-		ctx->log(RC_LOG_ERROR, "rcBuildRegions: Out of memory 'tmp' (%d).", chf.spanCount*4);
+		ctx->log(RC_LOG_ERROR, "rcBuildRegions: Out of memory 'tmp' ({}).", chf.spanCount*4);
 		return false;
 	}
 	
@@ -1647,7 +1647,7 @@ bool rcBuildRegions(rcContext* ctx, rcCompactHeightfield& chf,
 		// If overlapping regions were found during merging, split those regions.
 		if (overlaps.size() > 0)
 		{
-			ctx->log(RC_LOG_ERROR, "rcBuildRegions: %d overlapping regions.", overlaps.size());
+			ctx->log(RC_LOG_ERROR, "rcBuildRegions: {} overlapping regions.", overlaps.size());
 		}
 	}
 		
@@ -1673,7 +1673,7 @@ bool rcBuildLayerRegions(rcContext* ctx, rcCompactHeightfield& chf,
 	rcScopedDelete<unsigned short> srcReg((unsigned short*)rcAlloc(sizeof(unsigned short)*chf.spanCount, RC_ALLOC_TEMP));
 	if (!srcReg)
 	{
-		ctx->log(RC_LOG_ERROR, "rcBuildLayerRegions: Out of memory 'src' (%d).", chf.spanCount);
+		ctx->log(RC_LOG_ERROR, "rcBuildLayerRegions: Out of memory 'src' ({}).", chf.spanCount);
 		return false;
 	}
 	memset(srcReg,0,sizeof(unsigned short)*chf.spanCount);
@@ -1682,7 +1682,7 @@ bool rcBuildLayerRegions(rcContext* ctx, rcCompactHeightfield& chf,
 	rcScopedDelete<rcSweepSpan> sweeps((rcSweepSpan*)rcAlloc(sizeof(rcSweepSpan)*nsweeps, RC_ALLOC_TEMP));
 	if (!sweeps)
 	{
-		ctx->log(RC_LOG_ERROR, "rcBuildLayerRegions: Out of memory 'sweeps' (%d).", nsweeps);
+		ctx->log(RC_LOG_ERROR, "rcBuildLayerRegions: Out of memory 'sweeps' ({}).", nsweeps);
 		return false;
 	}
 	

@@ -117,13 +117,13 @@ void TextOutput::writeString(const std::string& string) {
         option.wordWrap = Settings::WRAP_NONE;
     }
     // Convert special characters to escape sequences
-    this->printf("\"%s\"", escape(string).c_str());
+    this->printf("\"{}\"", escape(string).c_str());
     option.wordWrap = old;
 }
 
 
 void TextOutput::writeBoolean(bool b) {
-    this->printf("%s ", b ? option.trueSymbol.c_str() : option.falseSymbol.c_str());
+    this->printf("{} ", b ? option.trueSymbol.c_str() : option.falseSymbol.c_str());
 }
 
 void TextOutput::writeNumber(double n) {
@@ -132,13 +132,13 @@ void TextOutput::writeNumber(double n) {
 
 
 void TextOutput::writeNumber(int n) {
-    this->printf("%d ", n);
+    this->printf("{} ", n);
 }
 
 
 void TextOutput::writeSymbol(const std::string& string) {
     if (string.size() > 0) {
-        this->printf("%s ", string.c_str());
+        this->printf("{} ", string.c_str());
     }
 }
 

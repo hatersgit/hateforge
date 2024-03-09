@@ -26,7 +26,7 @@ LogMessage::LogMessage(LogLevel _level, std::string const& _type, std::string_vi
 
 std::string LogMessage::getTimeStr(Seconds time)
 {
-    return Acore::Time::TimeToTimestampStr(time, "%Y-%m-%d %X");
+    return Acore::Time::TimeToTimestampStr(time, "%Y-%m-{} %X");
 }
 
 std::string LogMessage::getTimeStr() const

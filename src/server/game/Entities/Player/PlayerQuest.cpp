@@ -820,7 +820,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
                 currStr.append(".");
 
             ModifyMoney(goldMod);
-            ChatHandler(GetSession()).PSendSysMessage("Received additional %s", currStr);
+            ChatHandler(GetSession()).PSendSysMessage("Received additional {}", currStr);
         }
     }
 

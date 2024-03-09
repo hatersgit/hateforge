@@ -334,38 +334,38 @@ void gen_trees_header()
 
     fprintf(header, "local const ct_data static_ltree[L_CODES+2] = {\n");
     for (i = 0; i < L_CODES+2; i++) {
-        fprintf(header, "{{%3u},{%3u}}%s", static_ltree[i].Code,
+        fprintf(header, "{{%3u},{%3u}}{}", static_ltree[i].Code,
                 static_ltree[i].Len, SEPARATOR(i, L_CODES+1, 5));
     }
 
     fprintf(header, "local const ct_data static_dtree[D_CODES] = {\n");
     for (i = 0; i < D_CODES; i++) {
-        fprintf(header, "{{%2u},{%2u}}%s", static_dtree[i].Code,
+        fprintf(header, "{{%2u},{%2u}}{}", static_dtree[i].Code,
                 static_dtree[i].Len, SEPARATOR(i, D_CODES-1, 5));
     }
 
     fprintf(header, "const uch ZLIB_INTERNAL _dist_code[DIST_CODE_LEN] = {\n");
     for (i = 0; i < DIST_CODE_LEN; i++) {
-        fprintf(header, "%2u%s", _dist_code[i],
+        fprintf(header, "%2u{}", _dist_code[i],
                 SEPARATOR(i, DIST_CODE_LEN-1, 20));
     }
 
     fprintf(header,
         "const uch ZLIB_INTERNAL _length_code[MAX_MATCH-MIN_MATCH+1]= {\n");
     for (i = 0; i < MAX_MATCH-MIN_MATCH+1; i++) {
-        fprintf(header, "%2u%s", _length_code[i],
+        fprintf(header, "%2u{}", _length_code[i],
                 SEPARATOR(i, MAX_MATCH-MIN_MATCH, 20));
     }
 
     fprintf(header, "local const int base_length[LENGTH_CODES] = {\n");
     for (i = 0; i < LENGTH_CODES; i++) {
-        fprintf(header, "%1u%s", base_length[i],
+        fprintf(header, "%1u{}", base_length[i],
                 SEPARATOR(i, LENGTH_CODES-1, 20));
     }
 
     fprintf(header, "local const int base_dist[D_CODES] = {\n");
     for (i = 0; i < D_CODES; i++) {
-        fprintf(header, "%5u%s", base_dist[i],
+        fprintf(header, "%5u{}", base_dist[i],
                 SEPARATOR(i, D_CODES-1, 10));
     }
 
@@ -552,7 +552,7 @@ local void gen_bitlen(s, desc)
             m = s->heap[--h];
             if (m > max_code) continue;
             if ((unsigned) tree[m].Len != (unsigned) bits) {
-                Tracev((stderr,"code %d bits %d->%d\n", m, tree[m].Len, bits));
+                Tracev((stderr,"code {} bits {}->{}\n", m, tree[m].Len, bits));
                 s->opt_len += ((ulg)bits - tree[m].Len) * tree[m].Freq;
                 tree[m].Len = (ush)bits;
             }
@@ -591,7 +591,7 @@ local void gen_codes (tree, max_code, bl_count)
      */
     Assert (code + bl_count[MAX_BITS]-1 == (1<<MAX_BITS)-1,
             "inconsistent bit counts");
-    Tracev((stderr,"\ngen_codes: max_code %d ", max_code));
+    Tracev((stderr,"\ngen_codes: max_code {} ", max_code));
 
     for (n = 0;  n <= max_code; n++) {
         int len = tree[n].Len;
@@ -675,7 +675,7 @@ local void build_tree(s, desc)
         tree[n].Dad = tree[m].Dad = (ush)node;
 #ifdef DUMP_BL_TREE
         if (tree == s->bl_tree) {
-            fprintf(stderr,"\nnode %d(%d), sons %d(%d) %d(%d)",
+            fprintf(stderr,"\nnode {}({}), sons {}({}) {}({})",
                     node, tree[node].Freq, n, tree[n].Freq, m, tree[m].Freq);
         }
 #endif
@@ -946,7 +946,7 @@ void ZLIB_INTERNAL _tr_flush_block(s, buf, stored_len, last)
         opt_lenb = (s->opt_len+3+7)>>3;
         static_lenb = (s->static_len+3+7)>>3;
 
-        Tracev((stderr, "\nopt %lu(%lu) stat %lu(%lu) stored %lu lit %u ",
+        Tracev((stderr, "\nopt %lu(%lu) stat %lu(%lu) stored %lu lit {} ",
                 opt_lenb, s->opt_len, static_lenb, s->static_len, stored_len,
                 s->sym_next / 3));
 

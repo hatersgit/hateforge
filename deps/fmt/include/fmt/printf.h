@@ -596,7 +596,7 @@ inline auto vsprintf(
 
   **Example**::
 
-    std::string message = fmt::sprintf("The answer is %d", 42);
+    std::string message = fmt::sprintf("The answer is {}", 42);
   \endrst
 */
 template <typename S, typename... T,
@@ -625,7 +625,7 @@ inline auto vfprintf(
 
   **Example**::
 
-    fmt::fprintf(stderr, "Don't %s!", "panic");
+    fmt::fprintf(stderr, "Don't {}!", "panic");
   \endrst
  */
 template <typename S, typename... T, typename Char = char_t<S>>

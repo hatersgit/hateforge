@@ -286,7 +286,7 @@ public:
 
     static bool HandleBanInfoHelper(uint32 accountId, char const* accountName, ChatHandler* handler)
     {
-        QueryResult result = LoginDatabase.Query("SELECT FROM_UNIXTIME(bandate, '%Y-%m-%d..%H:%i:%s') as bandate, unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE id = '{}' ORDER BY bandate ASC", accountId);
+        QueryResult result = LoginDatabase.Query("SELECT FROM_UNIXTIME(bandate, '%Y-%m-{}..%H:%i:{}') as bandate, unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE id = '{}' ORDER BY bandate ASC", accountId);
         if (!result)
         {
             handler->PSendSysMessage(LANG_BANINFO_NOACCOUNTBAN, accountName);
@@ -376,7 +376,7 @@ public:
         LoginDatabase.EscapeString(IP);
         QueryResult result = LoginDatabase.Query("\
             SELECT \
-                ip, FROM_UNIXTIME(bandate, '%Y-%m-%d %H:%i:%s'), FROM_UNIXTIME(unbandate, '%Y-%m-%d %H:%i:%s'), \
+                ip, FROM_UNIXTIME(bandate, '%Y-%m-{} %H:%i:{}'), FROM_UNIXTIME(unbandate, '%Y-%m-{} %H:%i:{}'), \
                 IF (unbandate > UNIX_TIMESTAMP(), unbandate - UNIX_TIMESTAMP(), 0) AS timeRemaining, \
                 banreason, bannedby, unbandate - bandate = 0 AS permanent \
             FROM ip_banned \
@@ -444,7 +444,7 @@ public:
                 if (banResult)
                 {
                     Field* fields2 = banResult->Fetch();
-                    handler->PSendSysMessage("%s", fields2[0].Get<std::string>().c_str());
+                    handler->PSendSysMessage("{}", fields2[0].Get<std::string>().c_str());
                 }
             } while (result->NextRow());
         }
@@ -534,7 +534,7 @@ public:
 
                 PreparedQueryResult banResult = CharacterDatabase.Query(stmt2);
                 if (banResult)
-                    handler->PSendSysMessage("%s", (*banResult)[0].Get<std::string>().c_str());
+                    handler->PSendSysMessage("{}", (*banResult)[0].Get<std::string>().c_str());
             } while (result->NextRow());
         }
         // Console wide output
@@ -621,7 +621,7 @@ public:
             do
             {
                 Field* fields = result->Fetch();
-                handler->PSendSysMessage("%s", fields[0].Get<std::string>().c_str());
+                handler->PSendSysMessage("{}", fields[0].Get<std::string>().c_str());
             } while (result->NextRow());
         }
         // Console wide output

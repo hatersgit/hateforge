@@ -139,9 +139,9 @@ public:
                 if ((max + max2 + size) == 16)
                     max2 = max - 1;
                 if (handler->GetSession())
-                    handler->PSendSysMessage("|    %s GMLevel %u", name.c_str(), security);
+                    handler->PSendSysMessage("|    {} GMLevel {}", name.c_str(), security);
                 else
-                    handler->PSendSysMessage("|%*s%s%*s|   %u  |", max, " ", name.c_str(), max2, " ", security);
+                    handler->PSendSysMessage("|%*s{}%*s|   {}  |", max, " ", name.c_str(), max2, " ", security);
             }
         }
         if (footer)
@@ -175,9 +175,9 @@ public:
                 if ((max + max2 + name.length()) == 16)
                     max2 = max - 1;
                 if (handler->GetSession())
-                    handler->PSendSysMessage("|    %s GMLevel %u", name.c_str(), security);
+                    handler->PSendSysMessage("|    {} GMLevel {}", name.c_str(), security);
                 else
-                    handler->PSendSysMessage("|%*s%s%*s|   %u  |", max, " ", name.c_str(), max2, " ", security);
+                    handler->PSendSysMessage("|%*s{}%*s|   {}  |", max, " ", name.c_str(), max2, " ", security);
             } while (result->NextRow());
             handler->SendSysMessage("========================");
         }

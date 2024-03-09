@@ -30,7 +30,7 @@
 enum Texts
 {
     // Shared
-    SAY_REGENERATE                     = 0, // Without pressure in both realms, %s begins to regenerate.
+    SAY_REGENERATE                     = 0, // Without pressure in both realms, {} begins to regenerate.
 
     // Halion
     SAY_INTRO                          = 1, // Meddlesome insects! You are too late. The Ruby Sanctum is lost!
@@ -40,14 +40,14 @@ enum Texts
     SAY_DEATH                          = 5, // Relish this victory, mortals, for it will be your last! This world will burn with the master's return!
     SAY_KILL                           = 6, // Another "hero" falls.
     SAY_BERSERK                        = 7, // Not good enough.
-    EMOTE_CORPOREALITY_POT             = 8, // Your efforts force %s further out of the physical realm!
-    EMOTE_CORPOREALITY_PIP             = 9, // Your companions' efforts force %s further into the physical realm!
+    EMOTE_CORPOREALITY_POT             = 8, // Your efforts force {} further out of the physical realm!
+    EMOTE_CORPOREALITY_PIP             = 9, // Your companions' efforts force {} further into the physical realm!
 
     // Twilight Halion
     SAY_SPHERE_PULSE                   = 1, // Beware the shadow!
     SAY_PHASE_THREE                    = 2, // I am the light and the darkness! Cower, mortals, before the herald of Deathwing!
-    EMOTE_CORPOREALITY_TIT             = 3, // Your companions' efforts force %s further into the twilight realm!
-    EMOTE_CORPOREALITY_TOT             = 4, // Your efforts force %s further out of the twilight realm!
+    EMOTE_CORPOREALITY_TIT             = 3, // Your companions' efforts force {} further into the twilight realm!
+    EMOTE_CORPOREALITY_TOT             = 4, // Your efforts force {} further out of the twilight realm!
     EMOTE_WARN_LASER                   = 5, // The orbiting spheres pulse with dark energy!
 };
 

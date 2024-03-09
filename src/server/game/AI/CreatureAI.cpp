@@ -133,7 +133,7 @@ void CreatureAI::DoZoneInCombat(Creature* creature /*= nullptr*/, float maxRange
         // If it can't find a suitable attack target then we should error out.
         if (!creature->HasReactState(REACT_PASSIVE) && !creature->GetVictim())
         {
-            LOG_ERROR("misc.dozoneincombat", "DoZoneInCombat called for creature that has empty threat list (creature entry = %u)", creature->GetEntry());
+            LOG_ERROR("misc.dozoneincombat", "DoZoneInCombat called for creature that has empty threat list (creature entry = {})", creature->GetEntry());
             return;
         }
     }

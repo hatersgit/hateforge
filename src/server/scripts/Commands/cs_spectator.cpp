@@ -59,7 +59,7 @@ public:
     static bool HandleSpectatorVersionCommand(ChatHandler* handler, uint16 version)
     {
         if (version < SPECTATOR_ADDON_VERSION)
-            ArenaSpectator::SendCommand(handler->GetSession()->GetPlayer(), "%sOUTDATED", SPECTATOR_ADDON_PREFIX);
+            ArenaSpectator::SendCommand(handler->GetSession()->GetPlayer(), "{}OUTDATED", SPECTATOR_ADDON_PREFIX);
         return true;
     }
 

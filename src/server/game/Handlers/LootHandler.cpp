@@ -235,7 +235,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
                         currStr.append(std::to_string(copper) + " Copper");
                     }
 
-                    ChatHandler(player->GetSession()).PSendSysMessage("You loot additional %s", currStr);
+                    ChatHandler(player->GetSession()).PSendSysMessage("You loot additional {}", currStr);
                 }
             }
         }
@@ -276,7 +276,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
                     currStr.append(std::to_string(copper) + " Copper");
                 }
 
-                ChatHandler(player->GetSession()).PSendSysMessage("You loot additional %s", currStr);
+                ChatHandler(player->GetSession()).PSendSysMessage("You loot additional {}", currStr);
             }
         }
 

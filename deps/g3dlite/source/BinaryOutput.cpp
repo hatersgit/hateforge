@@ -111,7 +111,7 @@ IMPLEMENT_WRITER(Float64, float64)
 
 
 void BinaryOutput::reallocBuffer(size_t bytes, size_t oldBufferLen) {
-    //debugPrintf("reallocBuffer(%d, %d)\n", bytes, oldBufferLen);
+    //debugPrintf("reallocBuffer({}, {})\n", bytes, oldBufferLen);
 
     size_t newBufferLen = (int)(m_bufferLen * 1.5) + 100;
     uint8* newBuffer = NULL;
@@ -121,7 +121,7 @@ void BinaryOutput::reallocBuffer(size_t bytes, size_t oldBufferLen) {
         // try and allocate) or we've been asked to allocate a
         // reasonable size buffer.
 
-        // debugPrintf("  realloc(%d)\n", newBufferLen); 
+        // debugPrintf("  realloc({})\n", newBufferLen); 
         newBuffer = (uint8*)System::realloc(m_buffer, newBufferLen);
         if (newBuffer != NULL) {
             m_maxBufferLen = newBufferLen;
@@ -160,7 +160,7 @@ void BinaryOutput::reserveBytesWhenOutOfMemory(size_t bytes) {
         }
         debugAssert(writeBytes > 0);
 
-        //debugPrintf("Writing %d bytes to disk\n", writeBytes);
+        //debugPrintf("Writing {} bytes to disk\n", writeBytes);
 
         const char* mode = (m_alreadyWritten > 0) ? "ab" : "wb";
         alwaysAssertM(m_filename != "<memory>", "Writing memory file");
@@ -344,7 +344,7 @@ void BinaryOutput::commit(bool flush) {
     FILE* file = FileSystem::fopen(m_filename.c_str(), mode);
 
     if (! file) {
-        logPrintf("Error %d while trying to open \"%s\"\n", errno, m_filename.c_str());
+        logPrintf("Error {} while trying to open \"{}\"\n", errno, m_filename.c_str());
     }
     m_ok = (file != NULL) && m_ok;
 

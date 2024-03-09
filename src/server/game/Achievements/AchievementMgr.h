@@ -56,7 +56,7 @@ enum AchievementCriteriaDataType
     ACHIEVEMENT_CRITERIA_DATA_TYPE_T_GENDER             = 10, // gender                       0=male; 1=female
     ACHIEVEMENT_CRITERIA_DATA_TYPE_SCRIPT               = 11, // scripted requirement
     ACHIEVEMENT_CRITERIA_DATA_TYPE_MAP_DIFFICULTY       = 12, // difficulty                   normal/heroic difficulty for current event map
-    ACHIEVEMENT_CRITERIA_DATA_TYPE_MAP_PLAYER_COUNT     = 13, // count                        "with less than %u people in the zone"
+    ACHIEVEMENT_CRITERIA_DATA_TYPE_MAP_PLAYER_COUNT     = 13, // count                        "with less than {} people in the zone"
     ACHIEVEMENT_CRITERIA_DATA_TYPE_T_TEAM               = 14, // team                         HORDE(67), ALLIANCE(469)
     ACHIEVEMENT_CRITERIA_DATA_TYPE_S_DRUNK              = 15, // drunken_state  0             (enum DrunkenState) of player
     ACHIEVEMENT_CRITERIA_DATA_TYPE_HOLIDAY              = 16, // holiday_id     0             event in holiday time

@@ -173,7 +173,7 @@ BinaryInput::BinaryInput
     FILE* file = FileSystem::fopen(m_filename.c_str(), "rb");
 
     if (! file || (m_length == -1)) {
-        throw format("File not found: \"%s\"", m_filename.c_str());
+        throw format("File not found: \"{}\"", m_filename.c_str());
         return;
     }
 

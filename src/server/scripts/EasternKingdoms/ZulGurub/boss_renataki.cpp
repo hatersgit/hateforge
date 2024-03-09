@@ -77,7 +77,7 @@ public:
         {
             if (!_enraged && HealthBelowPct(30))
             {
-                me->TextEmote("%s becomes enraged", me, false);
+                me->TextEmote("{} becomes enraged", me, false);
                 DoCast(me, SPELL_ENRAGE);
                 _enraged = true;
             }

@@ -86,7 +86,7 @@ void Gamemode::OnDeath(Player* player, Creature* killer)
             mode = "all challange modes";
         }
 
-        sWorld->SendWorldText(1910002, player->GetName().c_str(), variants[urand(0, 3)], killer->GetName().c_str(), level.c_str(), mode.c_str()); // %s has been %s by %s at level %s attempting to complete the challenge(s) %s!
+        sWorld->SendWorldText(1910002, player->GetName().c_str(), variants[urand(0, 3)], killer->GetName().c_str(), level.c_str(), mode.c_str()); // {} has been {} by {} at level {} attempting to complete the challenge(s) {}!
     }
 }
 
@@ -183,7 +183,7 @@ void Gamemode::OnLevelUp(Player* player)
         time_t seconds(time);
         tm* p = gmtime(&seconds);
         std::ostringstream ss;
-        ss << p->tm_yday << " days, " << p->tm_hour << " hours, " << p->tm_min << " minutes, " << p->tm_sec << " seconds."; // %s has completed challenge(s) %s in %s!
+        ss << p->tm_yday << " days, " << p->tm_hour << " hours, " << p->tm_min << " minutes, " << p->tm_sec << " seconds."; // {} has completed challenge(s) {} in {}!
         sWorld->SendWorldText(1910000, player->GetName().c_str(), mode.c_str(), ss.str().c_str());
     }
 

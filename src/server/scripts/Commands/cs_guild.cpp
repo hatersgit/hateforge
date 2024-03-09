@@ -249,7 +249,7 @@ public:
         char createdDateStr[20];
         time_t createdDate = guild->GetCreatedDate();
         tm localTm;
-        strftime(createdDateStr, 20, "%Y-%m-%d %H:%M:%S", localtime_r(&createdDate, &localTm));
+        strftime(createdDateStr, 20, "%Y-%m-{} %H:%M:{}", localtime_r(&createdDate, &localTm));
 
         handler->PSendSysMessage(LANG_GUILD_INFO_CREATION_DATE, createdDateStr); // Creation Date
         handler->PSendSysMessage(LANG_GUILD_INFO_MEMBER_COUNT, guild->GetMemberCount()); // Number of Members

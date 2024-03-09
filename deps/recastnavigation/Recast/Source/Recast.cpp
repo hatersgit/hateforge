@@ -74,7 +74,7 @@ float rcSqrt(float x)
 /// Example:
 /// @code
 /// // Where ctx is an instance of rcContext and filepath is a char array.
-/// ctx->log(RC_LOG_ERROR, "buildTiledNavigation: Could not load '%s'", filepath);
+/// ctx->log(RC_LOG_ERROR, "buildTiledNavigation: Could not load '{}'", filepath);
 /// @endcode
 void rcContext::log(const rcLogCategory category, const char* format, ...)
 {
@@ -438,21 +438,21 @@ bool rcBuildCompactHeightfield(rcContext* ctx, const int walkableHeight, const i
 	chf.cells = (rcCompactCell*)rcAlloc(sizeof(rcCompactCell)*w*h, RC_ALLOC_PERM);
 	if (!chf.cells)
 	{
-		ctx->log(RC_LOG_ERROR, "rcBuildCompactHeightfield: Out of memory 'chf.cells' (%d)", w*h);
+		ctx->log(RC_LOG_ERROR, "rcBuildCompactHeightfield: Out of memory 'chf.cells' ({})", w*h);
 		return false;
 	}
 	memset(chf.cells, 0, sizeof(rcCompactCell)*w*h);
 	chf.spans = (rcCompactSpan*)rcAlloc(sizeof(rcCompactSpan)*spanCount, RC_ALLOC_PERM);
 	if (!chf.spans)
 	{
-		ctx->log(RC_LOG_ERROR, "rcBuildCompactHeightfield: Out of memory 'chf.spans' (%d)", spanCount);
+		ctx->log(RC_LOG_ERROR, "rcBuildCompactHeightfield: Out of memory 'chf.spans' ({})", spanCount);
 		return false;
 	}
 	memset(chf.spans, 0, sizeof(rcCompactSpan)*spanCount);
 	chf.areas = (unsigned char*)rcAlloc(sizeof(unsigned char)*spanCount, RC_ALLOC_PERM);
 	if (!chf.areas)
 	{
-		ctx->log(RC_LOG_ERROR, "rcBuildCompactHeightfield: Out of memory 'chf.areas' (%d)", spanCount);
+		ctx->log(RC_LOG_ERROR, "rcBuildCompactHeightfield: Out of memory 'chf.areas' ({})", spanCount);
 		return false;
 	}
 	memset(chf.areas, RC_NULL_AREA, sizeof(unsigned char)*spanCount);
@@ -541,7 +541,7 @@ bool rcBuildCompactHeightfield(rcContext* ctx, const int walkableHeight, const i
 	
 	if (tooHighNeighbour > MAX_LAYERS)
 	{
-		ctx->log(RC_LOG_ERROR, "rcBuildCompactHeightfield: Heightfield has too many layers %d (max: %d)",
+		ctx->log(RC_LOG_ERROR, "rcBuildCompactHeightfield: Heightfield has too many layers {} (max: {})",
 				 tooHighNeighbour, MAX_LAYERS);
 	}
 	

@@ -88,7 +88,7 @@ std::string resolveFilename(const std::string& filename) {
     // Prepend the working directory.
     (void)_getcwd(buffer, 1024);
 
-    return format("%s/%s", buffer, filename.c_str());
+    return format("{}/{}", buffer, filename.c_str());
 }
 
 bool zipfileExists(const std::string& filename) {

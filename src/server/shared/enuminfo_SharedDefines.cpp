@@ -1038,7 +1038,7 @@ AC_API_EXPORT EnumText EnumUtils<SpellAttr6>::ToString(SpellAttr6 value)
         case SPELL_ATTR6_VEHICLE_IMMUNITY_CATEGORY: return { "SPELL_ATTR6_VEHICLE_IMMUNITY_CATEGORY", "Unknown attribute 26@Attr6", "Player castable buff?" };
         case SPELL_ATTR6_IGNORE_HEALTH_MODIFIERS: return { "SPELL_ATTR6_IGNORE_HEALTH_MODIFIERS", "Limit applicable %healing modifiers", "This prevents certain healing modifiers from applying - see implementation if you really care about details" };
         case SPELL_ATTR6_DO_NOT_SELECT_TARGET_WITH_INITIATES_COMBAT: return { "SPELL_ATTR6_DO_NOT_SELECT_TARGET_WITH_INITIATES_COMBAT", "Unknown attribute 28@Attr6", "Death grip?" };
-        case SPELL_ATTR6_IGNORE_CASTER_DAMAGE_MODIFIERS: return { "SPELL_ATTR6_IGNORE_CASTER_DAMAGE_MODIFIERS", "Limit applicable %damage modifiers", "This prevents certain damage modifiers from applying - see implementation if you really care about details" };
+        case SPELL_ATTR6_IGNORE_CASTER_DAMAGE_MODIFIERS: return { "SPELL_ATTR6_IGNORE_CASTER_DAMAGE_MODIFIERS", "Limit applicable {}amage modifiers", "This prevents certain damage modifiers from applying - see implementation if you really care about details" };
         case SPELL_ATTR6_DISABLE_TIED_EFFECT_POINTS: return { "SPELL_ATTR6_DISABLE_TIED_EFFECT_POINTS", "Unknown attribute 30@Attr6", "" };
         case SPELL_ATTR6_NO_CATEGORY_COOLDOWN_MODS: return { "SPELL_ATTR6_NO_CATEGORY_COOLDOWN_MODS", "Ignore cooldown modifiers for category cooldown", "" };
         default: throw std::out_of_range("value");

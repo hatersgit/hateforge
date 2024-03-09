@@ -107,7 +107,7 @@ static void createErrorMessage(
         }
 
         if (lastErr != 0) {
-            le = G3D::format("Last Error (0x%08X): %s\r\n\r\n", lastErr, (LPCSTR)realLastErr);
+            le = G3D::format("Last Error (0x%08X): {}\r\n\r\n", lastErr, (LPCSTR)realLastErr);
         }
 
         // Get rid of the allocated memory from FormatMessage.
@@ -127,7 +127,7 @@ static void createErrorMessage(
 
     // Build the message.
     outMessage =
-        G3D::format("%s%s%sExpression: %s%s%s:%d%s%s%s", 
+        G3D::format("{}{}{}Expression: {}{}{}:{}{}{}{}", 
                  message.c_str(), newline, newline, expression, newline, 
                  filename, lineNumber, newline, newline, le.c_str());
 }
@@ -147,7 +147,7 @@ bool _handleDebugAssert_(
     #ifdef G3D_WINDOWS
         DWORD lastErr = GetLastError();
         postToClipboard(dialogText.c_str());
-        debugPrintf("\n%s\n", dialogText.c_str());
+        debugPrintf("\n{}\n", dialogText.c_str());
     #endif
 
     const int cBreak        = 0;
@@ -206,7 +206,7 @@ bool _handleErrorCheck_(
         DWORD lastErr = GetLastError();
         (void)lastErr;
         postToClipboard(dialogText.c_str());
-        debugPrintf("\n%s\n", dialogText.c_str());
+        debugPrintf("\n{}\n", dialogText.c_str());
     #endif
 
     static const char* choices[] = {"Ok"};
@@ -345,7 +345,7 @@ std::string __cdecl debugPrint(const std::string& s) {
             }
         }
 #    else
-        fprintf(stderr, "%s", s.c_str());
+        fprintf(stderr, "{}", s.c_str());
         fflush(stderr);
 #    endif
 
@@ -364,7 +364,7 @@ std::string __cdecl debugPrintf(const char* fmt ...) {
 
 std::string consolePrint(const std::string& s) {
     FILE* L = Log::common()->getFile();
-    fprintf(L, "%s", s.c_str());
+    fprintf(L, "{}", s.c_str());
 
     if (consolePrintHook()) {
         consolePrintHook()(s);

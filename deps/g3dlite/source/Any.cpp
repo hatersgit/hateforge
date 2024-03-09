@@ -966,7 +966,7 @@ void Any::serialize(TextOutput& to, bool json, bool coerce) const {
         } else {
             // This value came from a #include...preserve it.  This includes the comment
             // if any.
-            to.printf("%s", m_data->includeLine.c_str());
+            to.printf("{}", m_data->includeLine.c_str());
             return;
         }
     }
@@ -977,7 +977,7 @@ void Any::serialize(TextOutput& to, bool json, bool coerce) const {
                 throw "Could not coerce to JSON";
             }
         } else {
-            to.printf("\n/* %s */\n", m_data->comment.c_str());
+            to.printf("\n/* {} */\n", m_data->comment.c_str());
         }
     }
 
@@ -1100,7 +1100,7 @@ void Any::serialize(TextOutput& to, bool json, bool coerce) const {
                 to.writeSymbol("[");
             } else {
                 // For arrays, leave no trailing space between the name and the paren
-                to.printf("%s%c", m_data->name.c_str(), m_data->bracket[0]);
+                to.printf("{}%c", m_data->name.c_str(), m_data->bracket[0]);
             }
         } else {
             if (json) {
@@ -1162,7 +1162,7 @@ void Any::serialize(TextOutput& to, bool json, bool coerce) const {
         } else {
             if (! m_data->name.empty()) {
                 // Leave no trailing space between the name and the paren
-                to.printf("%s%c", m_data->name.c_str(), m_data->bracket[0]);
+                to.printf("{}%c", m_data->name.c_str(), m_data->bracket[0]);
             } else {
                 to.writeSymbol(m_data->bracket[0]);
             }
@@ -1313,11 +1313,11 @@ void Any::deserialize(TextInput& ti, Token& token) {
             // Update the source information
             ensureData();
             if (! comment.empty()) {
-                m_data->includeLine = format("\n/* %s */\n", comment.c_str());
+                m_data->includeLine = format("\n/* {} */\n", comment.c_str());
             }
-            m_data->includeLine += format("#include(\"%s\")", includeName.c_str());
+            m_data->includeLine += format("#include(\"{}\")", includeName.c_str());
             m_data->source.filename +=
-                format(" [included from %s:%d(%d)]", ti.filename().c_str(), token.line(), token.character());
+                format(" [included from {}:{}({})]", ti.filename().c_str(), token.line(), token.character());
             
             ti.readSymbol(")");
 
@@ -1757,7 +1757,7 @@ void Any::verifySize(int low, int high) const {
     beforeRead();
     verifyType(ARRAY, TABLE);
     if (size() < low || size() > high) {
-        verify(false, format("Size must be between %d and %d", low, high));
+        verify(false, format("Size must be between {} and {}", low, high));
     }
 }
 
@@ -1766,7 +1766,7 @@ void Any::verifySize(int s) const {
     beforeRead();
     verifyType(ARRAY, TABLE);
     if (size() != s) {
-        verify(false, format("Size must be %d", s));
+        verify(false, format("Size must be {}", s));
     }
 }
 

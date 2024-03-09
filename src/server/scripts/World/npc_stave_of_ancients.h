@@ -48,7 +48,7 @@ enum NPCArtorius
     ARTORIUS_EVENT_DEMONIC_DOOM               = 6,
     ARTORIUS_EVENT_DEMONIC_ENRAGE             = 7,
 
-    ARTORIUS_WEAKNESS_EMOTE                   = 9786,   // broadcast_text.ID         "%s is stricken by a virulent poison."
+    ARTORIUS_WEAKNESS_EMOTE                   = 9786,   // broadcast_text.ID         "{} is stricken by a virulent poison."
     ARTORIUS_SAY                              = 9787,   // broadcast_text.ID         "Your soul is mine, weakling."
 
     ARTORIUS_NORMAL_ENTRY                     = 14531,  // creature_template.entry
@@ -67,9 +67,9 @@ enum NPCSimone
     SIMONE_EVENT_CHAIN_LIGHTNING              = 8,
     SIMONE_EVENT_TEMPTRESS_KISS               = 9,
 
-    SIMONE_EMOTE                              = 9759,   // broadcast_text.ID         "%s laughs at your foolish request."
+    SIMONE_EMOTE                              = 9759,   // broadcast_text.ID         "{} laughs at your foolish request."
     SIMONE_SAY                                = 9760,   // broadcast_text.ID         "As you wish, $c."
-    SIMONE_WEAKNESS_EMOTE                     = 9762,   // broadcast_text.ID         "%s is silenced by the venomous sting."
+    SIMONE_WEAKNESS_EMOTE                     = 9762,   // broadcast_text.ID         "{} is silenced by the venomous sting."
 
     SIMONE_NORMAL_ENTRY                       = 14527,  // creature_template.entry
     SIMONE_EVIL_ENTRY                         = 14533,  // creature_template.entry
@@ -95,7 +95,7 @@ enum NPCNelson
     NELSON_EVENT_CREEPING_DOOM                = 7,
 
     NELSON_SAY                                = 9782,  // broadcast_text.ID          "You dare challenge me? Prepare for an e..."
-    NELSON_WEAKNESS_EMOTE                     = 9785,  // breadcast_text.ID          "%s is immobilized."
+    NELSON_WEAKNESS_EMOTE                     = 9785,  // breadcast_text.ID          "{} is immobilized."
     NELSON_DESPAWN_SAY                        = 9815,  // breadcast_text.ID          "Only a fool would remain in this battle..."
 
     NELSON_NORMAL_ENTRY                       = 14536, // creature_template.entry
@@ -118,7 +118,7 @@ enum NPCFranklin
     FRANKLIN_EVENT_DEMONIC_ENRAGE               = 6,
 
     FRANKLIN_SAY                                = 9772,  // broadcast_text.ID          "I shall enjoy this, $c."
-    FRANKLIN_ENRAGE_EMOTE                       = 9764,  // broadcast_text.ID          "%s goes into a killing frenzy!"
+    FRANKLIN_ENRAGE_EMOTE                       = 9764,  // broadcast_text.ID          "{} goes into a killing frenzy!"
     FRANKLIN_DESPAWN_SAY                        = 9815,  // breadcast_text.ID          "Only a fool would remain in this battle..."
 
     FRANKLIN_NORMAL_ENTRY                       = 14529,

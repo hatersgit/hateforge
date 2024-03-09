@@ -78,7 +78,7 @@ namespace VMAP
             // build global map tree
             std::vector<ModelSpawn*> mapSpawns;
             UniqueEntryMap::iterator entry;
-            printf("Calculating model bounds for map %u...\n", map_iter->first);
+            printf("Calculating model bounds for map {}...\n", map_iter->first);
             for (entry = map_iter->second->UniqueEntries.begin(); entry != map_iter->second->UniqueEntries.end(); ++entry)
             {
                 // M2 models don't have a bound set in WDT/ADT placement data, i still think they're not used for LoS at all on retail
@@ -99,7 +99,7 @@ namespace VMAP
                 spawnedModelFiles.insert(entry->second.name);
             }
 
-            printf("Creating map tree for map %u...\n", map_iter->first);
+            printf("Creating map tree for map {}...\n", map_iter->first);
             BIH pTree;
 
             try
@@ -108,7 +108,7 @@ namespace VMAP
             }
             catch (std::exception& e)
             {
-                printf("Exception ""%s"" when calling pTree.build", e.what());
+                printf("Exception ""{}"" when calling pTree.build", e.what());
                 return false;
             }
 
@@ -126,7 +126,7 @@ namespace VMAP
             if (!mapfile)
             {
                 success = false;
-                printf("Cannot open %s\n", mapfilename.str().c_str());
+                printf("Cannot open {}\n", mapfilename.str().c_str());
                 break;
             }
 
@@ -248,7 +248,7 @@ namespace VMAP
             MapData::iterator map_iter = mapData.find(mapID);
             if (map_iter == mapData.end())
             {
-                printf("spawning Map %d\n", mapID);
+                printf("spawning Map {}\n", mapID);
                 mapData[mapID] = current = new MapSpawns();
             }
             else
@@ -284,7 +284,7 @@ namespace VMAP
         uint32 groups = raw_model.groupsArray.size();
         if (groups != 1)
         {
-            printf("Warning: '%s' does not seem to be a M2 model!\n", modelFilename.c_str());
+            printf("Warning: '{}' does not seem to be a M2 model!\n", modelFilename.c_str());
         }
 
         AABox modelBound;
@@ -462,7 +462,7 @@ namespace VMAP
 #define READ_OR_RETURN_WITH_DELETE(V, S) if (fread((V), (S), 1, rf) != 1) { \
                                         fclose(rf); printf("readfail, op = %i\n", readOperation); delete[] V; return(false); };
 #define CMP_OR_RETURN(V, S)  if (strcmp((V), (S)) != 0)        { \
-                                        fclose(rf); printf("cmpfail, %s!=%s\n", V, S);return(false); }
+                                        fclose(rf); printf("cmpfail, {}!={}\n", V, S);return(false); }
 
     bool GroupModel_Raw::Read(FILE* rf)
     {
@@ -571,7 +571,7 @@ namespace VMAP
         FILE* rf = fopen(path, "rb");
         if (!rf)
         {
-            printf("ERROR: Can't open raw model file: %s\n", path);
+            printf("ERROR: Can't open raw model file: {}\n", path);
             return false;
         }
 

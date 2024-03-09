@@ -123,22 +123,22 @@ public:
             if (dbPort)
                 dbPortOutput = Acore::StringFormatFmt("Realmlist (Realm Id: {}) configured in port {}", realm.Id.Realm, dbPort);
             else
-                dbPortOutput = Acore::StringFormat("Realm Id: %u not found in `realmlist` table. Please check your setup", realm.Id.Realm);
+                dbPortOutput = Acore::StringFormat("Realm Id: {} not found in `realmlist` table. Please check your setup", realm.Id.Realm);
         }
 
         HandleServerInfoCommand(handler);
 
-        handler->PSendSysMessage("Using SSL version: %s (library: %s)", OPENSSL_VERSION_TEXT, OpenSSL_version(OPENSSL_VERSION));
+        handler->PSendSysMessage("Using SSL version: {} (library: {})", OPENSSL_VERSION_TEXT, OpenSSL_version(OPENSSL_VERSION));
         handler->PSendSysMessage("Using Boost version: %i.%i.%i", BOOST_VERSION / 100000, BOOST_VERSION / 100 % 1000, BOOST_VERSION % 100);
-        handler->PSendSysMessage("Using CMake version: %s", GitRevision::GetCMakeVersion());
+        handler->PSendSysMessage("Using CMake version: {}", GitRevision::GetCMakeVersion());
 
-        handler->PSendSysMessage("Using MySQL version: %u", MySQL::GetLibraryVersion());
-        handler->PSendSysMessage("Found MySQL Executable: %s", GitRevision::GetMySQLExecutable());
+        handler->PSendSysMessage("Using MySQL version: {}", MySQL::GetLibraryVersion());
+        handler->PSendSysMessage("Found MySQL Executable: {}", GitRevision::GetMySQLExecutable());
 
-        handler->PSendSysMessage("Compiled on: %s", GitRevision::GetHostOSVersion());
+        handler->PSendSysMessage("Compiled on: {}", GitRevision::GetHostOSVersion());
 
         handler->PSendSysMessage("Worldserver listening connections on port %" PRIu16, worldPort);
-        handler->PSendSysMessage("%s", dbPortOutput.c_str());
+        handler->PSendSysMessage("{}", dbPortOutput.c_str());
 
         bool vmapIndoorCheck = sWorld->getBoolConfig(CONFIG_VMAP_INDOOR_CHECK);
         bool vmapLOSCheck = VMAP::VMapFactory::createOrGetVMapMgr()->isLineOfSightCalcEnabled();
@@ -172,7 +172,7 @@ public:
 
             if (!std::filesystem::exists(mapPath))
             {
-                handler->PSendSysMessage("%s directory doesn't exist!. Using path: %s", subDir.c_str(), mapPath.generic_string().c_str());
+                handler->PSendSysMessage("{} directory doesn't exist!. Using path: {}", subDir.c_str(), mapPath.generic_string().c_str());
                 continue;
             }
 
@@ -211,9 +211,9 @@ public:
                 availableLocales += " ";
         }
 
-        handler->PSendSysMessage("Default DBC locale: %s.\nAll available DBC locales: %s", localeNames[defaultLocale], availableLocales.c_str());
+        handler->PSendSysMessage("Default DBC locale: {}.\nAll available DBC locales: {}", localeNames[defaultLocale], availableLocales.c_str());
 
-        handler->PSendSysMessage("Using World DB: %s", sWorld->GetDBVersion());
+        handler->PSendSysMessage("Using World DB: {}", sWorld->GetDBVersion());
 
         std::string lldb = "No updates found!";
         if (QueryResult resL = LoginDatabase.Query("SELECT name FROM updates ORDER BY name DESC LIMIT 1"))
@@ -234,9 +234,9 @@ public:
             lwdb = fields[0].Get<std::string>();
         }
 
-        handler->PSendSysMessage("Latest LoginDatabase update: %s", lldb.c_str());
-        handler->PSendSysMessage("Latest CharacterDatabase update: %s", lcdb.c_str());
-        handler->PSendSysMessage("Latest WorldDatabase update: %s", lwdb.c_str());
+        handler->PSendSysMessage("Latest LoginDatabase update: {}", lldb.c_str());
+        handler->PSendSysMessage("Latest CharacterDatabase update: {}", lcdb.c_str());
+        handler->PSendSysMessage("Latest WorldDatabase update: {}", lwdb.c_str());
 
         handler->PSendSysMessage("LoginDatabase queue size: %zu", LoginDatabase.QueueSize());
         handler->PSendSysMessage("CharacterDatabase queue size: %zu", CharacterDatabase.QueueSize());
@@ -263,15 +263,15 @@ public:
         uint32 queuedSessionCount = sWorld->GetQueuedSessionCount();
         uint32 connPeak = sWorld->GetMaxActiveSessionCount();
 
-        handler->PSendSysMessage("%s", GitRevision::GetFullVersion());
+        handler->PSendSysMessage("{}", GitRevision::GetFullVersion());
         if (!queuedSessionCount)
-            handler->PSendSysMessage("Connected players: %u. Characters in world: %u.", activeSessionCount, playerCount);
+            handler->PSendSysMessage("Connected players: {}. Characters in world: {}.", activeSessionCount, playerCount);
         else
-            handler->PSendSysMessage("Connected players: %u. Characters in world: %u. Queue: %u.", activeSessionCount, playerCount, queuedSessionCount);
+            handler->PSendSysMessage("Connected players: {}. Characters in world: {}. Queue: {}.", activeSessionCount, playerCount, queuedSessionCount);
 
-        handler->PSendSysMessage("Connection peak: %u.", connPeak);
+        handler->PSendSysMessage("Connection peak: {}.", connPeak);
         handler->PSendSysMessage(LANG_UPTIME, secsToTimeString(GameTime::GetUptime().count()).c_str());
-        handler->PSendSysMessage("Update time diff: %ums, average: %ums.", sWorldUpdateTime.GetLastUpdateTime(), sWorldUpdateTime.GetAverageUpdateTime());
+        handler->PSendSysMessage("Update time diff: {}ms, average: {}ms.", sWorldUpdateTime.GetLastUpdateTime(), sWorldUpdateTime.GetAverageUpdateTime());
 
         //! Can't use sWorld->ShutdownMsg here in case of console command
         if (sWorld->IsShuttingDown())

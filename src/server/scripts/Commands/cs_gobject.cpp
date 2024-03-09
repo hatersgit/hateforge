@@ -529,18 +529,18 @@ public:
 
         handler->PSendSysMessage(LANG_GOINFO_ENTRY, entry);
         if (gameObject)
-            handler->PSendSysMessage("GUID: %u", gameObject->GetGUID().GetCounter());
+            handler->PSendSysMessage("GUID: {}", gameObject->GetGUID().GetCounter());
         handler->PSendSysMessage(LANG_GOINFO_TYPE, type);
         handler->PSendSysMessage(LANG_GOINFO_LOOTID, lootId);
         handler->PSendSysMessage(LANG_GOINFO_DISPLAYID, displayId);
         if (gameObject)
         {
-            handler->PSendSysMessage("LootMode: %u", gameObject->GetLootMode());
-            handler->PSendSysMessage("LootState: %u", gameObject->getLootState());
-            handler->PSendSysMessage("GOState: %u", gameObject->GetGoState());
-            handler->PSendSysMessage("PhaseMask: %u", gameObject->GetPhaseMask());
-            handler->PSendSysMessage("IsLootEmpty: %u", gameObject->loot.empty());
-            handler->PSendSysMessage("IsLootLooted: %u", gameObject->loot.isLooted());
+            handler->PSendSysMessage("LootMode: {}", gameObject->GetLootMode());
+            handler->PSendSysMessage("LootState: {}", gameObject->getLootState());
+            handler->PSendSysMessage("GOState: {}", gameObject->GetGoState());
+            handler->PSendSysMessage("PhaseMask: {}", gameObject->GetPhaseMask());
+            handler->PSendSysMessage("IsLootEmpty: {}", gameObject->loot.empty());
+            handler->PSendSysMessage("IsLootLooted: {}", gameObject->loot.isLooted());
         }
 
         handler->PSendSysMessage(LANG_GOINFO_NAME, name.c_str());
@@ -578,7 +578,7 @@ public:
         {
             object->SendCustomAnim(*objectState);
         }
-        handler->PSendSysMessage("Set gobject type %d state %u", objectType, *objectState);
+        handler->PSendSysMessage("Set gobject type {} state {}", objectType, *objectState);
         return true;
     }
 };

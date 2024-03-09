@@ -868,7 +868,7 @@ bool __fastcall CollisionDetection::rayAABox(
     Vector3&                location,
     bool&                   inside) {
 
-    debugAssertM(fabs(ray.direction().squaredLength() - 1.0f) < 0.01f, format("Length = %f", ray.direction().length()));
+    debugAssertM(fabs(ray.direction().squaredLength() - 1.0f) < 0.01f, format("Length = {}", ray.direction().length()));
     {
         // Pre-emptive partial bounding sphere test
         const Vector3 L(boxCenter - ray.origin());
@@ -1690,7 +1690,7 @@ float CollisionDetection::collisionTimeForMovingSphereFixedTriangle
                 b[1] * triangle.vertex(1) + 
                 b[2] * triangle.vertex(2);
             debugAssertM(blend.fuzzyEq(outLocation), 
-                format("Barycentric coords don't match intersection. %s != %s", 
+                format("Barycentric coords don't match intersection. {} != {}", 
                     blend.toString().c_str(), 
                     outLocation.toString().c_str()));    
 

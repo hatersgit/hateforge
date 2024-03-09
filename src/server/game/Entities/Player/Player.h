@@ -814,7 +814,7 @@ enum TransferAbortReason
     TRANSFER_ABORT_TOO_MANY_INSTANCES       = 0x04,         // You have entered too many instances recently.
     TRANSFER_ABORT_ZONE_IN_COMBAT           = 0x06,         // Unable to zone in while an encounter is in progress.
     TRANSFER_ABORT_INSUF_EXPAN_LVL          = 0x07,         // You must have <TBC, WotLK> expansion installed to access this area.
-    TRANSFER_ABORT_DIFFICULTY               = 0x08,         // <Normal, Heroic, Epic> difficulty mode is not available for %s.
+    TRANSFER_ABORT_DIFFICULTY               = 0x08,         // <Normal, Heroic, Epic> difficulty mode is not available for {}.
     TRANSFER_ABORT_UNIQUE_MESSAGE           = 0x09,         // Until you've escaped TLK's grasp, you cannot leave this place!
     TRANSFER_ABORT_TOO_MANY_REALM_INSTANCES = 0x0A,         // Additional instances cannot be launched, please try again later.
     TRANSFER_ABORT_NEED_GROUP               = 0x0B,         // 3.1
@@ -827,10 +827,10 @@ enum TransferAbortReason
 
 enum InstanceResetWarningType
 {
-    RAID_INSTANCE_WARNING_HOURS     = 1,                    // WARNING! %s is scheduled to reset in %d hour(s).
-    RAID_INSTANCE_WARNING_MIN       = 2,                    // WARNING! %s is scheduled to reset in %d minute(s)!
-    RAID_INSTANCE_WARNING_MIN_SOON  = 3,                    // WARNING! %s is scheduled to reset in %d minute(s). Please exit the zone or you will be returned to your bind location!
-    RAID_INSTANCE_WELCOME           = 4,                    // Welcome to %s. This raid instance is scheduled to reset in %s.
+    RAID_INSTANCE_WARNING_HOURS     = 1,                    // WARNING! {} is scheduled to reset in {} hour(s).
+    RAID_INSTANCE_WARNING_MIN       = 2,                    // WARNING! {} is scheduled to reset in {} minute(s)!
+    RAID_INSTANCE_WARNING_MIN_SOON  = 3,                    // WARNING! {} is scheduled to reset in {} minute(s). Please exit the zone or you will be returned to your bind location!
+    RAID_INSTANCE_WELCOME           = 4,                    // Welcome to {}. This raid instance is scheduled to reset in {}.
     RAID_INSTANCE_EXPIRED           = 5
 };
 
@@ -1207,6 +1207,7 @@ public:
     void SetAcceptWhispers(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_ACCEPT_WHISPERS; else m_ExtraFlags &= ~PLAYER_EXTRA_ACCEPT_WHISPERS; }
     [[nodiscard]] bool IsGameMaster() const { return m_ExtraFlags & PLAYER_EXTRA_GM_ON; }
     void SetGameMaster(bool on);
+    bool CanBeGameMaster() const;
     [[nodiscard]] bool isGMChat() const { return m_ExtraFlags & PLAYER_EXTRA_GM_CHAT; }
     void SetGMChat(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_GM_CHAT; else m_ExtraFlags &= ~PLAYER_EXTRA_GM_CHAT; }
     [[nodiscard]] bool isTaxiCheater() const { return m_ExtraFlags & PLAYER_EXTRA_TAXICHEAT; }
@@ -2495,35 +2496,33 @@ public:
     /***                 INSTANCE SYSTEM                   ***/
     /*********************************************************/
 
-    typedef std::unordered_map<uint32 /*mapId*/, InstancePlayerBind> BoundInstancesMap;
+    typedef std::unordered_map<Difficulty, std::unordered_map<uint32 /*mapId*/, InstancePlayerBind>>  BoundInstancesMap;
 
     void UpdateHomebindTime(uint32 time);
 
     uint32 m_HomebindTimer;
     bool m_InstanceValid;
     // permanent binds and solo binds by difficulty
-    BoundInstancesMap m_boundInstances[MAX_DIFFICULTY];
+    BoundInstancesMap m_boundInstances;
     InstancePlayerBind* GetBoundInstance(uint32 mapid, Difficulty difficulty, bool withExpired = false);
     InstancePlayerBind const* GetBoundInstance(uint32 mapid, Difficulty difficulty) const;
-    BoundInstancesMap& GetBoundInstances(Difficulty difficulty) { return m_boundInstances[difficulty]; }
+    BoundInstancesMap::iterator GetBoundInstances(Difficulty difficulty) { return m_boundInstances.find(difficulty); }
     InstanceSave* GetInstanceSave(uint32 mapid);
     void UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload = false);
-    void UnbindInstance(BoundInstancesMap::iterator& itr, Difficulty difficulty, bool unload = false);
+    void UnbindInstance(BoundInstancesMap::mapped_type::iterator& itr, BoundInstancesMap::iterator& difficultyItr, bool unload = false);
     InstancePlayerBind* BindToInstance(InstanceSave* save, bool permanent, BindExtensionState extendState = EXTEND_STATE_NORMAL, bool load = false);
     void BindToInstance();
-    void SetPendingBind(uint32 instanceId, uint32 bindTimer) { _pendingBindId = instanceId; _pendingBindTimer = bindTimer; }
-    [[nodiscard]] bool HasPendingBind() const { return _pendingBindId > 0; }
-    [[nodiscard]] uint32 GetPendingBind() const { return _pendingBindId; }
+    void SetPendingBind(uint32 instanceId, uint32 bindTimer);
+    bool HasPendingBind() const { return _pendingBindId > 0; }
     void SendRaidInfo();
 
-
-    void SendSavedInstances();
     void PrettyPrintRequirementsQuestList(const std::vector<const ProgressionRequirement*>& missingQuests) const;
     void PrettyPrintRequirementsAchievementsList(const std::vector<const ProgressionRequirement*>& missingAchievements) const;
     void PrettyPrintRequirementsItemsList(const std::vector<const ProgressionRequirement*>& missingItems) const;
     bool Satisfy(DungeonProgressionRequirements const* ar, uint32 target_map, bool report = false);
     bool CheckInstanceLoginValid();
     bool CheckInstanceValidity(bool /*isLogin*/);
+    bool IsInstanceLoginGameMasterException() const;
     [[nodiscard]] bool CheckInstanceCount(uint32 instanceId) const;
     void AddInstanceEnterTime(uint32 instanceId, time_t enterTime)
     {

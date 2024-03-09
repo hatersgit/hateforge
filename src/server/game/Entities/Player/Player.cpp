@@ -19,7 +19,6 @@
 #include "Player.h"
 #include "AccountMgr.h"
 #include "AchievementMgr.h"
-#include "AnticheatMgr.h"
 #include "ArenaSpectator.h"
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"

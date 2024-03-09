@@ -21,7 +21,6 @@
 
 #include "WorldSession.h"
 #include "AccountMgr.h"
-#include "AnticheatMgr.h"
 #include "BattlegroundMgr.h"
 #include "CharacterPackets.h"
 #include "Common.h"
@@ -151,8 +150,6 @@ WorldSession::WorldSession(uint32 id, std::string&& name, std::shared_ptr<WorldS
         ResetTimeOutTime(false);
         LoginDatabase.Execute("UPDATE account SET online = 1 WHERE id = {};", GetAccountId()); // One-time query
     }
-
-    _isLuaCheater = false;
 }
 
 /// WorldSession destructor
@@ -895,17 +892,6 @@ void WorldSession::LoadAccountData(PreparedQueryResult result, uint32 mask)
         m_accountData[type].Time = time_t(fields[1].Get<uint32>());
         m_accountData[type].Data = fields[2].Get<std::string>();
     } while (result->NextRow());
-
-    bool cheater = sAnticheatMgr->CheckIsLuaCheater(GetAccountId());
-    if (!cheater)
-    {
-        cheater = sAnticheatMgr->CheckBlockedLuaFunctions(m_accountData, _player);
-    }
-
-    if (!_isLuaCheater)
-    {
-        _isLuaCheater = cheater;
-    }
 }
 
 void WorldSession::SetAccountData(AccountDataType type, time_t tm, std::string const& data)

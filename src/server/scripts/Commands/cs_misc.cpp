@@ -2074,10 +2074,10 @@ public:
         }
 
         // Can be used to query data from World database
-        WorldDatabasePreparedStatement* xQuery = WorldDatabase.GetPreparedStatement(WORLD_SEL_REQ_XP);
-        xQuery->SetData(0, level);
+        WorldDatabasePreparedStatement* xpQuery = WorldDatabase.GetPreparedStatement(WORLD_SEL_REQ_XP);
+        xpQuery->SetData(0, level);
 
-        PreparedQueryResult xpResult = WorldDatabase.Query(xQuery);
+        PreparedQueryResult xpResult = WorldDatabase.Query(xpQuery);
         if (xpResult)
         {
             Field* fields = xpResult->Fetch();
@@ -2085,10 +2085,10 @@ public:
         }
 
         // Can be used to query data from Characters database
-        CharacterDatabasePreparedStatement* charXQuery = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PINFO_XP);
-        charXQuery->SetData(0, lowguid);
+        CharacterDatabasePreparedStatement* charXpQuery = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PINFO_XP);
+        charXpQuery->SetData(0, lowguid);
 
-        PreparedQueryResult charXpResult = CharacterDatabase.Query(charXQuery);
+        PreparedQueryResult charXpResult = CharacterDatabase.Query(charXpQuery);
         if (charXpResult)
         {
             Field* fields = charXpResult->Fetch();

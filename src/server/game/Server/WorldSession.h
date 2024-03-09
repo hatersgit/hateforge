@@ -531,8 +531,6 @@ public:
     time_t GetCalendarEventCreationCooldown() const { return _calendarEventCreationCooldown; }
     void SetCalendarEventCreationCooldown(time_t cooldown) { _calendarEventCreationCooldown = cooldown; }
 
-     bool IsLuaCheater() const { return _isLuaCheater; }
-
     // Time Synchronisation
     void ResetTimeSync();
     void SendTimeSync();
@@ -1196,8 +1194,6 @@ private:
 
     WorldSession(WorldSession const& right) = delete;
     WorldSession& operator=(WorldSession const& right) = delete;
-
-    bool _isLuaCheater;
 };
 #endif
 /// @}

@@ -2014,21 +2014,21 @@ private:
     {
         _levelClassSpellMap.clear();
 
-        QueryResult maQuery = WorldDatabase.Query("select * from `acore_world`.`forge_character_spec_spells` order by `class` asc, `race` asc, `level` asc, `spell` asc");
+        QueryResult mapQuery = WorldDatabase.Query("select * from `acore_world`.`forge_character_spec_spells` order by `class` asc, `race` asc, `level` asc, `spell` asc");
 
-        if (!maQuery)
+        if (!mapQuery)
             return;
 
         do
         {
-            Field* mapFields = maQuery->Fetch();
+            Field* mapFields = mapQuery->Fetch();
             uint8 pClass = mapFields[0].Get<uint8>();
             uint32 race = mapFields[1].Get<uint32>();
             uint8 level = mapFields[2].Get<uint8>();
             uint32 spell = mapFields[3].Get<uint32>();
 
             _levelClassSpellMap[pClass][race][level].push_back(spell);
-        } while (maQuery->NextRow());
+        } while (mapQuery->NextRow());
     }
 
     void AddPlayerTalentLoadouts()

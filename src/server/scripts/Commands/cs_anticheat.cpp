@@ -29,14 +29,14 @@ public:
     {
         static ChatCommandTable anticheatCommandTable =
         {
-            { "global",      HandleAntiCheatGlobalCommand,   SEC_GAMEMASTER1,           Console::Yes },
-            { "player",      HandleAntiCheatPlayerCommand,   SEC_GAMEMASTER1,           Console::Yes },
-            { "delete",      HandleAntiCheatDeleteCommand,   SEC_GAMEMASTER1,           Console::Yes },
-            { "purge",       HandleAntiCheatPurgeCommand,    SEC_GAMEMASTER1,           Console::Yes },
-            { "handle",      HandleAntiCheatHandleCommand,   SEC_GAMEMASTER1,           Console::Yes },
-            { "jail",        HandleAnticheatJailCommand,     SEC_GAMEMASTER1,           Console::Yes },
-            { "parole",      HandleAnticheatParoleCommand,   SEC_GAMEMASTER1,           Console::Yes },
-            { "warn",        HandleAnticheatWarnCommand,     SEC_GAMEMASTER1,           Console::Yes }
+            { "global",      HandleAntiCheatGlobalCommand,   SEC_GAMEMASTER2_F,           Console::Yes },
+            { "player",      HandleAntiCheatPlayerCommand,   SEC_GAMEMASTER2_F,           Console::Yes },
+            { "delete",      HandleAntiCheatDeleteCommand,   SEC_GAMEMASTER2_F,           Console::Yes },
+            { "purge",       HandleAntiCheatPurgeCommand,    SEC_GAMEMASTER2_F,           Console::Yes },
+            { "handle",      HandleAntiCheatHandleCommand,   SEC_GAMEMASTER2_F,           Console::Yes },
+            { "jail",        HandleAnticheatJailCommand,     SEC_GAMEMASTER2_F,           Console::Yes },
+            { "parole",      HandleAnticheatParoleCommand,   SEC_GAMEMASTER2_F,           Console::Yes },
+            { "warn",        HandleAnticheatWarnCommand,     SEC_GAMEMASTER2_F,           Console::Yes }
         };
 
         static ChatCommandTable commandTable =

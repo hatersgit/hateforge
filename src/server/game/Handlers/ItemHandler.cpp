@@ -436,7 +436,7 @@ bool ItemTemplate::HasSpellPowerStat() const
 
 void ItemTemplate::InitializeQueryData()
 {
-    queryData.Initialize(SMSG_ITEM_QUERY_SINGLE_RESPONSE, 1);
+    queryData.Initialize(SMSG_ITEM_QUERY_SINGLE_RESPONSE, 500);
 
     queryData << ItemId;
     queryData << Class;
@@ -572,12 +572,10 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recvData)
 
     LOG_DEBUG("network.opcode", "STORAGE: Item Query = {}", item);
 
-    CustomItemTemplate pProto = GetItemTemplate(item);
-    if (pProto)
+    if (CustomItemTemplate pProto = GetItemTemplate(item))
     {
-        pProto->InitializeQueryData();
-        WorldPacket* response = pProto->_GetInfo()->GetQueryData();
-        SendPacket(response);
+        pProto->_GetInfo()->InitializeQueryData();
+        SendPacket(pProto->_GetInfo()->GetQueryData());
     }
     else
     {

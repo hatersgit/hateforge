@@ -564,7 +564,6 @@ void InstanceSaveMgr::_ResetSave(InstanceSaveHashMap::iterator& itr)
 
     if (shouldDelete)
     {
-        delete itr->second;
         itr = m_instanceSaveById.erase(itr);
     }
     else

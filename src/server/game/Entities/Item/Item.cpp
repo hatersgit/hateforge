@@ -1126,10 +1126,10 @@ Item* Item::CreateItem(uint32 item, OUT uint32 count, Player const* player, bool
         if (pItem->Create(sObjectMgr->GetGenerator<HighGuid::Item>().Generate(), item, player))
         {
             pItem->SetCount(count);
-            if (!clone)
+            /*if (!clone) hater: disable random suffixes
                 pItem->SetItemRandomProperties(randomPropertyId ? randomPropertyId : Item::GenerateItemRandomPropertyId(item));
             else if (randomPropertyId)
-                pItem->SetItemRandomProperties(randomPropertyId);
+                pItem->SetItemRandomProperties(randomPropertyId);*/
             return pItem;
         }
         else

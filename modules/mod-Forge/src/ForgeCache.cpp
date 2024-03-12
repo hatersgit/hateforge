@@ -152,6 +152,12 @@ struct ForgeCharacterXmog
 #define MAINSTATS 3
 #define TANKDIST 0
 
+enum RewardItems {
+    TOKEN_OF_PRESTIGE = 1049426,
+    REROLL = 1000000,
+    SOUL_DUST = 1045624
+};
+
 //////// PERK ////////
 enum CharacterPerkType
 {
@@ -2871,13 +2877,15 @@ public:
                     if (shardFound != _charSoulShards[account].end()) {
                         PlayerSoulShard* pShard = _charSoulShards[account][source];
                         pShard->count += 1;
-                        if (pShard->rank < pShard->shard->quality + 3)
+                        if (pShard->rank < pShard->shard->quality + 2) {
                             if (pShard->count > std::pow(SOUL_SHARD_UPGRADE_THRESHOLD, pShard->rank)) {
                                 pShard->count = 1;
                                 pShard->rank += 1;
                             }
-                        _charSoulShards[account][source] = pShard;
-                        HandleSoulShardAcquired(player, shard, false);
+                            _charSoulShards[account][source] = pShard;
+                            HandleSoulShardAcquired(player, shard, false);
+                        }
+                        player->AddItem(RewardItems::SOUL_DUST, 1);
                         return;
                     }
                 }
@@ -3166,7 +3174,7 @@ private:
                 _charSoulShards[account][source] = pShard;
             }
             else {
-                player->AddItem(1045624, shard->quality);
+                player->AddItem(RewardItems::SOUL_DUST, shard->quality);
                 return;
             }
         }

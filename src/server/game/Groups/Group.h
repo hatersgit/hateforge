@@ -199,7 +199,7 @@ public:
     };
     typedef std::list<MemberSlot> MemberSlotList;
     typedef MemberSlotList::const_iterator member_citerator;
-    typedef std::unordered_map< uint32 /*mapId*/, InstanceGroupBind> BoundInstancesMap;
+    typedef std::unordered_map<Difficulty, std::unordered_map<uint32 /*mapId*/, InstanceGroupBind>> BoundInstancesMap;
 
 protected:
     typedef MemberSlotList::iterator member_witerator;
@@ -356,7 +356,8 @@ public:
     InstanceGroupBind* GetBoundInstance(Map* aMap);
     InstanceGroupBind* GetBoundInstance(MapEntry const* mapEntry);
     InstanceGroupBind* GetBoundInstance(Difficulty difficulty, uint32 mapId);
-    BoundInstancesMap& GetBoundInstances(Difficulty difficulty);
+    BoundInstancesMap::iterator GetBoundInstances(Difficulty difficulty);
+    BoundInstancesMap::iterator GetBoundInstanceEnd();
 
 protected:
     void _homebindIfInstance(Player* player);
@@ -383,7 +384,7 @@ protected:
     ItemQualities       m_lootThreshold;
     ObjectGuid          m_looterGuid;
     ObjectGuid          m_masterLooterGuid;
-    BoundInstancesMap   m_boundInstances[MAX_DIFFICULTY];
+    BoundInstancesMap   m_boundInstances;
     Rolls               RollId;
     uint8*              m_subGroupsCounts;
     ObjectGuid          m_guid;

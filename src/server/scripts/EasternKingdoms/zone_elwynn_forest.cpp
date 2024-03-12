@@ -227,10 +227,11 @@ struct npc_cameron : public ScriptedAI
                     _childrenGUIDs.push_back(jose->GetGUID());
 
                 // If Formation was disbanded, remake.
-                if (!me->GetFormation()->IsFormed())
-                    for (auto& guid : _childrenGUIDs)
-                        if (Creature* child = ObjectAccessor::GetCreature(*me, guid))
-                            child->SearchFormation();
+                if (CreatureGroup* g = me->GetFormation())
+                    if (!g->IsFormed())
+                        for (auto& guid : _childrenGUIDs)
+                            if (Creature* child = ObjectAccessor::GetCreature(*me, guid))
+                                child->SearchFormation();
 
                 // Start movement
                 me->GetMotionMaster()->MovePath(STORMWIND_PATH, false);

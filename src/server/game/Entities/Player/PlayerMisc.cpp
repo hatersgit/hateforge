@@ -194,12 +194,15 @@ void Player::SendResetFailedNotify(uint32 mapid)
 /// Reset all solo instances and optionally send a message on success for each
 void Player::ResetInstances(uint8 method, bool isRaid, bool isLegacy)
 {
-    // method can be INSTANCE_RESET_ALL, INSTANCE_RESET_CHANGE_DIFFICULTY, INSTANCE_RESET_GROUP_JOIN
+    Difficulty diff = GetDungeonDifficulty();
+    if (isRaid)
+        diff = GetRaidDifficulty();
 
-    // we assume that when the difficulty changes, all instances that can be reset will be
-    Difficulty diff = GetDifficulty(isRaid);
+    auto difficultyItr = m_boundInstances.find(diff);
+    if (difficultyItr == m_boundInstances.end())
+        return;
 
-    for (BoundInstancesMap::iterator itr = m_boundInstances[diff].begin(); itr != m_boundInstances[diff].end();)
+    for (auto itr = difficultyItr->second.begin(); itr != difficultyItr->second.end();)
     {
         InstanceSave* p = itr->second.save;
         MapEntry const* entry = sMapStore.LookupEntry(itr->first);
@@ -209,7 +212,7 @@ void Player::ResetInstances(uint8 method, bool isRaid, bool isLegacy)
             continue;
         }
 
-        if (method == INSTANCE_RESET_ALL)
+        /*if (method == INSTANCE_RESET_ALL) hater: try raid resets
         {
             // the "reset all instances" method can only reset normal maps
             if (entry->IsRaid() || diff == Difficulty::DUNGEON_DIFFICULTY_HEROIC)
@@ -217,7 +220,7 @@ void Player::ResetInstances(uint8 method, bool isRaid, bool isLegacy)
                 ++itr;
                 continue;
             }
-        }
+        }*/
 
         // if the map is loaded, reset it
         Map* map = sMapMgr->FindMap(p->GetMapId(), p->GetInstanceId());

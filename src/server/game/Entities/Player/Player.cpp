@@ -704,12 +704,6 @@ bool Player::Create(ObjectGuid::LowType guidlow, CharacterCreateInfo* createInfo
     }
     // all item positions resolved
     UpdateThorns();
-    if (sConfigMgr->GetBoolDefault("StarterGuild.autojoin", false)) {
-        if (Guild* guild = sGuildMgr->GetGuildById(sConfigMgr->GetIntDefault("StarterGuild.id", 0))) {
-            guild->AddMemberOnCreate(this);
-        }
-    }
-
     CheckAllAchievementCriteria();
 
     GetThreatManager().Initialize();
@@ -1590,7 +1584,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                     data << teleportStore_dest.PositionXYZOStream();
 
                 GetSession()->SendPacket(&data);
-                SendSavedInstances();
             }
 
             // move packet sent by client always after far teleport

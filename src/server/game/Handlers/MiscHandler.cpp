@@ -1321,8 +1321,10 @@ void WorldSession::HandleResetInstancesOpcode(WorldPacket& /*recv_data*/)
         if (group->IsLeader(_player->GetGUID()))
             group->ResetInstances(INSTANCE_RESET_ALL, false, false, _player);
     }
-    else
-        _player->ResetInstances(INSTANCE_RESET_ALL, true, false);
+    else {
+        _player->ResetInstances(INSTANCE_RESET_ALL, true);
+        _player->ResetInstances(INSTANCE_RESET_ALL, false, false);
+    }
 }
 
 void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket& recv_data)
@@ -1386,7 +1388,7 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recv_data)
     uint32 mode;
     recv_data >> mode;
 
-    if (mode >= MAX_RAID_DIFFICULTY)
+    if (mode != REGULAR_DIFFICULTY)
         return;
 
     if (Difficulty(mode) == _player->GetRaidDifficulty())

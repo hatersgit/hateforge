@@ -1492,8 +1492,15 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss,
         return;
     }
 
-    if (GetTypeId() != TYPEID_PLAYER && !IsPet() && !IsTotem()) {
-        float mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
+    if (GetTypeId() != TYPEID_PLAYER) {
+        float mod = 1;
+        if (auto owner = GetOwner()) {
+            if (owner->GetTypeId() != TYPEID_PLAYER)
+                mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
+        }
+        else
+            mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
+
         damageInfo->damage *= mod;
     }
 
@@ -1927,8 +1934,15 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
             continue;
         }
 
-        if (GetTypeId() != TYPEID_PLAYER && !IsPet() && !IsTotem()) {
-            float mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
+        if (GetTypeId() != TYPEID_PLAYER) {
+            float mod = 1;
+            if (auto owner = GetOwner()) {
+                if (owner->GetTypeId() != TYPEID_PLAYER)
+                    mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
+            }
+            else
+                mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
+
             damageInfo->damages[i].damage *= mod;
         }
 
@@ -11417,6 +11431,14 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
 {
     if (rate < 0)
         rate = 0.0f;
+    else if (GetTypeId() != TYPEID_PLAYER) {
+        if (auto owner = GetOwner()) {
+            if (owner->GetTypeId() != TYPEID_PLAYER)
+                rate += GetWorldTier() * .05f;
+        }
+        else
+            rate += GetWorldTier() * .05f;
+    }
 
     // Update speed only on change
     if (m_speed_rate[mtype] == rate)
@@ -11546,7 +11568,6 @@ void Unit::setDeathState(DeathState s, bool despawn)
     {
         CombatStop();
         GetThreatManager().ClearAllThreat();
-        ClearComboPointHolders(false);                           // any combo points pointed to unit lost at it death
 
         if (IsNonMeleeSpellCast(false))
             InterruptNonMeleeSpells(false);
@@ -12345,8 +12366,14 @@ void Unit::SetMaxHealth(uint32 val)
     if (!val)
         val = 1;
 
-    if (GetTypeId() != TYPEID_PLAYER && !IsPet() && !IsTotem()) {
-        float mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
+    if (GetTypeId() != TYPEID_PLAYER) {
+        float mod = 1;
+        if (auto owner = GetOwner()) {
+            if (owner->GetTypeId() != TYPEID_PLAYER)
+                mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
+        }
+        else
+            mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
         val = val * mod;
     }
 
@@ -13558,22 +13585,20 @@ void Unit::AddComboPoints(Unit* target, int8 count)
 
 void Unit::ClearComboPoints(bool clearPoints)
 {
-    if (!m_comboTarget)
-    {
-        return;
-    }
+    if (m_comboTarget) {
 
-    // remove Premed-like effects
-    // (NB: this Aura retains the CP while it's active - now that CP have reset, it shouldn't be there anymore)
-    RemoveAurasByType(SPELL_AURA_RETAIN_COMBO_POINTS);
+        // remove Premed-like effects
+        // (NB: this Aura retains the CP while it's active - now that CP have reset, it shouldn't be there anymore)
+        RemoveAurasByType(SPELL_AURA_RETAIN_COMBO_POINTS);
 
-    if (clearPoints)
-    {
-        m_comboPoints = 0;
+        if (clearPoints)
+        {
+            m_comboPoints = 0;
+        }
+        m_comboTarget->RemoveComboPointHolder(this);
+        m_comboTarget = nullptr;
+        SendComboPoints();
     }
-    m_comboTarget->RemoveComboPointHolder(this);
-    m_comboTarget = nullptr;
-    SendComboPoints();
 }
 
 void Unit::SetComboPoints(int amount)
@@ -14038,7 +14063,7 @@ float Unit::CalculateDefaultCoefficient(SpellInfo const* spellInfo, DamageEffect
         if (!spellInfo->IsChanneled() && DotDuration > 0)
             DotFactor = DotDuration / 15000.0f;
 
-        if (uint32 DotTicks = spellInfo->GetNoHasteTicks())
+        if (uint32 DotTicks = spellInfo->GetMaxTicks())
         {
             DotFactor /= DotTicks;
         }
@@ -14526,8 +14551,9 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
         {
             if (Player* killedPlr = victim->ToPlayer())
                 sScriptMgr->OnPVPKill(killerPlr, killedPlr);
-            else if (Creature* killedCre = victim->ToCreature())
+            else if (Creature* killedCre = victim->ToCreature()) {
                 sScriptMgr->OnCreatureKill(killerPlr, killedCre);
+            }
         }
         else if (Creature* killerCre = killer->ToCreature())
         {

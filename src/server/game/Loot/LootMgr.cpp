@@ -604,11 +604,12 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
 
     items.reserve(MAX_NR_LOOT_ITEMS);
     quest_items.reserve(MAX_NR_QUEST_ITEMS);
-
     if (auto group = lootOwner->GetGroup()) {
-        for (Group::member_citerator mitr = group->GetMemberSlots().begin(); mitr != group->GetMemberSlots().end(); ++mitr)
+        for (auto member : group->GetMemberSlots())
+
+        for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
         {
-            Player* member = ObjectAccessor::FindPlayer(mitr->guid);
+            Player* member = ObjectAccessor::FindPlayer(itr->GetSource()->GetGUID());
             if (member)
                 if (member->GetMap()->GetId() == lootOwner->GetMap()->GetId() && member->GetWorldTier() == lootOwner->GetWorldTier() &&
                     lootOwner->IsAtLootRewardDistance(member))

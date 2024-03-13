@@ -3349,9 +3349,9 @@ void ObjectMgr::LoadItemTemplates()
     LOG_INFO("server.loading", " ");
 }
 // hater: custom items
-ItemTemplate * ObjectMgr::GetItemTemplate(uint32 entry)
+ItemTemplate* ObjectMgr::GetItemTemplate(uint32 entry)
 {
-    return Acore::Containers::MapGetValuePtr(_itemTemplateStore, entry);
+    return entry < _itemTemplateStoreFast.size() ? _itemTemplateStoreFast[entry] : nullptr;
 }
 
 ItemTemplate* ObjectMgr::CreateItemTemplate(uint32 entry, uint32 copyID)
@@ -3364,6 +3364,7 @@ ItemTemplate* ObjectMgr::CreateItemTemplate(uint32 entry, uint32 copyID)
     copy->ItemId = entry;
     copy->m_isDirty = true;
     copy->_LoadTotalAP();
+    _itemTemplateStoreFast[entry] = copy;
     return copy;
 }
 
@@ -3526,6 +3527,9 @@ void ObjectMgr::LoadCustomItemTemplates()
             _itemTemplateStoreFast[entry] = itemTemplate;
 
         } while (result->NextRow());
+
+        for (ItemTemplateContainer::iterator itr = _itemTemplateStore.begin(); itr != _itemTemplateStore.end(); ++itr)
+            itr->second.InitializeQueryData();
 }
 
 

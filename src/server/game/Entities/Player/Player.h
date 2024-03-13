@@ -1972,10 +1972,10 @@ public:
     void SetArenaTeamIdInvited(uint32 ArenaTeamId) { m_ArenaTeamIdInvited = ArenaTeamId; }
     uint32 GetArenaTeamIdInvited() { return m_ArenaTeamIdInvited; }
 
-    [[nodiscard]] Difficulty GetDifficulty(bool isRaid) const { return GetWorldTier(); }
-    [[nodiscard]] Difficulty GetDungeonDifficulty() const { return GetWorldTier(); }
-    [[nodiscard]] Difficulty GetRaidDifficulty() const { return GetWorldTier(); }
-    [[nodiscard]] Difficulty GetStoredRaidDifficulty() const { return GetWorldTier(); } // only for use in difficulty packet after exiting to raid map
+    [[nodiscard]] Difficulty GetDifficulty(bool isRaid) const { return isRaid ? m_raidDifficulty : m_dungeonDifficulty; }
+    [[nodiscard]] Difficulty GetDungeonDifficulty() const { return m_dungeonDifficulty; }
+    [[nodiscard]] Difficulty GetRaidDifficulty() const { return m_raidDifficulty; }
+    [[nodiscard]] Difficulty GetStoredRaidDifficulty() const { return m_raidMapDifficulty; } // only for use in difficulty packet after exiting to raid map
 
     void SetWorldTier(Difficulty worldTier) {
         m_worldTier = worldTier;
@@ -2501,20 +2501,20 @@ public:
     /***                 INSTANCE SYSTEM                   ***/
     /*********************************************************/
 
-    typedef std::unordered_map<uint32 /*mapId*/, InstancePlayerBind> BoundInstancesMap;
+    typedef std::unordered_map<Difficulty, std::unordered_map<uint32 /*mapId*/, InstancePlayerBind>> BoundInstancesMap;
 
     void UpdateHomebindTime(uint32 time);
 
     uint32 m_HomebindTimer;
     bool m_InstanceValid;
     // permanent binds and solo binds by difficulty
-    BoundInstancesMap m_boundInstances[MAX_DIFFICULTY] = {};
+    BoundInstancesMap m_boundInstances;
     InstancePlayerBind* GetBoundInstance(uint32 mapid, Difficulty difficulty, bool withExpired = false);
     InstancePlayerBind const* GetBoundInstance(uint32 mapid, Difficulty difficulty) const;
-    BoundInstancesMap& GetBoundInstances(Difficulty difficulty) { return m_boundInstances[difficulty]; }
+    BoundInstancesMap::iterator GetBoundInstances(Difficulty difficulty) { return m_boundInstances.find(difficulty); }
     InstanceSave* GetInstanceSave(uint32 mapid);
     void UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload = false);
-    void UnbindInstance(BoundInstancesMap::iterator& itr, Difficulty difficulty, bool unload = false);
+    void UnbindInstance(BoundInstancesMap::mapped_type::iterator& itr, BoundInstancesMap::iterator& difficultyItr, bool unload = false);
     InstancePlayerBind* BindToInstance(InstanceSave* save, bool permanent, BindExtensionState extendState = EXTEND_STATE_NORMAL, bool load = false);
     void BindToInstance();
     void SetPendingBind(uint32 instanceId, uint32 bindTimer) { _pendingBindId = instanceId; _pendingBindTimer = bindTimer; }
@@ -2522,8 +2522,6 @@ public:
     [[nodiscard]] uint32 GetPendingBind() const { return _pendingBindId; }
     void SendRaidInfo();
 
-
-    void SendSavedInstances();
     void PrettyPrintRequirementsQuestList(const std::vector<const ProgressionRequirement*>& missingQuests) const;
     void PrettyPrintRequirementsAchievementsList(const std::vector<const ProgressionRequirement*>& missingAchievements) const;
     void PrettyPrintRequirementsItemsList(const std::vector<const ProgressionRequirement*>& missingItems) const;

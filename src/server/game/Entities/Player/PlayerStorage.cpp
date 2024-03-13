@@ -6566,8 +6566,7 @@ void Player::_LoadGroup()
 
 void Player::_LoadBoundInstances(PreparedQueryResult result)
 {
-    for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
-        m_boundInstances[i].clear();
+    m_boundInstances.clear();
 
     Group* group = GetGroup();
 
@@ -6651,11 +6650,35 @@ InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty
     MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(mapid, difficulty);
     if (!mapDiff)
         return nullptr;
-    if (!m_boundInstances[difficulty].empty() && m_boundInstances[difficulty].size() < 100) {
-        BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
-        if (itr != m_boundInstances[difficulty].end())
+
+    if (!m_boundInstances.empty() && m_boundInstances.size() == MAX_DIFFICULTY) {
+        auto difficultyItr = m_boundInstances.find(difficulty);
+        if (difficultyItr == m_boundInstances.end())
+            return nullptr;
+
+        auto itr = difficultyItr->second.find(mapid);
+        if (itr != difficultyItr->second.end())
             if (itr->second.extendState || withExpired)
                 return &itr->second;
+    }
+    return nullptr;
+}
+
+InstancePlayerBind const* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty) const
+{
+    // some instances only have one difficulty
+    MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(mapid, difficulty);
+    if (!mapDiff)
+        return nullptr;
+
+    if (!m_boundInstances.empty()) {
+        auto difficultyItr = m_boundInstances.find(difficulty);
+        if (difficultyItr == m_boundInstances.end())
+            return nullptr;
+
+        auto itr = difficultyItr->second.find(mapid);
+        if (itr != difficultyItr->second.end())
+            return &itr->second;
     }
     return nullptr;
 }
@@ -6675,13 +6698,20 @@ InstanceSave* Player::GetInstanceSave(uint32 mapid)
 
 void Player::UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload)
 {
-    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
-    UnbindInstance(itr, difficulty, unload);
+    if (m_boundInstances.size() == MAX_DIFFICULTY) {
+        auto difficultyItr = m_boundInstances.find(difficulty);
+        if (difficultyItr != m_boundInstances.end())
+        {
+            auto itr = difficultyItr->second.find(mapid);
+            if (itr != difficultyItr->second.end())
+                UnbindInstance(itr, difficultyItr, unload);
+        }
+    }
 }
 
-void Player::UnbindInstance(BoundInstancesMap::iterator& itr, Difficulty difficulty, bool unload)
+void Player::UnbindInstance(BoundInstancesMap::mapped_type::iterator& itr, BoundInstancesMap::iterator& difficultyItr, bool unload)
 {
-    if (itr != m_boundInstances[difficulty].end())
+    if (itr != difficultyItr->second.end())
     {
         if (!unload)
         {
@@ -6694,7 +6724,7 @@ void Player::UnbindInstance(BoundInstancesMap::iterator& itr, Difficulty difficu
         }
 
         itr->second.save->RemovePlayer(this);               // save can become invalid
-        m_boundInstances[difficulty].erase(itr++);
+        difficultyItr->second.erase(itr++);
     }
 }
 
@@ -6790,9 +6820,9 @@ void Player::SendRaidInfo()
 
     time_t now = GameTime::GetGameTime().count();
 
-    for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+    for (auto difficultyItr = m_boundInstances.begin(); difficultyItr != m_boundInstances.end(); ++difficultyItr)
     {
-        for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
+        for (auto itr = difficultyItr->second.begin(); itr != difficultyItr->second.end(); ++itr)
         {
             InstancePlayerBind const& bind = itr->second;
             if (bind.perm)
@@ -6811,50 +6841,6 @@ void Player::SendRaidInfo()
     }
     data.put<uint32>(p_counter, counter);
     GetSession()->SendPacket(&data);
-}
-
-/*
-- called on every successful teleportation to a map
-*/
-void Player::SendSavedInstances()
-{
-    bool hasBeenSaved = false;
-    WorldPacket data;
-
-    for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
-    {
-        for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
-        {
-            InstancePlayerBind const& bind = itr->second;
-            if (bind.perm)                             // only permanent binds are sent
-            {
-                hasBeenSaved = true;
-                break;
-            }
-        }
-    }
-
-    //Send opcode 811. true or false means, whether you have current raid/heroic instances
-    data.Initialize(SMSG_UPDATE_INSTANCE_OWNERSHIP);
-    data << uint32(hasBeenSaved);
-    GetSession()->SendPacket(&data);
-
-    if (!hasBeenSaved)
-        return;
-
-    for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
-    {
-        for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
-        {
-            InstancePlayerBind const& bind = itr->second;
-            if (bind.perm)                             // only permanent binds are sent
-            {
-                data.Initialize(SMSG_UPDATE_LAST_INSTANCE);
-                data << uint32(itr->second.save->GetMapId());
-                GetSession()->SendPacket(&data);
-            }
-        }
-    }
 }
 
 void Player::PrettyPrintRequirementsQuestList(const std::vector<const ProgressionRequirement*>& missingQuests) const

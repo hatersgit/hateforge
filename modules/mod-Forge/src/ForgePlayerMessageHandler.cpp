@@ -60,10 +60,6 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 
-enum RewardItems {
-    TOKEN_OF_PRESTIGE = 49426,
-};
-
 #define STARTER_GUILD 1
 
 // Add player scripts
@@ -134,6 +130,12 @@ public:
             player->SendForgeUIMsg(ForgeTopic::SEND_MAX_WORLD_TIER, std::to_string(fc->GetCharWorldTierUnlock(player)));
             fc->RecalculateShardBonuses(player);
         }
+    }
+
+    void OnFirstLogin(Player* player) override {
+        if (sConfigMgr->GetBoolDefault("StarterGuild.autojoin", false))
+            if (Guild* guild = sGuildMgr->GetGuildById(sConfigMgr->GetIntDefault("StarterGuild.id", 0)))
+                guild->AddMember(player->GetGUID());
     }
 
     void BeforeEquip(Player* player, Item* item, uint8 bag, uint8 slot, bool update) override
@@ -241,7 +243,7 @@ public:
                         }
                         player->SendForgeUIMsg(ForgeTopic::SEND_MAX_WORLD_TIER, std::to_string(fc->GetCharWorldTierUnlock(player)));
                     }
-                    player->AddItem(TOKEN_OF_PRESTIGE, 1);
+                    player->AddItem(RewardItems::TOKEN_OF_PRESTIGE, 1);
                 }
             }
 
@@ -258,6 +260,7 @@ public:
                         }
                     }
                 }
+                player->SetHealth(player->GetMaxHealth());
             }
         }
     }
@@ -530,8 +533,18 @@ public:
 
     void OnCreatureKill(Player* killer, Creature* killed) override
     {
+        if (Group* group = killer->GetGroup()) {
+            group->DoForAllMembers([this, killed](Player* player) {
+                if (player->IsAtLootRewardDistance(killed) && player->isAllowedToLoot(killed))
+                    RollSoulForPlayer(player, killed); });
+        } else {
+            RollSoulForPlayer(killer, killed);
+        }
+    }
+
+    void RollSoulForPlayer(Player* killer, Creature* killed) {
         if (killed->GetCreatureType() < CREATURE_TYPE_NOT_SPECIFIED && killed->GetCreatureType() != CREATURE_TYPE_CRITTER) {
-            auto chance = 3.f;
+            auto chance = 1.f;
             if (killed->isElite())
                 chance = 5.f;
             if (killed->isWorldBoss())

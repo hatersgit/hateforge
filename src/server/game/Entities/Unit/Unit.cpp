@@ -14255,6 +14255,7 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
     }
 
     // pussywizard: remade this if section (player is on the same map
+    std::vector<Player*> tappers;
     if (isRewardAllowed && creature)
     {
         Player* lr = creature->GetLootRecipient();

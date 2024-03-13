@@ -136,6 +136,7 @@ struct LootStoreItem
     uint8   mincount;                           // mincount for drop items
     uint8   maxcount;                           // max drop count for the item mincount or Ref multiplicator
     ConditionList conditions;                   // additional loot condition
+    ObjectGuid  lootOwner;
 
     // Constructor
     // displayid is filled in IsValid() which must be called after
@@ -169,6 +170,7 @@ struct LootItem
     bool    needs_quest       : 1;                          // quest drop
     bool    follow_loot_rules : 1;
     uint8   groupid           : 7;
+    ObjectGuid owner;
 
     // Constructor, copies most fields from LootStoreItem, generates random count and random suffixes/properties
     // Should be called for non-reference LootStoreItem entries only (reference = 0)

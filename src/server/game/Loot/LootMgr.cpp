@@ -403,6 +403,7 @@ LootItem::LootItem(LootStoreItem const& li)
     is_counted = 0;
     rollWinnerGUID = ObjectGuid::Empty;
     groupid = li.groupid;
+    owner = li.lootOwner;
 }
 
 // Basic checks for player/item compatibility - if false no chance to see the item in the loot
@@ -413,6 +414,9 @@ bool LootItem::AllowedForPlayer(Player const* player, ObjectGuid source) const
     {
         return false;
     }
+
+    if (owner != player->GetGUID())
+        return false;
 
     if (DisableMgr::IsDisabledFor(DISABLE_TYPE_LOOT, itemid, nullptr))
     {
@@ -492,7 +496,7 @@ void LootItem::AddAllowedLooter(Player const* player)
 // Inserts the item into the loot (called by LootTemplate processors)
 void Loot::AddItem(LootStoreItem const& item, WorldObject* source)
 {
-
+    lootOwnerGUID = item.lootOwner;
     ItemTemplate const* proto = sObjectMgr->GetItemTemplate(item.itemid);
     if (!proto)
         return;
@@ -591,8 +595,6 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     if (!lootOwner)
         return false;
 
-    lootOwnerGUID = lootOwner->GetGUID();
-
     LootTemplate const* tab = store.GetLootFor(lootId);
 
     if (!tab)
@@ -604,34 +606,41 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
 
     items.reserve(MAX_NR_LOOT_ITEMS);
     quest_items.reserve(MAX_NR_QUEST_ITEMS);
-    if (auto group = lootOwner->GetGroup()) {
-        for (auto member : group->GetMemberSlots())
+
+    // Initial group is 0, top level set to True
+
+    sScriptMgr->OnAfterLootTemplateProcess(this, tab, store, lootOwner, personal, noEmptyError, lootMode);
+
+    // Setting access rights for group loot case
+    Group* group = lootOwner->GetGroup();
+    if (!personal && group)
+    {
 
         for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
         {
-            Player* member = ObjectAccessor::FindPlayer(itr->GetSource()->GetGUID());
-            if (member)
-                if (member->GetMap()->GetId() == lootOwner->GetMap()->GetId() && member->GetWorldTier() == lootOwner->GetWorldTier() &&
-                    lootOwner->IsAtLootRewardDistance(member))
+            if (Player* player = itr->GetSource()) // should actually be looted object instead of lootOwner but looter has to be really close so doesnt really matter
+            {
+                if (player->IsAtLootRewardDistance(lootSource ? lootSource : lootOwner))
                 {
-                    tab->Process(*this, store, lootMode, member, 0, true);
-                    DishOutLoot(this, member, group->GetMembersCount());
+                    tab->Process(*this, store, lootMode, player, 0, true);
+                    FillNotNormalLootFor(player);
                 }
+            }
+        }
+
+        for (uint8 i = 0; i < items.size(); ++i)
+        {
+            if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(items[i].itemid))
+                if (proto->Quality < uint32(group->GetLootThreshold()))
+                    items[i].is_underthreshold = true;
         }
     }
+    // ... for personal loot
     else {
-        tab->Process(*this, store, lootMode, lootOwner, 0, true);
-        DishOutLoot(this, lootOwner, 1);
+        tab->Process(*this, store, lootMode, lootOwner, 0, true);          // Processing is done there, callback via Loot::AddItem()
+        FillNotNormalLootFor(lootOwner);
     }
 
-    if (lootSource)
-        if (GameObject* go = lootSource->ToGameObject())
-            if (go->GetGoType() == GAMEOBJECT_TYPE_CHEST) {
-                go->loot.clear();
-                go->DespawnOrUnsummon();
-            }
-
-    sScriptMgr->OnAfterLootTemplateProcess(this, tab, store, lootOwner, personal, noEmptyError, lootMode);
     return true;
 }
 
@@ -1734,6 +1743,7 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, 
     for (LootStoreItemList::const_iterator i = Entries.begin(); i != Entries.end(); ++i)
     {
         LootStoreItem* item = *i;
+        item->lootOwner = player->GetGUID();
         if (!(item->lootmode & lootMode))                         // Do not add if mode mismatch
             continue;
         if (!item->Roll(rate, player, loot, store))

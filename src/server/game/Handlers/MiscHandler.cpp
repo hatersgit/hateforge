@@ -1322,7 +1322,8 @@ void WorldSession::HandleResetInstancesOpcode(WorldPacket& /*recv_data*/)
             group->ResetInstances(INSTANCE_RESET_ALL, false, false, _player);
     }
     else {
-        _player->ResetInstances(INSTANCE_RESET_ALL, false, false);
+        _player->ResetInstances(INSTANCE_RESET_ALL, true);
+        _player->ResetInstances(INSTANCE_RESET_ALL, false);
     }
 }
 

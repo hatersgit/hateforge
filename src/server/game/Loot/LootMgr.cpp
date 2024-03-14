@@ -652,7 +652,6 @@ QuestItemList* Loot::FillFFALoot(Player* player)
     for (uint8 i = 0; i < items.size(); ++i)
     {
         LootItem& item = items[i];
-        item.owner = player->GetGUID();
         if (!item.is_looted && item.freeforall && item.AllowedForPlayer(player, containerGUID))
         {
             ql->push_back(QuestItem(i));
@@ -681,7 +680,6 @@ QuestItemList* Loot::FillQuestLoot(Player* player)
     for (uint8 i = 0; i < quest_items.size(); ++i)
     {
         LootItem& item = quest_items[i];
-        item.owner = player->GetGUID();
         sScriptMgr->OnBeforeFillQuestLootItem(player, item);
 
         // Quest item is not free for all and is already assigned to another player
@@ -725,7 +723,6 @@ QuestItemList* Loot::FillNonQuestNonFFAConditionalLoot(Player* player)
     for (uint8 i = 0; i < items.size(); ++i)
     {
         LootItem& item = items[i];
-        item.owner = player->GetGUID();
         if (!item.is_looted && !item.freeforall && item.AllowedForPlayer(player, sourceWorldObjectGUID))
         {
             item.AddAllowedLooter(player);
@@ -1284,7 +1281,6 @@ LootStoreItem* LootTemplate::LootGroup::Roll(Loot& loot, Player const* player, L
         for (LootStoreItemList::const_iterator itr = possibleLoot.begin(); itr != possibleLoot.end(); ++itr)   // check each explicitly chanced entry in the template and modify its chance based on quality.
         {
             LootStoreItem* item = *itr;
-            item->lootOwner = player->GetGUID();
             float chance = item->chance;
 
             if (!sScriptMgr->OnItemRoll(player, item, chance, loot, store))
@@ -1425,6 +1421,7 @@ void LootTemplate::LootGroup::Process(Loot& loot, Player const* player, LootStor
     if (LootStoreItem* item = Roll(loot, player, store, lootMode))
     {
         bool rate = store.IsRatesAllowed();
+        item->lootOwner = player->GetGUID();
 
         if (item->reference) // References processing
         {

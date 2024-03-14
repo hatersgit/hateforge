@@ -553,39 +553,8 @@ void Loot::AddItem(LootStoreItem const& item, WorldObject* source)
     }
 }
 
-void DishOutLoot(Loot* loot, Player* lootOwner, uint8 goldSplit)
-{
-    for (LootItem entry : loot->items) {
-        if (entry.AllowedForPlayer(lootOwner, loot->sourceWorldObjectGUID)) {
-            ItemPosCountVec dest;
-            auto canStore = lootOwner->CanStoreItem(NULL_BAG, NULL_SLOT, dest, entry.itemid, entry.count);
-            if (canStore == EQUIP_ERR_OK) {
-                AllowedLooterSet looters = entry.GetAllowedLooters();
-                Item* newitem = lootOwner->StoreNewItem(dest, entry.itemid, true, entry.randomPropertyId, looters);
-                lootOwner->SendNewItem(newitem, uint32(entry.count), false, false, true);
-                entry.count = 0;
-                entry.is_looted = true;
-                loot->items[entry.itemIndex] = entry;
-                --loot->unlootedCount;
-            }
-        }
-    }
+void DishOutLoot(Loot* loot, Player* player) {
 
-    for (auto entry : loot->quest_items) {
-        if (entry.AllowedForPlayer(lootOwner, loot->sourceWorldObjectGUID)) {
-            ItemPosCountVec dest;
-            auto canStore = lootOwner->CanStoreItem(NULL_BAG, NULL_SLOT, dest, entry.itemid, entry.count);
-            if (canStore == EQUIP_ERR_OK) {
-                AllowedLooterSet looters = entry.GetAllowedLooters();
-                Item* newitem = lootOwner->StoreNewItem(dest, entry.itemid, true, entry.randomPropertyId, looters);
-                lootOwner->SendNewItem(newitem, uint32(entry.count), false, false, true);
-                entry.count = 0;
-                entry.is_looted = true;
-                loot->quest_items[entry.itemIndex] = entry;
-                --loot->unlootedCount;
-            }
-        }
-    }
 }
 
 // Calls processor of corresponding LootTemplate (which handles everything including references)
@@ -637,7 +606,7 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     }
     // ... for personal loot
     else {
-        tab->Process(*this, store, lootMode, lootOwner, 0, true);          // Processing is done there, callback via Loot::AddItem()
+        tab->Process(*this, store, lootMode, lootOwner, 0, true);
         FillNotNormalLootFor(lootOwner);
     }
 
@@ -1740,10 +1709,9 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, 
     }
 
     // Rolling non-grouped items
-    for (LootStoreItemList::const_iterator i = Entries.begin(); i != Entries.end(); ++i)
+    for (auto i = Entries.begin(); i != Entries.end(); ++i)
     {
         LootStoreItem* item = *i;
-        item->lootOwner = player->GetGUID();
         if (!(item->lootmode & lootMode))                         // Do not add if mode mismatch
             continue;
         if (!item->Roll(rate, player, loot, store))
@@ -1761,8 +1729,24 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, 
                 // we're no longer in the top level, so isTopLevel is false
                 Referenced->Process(loot, store, lootMode, player, item->groupid, false);
         }
-        else                                    // Plain entries (not a reference, not grouped)
+        else {                                  // Plain entries (not a reference, not grouped)
+            auto itemProto = sObjectMgr->GetItemTemplate(item->itemid);
+            if (!itemProto)
+                continue;
+
+            auto guidlow = sObjectMgr->GetGenerator<HighGuid::Item>().Generate();
+            guidlow += guidlow < 200000 ? 200000 : 0;
+
+            if (itemProto->Quality >= ITEM_QUALITY_UNCOMMON && (itemProto->Class == ITEM_CLASS_ARMOR || itemProto->Class == ITEM_CLASS_WEAPON)) {
+                itemProto = sObjectMgr->CreateItemTemplate(guidlow, item->itemid);
+                CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
+                sScriptMgr->GenerateItem(custom, player);
+                itemProto = custom->_GetInfo();
+                item->itemid = guidlow;
+            }
+            item->lootOwner = player->GetGUID();
             loot.AddItem(*item);                // Chance is already checked, just add
+        }
     }
 
     // Now processing groups

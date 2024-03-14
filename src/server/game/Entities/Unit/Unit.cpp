@@ -14255,7 +14255,6 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
     }
 
     // pussywizard: remade this if section (player is on the same map
-    std::vector<Player*> tappers;
     if (isRewardAllowed && creature)
     {
         Player* lr = creature->GetLootRecipient();
@@ -14341,7 +14340,25 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
                 // Update round robin looter only if the creature had loot
                 if (!creature->loot.empty())
                     group->UpdateLooterGuid(creature);
+
+                for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next()) {
+                    for (auto item : loot->items) {
+                        InventoryResult msg;
+                        Player* player = itr->GetSource();
+                        if (item.owner == player->GetGUID()) {
+                            player->StoreLootItem(item.itemIndex, loot, msg);
+                        }
+                    }
+                }
             }
+            else {
+                for (auto item : loot->items) {
+                    InventoryResult msg;
+                    looter->StoreLootItem(item.itemIndex, loot, msg);
+                }
+            }
+
+
             player->RewardPlayerAndGroupAtKill(victim, false);
         }
     }

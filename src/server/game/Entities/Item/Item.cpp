@@ -298,15 +298,7 @@ bool Item::Create(ObjectGuid::LowType guidlow, uint32 itemid, Player const* owne
     if (!itemProto)
         return false;
 
-    if (itemProto->Quality >= ITEM_QUALITY_UNCOMMON && (itemProto->Class == ITEM_CLASS_ARMOR || itemProto->Class == ITEM_CLASS_WEAPON)) {
-        itemProto = sObjectMgr->CreateItemTemplate(guidlow, itemid);
-        CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
-        sScriptMgr->GenerateItem(custom, owner);
-        itemProto = custom->_GetInfo();
-
-        SetEntry(guidlow);
-    } else 
-        SetEntry(itemid);
+    SetEntry(itemid);
 
     SetUInt32Value(ITEM_FIELD_STACK_COUNT, itemProto->GetMaxStackSize());
     SetUInt32Value(ITEM_FIELD_MAXDURABILITY, itemProto->MaxDurability);

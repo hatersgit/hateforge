@@ -112,7 +112,7 @@ public:
     void CopyConditions(ConditionList conditions);
     LootStoreItemList ExplicitlyChanced;                // Entries with chances defined in DB
     LootStoreItemList EqualChanced;                     // Zero chances - every entry takes the same chance
-    LootStoreItem const* Roll(Loot& loot, Player const* player, LootStore const& store, uint16 lootMode) const;   // Rolls an item from the group, returns nullptr if all miss their chances
+    LootStoreItem* Roll(Loot& loot, Player const* player, LootStore const& store, uint16 lootMode) const;   // Rolls an item from the group, returns nullptr if all miss their chances
 
 private:
     // This class must never be copied - storing pointers
@@ -553,10 +553,6 @@ void Loot::AddItem(LootStoreItem const& item, WorldObject* source)
     }
 }
 
-void DishOutLoot(Loot* loot, Player* player) {
-
-}
-
 // Calls processor of corresponding LootTemplate (which handles everything including references)
 bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bool personal, bool noEmptyError, uint16 lootMode /*= LOOT_MODE_DEFAULT*/, WorldObject* lootSource /*= nullptr*/)
 {
@@ -656,6 +652,7 @@ QuestItemList* Loot::FillFFALoot(Player* player)
     for (uint8 i = 0; i < items.size(); ++i)
     {
         LootItem& item = items[i];
+        item.owner = player->GetGUID();
         if (!item.is_looted && item.freeforall && item.AllowedForPlayer(player, containerGUID))
         {
             ql->push_back(QuestItem(i));
@@ -684,7 +681,7 @@ QuestItemList* Loot::FillQuestLoot(Player* player)
     for (uint8 i = 0; i < quest_items.size(); ++i)
     {
         LootItem& item = quest_items[i];
-
+        item.owner = player->GetGUID();
         sScriptMgr->OnBeforeFillQuestLootItem(player, item);
 
         // Quest item is not free for all and is already assigned to another player
@@ -728,7 +725,7 @@ QuestItemList* Loot::FillNonQuestNonFFAConditionalLoot(Player* player)
     for (uint8 i = 0; i < items.size(); ++i)
     {
         LootItem& item = items[i];
-
+        item.owner = player->GetGUID();
         if (!item.is_looted && !item.freeforall && item.AllowedForPlayer(player, sourceWorldObjectGUID))
         {
             item.AddAllowedLooter(player);
@@ -1275,7 +1272,7 @@ void LootTemplate::LootGroup::AddEntry(LootStoreItem* item)
 }
 
 // Rolls an item from the group, returns nullptr if all miss their chances
-LootStoreItem const* LootTemplate::LootGroup::Roll(Loot& loot, Player const* player, LootStore const& store, uint16 lootMode) const
+LootStoreItem* LootTemplate::LootGroup::Roll(Loot& loot, Player const* player, LootStore const& store, uint16 lootMode) const
 {
     LootStoreItemList possibleLoot = ExplicitlyChanced;
     possibleLoot.remove_if(LootGroupInvalidSelector(loot, lootMode));
@@ -1287,6 +1284,7 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot& loot, Player const* pla
         for (LootStoreItemList::const_iterator itr = possibleLoot.begin(); itr != possibleLoot.end(); ++itr)   // check each explicitly chanced entry in the template and modify its chance based on quality.
         {
             LootStoreItem* item = *itr;
+            item->lootOwner = player->GetGUID();
             float chance = item->chance;
 
             if (!sScriptMgr->OnItemRoll(player, item, chance, loot, store))
@@ -1424,7 +1422,7 @@ void LootTemplate::LootGroup::CopyConditions(ConditionList /*conditions*/)
 // Rolls an item from the group (if any takes its chance) and adds the item to the loot
 void LootTemplate::LootGroup::Process(Loot& loot, Player const* player, LootStore const& store, uint16 lootMode, uint16 nonRefIterationsLeft) const
 {
-    if (LootStoreItem const* item = Roll(loot, player, store, lootMode))
+    if (LootStoreItem* item = Roll(loot, player, store, lootMode))
     {
         bool rate = store.IsRatesAllowed();
 
@@ -1444,6 +1442,19 @@ void LootTemplate::LootGroup::Process(Loot& loot, Player const* player, LootStor
         {
             // Plain entries (not a reference, not grouped)
             sScriptMgr->OnBeforeDropAddItem(player, loot, rate, lootMode, const_cast<LootStoreItem*>(item), store);
+            if (auto itemProto = sObjectMgr->GetItemTemplate(item->itemid)) {
+                if (itemProto->Quality >= ITEM_QUALITY_UNCOMMON && (itemProto->Class == ITEM_CLASS_ARMOR || itemProto->Class == ITEM_CLASS_WEAPON)) {
+
+                    auto guidlow = sObjectMgr->GetGenerator<HighGuid::Item>().Generate();
+                    guidlow += guidlow < 200000 ? 200000 : 0;
+                    itemProto = sObjectMgr->CreateItemTemplate(guidlow, item->itemid);
+
+                    CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
+                    sScriptMgr->GenerateItem(custom, player);
+                    itemProto = custom->_GetInfo();
+                    item->itemid = guidlow;
+                }
+            }
             loot.AddItem(*item); // Chance is already checked, just add
 
             // If we still have non-ref runs to do for this group AND this item wasn't a reference,
@@ -1708,10 +1719,12 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, 
         return;
     }
 
+    bool gearGranted = false;
     // Rolling non-grouped items
     for (auto i = Entries.begin(); i != Entries.end(); ++i)
     {
         LootStoreItem* item = *i;
+        item->lootOwner = player->GetGUID();
         if (!(item->lootmode & lootMode))                         // Do not add if mode mismatch
             continue;
         if (!item->Roll(rate, player, loot, store))
@@ -1734,17 +1747,20 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, 
             if (!itemProto)
                 continue;
 
-            auto guidlow = sObjectMgr->GetGenerator<HighGuid::Item>().Generate();
-            guidlow += guidlow < 200000 ? 200000 : 0;
-
             if (itemProto->Quality >= ITEM_QUALITY_UNCOMMON && (itemProto->Class == ITEM_CLASS_ARMOR || itemProto->Class == ITEM_CLASS_WEAPON)) {
+                if (gearGranted)
+                    continue;
+
+                auto guidlow = sObjectMgr->GetGenerator<HighGuid::Item>().Generate();
+                guidlow += guidlow < 200000 ? 200000 : 0;
                 itemProto = sObjectMgr->CreateItemTemplate(guidlow, item->itemid);
+
                 CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
                 sScriptMgr->GenerateItem(custom, player);
                 itemProto = custom->_GetInfo();
                 item->itemid = guidlow;
+                gearGranted = true;
             }
-            item->lootOwner = player->GetGUID();
             loot.AddItem(*item);                // Chance is already checked, just add
         }
     }

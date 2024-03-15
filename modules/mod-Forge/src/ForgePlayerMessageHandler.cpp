@@ -513,16 +513,16 @@ public:
             amount *= fc->GetConfig("Dynamic.XP.Rate.10-19", 10);
 
         else if (player->getLevel() <= 29)
-            amount *= fc->GetConfig("Dynamic.XP.Rate.20-29", 10);
+            amount *= fc->GetConfig("Dynamic.XP.Rate.20-29", 13);
 
         else if (player->getLevel() <= 39)
-            amount *= fc->GetConfig("Dynamic.XP.Rate.30-39", 10);
+            amount *= fc->GetConfig("Dynamic.XP.Rate.30-39", 13);
 
         else if (player->getLevel() <= 49)
-            amount *= fc->GetConfig("Dynamic.XP.Rate.40-49", 10);
+            amount *= fc->GetConfig("Dynamic.XP.Rate.40-49", 15);
 
         else if (player->getLevel() <= 59)
-            amount *= fc->GetConfig("Dynamic.XP.Rate.50-59", 10);
+            amount *= fc->GetConfig("Dynamic.XP.Rate.50-59", 15);
 
         /*else if (player->getLevel() <= 69)
             amount *= fc->GetConfig("Dynamic.XP.Rate.60-69", 4);

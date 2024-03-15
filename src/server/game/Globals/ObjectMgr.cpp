@@ -10524,6 +10524,24 @@ void ObjectMgr::LoadCreatureQuestItems()
     LOG_INFO("server.loading", " ");
 }
 
+void ObjectMgr::InitializeQueriesData()
+{
+    uint32 oldMSTime = getMSTime();
+
+    // cache disabled
+    if (!sConfigMgr->GetBoolDefault("CacheDataQueries", false))
+    {
+        LOG_INFO("server.loading", ">> Query data caching is disabled. Skipped initialization.");
+        return;
+    }
+
+    // Initialize Query Data for items
+        for (auto& itemTemplatePair : _itemTemplateStore)
+            itemTemplatePair.second.InitializeQueryData();
+
+    LOG_INFO("server.loading", ">> Initialized query cache data in {} ms", GetMSTimeDiffToNow(oldMSTime));
+}
+
 void ObjectMgr::LoadQuestMoneyRewards()
 {
     uint32 oldMSTime = getMSTime();

@@ -1179,6 +1179,8 @@ public:
     void LoadTrainerSpell();
     void AddSpellToTrainer(uint32 entry, uint32 spell, uint32 spellCost, uint32 reqSkill, uint32 reqSkillValue, uint32 reqLevel, uint32 reqSpell);
 
+    void InitializeQueriesData();
+
     // Aleist3r: jump charge effect (think of retai heroic leap/dh metamorphosis)
     void LoadJumpChargeParams();
 

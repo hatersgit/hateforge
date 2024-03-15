@@ -2051,6 +2051,8 @@ void World::SetInitialWorldSettings()
     LOG_INFO("server.loading", "Loading Trainers...");
     sObjectMgr->LoadTrainerSpell();                              // must be after load CreatureTemplate
 
+    sObjectMgr->InitializeQueriesData();
+
     LOG_INFO("server.loading", "Loading Waypoints...");
     sWaypointMgr->Load();
 

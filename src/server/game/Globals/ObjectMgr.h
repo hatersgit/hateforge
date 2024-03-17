@@ -1539,6 +1539,12 @@ public:
     [[nodiscard]] uint32 GetQuestMoneyReward(uint8 level, uint32 questMoneyDifficulty) const;
     void SendServerMail(Player* player, uint32 id, uint32 reqLevel, uint32 reqPlayTime, uint32 rewardMoneyA, uint32 rewardMoneyH, uint32 rewardItemA, uint32 rewardItemCountA, uint32 rewardItemH, uint32 rewardItemCountH, std::string subject, std::string body, uint8 active) const;
 
+    void LoadInstanceSavedGameobjectStateData();
+    bool FindInstanceSavedGameobjectState(uint32 id, uint32 guid);
+    uint8 GetInstanceSavedGameobjectState(uint32 id, uint32 guid);
+    void SetInstanceSavedGameobjectState(uint32 id, uint32 guid, uint8 state);
+    void NewInstanceSavedGameobjectState(uint32 id, uint32 guid, uint8 state);
+
     // hater: m+
     WorldSafeLocsEntry* GetWorldSafeLoc(uint32 map, uint32 id) const;
     MapChallengeModeEntry* GetChallengeMode(uint32 id) const;

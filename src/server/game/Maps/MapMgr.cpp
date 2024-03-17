@@ -105,12 +105,12 @@ Map* MapMgr::FindBaseNonInstanceMap(uint32 mapId) const
     return map;
 }
 
-Map* MapMgr::CreateMap(uint32 id, Player* player, uint32 loginInstanceId)
+Map* MapMgr::CreateMap(uint32 id, Player* player)
 {
     Map* m = CreateBaseMap(id);
 
     if (m && m->Instanceable())
-        m = ((MapInstanced*)m)->CreateInstanceForPlayer(id, player, loginInstanceId);
+        m = ((MapInstanced*)m)->CreateInstanceForPlayer(id, player);
 
     return m;
 }
@@ -213,12 +213,12 @@ Map::EnterState MapMgr::PlayerCannotEnter(uint32 mapid, Player* player, bool log
     }
 
     // if map exists - check for being full, etc.
-    if (!loginCheck && group) // for login this is done by the calling function
+    if (!loginCheck) // for login this is done by the calling function
     {
-        InstanceGroupBind* boundInstance = group->GetBoundInstance(entry);
-        if (boundInstance && boundInstance->save)
-            if (Map* boundMap = sMapMgr->FindMap(mapid, boundInstance->save->GetInstanceId()))
-                if (Map::EnterState denyReason = boundMap->CannotEnter(player))
+        uint32 destInstId = sInstanceSaveMgr->PlayerGetDestinationInstanceId(player, mapid, targetDifficulty);
+        if (destInstId)
+            if (Map* boundMap = sMapMgr->FindMap(mapid, destInstId))
+                if (Map::EnterState denyReason = boundMap->CannotEnter(player, loginCheck))
                     return denyReason;
     }
 
@@ -226,11 +226,15 @@ Map::EnterState MapMgr::PlayerCannotEnter(uint32 mapid, Player* player, bool log
     if (entry->IsDungeon() && (!group || !group->isLFGGroup() || !group->IsLfgRandomInstance()))
     {
         uint32 instaceIdToCheck = 0;
-        if (InstanceSave* save = player->GetInstanceSave(mapid))
+        Player* bindOwner = player;
+        if (group)
+            bindOwner = group->GetLeader() ? group->GetLeader() : player;
+
+        if (InstanceSave* save = sInstanceSaveMgr->PlayerGetInstanceSave(bindOwner->GetGUID(), mapid, bindOwner->GetDifficulty(entry->IsRaid())))
             instaceIdToCheck = save->GetInstanceId();
 
         // instaceIdToCheck can be 0 if save not found - means no bind so the instance is new
-        if (!player->CheckInstanceCount(instaceIdToCheck))
+        if (!bindOwner->CheckInstanceCount(instaceIdToCheck))
         {
             player->SendTransferAborted(mapid, TRANSFER_ABORT_TOO_MANY_INSTANCES);
             return Map::CANNOT_ENTER_TOO_MANY_INSTANCES;
@@ -382,55 +386,37 @@ void MapMgr::InitInstanceIds()
 {
     _nextInstanceId = 1;
 
-    if (QueryResult result = CharacterDatabase.Query("SELECT IFNULL(MAX(id), 0) FROM instance"))
-        _freeInstanceIds.resize((*result)[0].Get<uint64>() + 2, true); // make space for one extra to be able to access [_nextInstanceId] index in case all slots are taken
-    else
-        _freeInstanceIds.resize(_nextInstanceId + 1, true);
-
-    // never allow 0 id
-    _freeInstanceIds[0] = false;
+    QueryResult result = CharacterDatabase.Query("SELECT MAX(id) FROM instance");
+    if (result)
+    {
+        uint32 maxId = (*result)[0].Get<uint32>();
+        _instanceIds.resize(maxId + 1);
+    }
 }
 
 void MapMgr::RegisterInstanceId(uint32 instanceId)
 {
-    // Allocation and sizing was done in InitInstanceIds()
-    _freeInstanceIds[instanceId] = false;
+    // Allocation was done in InitInstanceIds()
+    _instanceIds[instanceId] = true;
 
-    // Instances are pulled in ascending order from db and nextInstanceId is initialized with 1,
-    // so if the instance id is used, increment until we find the first unused one for a potential new instance
+    // Instances are pulled in ascending order from db and _nextInstanceId is initialized with 1,
+    // so if the instance id is used, increment
     if (_nextInstanceId == instanceId)
         ++_nextInstanceId;
 }
 
 uint32 MapMgr::GenerateInstanceId()
 {
+    uint32 newInstanceId = _nextInstanceId;
+
+    // find the lowest available id starting from the current _nextInstanceId
+    while (_nextInstanceId < 0xFFFFFFFF && ++_nextInstanceId < _instanceIds.size() && _instanceIds[_nextInstanceId]);
+
     if (_nextInstanceId == 0xFFFFFFFF)
     {
-        LOG_ERROR("maps", "Instance ID overflow!! Can't continue, shutting down server. ");
+        LOG_ERROR("server.worldserver", "Instance ID overflow!! Can't continue, shutting down server. ");
         World::StopNow(ERROR_EXIT_CODE);
-        return _nextInstanceId;
     }
-
-    uint32 newInstanceId = _nextInstanceId;
-    ASSERT(newInstanceId < _freeInstanceIds.size());
-    _freeInstanceIds[newInstanceId] = false;
-
-    // Find the lowest available id starting from the current NextInstanceId (which should be the lowest according to the logic in FreeInstanceId()
-    size_t nextFreedId = _freeInstanceIds.find_next(_nextInstanceId++);
-    if (nextFreedId == InstanceIds::npos)
-    {
-        _nextInstanceId = uint32(_freeInstanceIds.size());
-        _freeInstanceIds.push_back(true);
-    }
-    else
-        _nextInstanceId = uint32(nextFreedId);
 
     return newInstanceId;
-}
-
-void MapMgr::FreeInstanceId(uint32 instanceId)
-{
-    // If freed instance id is lower than the next id available for new instances, use the freed one instead
-    _nextInstanceId = std::min(instanceId, _nextInstanceId);
-    _freeInstanceIds[instanceId] = true;
 }

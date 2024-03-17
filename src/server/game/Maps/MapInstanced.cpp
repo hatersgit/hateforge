@@ -108,13 +108,12 @@ void MapInstanced::UnloadAll()
 - create the instance if it's not created already
 - the player is not actually added to the instance (only in InstanceMap::Add)
 */
-Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player, uint32 loginInstanceId /*= 0*/)
+Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
 {
     if (GetId() != mapId || !player)
         return nullptr;
 
     Map* map = nullptr;
-    uint32 newInstanceId = 0;
 
     if (IsBattlegroundOrArena())
     {
@@ -139,49 +138,40 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player, u
     }
     else
     {
-        InstancePlayerBind* pBind = player->GetBoundInstance(GetId(), player->GetDifficulty(GetEntry()));
-        InstanceSave* pSave = pBind ? pBind->save : nullptr;
+        Difficulty realdiff = player->GetDifficulty(IsRaid());
+        uint32 destInstId = sInstanceSaveMgr->PlayerGetDestinationInstanceId(player, GetId(), realdiff);
 
-        if (!pBind || !pBind->perm)
+        if (destInstId)
         {
-            if (loginInstanceId) // if the player has a saved instance id on login, we either use this instance or relocate him out (return null)
-            {
-                map = FindInstanceMap(loginInstanceId);
-                return (map && map->GetId() == GetId()) ? map : nullptr; // is this check necessary? or does MapInstanced only find instances of itself?
-            }
+            InstanceSave* pSave = sInstanceSaveMgr->GetInstanceSave(destInstId);
+            ASSERT(pSave); // pussywizard: must exist
 
-            InstanceGroupBind* groupBind = nullptr;
-            Group* group = player->GetGroup();
-            // use the player's difficulty setting (it may not be the same as the group's)
-            if (group)
-            {
-                groupBind = group->GetBoundInstance(this);
-                if (groupBind)
-                {
-                    // solo saves should be reset when entering a group's instance
-                    player->UnbindInstance(GetId(), player->GetDifficulty(GetEntry()));
-                    pSave = groupBind->save;
-                }
-            }
-        }
-        if (pSave)
-        {
-            // solo/perm/group
-            newInstanceId = pSave->GetInstanceId();
-            map = FindInstanceMap(newInstanceId);
-            // it is possible that the save exists but the map doesn't
+            map = FindInstanceMap(destInstId);
             if (!map)
-                map = CreateInstance(newInstanceId, pSave, pSave->GetDifficultyID());
+                map = CreateInstance(destInstId, pSave, realdiff);
+            else if (IsSharedDifficultyMap(mapId) && !map->HavePlayers() && map->GetDifficulty() != realdiff)
+            {
+                if (player->isBeingLoaded()) // pussywizard: crashfix (assert(passengers.empty) fail in ~transport), could be added to a transport during loading from db
+                    return nullptr;
+
+                if (!map->AllTransportsEmpty())
+                    map->AllTransportsRemovePassengers(); // pussywizard: gameobjects / summons (assert(passengers.empty) fail in ~transport)
+
+                for (InstancedMaps::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); ++i)
+                    if (i->first == destInstId)
+                    {
+                        DestroyInstance(i);
+                        map = CreateInstance(destInstId, pSave, realdiff);
+                        break;
+                    }
+            }
         }
         else
         {
             uint32 newInstanceId = sMapMgr->GenerateInstanceId();
-            Difficulty diff = player->GetGroup() ? player->GetGroup()->GetDifficultyID(GetEntry()) : player->GetDifficulty(GetEntry());
-            //Seems it is now possible, but I do not know if it should be allowed
-            //ASSERT(!FindInstanceMap(NewInstanceId));
-            map = FindInstanceMap(newInstanceId);
-            if (!map)
-                map = CreateInstance(newInstanceId, nullptr, diff);
+            ASSERT(!FindInstanceMap(newInstanceId)); // pussywizard: instance with new id can't exist
+            Difficulty diff = player->GetGroup() ? player->GetGroup()->GetDifficulty(IsRaid()) : player->GetDifficulty(IsRaid());
+            map = CreateInstance(newInstanceId, nullptr, diff);
         }
     }
 
@@ -218,8 +208,13 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave* save,
     map->LoadRespawnTimes();
     map->LoadCorpseData();
 
-    bool load_data = save != nullptr;
-    map->CreateInstanceData(load_data);
+    if (save)
+        map->CreateInstanceScript(true, save->GetInstanceData(), save->GetCompletedEncounterMask());
+    else
+        map->CreateInstanceScript(false, "", 0);
+
+    if (!save) // this is for sure a dungeon (assert above), no need to check here
+        sInstanceSaveMgr->AddInstanceSave(GetId(), InstanceId, difficulty);
 
     m_InstancedMaps[InstanceId] = map;
     return map;

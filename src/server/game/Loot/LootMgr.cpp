@@ -1439,20 +1439,25 @@ void LootTemplate::LootGroup::Process(Loot& loot, Player const* player, LootStor
         {
             // Plain entries (not a reference, not grouped)
             sScriptMgr->OnBeforeDropAddItem(player, loot, rate, lootMode, const_cast<LootStoreItem*>(item), store);
-            if (auto itemProto = sObjectMgr->GetItemTemplate(item->itemid)) {
-                if (itemProto->Quality >= ITEM_QUALITY_UNCOMMON && (itemProto->Class == ITEM_CLASS_ARMOR || itemProto->Class == ITEM_CLASS_WEAPON)) {
+            if (!loot.groupedGranted) {
+                if (auto itemProto = sObjectMgr->GetItemTemplate(item->itemid)) {
+                    if (itemProto->Quality >= ITEM_QUALITY_UNCOMMON && (itemProto->Class == ITEM_CLASS_ARMOR || itemProto->Class == ITEM_CLASS_WEAPON)) {
 
-                    auto guidlow = sObjectMgr->GetGenerator<HighGuid::Item>().Generate();
-                    guidlow += guidlow < 200000 ? 200000 : 0;
-                    itemProto = sObjectMgr->CreateItemTemplate(guidlow, item->itemid);
+                        auto guidlow = sObjectMgr->GetGenerator<HighGuid::Item>().Generate();
+                        guidlow += guidlow < 200000 ? 200000 : 0;
+                        itemProto = sObjectMgr->CreateItemTemplate(guidlow, item->itemid);
 
-                    CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
-                    sScriptMgr->GenerateItem(custom, player);
-                    itemProto = custom->_GetInfo();
-                    item->itemid = guidlow;
+                        CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
+                        sScriptMgr->GenerateItem(custom, player);
+                        itemProto = custom->_GetInfo();
+                        item->itemid = guidlow;
+
+                        loot.groupedGranted = true;
+                    }
                 }
+
+                loot.AddItem(*item); // Chance is already checked, just add
             }
-            loot.AddItem(*item); // Chance is already checked, just add
 
             // If we still have non-ref runs to do for this group AND this item wasn't a reference,
             // recursively call this function to produce more items for this group.

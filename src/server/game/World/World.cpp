@@ -1715,10 +1715,12 @@ void World::SetInitialWorldSettings()
     LOG_INFO("server.loading", "Loading Instance Template...");
     sObjectMgr->LoadInstanceTemplate();
 
+    LOG_INFO("server.loading", "Loading Instance Saved Gameobject State Data...");
+    sObjectMgr->LoadInstanceSavedGameobjectStateData();
+
     LOG_INFO("server.loading", "Loading Character Cache...");
     sCharacterCache->LoadCharacterCacheStorage();
 
-    // Must be called before `creature_respawn`/`gameobject_respawn` tables
     LOG_INFO("server.loading", "Loading Instances...");
     sInstanceSaveMgr->LoadInstances();
 

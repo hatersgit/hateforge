@@ -14346,9 +14346,9 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
                     group->UpdateLooterGuid(creature);
 
                 for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next()) {
+                    Player* player = itr->GetSource();
                     for (auto item : loot->items) {
                         InventoryResult msg;
-                        Player* player = itr->GetSource();
                         if (item.owner == player->GetGUID()) {
                             player->StoreLootItem(item.itemIndex, loot, msg);
                         }
@@ -14360,6 +14360,7 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
                     InventoryResult msg;
                     looter->StoreLootItem(item.itemIndex, loot, msg);
                 }
+                
             }
 
 

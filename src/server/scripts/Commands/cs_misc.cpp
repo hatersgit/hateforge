@@ -761,15 +761,13 @@ public:
                 }
 
                 // if the GM is bound to another instance, he will not be bound to another one
-                InstancePlayerBind* bind = _player->GetBoundInstance(targetPlayer->GetMapId(), targetPlayer->GetDifficulty(map->IsRaid()));
+                InstancePlayerBind* bind = sInstanceSaveMgr->PlayerGetBoundInstance(_player->GetGUID(), targetPlayer->GetMapId(), targetPlayer->GetDifficulty(map->IsRaid()));
                 if (!bind)
                 {
-                    Group* group = _player->GetGroup();
-                    // if no bind exists, create a solo bind
-                    InstanceGroupBind* gBind = group ? group->GetBoundInstance(_player) : nullptr;                // if no bind exists, create a solo bind
-                    if (!gBind)
-                        if (InstanceSave* save = sInstanceSaveMgr->GetInstanceSave(_player->GetInstanceId()))
-                            _player->BindToInstance(save, !save->CanReset());
+                    if (InstanceSave* save = sInstanceSaveMgr->GetInstanceSave(target->GetConnectedPlayer()->GetInstanceId()))
+                    {
+                        sInstanceSaveMgr->PlayerBindToInstance(_player->GetGUID(), save, !save->CanReset(), _player);
+                    }
                 }
 
                 if (map->IsRaid())
@@ -900,7 +898,7 @@ public:
 
                 if (destMap->Instanceable() && destMap->GetInstanceId() != map->GetInstanceId())
                 {
-                    targetPlayer->UnbindInstance(map->GetInstanceId(), targetPlayer->GetDungeonDifficulty(), true);
+                    sInstanceSaveMgr->PlayerUnbindInstance(target->GetGUID(), map->GetInstanceId(), targetPlayer->GetDungeonDifficulty(), true, targetPlayer);
                 }
 
                 // we are in an instance, and can only summon players in our group with us as leader

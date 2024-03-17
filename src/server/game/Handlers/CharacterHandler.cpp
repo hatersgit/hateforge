@@ -228,9 +228,9 @@ bool LoginQueryHolder::Initialize()
     stmt->SetData(0, GetGuid().GetCounter());
     res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_WORLDTIER, stmt);
 
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_INSTANCE);
-    stmt->SetData(0, lowGuid);
-    res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_BOUND_INSTANCES, stmt);
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_BOSS_LOOT_LOCKOUT);
+    stmt->SetData(0, GetGuid().GetCounter());
+    res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_BOSS_KILLS, stmt);
 
     return res;
 }

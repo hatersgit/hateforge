@@ -2388,6 +2388,7 @@ bool Player::IsInSameGroupWith(Player const* p) const
 }
 
 ///- If the player is invited, remove him. If the group if then only 1 person, disband the group.
+/// \todo Shouldn't we also check if there is no other invitees before disbanding the group?
 void Player::UninviteFromGroup()
 {
     Group* group = GetGroupInvite();
@@ -2396,17 +2397,14 @@ void Player::UninviteFromGroup()
 
     group->RemoveInvite(this);
 
-    if (group->IsCreated())
+    if (group->GetMembersCount() <= 1)                       // group has just 1 member => disband
     {
-        if (group->GetMembersCount() <= 1)                       // group has just 1 member => disband
+        if (group->IsCreated())
         {
             group->Disband(true);
             group = nullptr; // gets deleted in disband
         }
-    }
-    else
-    {
-        if (group->GetInviteeCount() <= 1)
+        else
         {
             group->RemoveAllInvites();
             delete group;
@@ -12119,6 +12117,15 @@ void Player::SendTransferAborted(uint32 mapid, TransferAbortReason reason, uint8
 
 void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time, bool onEnterMap)
 {
+    // pussywizard:
+    InstancePlayerBind* bind = sInstanceSaveMgr->PlayerGetBoundInstance(GetGUID(), mapid, difficulty);
+    if (bind && bind->extended)
+    {
+        if (!onEnterMap) // extended id player shouldn't be warned about lock expiration
+            return;
+        time += (bind->save->GetExtendedResetTime() - bind->save->GetResetTime()); // add lockout period to the time left
+    }
+
     // type of warning, based on the time remaining until reset
     uint32 type;
     if (onEnterMap)
@@ -12137,11 +12144,11 @@ void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint3
     data << uint32(mapid);
     data << uint32(difficulty);                             // difficulty
     data << uint32(time);
-    if (InstancePlayerBind const* bind = GetBoundInstance(mapid, difficulty))
-        data << uint8(bind && bind->perm);
-    else
-        data << uint8(false);
-    data << uint8(false);
+    if (type == RAID_INSTANCE_WELCOME)
+    {
+        data << uint8(bind && bind->perm);                  // is locked
+        data << uint8(bind && bind->extended);              // is extended, ignored if prev field is 0
+    }
     GetSession()->SendPacket(&data);
 }
 
@@ -13184,9 +13191,32 @@ bool Player::IsAtLootRewardDistance(WorldObject const* pRewardSource) const
         return false;
     }
 
-    if (HasPendingBind())
-    {
-        return false;
+    if (Creature const* cre = pRewardSource->ToCreature()) {
+        auto map = cre->GetMap();
+        DungeonEncounterList const* encounters;
+        if ((map->GetId() == 631 || map->GetId() == 724) && map->IsHeroic())
+            encounters = sObjectMgr->GetDungeonEncounterList(map->GetId(), !map->Is25ManRaid() ? RAID_DIFFICULTY_10MAN_NORMAL : RAID_DIFFICULTY_25MAN_NORMAL);
+        else
+            encounters = sObjectMgr->GetDungeonEncounterList(map->GetId(), map->GetDifficulty());
+
+        if (encounters) {
+            for (DungeonEncounterList::const_iterator itr = encounters->begin(); itr != encounters->end(); ++itr)
+            {
+                DungeonEncounter const* encounter = *itr;
+                if (encounter->creditType == EncounterCreditType::ENCOUNTER_CREDIT_KILL_CREATURE && encounter->creditEntry == cre->GetEntry())
+                {
+                    auto bossMask = (1 << encounter->dbcEntry->encounterIndex);
+                    auto foundmap = _encounterLockouts.find(map->GetId());
+                    if (foundmap != _encounterLockouts.end()) {
+                        auto founddiff = foundmap->second.find(map->GetDifficulty());
+                        if (founddiff != foundmap->second.end()) {
+                            if (founddiff->second->encountersCompleted & bossMask)
+                                return false;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     return pRewardSource->HasAllowedLooter(GetGUID());

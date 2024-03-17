@@ -336,7 +336,7 @@ public: /* PlayerScript */
     void OnPlayerSave(Player* player);
     void OnPlayerDelete(ObjectGuid guid, uint32 accountId);
     void OnPlayerFailedDelete(ObjectGuid guid, uint32 accountId);
-    void OnPlayerBindToInstance(Player* player, Difficulty difficulty, uint32 mapid, bool permanent, uint8 extendState);
+    void OnPlayerBindToInstance(Player* player, Difficulty difficulty, uint32 mapid, bool permanent);
     void OnPlayerUpdateZone(Player* player, uint32 newZone, uint32 newArea);
     void OnPlayerUpdateArea(Player* player, uint32 oldArea, uint32 newArea);
     bool OnBeforePlayerTeleport(Player* player, uint32 mapid, float x, float y, float z, float orientation, uint32 options, Unit* target);

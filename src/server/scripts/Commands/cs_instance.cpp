@@ -70,39 +70,19 @@ public:
 
         for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
         {
-            auto binds = player->GetBoundInstances(Difficulty(i));
-            if (binds != player->m_boundInstances.end())
+            for (auto const& [mapId, bind] : sInstanceSaveMgr->PlayerGetBoundInstances(player->GetGUID(), Difficulty(i)))
             {
-                for (auto itr = binds->second.begin(); itr != binds->second.end(); ++itr)
-                {
-                    InstanceSave* save = itr->second.save;
-                    std::string timeleft = secsToTimeString(save->GetResetTime() - time(nullptr));
-                    handler->PSendSysMessage(LANG_COMMAND_LIST_BIND_INFO, itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no", itr->second.extendState == EXTEND_STATE_EXPIRED ? "expired" : itr->second.extendState == EXTEND_STATE_EXTENDED ? "yes" : "no", save->GetDifficultyID(), save->CanReset() ? "yes" : "no", timeleft.c_str());
-                    counter++;
-                }
+                InstanceSave const* save = bind.save;
+                uint32 resetTime = bind.extended ? save->GetExtendedResetTime() : save->GetResetTime();
+                uint32 ttr = (resetTime >= GameTime::GetGameTime().count() ? resetTime - GameTime::GetGameTime().count() : 0);
+                std::string timeleft = secsToTimeString(ttr);
+                handler->PSendSysMessage("map: %d, inst: %d, perm: %s, diff: %d, canReset: %s, TTR: %s%s",
+                    mapId, save->GetInstanceId(), bind.perm ? "yes" : "no", save->GetDifficulty(), save->CanReset() ? "yes" : "no", timeleft.c_str(), (bind.extended ? " (extended)" : ""));
+                counter++;
             }
         }
-        handler->PSendSysMessage(LANG_COMMAND_LIST_BIND_PLAYER_BINDS, counter);
 
-        counter = 0;
-        if (Group* group = player->GetGroup())
-        {
-            for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
-            {
-                auto binds = group->GetBoundInstances(Difficulty(i));
-                if (binds != group->GetBoundInstanceEnd())
-                {
-                    for (auto itr = binds->second.begin(); itr != binds->second.end(); ++itr)
-                    {
-                        InstanceSave* save = itr->second.save;
-                        std::string timeleft = secsToTimeString(save->GetResetTime() - time(nullptr));
-                        handler->PSendSysMessage(LANG_COMMAND_LIST_BIND_INFO, itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no", "-", save->GetDifficultyID(), save->CanReset() ? "yes" : "no", timeleft.c_str());
-                        counter++;
-                    }
-                }
-            }
-        }
-        handler->PSendSysMessage(LANG_COMMAND_LIST_BIND_GROUP_BINDS, counter);
+        handler->PSendSysMessage("player binds: %d", counter);
 
         return true;
     }
@@ -125,23 +105,22 @@ public:
 
         for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
         {
-            auto binds = player->GetBoundInstances(Difficulty(i));
-            if (binds != player->m_boundInstances.end())
+            BoundInstancesMap const& m_boundInstances = sInstanceSaveMgr->PlayerGetBoundInstances(player->GetGUID(), Difficulty(i));
+            for (BoundInstancesMap::const_iterator itr = m_boundInstances.begin(); itr != m_boundInstances.end();)
             {
-                for (auto itr = binds->second.begin(); itr != binds->second.end();)
+                InstanceSave const* save = itr->second.save;
+                if (itr->first != player->GetMapId() && (!mapId || mapId == itr->first) && (!difficultyArg || difficultyArg == save->GetDifficulty()))
                 {
-                    InstanceSave const* save = itr->second.save;
-                    if (itr->first != player->GetMapId() && (!mapId || mapId == itr->first) && (!difficultyArg || difficultyArg == save->GetDifficultyID()))
-                    {
-                        std::string timeleft = secsToTimeString(save->GetResetTime() - time(nullptr));
-                        handler->PSendSysMessage(LANG_COMMAND_INST_UNBIND_UNBINDING, itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no", save->GetDifficultyID(), save->CanReset() ? "yes" : "no", timeleft.c_str());
-                        player->UnbindInstance(itr, binds);
-                        counter++;
-                    }
-                    else
-                        ++itr;
-
+                    uint32 resetTime = itr->second.extended ? save->GetExtendedResetTime() : save->GetResetTime();
+                    uint32 ttr = (resetTime >= GameTime::GetGameTime().count() ? resetTime - GameTime::GetGameTime().count() : 0);
+                    std::string timeleft = secsToTimeString(ttr);
+                    handler->PSendSysMessage("unbinding map: %d, inst: %d, perm: %s, diff: %d, canReset: %s, TTR: %s%s", itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no", save->GetDifficulty(), save->CanReset() ? "yes" : "no", timeleft.c_str(), (itr->second.extended ? " (extended)" : ""));
+                    sInstanceSaveMgr->PlayerUnbindInstance(player->GetGUID(), itr->first, Difficulty(i), true, player);
+                    itr = m_boundInstances.begin();
+                    counter++;
                 }
+                else
+                    ++itr;
             }
         }
 
@@ -170,13 +149,15 @@ public:
         Map* map = player->GetMap();
         if (!map->IsDungeon())
         {
-            handler->SendErrorMessage("Map is not a dungeon.");
+            handler->PSendSysMessage("Map is not a dungeon.");
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
         if (!map->ToInstanceMap()->GetInstanceScript())
         {
-            handler->SendErrorMessage("Map has no instance data.");
+            handler->PSendSysMessage("Map has no instance data.");
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
@@ -190,7 +171,8 @@ public:
         // Character name must be provided when using this from console.
         if (!player && !handler->GetSession())
         {
-            handler->SendErrorMessage(LANG_CMD_SYNTAX);
+            handler->PSendSysMessage(LANG_CMD_SYNTAX);
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
@@ -199,27 +181,31 @@ public:
 
         if (!player->IsConnected())
         {
-            handler->SendErrorMessage(LANG_PLAYER_NOT_FOUND);
+            handler->PSendSysMessage(LANG_PLAYER_NOT_FOUND);
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
         InstanceMap* map = player->GetConnectedPlayer()->GetMap()->ToInstanceMap();
         if (!map)
         {
-            handler->SendErrorMessage(LANG_NOT_DUNGEON);
+            handler->PSendSysMessage(LANG_NOT_DUNGEON);
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
         if (!map->GetInstanceScript())
         {
-            handler->SendErrorMessage(LANG_NO_INSTANCE_DATA);
+            handler->PSendSysMessage(LANG_NO_INSTANCE_DATA);
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
         // Reject improper values.
         if (encounterId > map->GetInstanceScript()->GetEncounterCount())
         {
-            handler->SendErrorMessage(LANG_BAD_VALUE);
+            handler->PSendSysMessage(LANG_BAD_VALUE);
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
@@ -234,7 +220,8 @@ public:
         // Character name must be provided when using this from console.
         if (!player && !handler->GetSession())
         {
-            handler->SendErrorMessage(LANG_CMD_SYNTAX);
+            handler->PSendSysMessage(LANG_CMD_SYNTAX);
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
@@ -243,26 +230,30 @@ public:
 
         if (!player->IsConnected())
         {
-            handler->SendErrorMessage(LANG_PLAYER_NOT_FOUND);
+            handler->PSendSysMessage(LANG_PLAYER_NOT_FOUND);
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
         InstanceMap* map = player->GetConnectedPlayer()->GetMap()->ToInstanceMap();
         if (!map)
         {
-            handler->SendErrorMessage(LANG_NOT_DUNGEON);
+            handler->PSendSysMessage(LANG_NOT_DUNGEON);
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
         if (!map->GetInstanceScript())
         {
-            handler->SendErrorMessage(LANG_NO_INSTANCE_DATA);
+            handler->PSendSysMessage(LANG_NO_INSTANCE_DATA);
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
         if (encounterId > map->GetInstanceScript()->GetEncounterCount())
         {
-            handler->SendErrorMessage(LANG_BAD_VALUE);
+            handler->PSendSysMessage(LANG_BAD_VALUE);
+            handler->SetSentErrorMessage(true);
             return false;
         }
 

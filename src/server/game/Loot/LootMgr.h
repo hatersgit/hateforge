@@ -328,12 +328,14 @@ struct Loot
     ObjectGuid lootOwnerGUID;
     LootType loot_type{LOOT_NONE};      // required for achievement system
 
+    bool groupedGranted;
+
     // GUID of container that holds this loot (item_instance.entry), set for items that can be looted
     ObjectGuid containerGUID;
     ObjectGuid sourceWorldObjectGUID;
     GameObject* sourceGameObject{nullptr};
 
-    Loot(uint32 _gold = 0) : gold(_gold) { }
+    Loot(uint32 _gold = 0) : gold(_gold), groupedGranted(false) { }
     ~Loot() { clear(); }
 
     // if loot becomes invalid this reference is used to inform the listener

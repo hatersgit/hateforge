@@ -1992,7 +1992,7 @@ public:
             }
         }
         if (needNew) {
-            BossLootLockout* lockout = new BossLootLockout(map, diff, encounterMask, GameTime::GetGameTime().count() + DAY);
+            BossLootLockout* lockout = new BossLootLockout(map, diff, encounterMask, GameTime::GetGameTime().count() + DAY*3);
             _encounterLockouts[map][diff] = lockout;
         }
 

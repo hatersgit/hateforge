@@ -8987,6 +8987,8 @@ namespace Acore
                         return false;
                     if (_caster->GetGUID() != unitTarget->GetOwnerGUID())
                         return false;
+                    if (_caster->GetGUID() == unitTarget->GetGUID())
+                        return false;
                     break;
                 default:
                     break;

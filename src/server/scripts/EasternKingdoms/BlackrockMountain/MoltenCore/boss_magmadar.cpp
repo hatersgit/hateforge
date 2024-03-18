@@ -73,13 +73,13 @@ public:
                 {
                     Talk(EMOTE_FRENZY);
                     DoCastSelf(SPELL_FRENZY);
-                    events.RepeatEvent(urand(15000, 20000) * ((10 - me->GetWorldTier()) / 10));
+                    events.RepeatEvent(CalculatePct(urand(15000, 20000), (10 - me->GetWorldTier()) * 10));
                     break;
                 }
                 case EVENT_PANIC:
                 {
                     DoCastVictim(SPELL_PANIC);
-                    events.RepeatEvent(urand(31000, 38000) * ((10 - me->GetWorldTier()) / 10));
+                    events.RepeatEvent(CalculatePct(urand(15000, 20000), (10 - me->GetWorldTier()) * 10));
                     break;
                 }
                 case EVENT_LAVA_BOMB:
@@ -88,8 +88,7 @@ public:
                     {
                         DoCast(target, SPELL_LAVA_BOMB);
                     }
-
-                    events.RepeatEvent(urand(12000, 15000) * ((10 - me->GetWorldTier()) / 10));
+                    events.RepeatEvent(CalculatePct(urand(12000, 15000), (10 - me->GetWorldTier()) * 10));
                     break;
                 }
                 case EVENT_LAVA_BOMB_RANGED:
@@ -104,7 +103,7 @@ public:
                     {
                         DoCast(targets.front() , SPELL_LAVA_BOMB_RANGED);
                     }
-                    events.RepeatEvent(urand(12000, 15000) * ((10 - me->GetWorldTier()) / 10));
+                    events.RepeatEvent(CalculatePct(urand(12000, 15000), (10 - me->GetWorldTier()) * 10));
                     break;
                 }
             }

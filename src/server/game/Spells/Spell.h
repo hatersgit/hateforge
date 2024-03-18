@@ -556,7 +556,7 @@ public:
 
     void AddComboPointGain(Unit* target, int8 amount)
     {
-        if (target != m_comboTarget)
+        if (target != m_caster->GetComboTarget())
         {
             m_comboTarget = target;
             m_comboPointGain = amount;

@@ -4268,7 +4268,7 @@ void Spell::_handle_finish_phase()
     }
 
     // Real add combo points from effects
-    if (m_comboTarget && m_comboPointGain)
+    if (m_caster->GetComboTarget() && m_comboPointGain)
     {
         // remove Premed-like effects unless they were caused by ourselves
         // (this Aura removes the already-added CP when it expires from duration - now that we've added CP, this shouldn't happen anymore!)
@@ -4277,7 +4277,7 @@ void Spell::_handle_finish_phase()
             m_caster->RemoveAurasByType(SPELL_AURA_RETAIN_COMBO_POINTS);
         }
 
-        m_caster->AddComboPoints(m_comboTarget, m_comboPointGain);
+        m_caster->AddComboPoints(m_caster->GetComboTarget(), m_comboPointGain);
     }
 
     if (m_caster->m_extraAttacks && GetSpellInfo()->HasEffect(SPELL_EFFECT_ADD_EXTRA_ATTACKS))

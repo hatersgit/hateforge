@@ -1038,7 +1038,7 @@ void Player::setDeathState(DeathState s, bool /*despawn = false*/)
         // drunken state is cleared on death
         SetDrunkValue(0);
         // lost combo points at any target (targeted combo points clear in Unit::setDeathState)
-        ClearComboPoints(false);
+        ClearComboPoints(true);
 
         clearResurrectRequestData();
 
@@ -1717,7 +1717,7 @@ void Player::RemoveFromWorld()
         StopCastingCharm();
         StopCastingBindSight();
         UnsummonPetTemporaryIfAny();
-        ClearComboPoints(); // pussywizard: crashfix
+        ClearComboPoints(true); // pussywizard: crashfix
         ClearComboPointHolders(); // pussywizard: crashfix
         if (ObjectGuid lguid = GetLootGUID()) // pussywizard: crashfix
             m_session->DoLootRelease(lguid);
@@ -1789,8 +1789,6 @@ void Player::RegenerateAll()
     {
         if (!IsInCombat())
             AddComboPoints(-1);
-
-        m_ComboPointDegenTimer -= 10000;
     }
 
     if (m_regenTimerCount >= 2000)
@@ -13193,25 +13191,27 @@ bool Player::IsAtLootRewardDistance(WorldObject const* pRewardSource) const
 
     if (Creature const* cre = pRewardSource->ToCreature()) {
         auto map = cre->GetMap();
-        DungeonEncounterList const* encounters;
-        if ((map->GetId() == 631 || map->GetId() == 724) && map->IsHeroic())
-            encounters = sObjectMgr->GetDungeonEncounterList(map->GetId(), !map->Is25ManRaid() ? RAID_DIFFICULTY_10MAN_NORMAL : RAID_DIFFICULTY_25MAN_NORMAL);
-        else
-            encounters = sObjectMgr->GetDungeonEncounterList(map->GetId(), map->GetDifficulty());
+        if (map->IsRaid()) {
+            DungeonEncounterList const* encounters;
+            if ((map->GetId() == 631 || map->GetId() == 724) && map->IsHeroic())
+                encounters = sObjectMgr->GetDungeonEncounterList(map->GetId(), !map->Is25ManRaid() ? RAID_DIFFICULTY_10MAN_NORMAL : RAID_DIFFICULTY_25MAN_NORMAL);
+            else
+                encounters = sObjectMgr->GetDungeonEncounterList(map->GetId(), map->GetDifficulty());
 
-        if (encounters) {
-            for (DungeonEncounterList::const_iterator itr = encounters->begin(); itr != encounters->end(); ++itr)
-            {
-                DungeonEncounter const* encounter = *itr;
-                if (encounter->creditType == EncounterCreditType::ENCOUNTER_CREDIT_KILL_CREATURE && encounter->creditEntry == cre->GetEntry())
+            if (encounters) {
+                for (DungeonEncounterList::const_iterator itr = encounters->begin(); itr != encounters->end(); ++itr)
                 {
-                    auto bossMask = (1 << encounter->dbcEntry->encounterIndex);
-                    auto foundmap = _encounterLockouts.find(map->GetId());
-                    if (foundmap != _encounterLockouts.end()) {
-                        auto founddiff = foundmap->second.find(map->GetDifficulty());
-                        if (founddiff != foundmap->second.end()) {
-                            if (founddiff->second->encountersCompleted & bossMask)
-                                return false;
+                    DungeonEncounter const* encounter = *itr;
+                    if (encounter->creditType == EncounterCreditType::ENCOUNTER_CREDIT_KILL_CREATURE && encounter->creditEntry == cre->GetEntry())
+                    {
+                        auto bossMask = (1 << encounter->dbcEntry->encounterIndex);
+                        auto foundmap = _encounterLockouts.find(map->GetId());
+                        if (foundmap != _encounterLockouts.end()) {
+                            auto founddiff = foundmap->second.find(map->GetDifficulty());
+                            if (founddiff != foundmap->second.end()) {
+                                if (founddiff->second->encountersCompleted & bossMask)
+                                    return false;
+                            }
                         }
                     }
                 }

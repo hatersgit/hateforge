@@ -2730,8 +2730,6 @@ void GameObject::SetLootRecipient(Map* map)
                 continue;
             }
 
-            //if (groupMember)
-
             if (!m_lootRecipient)
             {
                 m_lootRecipient = groupMember->GetGUID();

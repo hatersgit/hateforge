@@ -2168,7 +2168,7 @@ void Group::ResetMaxEnchantingLevel()
 
 void Group::SetLootMethod(LootMethod method)
 {
-    m_lootMethod = method;
+    m_lootMethod = FREE_FOR_ALL;
 }
 
 void Group::SetLooterGuid(ObjectGuid guid)

@@ -299,17 +299,15 @@ bool CreatureAI::UpdateVictim()
     {
         if (Unit* victim = me->SelectVictim())
             AttackStart(victim);
-        return me->GetVictim();
+
+        return me->GetVictim() != nullptr;
     }
-    // xinef: if we have any victim, just return true
-    else if (me->GetVictim() && me->GetExactDist(me->GetVictim()) < 30.0f)
-        return true;
     else if (!me->IsInCombat())
     {
         EnterEvadeMode();
         return false;
     }
-    else
+    else if (me->GetVictim())
         me->AttackStop();
 
     return true;

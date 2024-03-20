@@ -15,6 +15,11 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+enum AreaScriptUpdateIntervals {
+    AREA_SCRIPT_UPDATE = 1000,
+    AREA_SCRIPT_HOT_SPOT_TIMER = 360000,
+};
+
 #include "AreaScript.h"
 #include "AreaScriptMgr.h"
 #include "Player.h"
@@ -23,11 +28,13 @@
 AreaScriptMgr::AreaScriptMgr()
 {
     m_UpdateTimer = 0;
+    FillNewHotSpots();
 }
 
 AreaScriptMgr::~AreaScriptMgr()
 {
     _scriptMap.clear();
+    _hotSpots.clear();
 }
 
 AreaScriptMgr* AreaScriptMgr::instance()
@@ -44,12 +51,18 @@ void AreaScriptMgr::AddZone(uint32 zoneid, AreaScript* handle)
 void AreaScriptMgr::Update(uint32 diff)
 {
     m_UpdateTimer += diff;
-    if (m_UpdateTimer > BATTLEFIELD_OBJECTIVE_UPDATE_INTERVAL)
+    if (m_UpdateTimer > AREA_SCRIPT_UPDATE)
     {
         for (auto script : _scriptMap)
             script.second->Update(m_UpdateTimer);
         m_UpdateTimer = 0;
     }
+    m_hotSpotTimer += diff;
+    if (m_hotSpotTimer > AREA_SCRIPT_HOT_SPOT_TIMER || _hotSpots.empty()) {
+        _hotSpots.clear();
+        FillNewHotSpots();
+    }
+
 }
 
 void AreaScriptMgr::HandlePlayerEnterZone(Player* player, uint32 zoneid)

@@ -6760,7 +6760,9 @@ void ObjectMgr::LoadAreaScripts()
         uint8 goal = fields[2].Get<uint8>();
         uint32 boss = fields[3].Get<uint32>();
 
-        AreaScript* script = new AreaScript(zone, area, goal, boss);
+        uint32 parentZone = sAreaScriptMgr->GetParentZone(area);
+
+        AreaScript* script = new AreaScript(zone, parentZone, area, goal, boss);
         sAreaScriptMgr->AddZone(area, script);
     } while (result->NextRow());
 

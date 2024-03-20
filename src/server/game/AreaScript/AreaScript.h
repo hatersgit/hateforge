@@ -30,8 +30,8 @@ class AreaScript : public ZoneScript
 {
     friend class AreaScriptMgr;
 public:
-    AreaScript(uint32 map, uint32 zone, uint8 goal, uint32 boss)
-        : progress(0.f), goal(goal), boss(boss), _zone(zone) {
+    AreaScript(uint32 map, uint32 parentZone, uint32 zone, uint8 goal, uint32 boss)
+        : progress(0.f), goal(goal), boss(boss), _zone(zone), _parentZone(parentZone) {
 
         _map = sMapMgr->FindBaseMap(map);
         _players.clear();
@@ -85,6 +85,7 @@ private:
     Map* _map{};
     uint32 _zone{};
     bool _bossActive{false};
+    uint32 _parentZone{};
 
     uint32 boss = 0;
 };

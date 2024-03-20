@@ -26,14 +26,28 @@
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
 
+enum AreaScriptAuras {
+    CHAMPION    = 62320,
+    FANATIC     = 2,
+    GHOSTLY     = 3,
+    EMPOWERED   = 4,
+    BERSERKER   = 5,
+    POSSESSED   = 6,
+
+    HOTSPOT_XP  = 1000000,
+};
+
 void AreaScript::OnPlayerEnter(Player* player)
 {
-    player->CastSpell(player, 7393, true);
+    if (sAreaScriptMgr->IsHotSpot(_parentZone, _zone)) {
+        player->AddAura(HOTSPOT_XP, player);
+    }
 }
 
 void AreaScript::OnPlayerExit(Player* player)
 {
-    
+    if (player->HasAura(HOTSPOT_XP))
+        player->RemoveAura(HOTSPOT_XP);
 }
 
 void AreaScript::HandlePlayerEnterZone(Player* player, uint32 /*zone*/)
@@ -61,7 +75,9 @@ bool AreaScript::HasPlayer(Player const* player) const
 
 void AreaScript::OnCreatureCreate(Creature* creature)
 {
-    
+    if (roll_chance_f(100.f)) {
+        creature->AddAura(CHAMPION, creature);
+    }
 }
 
 void AreaScript::OnCreatureRemove(Creature* creature)

@@ -26,17 +26,6 @@
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
 
-enum AreaScriptAuras {
-    CHAMPION    = 62320,
-    FANATIC     = 2,
-    GHOSTLY     = 3,
-    EMPOWERED   = 4,
-    BERSERKER   = 5,
-    POSSESSED   = 6,
-
-    HOTSPOT_XP  = 1000000,
-};
-
 void AreaScript::OnPlayerEnter(Player* player)
 {
     if (sAreaScriptMgr->IsHotSpot(_parentZone, _zone)) {
@@ -75,8 +64,18 @@ bool AreaScript::HasPlayer(Player const* player) const
 
 void AreaScript::OnCreatureCreate(Creature* creature)
 {
-    if (roll_chance_f(100.f)) {
-        creature->AddAura(CHAMPION, creature);
+
+}
+
+void AreaScript::OnCreatureRespawn(Creature* creature)
+{
+    if ((roll_chance_f(10.f) && creature->GetWorldTier() > WORLD_TIER_1) || creature->GetCreatureTemplate()->rank == CREATURE_ELITE_RAREELITE) {
+        creature->CastSpell(creature, CHAMPION, true);
+        std::random_device rd; // obtain a random number from hardware
+        std::mt19937 gen(rd()); // seed the generator
+        std::uniform_int_distribution<> hotspotRng(0, _mobAffixes.size()-1);
+        auto affix = _mobAffixes[hotspotRng(gen)];
+        creature->CastSpell(creature, affix, true);
     }
 }
 

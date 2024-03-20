@@ -16,6 +16,8 @@
  */
 
 #include "Creature.h"
+#include "AreaScript.h"
+#include "AreaScriptMgr.h"
 #include "BattlegroundMgr.h"
 #include "CellImpl.h"
 #include "Common.h"
@@ -684,6 +686,8 @@ void Creature::Update(uint32 diff)
             if (m_respawnTime <= now)
             {
                 Respawn();
+                if (AreaScript* as = sAreaScriptMgr->GetAreaScript(GetAreaId()))
+                    as->OnCreatureRespawn(this);
             }
             break;
         }

@@ -26,6 +26,17 @@
 
 class GameObject;
 
+enum AreaScriptAuras {
+    CHAMPION    = 9000010,
+    EMPOWERED   = 9000011,
+    GHOSTLY     = 9000012,
+    FANATIC     = 9000013,
+    BERSERKER   = 9000014,
+    POSSESSED   = 9000015,
+
+    HOTSPOT_XP = 1000000,
+};
+
 class AreaScript : public ZoneScript
 {
     friend class AreaScriptMgr;
@@ -47,6 +58,8 @@ public:
 
     void OnCreatureCreate(Creature* creature) override;
     void OnCreatureRemove(Creature* creature) override;
+
+    void OnCreatureRespawn(Creature* creature) override;
 
     virtual void HandleKill(Player* /*killer*/, Unit* /*killed*/);
 
@@ -88,6 +101,8 @@ private:
     uint32 _parentZone{};
 
     uint32 boss = 0;
+
+    std::vector<uint32> _mobAffixes = {EMPOWERED, GHOSTLY, FANATIC, BERSERKER, POSSESSED};
 };
 
 #endif

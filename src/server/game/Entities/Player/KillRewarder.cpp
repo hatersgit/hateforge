@@ -146,6 +146,9 @@ void KillRewarder::_RewardHonor(Player* player)
 void KillRewarder::_RewardXP(Player* player, float rate)
 {
     uint32 xp(_xp);
+    if (_victim->HasAura(9000010))
+        xp *= 3;
+
     if (_group)
     {
         // 4.2.1. If player is in group, adjust XP:

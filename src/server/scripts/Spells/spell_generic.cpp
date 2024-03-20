@@ -5198,8 +5198,81 @@ class spell_gen_choking_vines : public AuraScript
     }
 };
 
+class spell_affix_champion : public AuraScript
+{
+    PrepareAuraScript(spell_affix_champion);
+
+    void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        Unit* target = GetTarget();
+        int32 bp0 = target->CountPctFromMaxHealth(aurEff->GetAmount());
+        target->CastCustomSpell(target, 9000009, &bp0, nullptr, nullptr, true, nullptr, aurEff);
+    }
+
+    void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        GetTarget()->RemoveAurasDueToSpell(9000009);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(spell_affix_champion::AfterApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
+        AfterEffectRemove += AuraEffectRemoveFn(spell_affix_champion::AfterRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
+    }
+};
+class spell_affix_berserk : public AuraScript
+{
+    PrepareAuraScript(spell_affix_berserk);
+
+    void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        Unit* target = GetTarget();
+        int32 bp0 = target->CountPctFromMaxHealth(aurEff->GetAmount());
+        target->CastCustomSpell(target, 9000016, &bp0, nullptr, nullptr, true, nullptr, aurEff);
+    }
+
+    void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        GetTarget()->RemoveAurasDueToSpell(9000016);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(spell_affix_berserk::AfterApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
+        AfterEffectRemove += AuraEffectRemoveFn(spell_affix_berserk::AfterRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
+    }
+};
+class spell_affix_possessed : public AuraScript
+{
+    PrepareAuraScript(spell_affix_possessed);
+
+    void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        Unit* target = GetTarget();
+        int32 bp0 = target->CountPctFromMaxHealth(aurEff->GetAmount());
+        target->CastCustomSpell(target, 9000017, &bp0, nullptr, nullptr, true, nullptr, aurEff);
+    }
+
+    void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        GetTarget()->RemoveAurasDueToSpell(9000017);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(spell_affix_possessed::AfterApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
+        AfterEffectRemove += AuraEffectRemoveFn(spell_affix_possessed::AfterRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
+    // hater:
+    RegisterSpellScript(spell_affix_champion);
+    RegisterSpellScript(spell_affix_berserk);
+    RegisterSpellScript(spell_affix_possessed);
+
+    // base game
     RegisterSpellScript(spell_silithyst);
     RegisterSpellScript(spell_gen_5000_gold);
     RegisterSpellScript(spell_gen_model_visible);

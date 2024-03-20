@@ -36,6 +36,8 @@ public:
     virtual void OnCreatureCreate(Creature*) { }
     virtual void OnCreatureRemove(Creature*) { }
 
+    virtual void OnCreatureRespawn(Creature*) {}
+
     virtual void OnGameObjectCreate(GameObject*) { }
     virtual void OnGameObjectRemove(GameObject*) { }
 

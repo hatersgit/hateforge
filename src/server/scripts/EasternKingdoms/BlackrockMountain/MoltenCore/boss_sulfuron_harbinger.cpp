@@ -72,7 +72,7 @@ public:
                 case EVENT_DEMORALIZING_SHOUT:
                 {
                     DoCastVictim(SPELL_DEMORALIZING_SHOUT);
-                    events.RepeatEvent(urand(12000, 18000) * ((10 - me->GetWorldTier()) / 10));
+                    events.RepeatEvent(CalculatePct(urand(12000, 18000), (10 - me->GetWorldTier()) * 10));
                     break;
                 }
                 case EVENT_INSPIRE:
@@ -96,7 +96,7 @@ public:
                 case EVENT_FLAMESPEAR:
                 {
                     DoCastRandomTarget(SPELL_FLAMESPEAR);
-                    events.RepeatEvent(urand(12000, 16000) * ((10 - me->GetWorldTier()) / 10));
+                    events.RepeatEvent(CalculatePct(urand(12000, 16000), (10 - me->GetWorldTier()) * 10));
                     break;
                 }
             }
@@ -157,7 +157,7 @@ public:
                     case EVENT_DARK_STRIKE:
                     {
                         DoCastVictim(SPELL_DARK_STRIKE);
-                        events.RepeatEvent(urand(4000, 7000) * ((10 - me->GetWorldTier()) / 10));
+                        events.RepeatEvent(CalculatePct(urand(4000, 7000), (10 - me->GetWorldTier()) * 10));
                         break;
                     }
                     case EVENT_DARK_MENDING:
@@ -169,7 +169,7 @@ public:
                                 DoCast(target, SPELL_DARK_MENDING);
                             }
                         }
-                        events.RepeatEvent(urand(15000, 20000) * ((10 - me->GetWorldTier()) / 10));
+                        events.RepeatEvent(CalculatePct(urand(15000, 20000), (10 - me->GetWorldTier()) * 10));
                         break;
                     }
                     case EVENT_SHADOW_WORD_PAIN:
@@ -178,7 +178,7 @@ public:
                         {
                             DoCast(target, SPELL_SHADOW_WORD_PAIN);
                         }
-                        events.RepeatEvent(urand(2500, 5000) * ((10 - me->GetWorldTier()) / 10));
+                        events.RepeatEvent(CalculatePct(urand(2500, 5000), (10 - me->GetWorldTier()) * 10));
                         break;
                     }
                     case EVENT_IMMOLATE:
@@ -187,7 +187,7 @@ public:
                         {
                             DoCast(target, SPELL_IMMOLATE);
                         }
-                        events.RepeatEvent(urand(5000, 7000) * ((10 - me->GetWorldTier()) / 10));
+                        events.RepeatEvent(CalculatePct(urand(5000, 7000), (10 - me->GetWorldTier()) * 10));
                         break;
                     }
                 }

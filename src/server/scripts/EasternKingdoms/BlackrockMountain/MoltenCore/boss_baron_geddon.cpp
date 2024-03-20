@@ -91,7 +91,7 @@ public:
                 case EVENT_INFERNO:
                 {
                     DoCastAOE(SPELL_INFERNO);
-                    events.RepeatEvent(urand(21000, 26000) * ((10 - me->GetWorldTier()) / 10));
+                    events.RepeatEvent(CalculatePct(urand(21000, 26000), (10 - me->GetWorldTier()) * 10));
                     break;
                 }
                 case EVENT_IGNITE_MANA:
@@ -101,7 +101,7 @@ public:
                         DoCast(target, SPELL_IGNITE_MANA);
                     }
 
-                    events.RepeatEvent(urand(27000, 32000) * ((10 - me->GetWorldTier()) / 10));
+                    events.RepeatEvent(CalculatePct(urand(27000, 32000), (10 - me->GetWorldTier()) * 10));
                     break;
                 }
                 case EVENT_LIVING_BOMB:

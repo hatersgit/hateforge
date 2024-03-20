@@ -350,7 +350,7 @@ public:
                         {
                             Talk(SAY_WRATH);
                         }
-                        events.RepeatEvent(25000 * ((10 - me->GetWorldTier()) / 10));
+                        events.RepeatEvent(CalculatePct(25000, (10 - me->GetWorldTier()) * 10));
                         break;
                     }
                     case EVENT_HAND_OF_RAGNAROS:
@@ -362,7 +362,7 @@ public:
                             _isKnockbackEmoteAllowed = false;
                             extraEvents.RescheduleEvent(EVENT_RESET_KNOCKBACK_EMOTE, 5s);
                         }
-                        events.RepeatEvent(20000 * ((10 - me->GetWorldTier()) / 10));
+                        events.RepeatEvent(CalculatePct(20000, (10 - me->GetWorldTier()) * 10));
                         break;
                     }
                     case EVENT_LAVA_BURST:

@@ -82,13 +82,13 @@ public:
                 case EVENT_MAGIC_GROUNDING:
                 {
                     DoCastSelf(SPELL_MAGIC_GROUNDING);
-                    events.RepeatEvent(urand(7000, 9000) * ((10 - me->GetWorldTier()) / 10));
+                    events.RepeatEvent(CalculatePct(urand(7000, 9000), (10 - me->GetWorldTier()) * 10));
                     break;
                 }
                 case EVENT_COUNTERSPELL:
                 {
                     DoCastAOE(SPELL_COUNTERSPELL);
-                    events.RepeatEvent(urand(15000, 18000) * ((10 - me->GetWorldTier()) / 10));
+                    events.RepeatEvent(CalculatePct(urand(15000, 18000), (10 - me->GetWorldTier()) * 10));
                     break;
                 }
                 case EVENT_SHAZZRAH_GATE:

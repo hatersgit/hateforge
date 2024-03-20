@@ -15,16 +15,14 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "AreaTriggerScript.h"
 #include "CreatureAI.h"
 #include "EventMap.h"
-#include "InstanceMapScript.h"
 #include "InstanceScript.h"
 #include "Player.h"
+#include "ScriptMgr.h"
 #include "SpellScript.h"
-#include "SpellScriptLoader.h"
-#include "Unit.h"
 #include "sunken_temple.h"
+#include "Unit.h"
 
 class instance_sunken_temple : public InstanceMapScript
 {
@@ -49,13 +47,13 @@ public:
         {
             switch (creature->GetEntry())
             {
-                case NPC_JAMMAL_AN_THE_PROPHET:
-                    _jammalanGUID = creature->GetGUID();
-                    break;
-                case NPC_SHADE_OF_ERANIKUS:
-                    _shadeOfEranikusGUID = creature->GetGUID();
-                    creature->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
-                    break;
+            case NPC_JAMMAL_AN_THE_PROPHET:
+                _jammalanGUID = creature->GetGUID();
+                break;
+            case NPC_SHADE_OF_ERANIKUS:
+                _shadeOfEranikusGUID = creature->GetGUID();
+                creature->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+                break;
             }
 
             if (creature->IsAlive() && creature->GetSpawnId() && creature->GetCreatureType() == CREATURE_TYPE_DRAGONKIN && creature->GetEntry() != NPC_SHADE_OF_ERANIKUS)
@@ -78,30 +76,30 @@ public:
         {
             switch (gameobject->GetEntry())
             {
-                case GO_ATALAI_STATUE1:
-                case GO_ATALAI_STATUE2:
-                case GO_ATALAI_STATUE3:
-                case GO_ATALAI_STATUE4:
-                case GO_ATALAI_STATUE5:
-                case GO_ATALAI_STATUE6:
-                    if (gameobject->GetEntry() < GO_ATALAI_STATUE1 + _statuePhase)
-                    {
-                        instance->SummonGameObject(GO_ATALAI_LIGHT2, gameobject->GetPositionX(), gameobject->GetPositionY(), gameobject->GetPositionZ(), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-                        gameobject->ReplaceAllGameObjectFlags(GO_FLAG_NOT_SELECTABLE);
-                    }
-                    break;
-                case GO_ATALAI_IDOL:
-                    if (_statuePhase == MAX_STATUE_PHASE)
-                        gameobject->SummonGameObject(GO_IDOL_OF_HAKKAR, -480.08f, 94.29f, -189.72f, 1.571f, 0.0f, 0.0f, 0.0f, 0.0f, 0);
-                    break;
-                case GO_IDOL_OF_HAKKAR:
-                    if (_encounters[TYPE_ATAL_ALARION] == DONE)
-                        gameobject->RemoveGameObjectFlag(GO_FLAG_NOT_SELECTABLE);
-                    break;
-                case GO_FORCEFIELD:
-                    _forcefieldGUID = gameobject->GetGUID();
-                    if (_defendersKilled == DEFENDERS_COUNT)
-                        gameobject->SetGoState(GO_STATE_ACTIVE);
+            case GO_ATALAI_STATUE1:
+            case GO_ATALAI_STATUE2:
+            case GO_ATALAI_STATUE3:
+            case GO_ATALAI_STATUE4:
+            case GO_ATALAI_STATUE5:
+            case GO_ATALAI_STATUE6:
+                if (gameobject->GetEntry() < GO_ATALAI_STATUE1 + _statuePhase)
+                {
+                    instance->SummonGameObject(GO_ATALAI_LIGHT2, gameobject->GetPositionX(), gameobject->GetPositionY(), gameobject->GetPositionZ(), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                    gameobject->ReplaceAllGameObjectFlags(GO_FLAG_NOT_SELECTABLE);
+                }
+                break;
+            case GO_ATALAI_IDOL:
+                if (_statuePhase == MAX_STATUE_PHASE)
+                    gameobject->SummonGameObject(GO_IDOL_OF_HAKKAR, -480.08f, 94.29f, -189.72f, 1.571f, 0.0f, 0.0f, 0.0f, 0.0f, 0);
+                break;
+            case GO_IDOL_OF_HAKKAR:
+                if (_encounters[TYPE_ATAL_ALARION] == DONE)
+                    gameobject->RemoveGameObjectFlag(GO_FLAG_NOT_SELECTABLE);
+                break;
+            case GO_FORCEFIELD:
+                _forcefieldGUID = gameobject->GetGUID();
+                if (_defendersKilled == DEFENDERS_COUNT)
+                    gameobject->SetGoState(GO_STATE_ACTIVE);
             }
         }
 
@@ -109,33 +107,33 @@ public:
         {
             switch (type)
             {
-                case DATA_STATUES:
-                    _events.ScheduleEvent(DATA_STATUES, 0ms);
-                    break;
-                case DATA_DEFENDER_KILLED:
-                    ++_defendersKilled;
-                    if (_defendersKilled == DEFENDERS_COUNT)
-                    {
-                        instance->LoadGrid(-425.89f, -86.07f);
-                        if (Creature* jammal = instance->GetCreature(_jammalanGUID))
-                            jammal->AI()->Talk(0);
-                        if (GameObject* forcefield = instance->GetGameObject(_forcefieldGUID))
-                            forcefield->SetGoState(GO_STATE_ACTIVE);
-                    }
-                    break;
-                case DATA_ERANIKUS_FIGHT:
-                    for (ObjectGuid const& guid : _dragonkinList)
-                    {
-                        if (Creature* creature = instance->GetCreature(guid))
-                            if (instance->IsGridLoaded(creature->GetPositionX(), creature->GetPositionY()))
-                                creature->SetInCombatWithZone();
-                    }
-                    break;
-                case TYPE_ATAL_ALARION:
-                case TYPE_JAMMAL_AN:
-                case TYPE_HAKKAR_EVENT:
-                    _encounters[type] = data;
-                    break;
+            case DATA_STATUES:
+                _events.ScheduleEvent(DATA_STATUES, 0ms);
+                break;
+            case DATA_DEFENDER_KILLED:
+                ++_defendersKilled;
+                if (_defendersKilled == DEFENDERS_COUNT)
+                {
+                    instance->LoadGrid(-425.89f, -86.07f);
+                    if (Creature* jammal = instance->GetCreature(_jammalanGUID))
+                        jammal->AI()->Talk(0);
+                    if (GameObject* forcefield = instance->GetGameObject(_forcefieldGUID))
+                        forcefield->SetGoState(GO_STATE_ACTIVE);
+                }
+                break;
+            case DATA_ERANIKUS_FIGHT:
+                for (ObjectGuid const& guid : _dragonkinList)
+                {
+                    if (Creature* creature = instance->GetCreature(guid))
+                        if (instance->IsGridLoaded(creature->GetPositionX(), creature->GetPositionY()))
+                            creature->SetInCombatWithZone();
+                }
+                break;
+            case TYPE_ATAL_ALARION:
+            case TYPE_JAMMAL_AN:
+            case TYPE_HAKKAR_EVENT:
+                _encounters[type] = data;
+                break;
             }
 
             SaveToDB();
@@ -145,14 +143,14 @@ public:
         {
             switch (type)
             {
-                case DATA_STATUES:
-                    return _statuePhase;
-                case DATA_DEFENDER_KILLED:
-                    return _defendersKilled;
-                case TYPE_ATAL_ALARION:
-                case TYPE_JAMMAL_AN:
-                case TYPE_HAKKAR_EVENT:
-                    return _encounters[type];
+            case DATA_STATUES:
+                return _statuePhase;
+            case DATA_DEFENDER_KILLED:
+                return _defendersKilled;
+            case TYPE_ATAL_ALARION:
+            case TYPE_JAMMAL_AN:
+            case TYPE_HAKKAR_EVENT:
+                return _encounters[type];
             }
 
             return 0;
@@ -163,11 +161,11 @@ public:
             _events.Update(diff);
             switch (_events.ExecuteEvent())
             {
-                case DATA_STATUES:
-                    ++_statuePhase;
-                    if (_statuePhase == MAX_STATUE_PHASE)
-                        instance->SummonGameObject(GO_IDOL_OF_HAKKAR, -480.08f, 94.29f, -189.72f, 1.571f, 0.0f, 0.0f, 0.0f, 0.0f, 0);
-                    break;
+            case DATA_STATUES:
+                ++_statuePhase;
+                if (_statuePhase == MAX_STATUE_PHASE)
+                    instance->SummonGameObject(GO_IDOL_OF_HAKKAR, -480.08f, 94.29f, -189.72f, 1.571f, 0.0f, 0.0f, 0.0f, 0.0f, 0);
+                break;
             }
         }
 
@@ -209,7 +207,7 @@ public:
 
 enum MalfurionMisc
 {
-    QUEST_ERANIKUS_TYRANT_OF_DREAMS   = 8733,
+    QUEST_ERANIKUS_TYRANT_OF_DREAMS = 8733,
     QUEST_THE_CHARGE_OF_DRAGONFLIGHTS = 8555,
 };
 
@@ -221,7 +219,7 @@ public:
     bool OnTrigger(Player* player, const AreaTrigger* /*at*/) override
     {
         if (player->GetInstanceScript() && !player->FindNearestCreature(NPC_MALFURION_STORMRAGE, 15.0f) &&
-                player->GetQuestStatus(QUEST_THE_CHARGE_OF_DRAGONFLIGHTS) == QUEST_STATUS_REWARDED && player->GetQuestStatus(QUEST_ERANIKUS_TYRANT_OF_DREAMS) != QUEST_STATUS_REWARDED)
+            player->GetQuestStatus(QUEST_THE_CHARGE_OF_DRAGONFLIGHTS) == QUEST_STATUS_REWARDED && player->GetQuestStatus(QUEST_ERANIKUS_TYRANT_OF_DREAMS) != QUEST_STATUS_REWARDED)
             player->SummonCreature(NPC_MALFURION_STORMRAGE, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), -1.52f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 100000);
         return false;
     }
@@ -275,7 +273,7 @@ public:
             if (!map || !instanceScript || instanceScript->GetData(TYPE_HAKKAR_EVENT) != NOT_STARTED)
                 return;
 
-            Position pos = {-466.795f, 272.863f, -90.447f, 1.57f};
+            Position pos = { -466.795f, 272.863f, -90.447f, 1.57f };
             if (TempSummon* summon = map->SummonCreature(NPC_SHADE_OF_HAKKAR, pos))
             {
                 summon->SetTempSummonType(TEMPSUMMON_MANUAL_DESPAWN);
@@ -302,4 +300,3 @@ void AddSC_instance_sunken_temple()
     new spell_temple_of_atal_hakkar_hex_of_jammal_an();
     new spell_temple_of_atal_hakkar_awaken_the_soulflayer();
 }
-

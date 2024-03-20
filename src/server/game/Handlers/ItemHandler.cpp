@@ -16,6 +16,7 @@
  */
 
 #include "Common.h"
+#include "Config.h"
 #include "CustomItemTemplate.h"
 #include "Item.h"
 #include "Log.h"
@@ -572,10 +573,16 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recvData)
 
     LOG_DEBUG("network.opcode", "STORAGE: Item Query = {}", item);
 
-    if (CustomItemTemplate pProto = GetItemTemplate(item))
+    ItemTemplate* pProto = sObjectMgr->GetItemTemplate(item);
+    if (pProto)
     {
-        pProto->_GetInfo()->InitializeQueryData();
-        SendPacket(pProto->_GetInfo()->GetQueryData());
+        if (sConfigMgr->GetBoolDefault("CacheDataQueries", false))
+            SendPacket(pProto->GetQueryData());
+        else
+        {
+            pProto->InitializeQueryData();
+            SendPacket(pProto->GetQueryData());
+        }
     }
     else
     {

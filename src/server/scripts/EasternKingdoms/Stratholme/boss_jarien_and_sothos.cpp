@@ -15,7 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CreatureScript.h"
+#include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "TaskScheduler.h"
 #include "stratholme.h"
@@ -23,37 +23,37 @@
 enum Texts
 {
     // Sothos
-    SAY_SOTHOS_ON_SUMMON_0     = 0,
-    SAY_SOTHOS_ON_SUMMON_1     = 1,
-    EMOTE_SOTHOS_VENGEANCE     = 2,
+    SAY_SOTHOS_ON_SUMMON_0 = 0,
+    SAY_SOTHOS_ON_SUMMON_1 = 1,
+    EMOTE_SOTHOS_VENGEANCE = 2,
 
     // Jarien
-    SAY_JARIEN_ON_SUMMON_0     = 0,
-    SAY_JARIEN_ON_SUMMON_1     = 1,
-    SAY_JARIEN_ON_SUMMON_2     = 2,
-    EMOTE_JARIEN_VENGEANCE     = 3,
+    SAY_JARIEN_ON_SUMMON_0 = 0,
+    SAY_JARIEN_ON_SUMMON_1 = 1,
+    SAY_JARIEN_ON_SUMMON_2 = 2,
+    EMOTE_JARIEN_VENGEANCE = 3,
 
     // Spirit
-    SAY_SPIRIT_BOTH_DEAD       = 0
+    SAY_SPIRIT_BOTH_DEAD = 0
 };
 
 enum Spells
 {
     // Jarien
-    SPELL_MORTAL_STRIKE     = 16856,
-    SPELL_SHADOW_SHOCK      = 22575,
-    SPELL_CRIPPLE           = 20812,
-    SPELL_CLEAVE            = 15284,
+    SPELL_MORTAL_STRIKE = 16856,
+    SPELL_SHADOW_SHOCK = 22575,
+    SPELL_CRIPPLE = 20812,
+    SPELL_CLEAVE = 15284,
 
     // Sothos
-    SPELL_SHIELD_CHARGE     = 15749,
-    SPELL_SHIELD_SLAM       = 15655,
-    SPELL_SHIELD_BLOCK      = 12169,
-    SPELL_SHADOW_BOLT       = 27646,
-    SPELL_FEAR              = 27641,
+    SPELL_SHIELD_CHARGE = 15749,
+    SPELL_SHIELD_SLAM = 15655,
+    SPELL_SHIELD_BLOCK = 12169,
+    SPELL_SHADOW_BOLT = 27646,
+    SPELL_FEAR = 27641,
 
     // Both
-    SPELL_VENGEANCE         = 27650
+    SPELL_VENGEANCE = 27650
 };
 
 enum Phases
@@ -140,21 +140,21 @@ struct boss_jarien : public BossAI
             {
                 Talk(SAY_JARIEN_ON_SUMMON_1);
             })
-        .Schedule(12s, [this](TaskContext /*context*/)
-            {
-                Talk(SAY_JARIEN_ON_SUMMON_2);
-                _talked = true;
-                _phase = PHASE_FIGHT;
-                me->SetReactState(REACT_AGGRESSIVE);
-                me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
-                me->SetImmuneToNPC(false);
-            });
+            .Schedule(12s, [this](TaskContext /*context*/)
+                {
+                    Talk(SAY_JARIEN_ON_SUMMON_2);
+                    _talked = true;
+                    _phase = PHASE_FIGHT;
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
+                    me->SetImmuneToNPC(false);
+                });
     }
 
     void JustDied(Unit* killer) override
     {
         _JustDied();
-        if (Creature * sothos = me->FindNearestCreature(NPC_SOTHOS, 200.f))
+        if (Creature* sothos = me->FindNearestCreature(NPC_SOTHOS, 200.f))
         {
             sothos->AI()->DoAction(ACTION_PARTNER_DEAD);
         }
@@ -189,21 +189,21 @@ struct boss_jarien : public BossAI
                 DoCastVictim(SPELL_SHADOW_SHOCK);
                 context.Repeat(10s, 12s);
             })
-        .Schedule(3s, [this](TaskContext context)
-            {
-                DoCastVictim(SPELL_CLEAVE);
-                context.Repeat(10s);
-            })
-        .Schedule(11s, [this](TaskContext context)
-            {
-                DoCastRandomTarget(SPELL_CRIPPLE);
-                context.Repeat(30s);
-            })
-        .Schedule(10s, [this](TaskContext context)
-            {
-                DoCastVictim(SPELL_MORTAL_STRIKE);
-                context.Repeat(15s);
-            });
+            .Schedule(3s, [this](TaskContext context)
+                {
+                    DoCastVictim(SPELL_CLEAVE);
+                    context.Repeat(10s);
+                })
+                .Schedule(11s, [this](TaskContext context)
+                    {
+                        DoCastRandomTarget(SPELL_CRIPPLE);
+                        context.Repeat(30s);
+                    })
+                    .Schedule(10s, [this](TaskContext context)
+                        {
+                            DoCastVictim(SPELL_MORTAL_STRIKE);
+                            context.Repeat(15s);
+                        });
     }
 
     void UpdateAI(uint32 diff) override
@@ -219,11 +219,11 @@ struct boss_jarien : public BossAI
             });
     }
 
-    protected:
-        TaskScheduler _scheduler;
-        uint8 _phase;
-        bool _talked;
-        bool _sothosDied;
+protected:
+    TaskScheduler _scheduler;
+    uint8 _phase;
+    bool _talked;
+    bool _sothosDied;
 };
 
 struct boss_sothos : public BossAI
@@ -267,14 +267,14 @@ struct boss_sothos : public BossAI
                 me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
                 me->SetImmuneToNPC(false);
             })
-        .Schedule(3s, [this](TaskContext /*context*/)
-            {
-                Talk(SAY_SOTHOS_ON_SUMMON_0);
-            })
-        .Schedule(9s, [this](TaskContext /*context*/)
-            {
-                Talk(SAY_SOTHOS_ON_SUMMON_1);
-            });
+            .Schedule(3s, [this](TaskContext /*context*/)
+                {
+                    Talk(SAY_SOTHOS_ON_SUMMON_0);
+                })
+                .Schedule(9s, [this](TaskContext /*context*/)
+                    {
+                        Talk(SAY_SOTHOS_ON_SUMMON_1);
+                    });
     }
 
     void JustDied(Unit* killer) override
@@ -315,26 +315,26 @@ struct boss_sothos : public BossAI
                 DoCastAOE(SPELL_FEAR);
                 context.Repeat(18s, 20s);
             })
-        .Schedule(9s, [this](TaskContext context)
-            {
-                DoCastAOE(SPELL_SHADOW_BOLT);
-                context.Repeat(10s, 11s);
-            })
-        .Schedule(15s, [this](TaskContext context)
-            {
-                DoCastRandomTarget(SPELL_SHIELD_CHARGE);
-                context.Repeat();
-            })
-        .Schedule(3s, [this](TaskContext context)
-            {
-                DoCastSelf(SPELL_SHIELD_BLOCK);
-                context.Repeat(10s, 12s);
-            })
-        .Schedule(4s, [this](TaskContext context)
-            {
-                DoCastVictim(SPELL_SHIELD_SLAM);
-                context.Repeat(14s);
-            });
+            .Schedule(9s, [this](TaskContext context)
+                {
+                    DoCastAOE(SPELL_SHADOW_BOLT);
+                    context.Repeat(10s, 11s);
+                })
+                .Schedule(15s, [this](TaskContext context)
+                    {
+                        DoCastRandomTarget(SPELL_SHIELD_CHARGE);
+                        context.Repeat();
+                    })
+                    .Schedule(3s, [this](TaskContext context)
+                        {
+                            DoCastSelf(SPELL_SHIELD_BLOCK);
+                            context.Repeat(10s, 12s);
+                        })
+                        .Schedule(4s, [this](TaskContext context)
+                            {
+                                DoCastVictim(SPELL_SHIELD_SLAM);
+                                context.Repeat(14s);
+                            });
     }
 
     void UpdateAI(uint32 diff) override
@@ -350,11 +350,11 @@ struct boss_sothos : public BossAI
             });
     }
 
-    protected:
-        TaskScheduler _scheduler;
-        uint8 _phase;
-        bool _talked;
-        bool _jarienDied;
+protected:
+    TaskScheduler _scheduler;
+    uint8 _phase;
+    bool _talked;
+    bool _jarienDied;
 };
 
 void AddSC_boss_jarien_and_sothos()

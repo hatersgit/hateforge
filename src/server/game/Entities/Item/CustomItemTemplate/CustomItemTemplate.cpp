@@ -650,9 +650,11 @@ float CustomItemTemplate::CalculateDps()
 ItemModType CustomItemTemplate::GenerateMainStatForItem()
 {
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> agistrint(ITEM_MOD_AGILITY, ITEM_MOD_INTELLECT);
-    std::uniform_int_distribution<> agistr(ITEM_MOD_AGILITY, ITEM_MOD_STRENGTH);
-    std::uniform_int_distribution<> strint(ITEM_MOD_STRENGTH, ITEM_MOD_INTELLECT);
+    std::vector<ItemModType> stats = {ITEM_MOD_STRENGTH, ITEM_MOD_AGILITY, ITEM_MOD_INTELLECT};
+
+    std::uniform_int_distribution<> agistrint(0, 2);
+    std::uniform_int_distribution<> agistr(0, 1);
+    std::uniform_int_distribution<> agiint(1, 2);
     if (IsWeapon()) {
         switch (GetSubClass()) {
         case ITEM_SUBCLASS_WEAPON_AXE:
@@ -665,13 +667,13 @@ ItemModType CustomItemTemplate::GenerateMainStatForItem()
         case ITEM_SUBCLASS_WEAPON_STAFF:
         case ITEM_SUBCLASS_WEAPON_FIST:
         case ITEM_SUBCLASS_WEAPON_DAGGER: {
-            return ItemModType(agistrint(gen));
+            return ItemModType(stats[agistrint(gen)]);
         }
         case ITEM_SUBCLASS_WEAPON_THROWN:
         case ITEM_SUBCLASS_WEAPON_CROSSBOW:
         case ITEM_SUBCLASS_WEAPON_BOW:
         case ITEM_SUBCLASS_WEAPON_GUN: {
-            return ItemModType(agistr(gen));
+            return ItemModType(stats[agistr(gen)]);
         }
         case ITEM_SUBCLASS_WEAPON_MISC:
         case ITEM_SUBCLASS_WEAPON_WAND:
@@ -681,18 +683,18 @@ ItemModType CustomItemTemplate::GenerateMainStatForItem()
         switch (GetSubClass())
         {
         case ITEM_SUBCLASS_ARMOR_CLOTH:
-            return ITEM_MOD_INTELLECT;
+            return GetInventoryType() == INVTYPE_CLOAK ? ItemModType(stats[agistrint(gen)]) : ITEM_MOD_INTELLECT;
         case ITEM_SUBCLASS_ARMOR_LEATHER:
-            return ItemModType(agistr(gen));
+            return ItemModType(stats[agistr(gen)]);
         case ITEM_SUBCLASS_ARMOR_MAIL:
-            return ItemModType(agistr(gen));
+            return ItemModType(stats[agiint(gen)]);
         case ITEM_SUBCLASS_ARMOR_PLATE:
         case ITEM_SUBCLASS_ARMOR_BUCKLER:
         case ITEM_SUBCLASS_ARMOR_SHIELD:
-            return ItemModType(agistr(gen));
+            return ItemModType(stats[agistr(gen)]);
         }
     }
-    return ItemModType(agistrint(gen));
+    return ItemModType(stats[agistrint(gen)]);
 }
 
 bool CustomItemTemplate::CanRollStam()
@@ -940,7 +942,7 @@ void CustomItemTemplate::MakeBlankSlate() {
         SetDamageTypeA(0);
         SetDamageTypeB(0);
     }
-
+    SetArmorDamageModifier(0);
     SetFlags(GetFlags() & ~ITEM_FLAG_UNIQUE_EQUIPPABLE);
 }
 

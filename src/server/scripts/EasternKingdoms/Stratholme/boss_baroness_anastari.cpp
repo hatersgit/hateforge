@@ -15,22 +15,22 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CreatureScript.h"
 #include "InstanceScript.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
+#include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "TaskScheduler.h"
 #include "stratholme.h"
 
 enum Spells
 {
-    SPELL_BANSHEEWAIL           = 16565,
-    SPELL_BANSHEECURSE          = 16867,
-    SPELL_SILENCE               = 18327,
-    SPELL_POSSESS               = 17244,    // the charm on player
-    SPELL_POSSESSED             = 17246,    // the damage debuff on player
-    SPELL_POSSESS_INV           = 17250     // baroness becomes invisible while possessing a target
+    SPELL_BANSHEEWAIL = 16565,
+    SPELL_BANSHEECURSE = 16867,
+    SPELL_SILENCE = 18327,
+    SPELL_POSSESS = 17244,    // the charm on player
+    SPELL_POSSESSED = 17246,    // the damage debuff on player
+    SPELL_POSSESS_INV = 17250     // baroness becomes invisible while possessing a target
 };
 
 class boss_baroness_anastari : public CreatureScript
@@ -55,27 +55,27 @@ public:
             _scheduler.CancelAll();
 
             _scheduler.SetValidator([this]
-            {
-                return !me->HasUnitState(UNIT_STATE_CASTING);
-            });
+                {
+                    return !me->HasUnitState(UNIT_STATE_CASTING);
+                });
         }
 
         void JustEngagedWith(Unit* /*who*/) override
         {
-            _scheduler.Schedule(1s, [this](TaskContext context){
+            _scheduler.Schedule(1s, [this](TaskContext context) {
                 DoCastVictim(SPELL_BANSHEEWAIL);
                 context.Repeat(4s);
-            })
-            .Schedule(11s, [this](TaskContext context){
-                DoCastVictim(SPELL_BANSHEECURSE);
-                context.Repeat(18s);
-            })
-            .Schedule(13s, [this](TaskContext context){
-                DoCastVictim(SPELL_SILENCE);
-                context.Repeat(13s);
-            });
+                })
+                .Schedule(11s, [this](TaskContext context) {
+                    DoCastVictim(SPELL_BANSHEECURSE);
+                    context.Repeat(18s);
+                    })
+                    .Schedule(13s, [this](TaskContext context) {
+                        DoCastVictim(SPELL_SILENCE);
+                        context.Repeat(13s);
+                        });
 
-            SchedulePossession();
+                    SchedulePossession();
         }
 
         void JustDied(Unit* /*killer*/) override
@@ -85,7 +85,7 @@ public:
 
         void SchedulePossession()
         {
-            _scheduler.Schedule(20s, 30s, [this](TaskContext context){
+            _scheduler.Schedule(20s, 30s, [this](TaskContext context) {
                 if (Unit* possessTarget = SelectTarget(SelectTargetMethod::Random, 1, 0, true, false))
                 {
                     DoCast(possessTarget, SPELL_POSSESS, true);
@@ -111,14 +111,14 @@ public:
                                 possessionContext.Repeat(1s);
                             }
                         }
-                    });
+                        });
                 }
                 else
                 {
                     // No valid possession targets found, retry.
                     context.Repeat(1s);
                 }
-            });
+                });
         }
 
         void UpdateAI(uint32 diff) override

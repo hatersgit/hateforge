@@ -221,7 +221,7 @@ struct boss_viscidus : public BossAI
                 _phase = PHASE_MELEE;
                 me->RemoveAura(SPELL_VISCIDUS_SLOWED_MORE);
                 DoCastSelf(SPELL_VISCIDUS_FREEZE);
-                events.ScheduleEvent(EVENT_RESET_PHASE, 15s);
+                events.ScheduleEvent(EVENT_RESET_PHASE, 30s);
             }
             else if (_hitcounter == HITCOUNTER_SLOW_MORE)
             {

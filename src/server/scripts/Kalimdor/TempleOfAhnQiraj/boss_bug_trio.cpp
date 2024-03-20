@@ -222,60 +222,7 @@ public:
 
     void DamageTaken(Unit* who, uint32& damage, DamageEffectType, SpellSchoolMask) override
     {
-        if (_dying && who && who->GetGUID() != me->GetGUID())
-            damage = 0;
-
-        if (me->HealthBelowPctDamaged(0, damage) && instance->GetData(DATA_BUG_TRIO_DEATH) < 2 && !_dying)
-        {
-            damage = 0;
-            if (_isEating)
-                return;
-
-            _scheduler.CancelAll();
-            me->SetReactState(REACT_PASSIVE);
-            _dying = true;
-            float x, y, z;
-            // Move the other bugs to this bug position
-            if (Creature* vem = instance->GetCreature(DATA_VEM))
-            {
-                if (vem->GetGUID() != me->GetGUID())
-                {
-                    if (vem->IsAlive())
-                    {
-                        vem->AI()->DoAction(ACTION_CONSUME);
-                        me->GetRandomContactPoint(vem, x, y, z);
-                        vem->GetMotionMaster()->MovePoint(POINT_CONSUME, x, y, z);
-                    }
-                }
-                else _creatureDying = DATA_VEM;
-            }
-            if (Creature* kri = instance->GetCreature(DATA_KRI))
-            {
-                if (kri->GetGUID() != me->GetGUID())
-                {
-                    if (kri->IsAlive())
-                    {
-                        kri->AI()->DoAction(ACTION_CONSUME);
-                        me->GetRandomContactPoint(kri, x, y, z);
-                        kri->GetMotionMaster()->MovePoint(POINT_CONSUME, x, y, z);
-                    }
-                }
-                else _creatureDying = DATA_KRI;
-            }
-            if (Creature* yauj = instance->GetCreature(DATA_YAUJ))
-            {
-                if (yauj->GetGUID() != me->GetGUID())
-                {
-                    if (yauj->IsAlive())
-                    {
-                        yauj->AI()->DoAction(ACTION_CONSUME);
-                        me->GetRandomContactPoint(yauj, x, y, z);
-                        yauj->GetMotionMaster()->MovePoint(POINT_CONSUME, x, y, z);
-                    }
-                }
-                else _creatureDying = DATA_YAUJ;
-            }
-        }
+    
     }
 
     void DoFinalSpell()

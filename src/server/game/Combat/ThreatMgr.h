@@ -104,7 +104,8 @@ public:
     // identical to ThreatManager::CanHaveThreatList(GetOwner())
     bool CanHaveThreatList() const { return _ownerCanHaveThreatList; }
     // returns the victim selected by the last SelectVictim call - this can be nullptr
-    Unit* GetCurrentVictim() const;
+    Unit* GetCurrentVictim();
+    Unit* GetLastVictim() const;
     // returns an arbitrary non-offline victim from owner's threat list if one exists, nullptr otherwise
     Unit* GetAnyTarget() const;
     // selects a (potentially new) victim from the threat list and returns it - this can be nullptr
@@ -194,6 +195,8 @@ private:
     ///== MY THREAT LIST ==
     void PutThreatListRef(ObjectGuid const& guid, ThreatReference* ref);
     void PurgeThreatListRef(ObjectGuid const& guid, bool sendRemove);
+
+    void UpdateVictim();
 
     uint32 _updateClientTimer;
     threat_list_heap _sortedThreatList;

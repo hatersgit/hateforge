@@ -179,9 +179,18 @@ void ThreatMgr::Update(uint32 tdiff)
         _updateClientTimer -= tdiff;
 }
 
-Unit* ThreatMgr::GetCurrentVictim() const
+Unit* ThreatMgr::GetCurrentVictim()
 {
-    if (_currentVictimRef)
+    if (!_currentVictimRef || _currentVictimRef->IsOffline())
+        UpdateVictim();
+
+    ASSERT(!_currentVictimRef || _currentVictimRef->IsAvailable());
+    return _currentVictimRef ? _currentVictimRef->GetVictim() : nullptr;
+}
+
+Unit* ThreatMgr::GetLastVictim() const
+{
+    if (_currentVictimRef && !_currentVictimRef->IsOffline())
         return _currentVictimRef->GetVictim();
     return nullptr;
 }
@@ -457,8 +466,23 @@ void ThreatMgr::ClearAllThreat()
     while (!_myThreatListEntries.empty());
 }
 
+void ThreatMgr::UpdateVictim()
+{
+    ThreatReference const* const newVictim = ReselectVictim();
+    bool const newHighest = newVictim && (newVictim != _currentVictimRef);
+
+    _currentVictimRef = newVictim;
+    if (newHighest)
+    {
+        SendThreatListToClients();
+    }
+}
+
 ThreatReference const* ThreatMgr::ReselectVictim()
 {
+    if (_sortedThreatList.empty())
+        return nullptr;
+
     ThreatReference const* oldVictimRef = _currentVictimRef;
     if (oldVictimRef && !oldVictimRef->IsAvailable())
         oldVictimRef = nullptr;

@@ -3747,9 +3747,9 @@ enum SpellFamilyNames
     SPELLFAMILY_SHAMAN      = 11,
     SPELLFAMILY_UNK2        = 12,                           // 2 spells (silence resistance)
     SPELLFAMILY_POTION      = 13,
-    // 14 - unused
+    SPELLFAMILY_MELEE       = 14, // hater: family for melee abilities
     SPELLFAMILY_DEATHKNIGHT = 15,
-    // 16 - unused
+    SPELLFAMILY_CASTER      = 16, // hater: family for caster abilities
     SPELLFAMILY_PET         = 17,
     SPELLFAMILY_MONK        = 18,
     SPELLFAMILY_TINKER      = 19,

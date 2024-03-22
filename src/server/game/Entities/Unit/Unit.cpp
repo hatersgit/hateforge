@@ -1496,10 +1496,10 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss,
         float mod = 1;
         if (auto owner = GetOwner()) {
             if (owner->GetTypeId() != TYPEID_PLAYER)
-                mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
+                mod = 1 + std::pow(1.43f, GetWorldTier() + 1.2) - 2.19f;
         }
         else
-            mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
+            mod = 1 + std::pow(1.43f, GetWorldTier() + 1.2) - 2.19f;
 
         damageInfo->damage *= mod;
     }
@@ -1938,10 +1938,10 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
             float mod = 1;
             if (auto owner = GetOwner()) {
                 if (owner->GetTypeId() != TYPEID_PLAYER)
-                    mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
+                    mod = 1 + std::pow(1.43f, GetWorldTier() + 1.2) - 2.19f;
             }
             else
-                mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
+                mod = 1 + std::pow(1.43f, GetWorldTier() + 1.2) - 2.19f;
 
             damageInfo->damages[i].damage *= mod;
         }
@@ -7279,6 +7279,8 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     if (meleeAttack)
         SendMeleeAttackStart(victim);
 
+    AddComboPoints(0);
+
     return true;
 }
 
@@ -12372,10 +12374,10 @@ void Unit::SetMaxHealth(uint32 val)
         float mod = 1;
         if (auto owner = GetOwner()) {
             if (owner->GetTypeId() != TYPEID_PLAYER)
-                mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
+                mod = 1 + std::pow(1.43f, GetWorldTier() + 1.2) - 2.19f;
         }
         else
-            mod = 1 + std::pow(1.53f, GetWorldTier() + 1.2) - 2.54f;
+            mod = 1 + std::pow(1.43f, GetWorldTier() + 1.2) - 2.19f;
         val = val * mod;
     }
 

@@ -26,11 +26,25 @@
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
 
+void SendHotSpotPOI(Player* player, AreaPOIEntry const* poi) {
+    WorldPacket data(SMSG_GOSSIP_POI, 4 + 4 + 4 + 4 + 4 + 20);
+    data << uint32(99);
+    data << float(poi->x);
+    data << float(poi->y);
+    data << uint32(30);
+    data << uint32(1);
+    data << poi->name[0];
+
+    player->GetSession()->SendPacket(&data);
+}
+
 void AreaScript::OnPlayerEnter(Player* player)
 {
-    if (sAreaScriptMgr->IsHotSpot(_parentZone, _zone)) {
+    if (sAreaScriptMgr->IsHotSpot(_parentZone, _zone))
         player->AddAura(HOTSPOT_XP, player);
-    }
+
+    if (AreaPOIEntry const* poi = sAreaPOIStore.LookupEntry(_zone))
+        SendHotSpotPOI(player, poi);
 }
 
 void AreaScript::OnPlayerExit(Player* player)
@@ -69,7 +83,7 @@ void AreaScript::OnCreatureCreate(Creature* creature)
 
 void AreaScript::OnCreatureRespawn(Creature* creature)
 {
-    if ((roll_chance_f(10.f) && creature->GetWorldTier() > WORLD_TIER_1) || creature->GetCreatureTemplate()->rank == CREATURE_ELITE_RAREELITE) {
+    if ((roll_chance_f(creature->GetWorldTier()*7.f) && creature->GetWorldTier() > WORLD_TIER_1) || creature->GetCreatureTemplate()->rank == CREATURE_ELITE_RAREELITE || creature->GetCreatureTemplate()->rank == CREATURE_ELITE_RARE) {
         creature->CastSpell(creature, CHAMPION, true);
         std::random_device rd; // obtain a random number from hardware
         std::mt19937 gen(rd()); // seed the generator

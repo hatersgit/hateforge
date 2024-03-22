@@ -562,7 +562,7 @@ struct AreaPOIEntry
     uint32 mapId;               //15
     //uint32 val1;              //16
     uint32 zoneId;              //17
-    //char const* name[16];     //18-33
+    char const* name[16];       //18-33
     //uint32 name_flag;         //34
     //char const* name2[16];    //35-50
     //uint32 name_flag2;        //51

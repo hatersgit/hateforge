@@ -1754,7 +1754,6 @@ public:
     ThreatMgr const& GetThreatManager() const { return m_threatManager; }
 
     void SendClearTarget();
-    void SendThreatListUpdate() { m_threatManager.SendThreatListToClients(); }
     void ToggleCombatAuras(bool startingCombat);
     void ToggleOnPowerPctAuras();
 

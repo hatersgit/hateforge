@@ -108,8 +108,6 @@ public:
     Unit* GetLastVictim() const;
     // returns an arbitrary non-offline victim from owner's threat list if one exists, nullptr otherwise
     Unit* GetAnyTarget() const;
-    // selects a (potentially new) victim from the threat list and returns it - this can be nullptr
-    Unit* SelectVictim();
 
     bool IsEngaged() const { return _ownerEngaged; }
     // are there any entries in owner's threat list?
@@ -138,6 +136,7 @@ public:
     bool IsThreateningTo(Unit const* who, bool includeOffline = false) const;
     auto const& GetThreatenedByMeList() const { return _threatenedByMe; }
 
+    void EvaluateSuppressed(bool canExpire = false);
     // Notify the ThreatManager that a condition changed that may impact refs' online state so it can re-evaluate
     void UpdateOnlineStates(bool meThreateningOthers = true, bool othersThreateningMe = true);
     ///== AFFECT MY THREAT LIST ==
@@ -155,11 +154,12 @@ public:
     void ResetAllThreat();
     // Removes specified target from the threat list
     void ClearThreat(Unit* target);
+    void ClearThreat(ThreatReference* ref);
     // Removes all targets from the threat list (will cause evade in UpdateVictim if called)
     void ClearAllThreat();
 
     // sends SMSG_THREAT_UPDATE to all nearby clients (used by client to forward threat list info to addons)
-    void SendThreatListToClients() const;
+    void SendThreatListToClients(bool newHighest) const;
 
     ///== AFFECT OTHERS' THREAT LISTS ==
     // what it says on the tin - call AddThreat on everything that's threatened by us with the specified params
@@ -195,6 +195,10 @@ private:
     ///== MY THREAT LIST ==
     void PutThreatListRef(ObjectGuid const& guid, ThreatReference* ref);
     void PurgeThreatListRef(ObjectGuid const& guid, bool sendRemove);
+
+    void ProcessAIUpdates();
+    void RegisterForAIUpdate(ObjectGuid const& guid) { _needsAIUpdate.push_back(guid); }
+    std::vector<ObjectGuid> _needsAIUpdate;
 
     void UpdateVictim();
 
@@ -237,6 +241,7 @@ public:
     OnlineState GetOnlineState() const { return _online; }
     bool IsOnline() const { return (_online >= ONLINE_STATE_ONLINE); }
     bool IsAvailable() const { return (_online > ONLINE_STATE_OFFLINE); }
+    bool IsSuppressed() const { return (_online == ONLINE_STATE_SUPPRESSED); }
     bool IsOffline() const { return (_online <= ONLINE_STATE_OFFLINE); }
     TauntState GetTauntState() const { return _taunted; }
     bool IsTaunting() const { return _taunted == TAUNT_STATE_TAUNT; }
@@ -271,6 +276,10 @@ public:
 
     friend class ThreatMgr;
     friend struct CompareThreatLessThan;
+
+protected:
+    void UnregisterAndFree();
+    bool ShouldBeSuppressed() const;
 };
 
 inline bool CompareThreatLessThan::operator()(ThreatReference const* a, ThreatReference const* b) const { return ThreatMgr::CompareReferencesLT(a, b, 1.0f); }

@@ -298,13 +298,14 @@ bool CreatureAI::UpdateVictim()
     if (!me->HasReactState(REACT_PASSIVE))
     {
         if (Unit* victim = me->SelectVictim())
-            AttackStart(victim);
+            if (victim != me->GetVictim())
+                AttackStart(victim);
 
         return me->GetVictim() != nullptr;
     }
     else if (!me->IsInCombat())
     {
-        EnterEvadeMode();
+        EnterEvadeMode(EVADE_REASON_NO_HOSTILES);
         return false;
     }
     else if (me->GetVictim())

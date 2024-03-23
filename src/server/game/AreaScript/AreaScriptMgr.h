@@ -45,6 +45,10 @@ public:
         return _hotSpots[zone] == area;
     }
 
+    uint32 GetHotspotForZone(uint32 zone) {
+        return _hotSpots[zone];
+    }
+
     uint32 GetParentZone(uint32 area) {
         for (auto zone : _areaByZone) {
             if (std::find(zone.second.begin(), zone.second.end(), area) != zone.second.end())

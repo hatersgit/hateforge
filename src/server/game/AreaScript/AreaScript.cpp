@@ -26,14 +26,21 @@
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
 
-void SendHotSpotPOI(Player* player, AreaPOIEntry const* poi) {
+void SendHotSpotPOI(Player* player, AreaTableEntry const* entry) {
+    std::string location = entry->area_name[0];
+    std::string chars = "' ";
+    for (char c : chars)
+        location.erase(std::remove(location.begin(), location.end(), c), location.end());
+
+    GameTele const* teleloc = sObjectMgr->GetGameTele(location);
+
     WorldPacket data(SMSG_GOSSIP_POI, 4 + 4 + 4 + 4 + 4 + 20);
     data << uint32(99);
-    data << float(poi->x);
-    data << float(poi->y);
-    data << uint32(30);
-    data << uint32(1);
-    data << poi->name[0];
+    data << float(teleloc->position_x);
+    data << float(teleloc->position_y);
+    data << uint32(7); // flag icon
+    data << uint32(10);
+    data << "Bonus Experience";
 
     player->GetSession()->SendPacket(&data);
 }
@@ -42,9 +49,9 @@ void AreaScript::OnPlayerEnter(Player* player)
 {
     if (sAreaScriptMgr->IsHotSpot(_parentZone, _zone))
         player->AddAura(HOTSPOT_XP, player);
-
-    if (AreaPOIEntry const* poi = sAreaPOIStore.LookupEntry(_zone))
-        SendHotSpotPOI(player, poi);
+    
+    if (AreaTableEntry const* entry = sAreaTableStore.LookupEntry(sAreaScriptMgr->GetHotspotForZone(_parentZone)))
+        SendHotSpotPOI(player, entry);
 }
 
 void AreaScript::OnPlayerExit(Player* player)

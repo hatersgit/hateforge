@@ -2684,17 +2684,18 @@ private:
             uint32 classMask = perkFields[6].Get<uint32>();
 
             CharacterSpecPerk* perk = new CharacterSpecPerk();
-            Perk* copy = GetPerk(classMask, spellId, CharacterPerkType(type));
-            perk->spell = copy;
-            perk->rank = rank;
-            perk->uuid = uuid;
+            if (Perk* copy = GetPerk(classMask, spellId, CharacterPerkType(type))) {
+                perk->spell = copy;
+                perk->rank = rank;
+                perk->uuid = uuid;
 
-            ForgeCharacterSpec* spec = CharacterSpecs[characterGuid][specId];
+                ForgeCharacterSpec* spec = CharacterSpecs[characterGuid][specId];
 
-            spec->perks[CharacterPerkType(type)][spellId] = perk;
+                spec->perks[CharacterPerkType(type)][spellId] = perk;
 
-            if (copy->groupId > 0)
-                spec->groupPerks[copy->groupId] = copy;
+                if (copy->groupId > 0)
+                    spec->groupPerks[copy->groupId] = copy;
+            }
         } while (perkQuery->NextRow());
     }
 

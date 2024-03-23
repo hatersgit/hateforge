@@ -25,24 +25,25 @@
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
-
+            
 void SendHotSpotPOI(Player* player, AreaTableEntry const* entry) {
     std::string location = entry->area_name[0];
     std::string chars = "' ";
     for (char c : chars)
         location.erase(std::remove(location.begin(), location.end(), c), location.end());
 
-    GameTele const* teleloc = sObjectMgr->GetGameTele(location);
+    if (GameTele const* teleloc = sObjectMgr->GetGameTele(location)) {
 
-    WorldPacket data(SMSG_GOSSIP_POI, 4 + 4 + 4 + 4 + 4 + 20);
-    data << uint32(99);
-    data << float(teleloc->position_x);
-    data << float(teleloc->position_y);
-    data << uint32(7); // flag icon
-    data << uint32(10);
-    data << "Bonus Experience";
+        WorldPacket data(SMSG_GOSSIP_POI, 4 + 4 + 4 + 4 + 4 + 20);
+        data << uint32(99);
+        data << float(teleloc->position_x);
+        data << float(teleloc->position_y);
+        data << uint32(7); // flag icon
+        data << uint32(10);
+        data << "Bonus Experience";
 
-    player->GetSession()->SendPacket(&data);
+        player->GetSession()->SendPacket(&data);
+    }
 }
 
 void AreaScript::OnPlayerEnter(Player* player)

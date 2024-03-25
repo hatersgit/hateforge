@@ -40,7 +40,7 @@ void SendHotSpotPOI(Player* player, AreaTableEntry const* entry) {
         data << float(teleloc->position_y);
         data << uint32(7); // flag icon
         data << uint32(10);
-        data << "Bonus Experience";
+        data << "Bonus Experience: " + (std::string)entry->area_name[0];
 
         player->GetSession()->SendPacket(&data);
     }

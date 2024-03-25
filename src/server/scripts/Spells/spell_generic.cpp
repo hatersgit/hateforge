@@ -5248,6 +5248,8 @@ class spell_affix_possessed : public AuraScript
 
     void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
     {
+        GetTarget()->RemoveAurasDueToSpell(9000009);
+
         Unit* target = GetTarget();
         int32 bp0 = target->CountPctFromMaxHealth(aurEff->GetAmount());
         target->CastCustomSpell(target, 9000017, &bp0, nullptr, nullptr, true, nullptr, aurEff);

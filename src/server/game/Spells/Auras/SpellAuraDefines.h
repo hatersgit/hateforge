@@ -373,7 +373,7 @@ enum AuraType
     SPELL_AURA_MOD_CREATURE_AOE_DAMAGE_AVOIDANCE            = 310,
     SPELL_AURA_311                                          = 311,
     SPELL_AURA_312                                          = 312,
-    SPELL_AURA_313                                          = 313,
+    SPELL_AURA_WEAPON_DAMAGE_TO_ELEMENT                     = 313,
     SPELL_AURA_PREVENT_RESURRECTION                         = 314,
     SPELL_AURA_UNDERWATER_WALKING                           = 315,
     SPELL_AURA_PERIODIC_HASTE                               = 316,

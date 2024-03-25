@@ -697,6 +697,17 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
             ItemPosCountVec dest;
             if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, quest->RewardChoiceItemCount[reward]) == EQUIP_ERR_OK)
             {
+                auto itemProto = sObjectMgr->GetItemTemplate(itemId);
+                if (itemProto->Quality >= ITEM_QUALITY_UNCOMMON && (itemProto->Class == ITEM_CLASS_ARMOR || itemProto->Class == ITEM_CLASS_WEAPON)) {
+                    auto guidlow = sObjectMgr->GetGenerator<HighGuid::Item>().Generate();
+                    guidlow += guidlow < 200000 ? 200000 : 0;
+                    itemProto = sObjectMgr->CreateItemTemplate(guidlow, itemId);
+
+                    CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
+                    sScriptMgr->GenerateItem(custom, this);
+                    itemProto = custom->_GetInfo();
+                    itemId = guidlow;
+                }
                 Item* item = StoreNewItem(dest, itemId, true);
                 SendNewItem(item, quest->RewardChoiceItemCount[reward], true, false, false, false);
 
@@ -723,6 +734,17 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
                 ItemPosCountVec dest;
                 if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, quest->RewardItemIdCount[i]) == EQUIP_ERR_OK)
                 {
+                    auto itemProto = sObjectMgr->GetItemTemplate(itemId);
+                    if (itemProto->Quality >= ITEM_QUALITY_UNCOMMON && (itemProto->Class == ITEM_CLASS_ARMOR || itemProto->Class == ITEM_CLASS_WEAPON)) {
+                        auto guidlow = sObjectMgr->GetGenerator<HighGuid::Item>().Generate();
+                        guidlow += guidlow < 200000 ? 200000 : 0;
+                        itemProto = sObjectMgr->CreateItemTemplate(guidlow, itemId);
+
+                        CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
+                        sScriptMgr->GenerateItem(custom, this);
+                        itemProto = custom->_GetInfo();
+                        itemId = guidlow;
+                    }
                     Item* item = StoreNewItem(dest, itemId, true);
                     SendNewItem(item, quest->RewardItemIdCount[i], true, false, false, false);
 

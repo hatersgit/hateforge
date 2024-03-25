@@ -329,7 +329,6 @@ void ThreatMgr::AddThreat(Unit* target, float amount, SpellInfo const* spell, bo
     // while riding a vehicle, all threat goes to the vehicle, not the pilot
     if (Unit* vehicle = target->GetVehicleBase())
     {
-
         AddThreat(vehicle, amount, spell, ignoreModifiers, ignoreRedirects);
         if (target->HasUnitTypeMask(UNIT_MASK_ACCESSORY)) // accessories are fully treated as components of the parent and cannot have threat
             return;

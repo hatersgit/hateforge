@@ -1528,6 +1528,7 @@ void Unit::CalculateMeleeDamage(Unit* victim, CalcDamageInfo* damageInfo, Weapon
     damageInfo->attacker         = this;
     damageInfo->target           = victim;
 
+
     for (uint8 i = 0; i < MAX_ITEM_PROTO_DAMAGES; ++i)
     {
         damageInfo->damages[i].damageSchoolMask = GetMeleeDamageSchoolMask(attackType, i);
@@ -1927,6 +1928,18 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
         }
     }
 
+    uint32 replaceBy = SPELL_SCHOOL_MASK_NONE;
+    float pctReplaced = 0.f;
+    const AuraEffectList& weaponRepAuras = damageInfo->attacker->GetAuraEffectsByType(SPELL_AURA_WEAPON_DAMAGE_TO_ELEMENT);
+    if (!weaponRepAuras.empty()) {
+        for (auto aura : weaponRepAuras) {
+            pctReplaced += (float)aura->GetBaseAmount() / 100.f;
+            replaceBy |= (1 << aura->GetMiscValue());
+        }
+        pctReplaced /= weaponRepAuras.size();
+    }
+    pctReplaced = std::min(pctReplaced, 1.f);
+
     for (uint8 i = 0; i < MAX_ITEM_PROTO_DAMAGES; ++i)
     {
         if (!canTakeMeleeDamage() || (!damageInfo->damages[i].damage && !damageInfo->damages[i].absorb && !damageInfo->damages[i].resist))
@@ -1946,9 +1959,26 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
             damageInfo->damages[i].damage *= mod;
         }
 
+        if (pctReplaced) {
+
+            SpellInfo const* i_spellProto = sSpellMgr->GetSpellInfo(9000019);
+            uint32 damage = damageInfo->damages[i].damage * pctReplaced;
+            damageInfo->damages[i].damage -= damage;
+            uint32 absorb = 0;
+
+            DamageInfo dmgInfo(victim, this, damage, i_spellProto, i_spellProto->GetSchoolMask(), SPELL_DIRECT_DAMAGE, BASE_ATTACK);
+            Unit::CalcAbsorbResist(dmgInfo);
+            absorb = dmgInfo.GetAbsorb();
+
+            Unit::DealDamageMods(this, damage, &absorb);
+            Unit::DealDamage(victim, this, damage, 0, SPELL_DIRECT_DAMAGE, SpellSchoolMask(replaceBy), nullptr, true);
+            this->SendSpellNonMeleeDamageLog(victim, i_spellProto, damage, SpellSchoolMask(replaceBy), absorb, 0, false, dmgInfo.GetBlock(), dmgInfo.GetHitInfo() == HITINFO_CRITICALHIT, false);
+        }
+
         // Call default DealDamage
         CleanDamage cleanDamage(damageInfo->cleanDamage, damageInfo->damages[i].absorb, damageInfo->attackType, damageInfo->hitOutCome);
         Unit::DealDamage(this, victim, damageInfo->damages[i].damage, &cleanDamage, DIRECT_DAMAGE, SpellSchoolMask(damageInfo->damages[i].damageSchoolMask), nullptr, durabilityLoss);
+
     }
 
     // If this is a creature and it attacks from behind it has a probability to daze it's victim
@@ -15801,11 +15831,10 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
                 } while (resultCat->NextRow());
             }
 
-            if (CatnDisplay != 0) // Violet
+            if (CatnDisplay) // Violet
             {
                 return CatnDisplay;
             }
-
             else
             {
                 // Based on Hair color
@@ -15881,6 +15910,14 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
                     default: // original - Grey
                         return 8571;
                     }
+                }
+                else if (getRace() == RACE_GNOME) {
+                    std::vector<uint32> cats = { 5555, 5556, 5585, 5586, 5448 };
+                    std::random_device rd; // obtain a random number from hardware
+                    std::mt19937 gen(rd()); // seed the generator
+                    std::uniform_int_distribution<> randForm(1, cats.size());
+
+                    return cats[randForm(gen)-1];
                 }
                 else if (Player::TeamIdForRace(getRace()) == TEAM_ALLIANCE)
                     return 892;

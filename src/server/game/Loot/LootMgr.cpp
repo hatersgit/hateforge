@@ -1722,6 +1722,12 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, 
     }
 
     bool gearGranted = false;
+    if (auto cre = source->ToCreature()) {
+        if (source->GetMap()->IsDungeon() || source->GetMap()->IsRaid()) {
+
+        }
+    }
+
     // Rolling non-grouped items
     for (auto i = Entries.begin(); i != Entries.end(); ++i)
     {
@@ -1765,6 +1771,7 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, 
             }
             loot.AddItem(*item);                // Chance is already checked, just add
         }
+
     }
 
     // Now processing groups

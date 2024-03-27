@@ -2101,8 +2101,10 @@ void World::SetInitialWorldSettings()
     LOG_INFO("server.loading", "Load xmog enchants...");
     Transmogrification::instance().LoadEnchants();
 
-    //hater: area events
+    // hater: area events
     sObjectMgr->LoadAreaScripts();
+    // hater: farming
+    sObjectMgr->LoadFarmData();
 
     // pussywizard:
     LOG_INFO("server.loading", "Deleting Invalid Mail Items...");

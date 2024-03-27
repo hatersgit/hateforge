@@ -11033,6 +11033,18 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorguid, uint32 vendorslot, uin
         return false;
     }
 
+    auto genId = item;
+    if (pProto->Quality >= ITEM_QUALITY_UNCOMMON && (pProto->Class == ITEM_CLASS_ARMOR || pProto->Class == ITEM_CLASS_WEAPON)) {
+        auto guidlow = sObjectMgr->GetGenerator<HighGuid::Item>().Generate();
+        guidlow += guidlow < 200000 ? 200000 : 0;
+        pProto = sObjectMgr->CreateItemTemplate(guidlow, item);
+
+        CustomItemTemplate* custom = new CustomItemTemplate(pProto);
+        sScriptMgr->GenerateItem(custom, this);
+        pProto = custom->_GetInfo();
+        genId = guidlow;
+    }
+
     if (!(pProto->AllowableClass & getClassMask()) && pProto->Bonding == BIND_WHEN_PICKED_UP && !IsGameMaster())
     {
         SendBuyError(BUY_ERR_CANT_FIND_ITEM, nullptr, item, 0);
@@ -11162,7 +11174,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorguid, uint32 vendorslot, uin
 
     if ((bag == NULL_BAG && slot == NULL_SLOT) || IsInventoryPos(bag, slot))
     {
-        if (!_StoreOrEquipNewItem(vendorslot, item, count, bag, slot, price, pProto, creature, crItem, true))
+        if (!_StoreOrEquipNewItem(vendorslot, genId, count, bag, slot, price, pProto, creature, crItem, true))
             return false;
     }
     else if (IsEquipmentPos(bag, slot))
@@ -11172,7 +11184,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorguid, uint32 vendorslot, uin
             SendEquipError(EQUIP_ERR_ITEM_CANT_BE_EQUIPPED, nullptr, nullptr);
             return false;
         }
-        if (!_StoreOrEquipNewItem(vendorslot, item, count, bag, slot, price, pProto, creature, crItem, false))
+        if (!_StoreOrEquipNewItem(vendorslot, genId, count, bag, slot, price, pProto, creature, crItem, false))
             return false;
     }
     else

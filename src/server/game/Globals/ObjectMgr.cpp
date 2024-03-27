@@ -31,6 +31,7 @@
 #include "DBCStructure.h"
 #include "DatabaseEnv.h"
 #include "DisableMgr.h"
+#include "FarmMgr.h"
 #include "GameEventMgr.h"
 #include "GameObjectAIFactory.h"
 #include "GameTime.h"
@@ -6768,6 +6769,12 @@ void ObjectMgr::LoadAreaScripts()
 
     LOG_INFO("server.loading", ">> Loaded {} Area Scripts in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
     LOG_INFO("server.loading", " ");
+}
+
+void ObjectMgr::LoadFarmData()
+{
+    sFarmMgr->LoadCrops();
+    sFarmMgr->LoadPlayerFarms();
 }
 
 uint32 ObjectMgr::GetNearestTaxiNode(float x, float y, float z, uint32 mapid, uint32 teamId)

@@ -1875,6 +1875,7 @@ public:
     // hater: world tier creature map for pathing etc..
     std::unordered_map<uint32 /*ct entry*/, std::vector<uint32 /*guid*/>> _worldTierCreatureInstances;
     void LoadAreaScripts();
+    void LoadFarmData();
 
     std::unordered_map< uint32 /*map id*/, std::unordered_map<uint32 /*id*/, WorldSafeLocsEntry*>> _worldSafeLocs;
 private:

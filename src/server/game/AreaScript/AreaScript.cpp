@@ -25,6 +25,7 @@
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
+#include "Farm.h"
             
 void SendHotSpotPOI(Player* player, AreaTableEntry const* entry) {
     std::string location = entry->area_name[0];
@@ -50,9 +51,10 @@ void AreaScript::OnPlayerEnter(Player* player)
 {
     if (sAreaScriptMgr->IsHotSpot(_parentZone, _zone))
         player->AddAura(HOTSPOT_XP, player);
-    
+
     if (AreaTableEntry const* entry = sAreaTableStore.LookupEntry(sAreaScriptMgr->GetHotspotForZone(_parentZone)))
         SendHotSpotPOI(player, entry);
+
 }
 
 void AreaScript::OnPlayerExit(Player* player)

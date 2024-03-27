@@ -1970,8 +1970,8 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
             Unit::CalcAbsorbResist(dmgInfo);
             absorb = dmgInfo.GetAbsorb();
 
-            Unit::DealDamageMods(this, damage, &absorb);
-            Unit::DealDamage(victim, this, damage, 0, SPELL_DIRECT_DAMAGE, SpellSchoolMask(replaceBy), nullptr, true);
+            Unit::DealDamageMods(victim, damage, &absorb);
+            Unit::DealDamage(this, victim, damage, 0, SPELL_DIRECT_DAMAGE, SpellSchoolMask(replaceBy), nullptr, true);
             this->SendSpellNonMeleeDamageLog(victim, i_spellProto, damage, SpellSchoolMask(replaceBy), absorb, 0, false, dmgInfo.GetBlock(), dmgInfo.GetHitInfo() == HITINFO_CRITICALHIT, false);
         }
 

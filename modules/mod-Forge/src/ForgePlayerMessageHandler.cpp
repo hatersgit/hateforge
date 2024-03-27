@@ -335,7 +335,7 @@ public:
         if (slot != fc->_forgeItemSlotValues.end()) {
             float slotmod = slot->second;
             int maxIlvlBase = sConfigMgr->GetIntDefault("WorldTier.base.level", 80);
-            int baseIlvl = itemProto->GetItemLevel() > 70 && maxIlvlBase > 70 ? maxIlvlBase : itemProto->GetItemLevel();
+            int baseIlvl = itemProto->GetItemLevel() > 80 ? maxIlvlBase : itemProto->GetItemLevel();
 
             float ilvl = baseIlvl + uint8(owner->GetWorldTier() - 1) * 10.f;
             itemProto->SetItemLevel(ilvl);

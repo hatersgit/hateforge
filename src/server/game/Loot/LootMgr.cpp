@@ -587,7 +587,7 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
             {
                 if (player->IsAtLootRewardDistance(lootSource ? lootSource : lootOwner))
                 {
-                    tab->Process(*this, store, lootMode, player, 0, true);
+                    tab->Process(*this, store, lootMode, player, 0, true, lootSource);
                     FillNotNormalLootFor(player);
                 }
             }
@@ -602,7 +602,7 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     }
     // ... for personal loot
     else {
-        tab->Process(*this, store, lootMode, lootOwner, 0, true);
+        tab->Process(*this, store, lootMode, lootOwner, 0, true, lootSource);
         FillNotNormalLootFor(lootOwner);
     }
 
@@ -1272,7 +1272,7 @@ void LootTemplate::LootGroup::AddEntry(LootStoreItem* item)
 LootStoreItem* LootTemplate::LootGroup::Roll(Loot& loot, Player const* player, LootStore const& store, uint16 lootMode) const
 {
     LootStoreItemList possibleLoot = ExplicitlyChanced;
-    possibleLoot.remove_if(LootGroupInvalidSelector(loot, lootMode));
+    std::remove_if(possibleLoot.begin(), possibleLoot.end(), LootGroupInvalidSelector(loot, lootMode));
 
     if (!possibleLoot.empty())                             // First explicitly chanced entries are checked
     {
@@ -1299,7 +1299,7 @@ LootStoreItem* LootTemplate::LootGroup::Roll(Loot& loot, Player const* player, L
         return nullptr;
 
     possibleLoot = EqualChanced;
-    possibleLoot.remove_if(LootGroupInvalidSelector(loot, lootMode));
+    std::remove_if(possibleLoot.begin(), possibleLoot.end(), LootGroupInvalidSelector(loot, lootMode));
     if (!possibleLoot.empty())                              // If nothing selected yet - an item is taken from equal-chanced part
         return Acore::Containers::SelectRandomContainerElement(possibleLoot);
 
@@ -1722,11 +1722,29 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, 
     }
 
     bool gearGranted = false;
-    if (auto cre = source->ToCreature()) {
-        if (source->GetMap()->IsDungeon() || source->GetMap()->IsRaid()) {
+    if (source)
+        if (auto cre = source->ToCreature()) {
+            if (source->GetMap()->IsDungeon() || source->GetMap()->IsRaid() || cre->isWorldBoss()) {
+                std::random_device rd; // obtain a random number from hardware
+                std::mt19937 gen(rd()); // seed the generator
+                std::uniform_int_distribution<> lootDrop(0, Entries.size()-1);
+                auto lootDropped = Entries[lootDrop(gen)];
 
+                auto itemProto = sObjectMgr->GetItemTemplate(lootDropped->itemid);
+
+                auto guidlow = sObjectMgr->GetGenerator<HighGuid::Item>().Generate();
+                guidlow += guidlow < 200000 ? 200000 : 0;
+                itemProto = sObjectMgr->CreateItemTemplate(guidlow, lootDropped->itemid);
+
+                CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
+                sScriptMgr->GenerateItem(custom, player);
+                itemProto = custom->_GetInfo();
+                lootDropped->itemid = guidlow;
+                lootDropped->lootOwner = player->GetGUID();
+                loot.AddItem(*lootDropped);
+                return;
+            }
         }
-    }
 
     // Rolling non-grouped items
     for (auto i = Entries.begin(); i != Entries.end(); ++i)

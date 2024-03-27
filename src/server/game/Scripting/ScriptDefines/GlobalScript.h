@@ -39,7 +39,7 @@ public:
     virtual void OnAfterCalculateLootGroupAmount(Player const* /*player*/, Loot& /*loot*/, uint16 /*lootMode*/, uint32& /*groupAmount*/, LootStore const& /*store*/) { }
     virtual void OnBeforeDropAddItem(Player const* /*player*/, Loot& /*loot*/, bool /*canRate*/, uint16 /*lootMode*/, LootStoreItem* /*LootStoreItem*/, LootStore const& /*store*/) { }
     virtual bool OnItemRoll(Player const* /*player*/, LootStoreItem const* /*LootStoreItem*/, float& /*chance*/, Loot& /*loot*/, LootStore const& /*store*/) { return true; };
-    virtual bool OnBeforeLootEqualChanced(Player const* /*player*/, std::list<LootStoreItem*> /*EqualChanced*/, Loot& /*loot*/, LootStore const& /*store*/) { return true; }
+    virtual bool OnBeforeLootEqualChanced(Player const* /*player*/, std::vector<LootStoreItem*> /*EqualChanced*/, Loot& /*loot*/, LootStore const& /*store*/) { return true; }
     virtual void OnInitializeLockedDungeons(Player* /*player*/, uint8& /*level*/, uint32& /*lockData*/, lfg::LFGDungeonData const* /*dungeon*/) { }
     virtual void OnAfterInitializeLockedDungeons(Player* /*player*/) { }
 

@@ -1129,6 +1129,7 @@ public:
 
     // hater: custom items
     std::unordered_map<InventoryType, float /*value*/> _forgeItemSlotValues;
+    std::unordered_map<InventoryType, uint8 /*slots*/> _genItemSlotsForEquipSlot;
     std::unordered_map<ItemModType, float /*value*/> _forgeItemStatValues;
     std::unordered_map<uint8, std::vector<ItemModType>> _forgeItemSecondaryStatPools;
 
@@ -1303,6 +1304,7 @@ private:
         AddItemSlotValue();
         AddItemStatValue();
         AddItemStatPools();
+        AddGemSlotsForItemSlot();
 
         // hater: perks
         AddPerks();
@@ -2185,6 +2187,24 @@ private:
             float value = valuesFields[1].Get<float>();
 
             _forgeItemStatValues[stat] = value;
+        } while (values->NextRow());
+    }
+
+    void AddGemSlotsForItemSlot() {
+        _genItemSlotsForEquipSlot.clear();
+
+        QueryResult values = WorldDatabase.Query("select * from `acore_world`.`gen_item_slots`");
+
+        if (!values)
+            return;
+
+        do
+        {
+            Field* valuesFields = values->Fetch();
+            InventoryType inv = InventoryType(valuesFields[0].Get<uint32>());
+            uint8 slots = valuesFields[1].Get<uint8>();
+
+            _genItemSlotsForEquipSlot[inv] = slots;
         } while (values->NextRow());
     }
 

@@ -320,6 +320,17 @@ public:
 
         ItemModType stats[MAINSTATS] = { ITEM_MOD_STRENGTH, ITEM_MOD_AGILITY, ITEM_MOD_INTELLECT };
 
+        auto gemSlots = fc->_genItemSlotsForEquipSlot.find(InventoryType(invType));
+        if (gemSlots != fc->_genItemSlotsForEquipSlot.end()) {
+            std::vector<SocketColor> sockets = {SocketColor::SOCKET_COLOR_BLUE, SocketColor::SOCKET_COLOR_RED, SocketColor::SOCKET_COLOR_YELLOW };
+            std::uniform_int_distribution<> socketpicker(0, sockets.size()-1);
+            auto slots = gemSlots->second;
+
+            for (int i = 0; i < slots; i++) {
+                itemProto->SetSocketColor(i, sockets[socketpicker(gen)]);
+            }
+        }
+
         auto slot = fc->_forgeItemSlotValues.find(InventoryType(invType));
         if (slot != fc->_forgeItemSlotValues.end()) {
             float slotmod = slot->second;

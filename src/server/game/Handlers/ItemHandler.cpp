@@ -363,10 +363,6 @@ bool ItemTemplate::HasStat(ItemModType stat) const
 
 WorldPacket* ItemTemplate::GetQueryData()
 {
-    if (m_isDirty)
-    {
-        InitializeQueryData();
-    }
     return &queryData;
 }
 

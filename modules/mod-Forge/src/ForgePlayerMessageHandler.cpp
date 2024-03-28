@@ -173,6 +173,15 @@ public:
         fc->UpdateCharacters(accountId, nullptr);
     }
 
+    bool CanRepopAtGraveyard(Player* player) override
+    {
+        if (player) {
+            if (auto script = player->GetInstanceScript())
+                return !script->IsEncounterInProgress();
+        }
+        return false;
+    }
+
     // receive message from client
     // since we sent the messag to ourselves the server will not route it back to the player.
     void OnBeforeSendChatMessage(Player* player, uint32& type, uint32& lang, std::string& msg) override

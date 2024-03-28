@@ -15,6 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AreaScript.h"
+
 class Player;
 class GameObject;
 class Creature;
@@ -67,6 +69,13 @@ public:
         }
     }
 
+    uint32 GetRandomMobAffix() {
+        std::random_device rd; // obtain a random number from hardware
+        std::mt19937 gen(rd()); // seed the generator
+        std::uniform_int_distribution<> hotspotRng(0, _mobAffixes.size() - 1);
+        return _mobAffixes[hotspotRng(gen)];
+    }
+
 private:
     std::unordered_map<uint32/*zoneId*/, AreaScript*> _scriptMap;
     uint32 m_UpdateTimer;
@@ -115,6 +124,8 @@ private:
         {41, {2558, 2560, 2561, 2562, 2697, 2837, 2937, 2938}},
         {1377, {2477, 2737, 2738, 2739, 2740, 2741, 2742, 2743, 2744, 3077, 3097, 3098, 3099, 3100, 3425, 3426, 3427, 3446, 3447}}
     };
+
+    std::vector<uint32> _mobAffixes = { EMPOWERED, GHOSTLY, FANATIC, BERSERKER, POSSESSED, FIERY };
 };
 
 #define sAreaScriptMgr AreaScriptMgr::instance()

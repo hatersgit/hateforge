@@ -16,6 +16,7 @@
  */
 
 #include "InstanceScript.h"
+#include "AreaScriptMgr.h"
 #include "ChallengeModeMgr.h"
 #include "Creature.h"
 #include "DatabaseEnv.h"
@@ -38,6 +39,42 @@ struct MapChallengeModeEntry;
 
 uint32 GO_REWARD_CHEST = 1000001;
 uint64 GO_KEY_START = 1000000;
+
+uint32 DAMAGE_BONUS_AURA = 9000022;
+
+class WorldTierWorker
+{
+public:
+    WorldTierWorker(InstanceScript* instance) : _instance(instance) { }
+
+    void Visit(std::unordered_map<ObjectGuid, Creature*>& creatureMap)
+    {
+        for (auto const& p : creatureMap)
+        {
+            auto cre = p.second;
+            if (cre->IsInWorld() && !cre->IsPet())
+            {
+                cre->SetMaxHealth(cre->GetCreateHealth() * _instance->GetWTScalingMult());
+
+                if (cre->HasAura(DAMAGE_BONUS_AURA))
+                    cre->RemoveAura(DAMAGE_BONUS_AURA);
+
+                int32 bp0 = int32(100.f * _instance->GetWTScalingMult());
+                cre->CastCustomSpell(cre, DAMAGE_BONUS_AURA, &bp0, nullptr, nullptr, true, nullptr);
+
+                float chance = cre->isWorldBoss() ? 100.f : 10.f;
+                if (roll_chance_f(chance))
+                    cre->CastSpell(cre, sAreaScriptMgr->GetRandomMobAffix(), true);
+            }
+        }
+    }
+
+    template<class T>
+    void Visit(std::unordered_map<ObjectGuid, T*>&) { }
+
+private:
+    InstanceScript* _instance;
+};
 
 BossBoundaryData::~BossBoundaryData()
 {
@@ -69,10 +106,6 @@ void InstanceScript::OnCreatureCreate(Creature* creature)
 
         creature->SetLevel(DEFAULT_MAX_LEVEL);
     }
-
-    if (IsChallengeModeStarted())
-        if (!creature->IsPet())
-            CastChallengeCreatureSpell(creature);
 
     AddObject(creature);
     AddMinion(creature);
@@ -175,18 +208,45 @@ void InstanceScript::OnPlayerEnter(Player* player)
 
         _firstEntry = false;
     }
+
+    if (!IsEncounterInProgress())
+        CalcNewDifficulty();
+
+    player->SetPhaseMask(1, true);;
 }
 
 void InstanceScript::OnPlayerExit(Player* player)
 {
     player->RemoveAurasDueToSpell(SPELL_CHALLENGER_BURDEN);
 
+    if (!IsEncounterInProgress())
+        CalcNewDifficulty();
+
     if (instance->IsDungeon()) {
         Map::PlayerList const& plrList = instance->GetPlayers();
 
-        if (plrList.getSize() - 1 < 1)
+        if (plrList.IsEmpty())
             _firstEntry = true;
     }
+
+    player->SetPhaseMask(1 << (15 + player->GetWorldTier()), true);;
+}
+
+void InstanceScript::CalcNewDifficulty() {
+    auto accWT = 1.f;
+
+    Map::PlayerList const& plrList = instance->GetPlayers();
+    if (!plrList.IsEmpty()) {
+        for (Map::PlayerList::const_iterator i = plrList.begin(); i != plrList.end(); ++i)
+            if (Player* player = i->GetSource()) {
+                accWT += float(player->GetWorldTier());
+            }
+        SetAverageWorldTier(accWT/plrList.getSize());
+    }
+
+    WorldTierWorker worker(this);
+    TypeContainerVisitor<WorldTierWorker, MapStoredObjectTypesContainer> visitor(worker);
+    visitor.Visit(instance->GetObjectsStore());
 }
 
 void InstanceScript::OnPlayerDeath(Player* /*player*/)

@@ -127,7 +127,10 @@ public:
             if (foundLoadout == fc->_playerActiveTalentLoadouts.end()) {
                 fc->EchosDefaultLoadout(player);
             }
-            player->SendForgeUIMsg(ForgeTopic::SEND_MAX_WORLD_TIER, std::to_string(fc->GetCharWorldTierUnlock(player)));
+            if (fc->GetCharWorldTierUnlock(player) > fc->GetAccountWorldTierUnlock(player))
+                fc->SetAccountWorldTierUnlock(player, fc->GetCharWorldTierUnlock(player));
+
+            player->SendForgeUIMsg(ForgeTopic::SEND_MAX_WORLD_TIER, std::to_string(std::max(fc->GetCharWorldTierUnlock(player), fc->GetAccountWorldTierUnlock(player))));
             fc->RecalculateShardBonuses(player);
         }
     }
@@ -233,17 +236,23 @@ public:
                         case WORLD_TIER_2: {
                             ChatHandler(player->GetSession()).SendSysMessage("|cffBC961CYou have unlocked World Tier 3.");
                             fc->SetCharWorldTierUnlock(player, tier + 1);
+                            fc->SetAccountWorldTierUnlock(player, tier);
                             break;
                         }
                         case WORLD_TIER_3: {
                             ChatHandler(player->GetSession()).SendSysMessage("|cffBC961CYou have unlocked World Tier 4.");
                             fc->SetCharWorldTierUnlock(player, tier + 1);
+                            fc->SetAccountWorldTierUnlock(player, tier);
                             break;
                         }
                         }
                         player->SendForgeUIMsg(ForgeTopic::SEND_MAX_WORLD_TIER, std::to_string(fc->GetCharWorldTierUnlock(player)));
                     }
-                    player->AddItem(RewardItems::TOKEN_OF_PRESTIGE, 1);
+                    auto rewarded = 1;
+                    if (tier > 2) {
+                        rewarded++;
+                    }
+                    player->AddItem(RewardItems::TOKEN_OF_PRESTIGE, rewarded);
                 }
             }
 

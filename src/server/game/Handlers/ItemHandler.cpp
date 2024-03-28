@@ -557,6 +557,8 @@ void ItemTemplate::InitializeQueryData()
     queryData << Duration;                           // added in 2.4.2.8209, duration (seconds)
     queryData << ItemLimitCategory;                  // WotLK, ItemLimitCategory
     queryData << HolidayId;                          // Holiday.dbc?
+
+    m_isDirty = false;
 }
 
 // Only _static_ data send in this packet !!!

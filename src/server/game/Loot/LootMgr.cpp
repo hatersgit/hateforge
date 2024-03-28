@@ -1741,7 +1741,10 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, 
                             itemProto = sObjectMgr->CreateItemTemplate(guidlow, lootDropped->itemid);
 
                             CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
-                            sScriptMgr->GenerateItem(custom, player);
+                            float ilvlmod = 0.f;
+                            if (auto script = cre->GetInstanceScript())
+                                ilvlmod = script->GetAverageWorldTier();
+                            sScriptMgr->GenerateItem(custom, player, ilvlmod);
                             itemProto = custom->_GetInfo();
                             lootDropped->itemid = guidlow;
                             lootDropped->lootOwner = player->GetGUID();

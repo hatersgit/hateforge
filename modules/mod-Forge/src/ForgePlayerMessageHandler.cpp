@@ -323,7 +323,7 @@ public:
     {
     }
 
-    void GenerateItem(CustomItemTemplate* itemProto, Player const* owner) override
+    void GenerateItem(CustomItemTemplate* itemProto, Player const* owner, float ilvlmod) override
     {
         std::random_device rd; // obtain a random number from hardware
         std::mt19937 gen(rd()); // seed the generator
@@ -355,7 +355,7 @@ public:
             int maxIlvlBase = sConfigMgr->GetIntDefault("WorldTier.base.level", 80);
             int baseIlvl = itemProto->GetItemLevel() > maxIlvlBase ? maxIlvlBase : itemProto->GetItemLevel();
 
-            float ilvl = baseIlvl + uint8(owner->GetWorldTier() - 1) * 10.f;
+            float ilvl = ilvlmod ? baseIlvl + ilvlmod * 10.f : baseIlvl + uint8(owner->GetWorldTier() - 1) * 10.f;
             itemProto->SetItemLevel(ilvl);
             itemProto->SetRequiredLevel(1);
             itemProto->SetAllowableClass(CLASSMASK_ALL_PLAYABLE);

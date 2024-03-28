@@ -127,8 +127,9 @@ public:
             if (foundLoadout == fc->_playerActiveTalentLoadouts.end()) {
                 fc->EchosDefaultLoadout(player);
             }
-            if (fc->GetCharWorldTierUnlock(player) > fc->GetAccountWorldTierUnlock(player))
-                fc->SetAccountWorldTierUnlock(player, fc->GetCharWorldTierUnlock(player));
+
+            if (fc->GetCharWorldTierUnlock(player) > fc->GetAccountWorldTierUnlock(player) && fc->GetCharWorldTierUnlock(player) > WORLD_TIER_2)
+                fc->SetAccountWorldTierUnlock(player, fc->GetCharWorldTierUnlock(player) - 1);
 
             player->SendForgeUIMsg(ForgeTopic::SEND_MAX_WORLD_TIER, std::to_string(std::max(fc->GetCharWorldTierUnlock(player), fc->GetAccountWorldTierUnlock(player))));
             fc->RecalculateShardBonuses(player);

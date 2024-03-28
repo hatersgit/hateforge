@@ -1492,16 +1492,18 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss,
         return;
     }
 
-    if (GetTypeId() != TYPEID_PLAYER) {
-        float mod = 1;
-        if (auto owner = GetOwner()) {
-            if (owner->GetTypeId() != TYPEID_PLAYER)
+    if (IsOutdoors()) {
+        if (GetTypeId() != TYPEID_PLAYER) {
+            float mod = 1;
+            if (auto owner = GetOwner()) {
+                if (owner->GetTypeId() != TYPEID_PLAYER)
+                    mod = 1 + std::pow(1.43f, GetWorldTier() + 1.2) - 2.19f;
+            }
+            else
                 mod = 1 + std::pow(1.43f, GetWorldTier() + 1.2) - 2.19f;
-        }
-        else
-            mod = 1 + std::pow(1.43f, GetWorldTier() + 1.2) - 2.19f;
 
-        damageInfo->damage *= mod;
+            damageInfo->damage *= mod;
+        }
     }
 
     // Call default DealDamage
@@ -1946,17 +1948,18 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
         {
             continue;
         }
-
-        if (GetTypeId() != TYPEID_PLAYER) {
-            float mod = 1;
-            if (auto owner = GetOwner()) {
-                if (owner->GetTypeId() != TYPEID_PLAYER)
+        if (IsOutdoors()) {
+            if (GetTypeId() != TYPEID_PLAYER) {
+                float mod = 1;
+                if (auto owner = GetOwner()) {
+                    if (owner->GetTypeId() != TYPEID_PLAYER)
+                        mod = 1 + std::pow(1.43f, GetWorldTier() + 1.2) - 2.19f;
+                }
+                else
                     mod = 1 + std::pow(1.43f, GetWorldTier() + 1.2) - 2.19f;
-            }
-            else
-                mod = 1 + std::pow(1.43f, GetWorldTier() + 1.2) - 2.19f;
 
-            damageInfo->damages[i].damage *= mod;
+                damageInfo->damages[i].damage *= mod;
+            }
         }
 
         if (pctReplaced) {
@@ -12400,15 +12403,17 @@ void Unit::SetMaxHealth(uint32 val)
     if (!val)
         val = 1;
 
-    if (GetTypeId() != TYPEID_PLAYER) {
-        float mod = 1;
-        if (auto owner = GetOwner()) {
-            if (owner->GetTypeId() != TYPEID_PLAYER)
+    if (IsOutdoors()) {
+        if (GetTypeId() != TYPEID_PLAYER) {
+            float mod = 1;
+            if (auto owner = GetOwner()) {
+                if (owner->GetTypeId() != TYPEID_PLAYER)
+                    mod = 1 + std::pow(1.43f, GetWorldTier() + 1.2) - 2.19f;
+            }
+            else
                 mod = 1 + std::pow(1.43f, GetWorldTier() + 1.2) - 2.19f;
+            val = val * mod;
         }
-        else
-            mod = 1 + std::pow(1.43f, GetWorldTier() + 1.2) - 2.19f;
-        val = val * mod;
     }
 
     uint32 health = GetHealth();

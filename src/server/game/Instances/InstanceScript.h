@@ -327,6 +327,18 @@ public:
     void SetChallengeDoorPos(Position pos) { _challengeModeDoorPosition = pos; }
     void SpawnChallengeModeRewardChest(Position);
 
+    void SetAverageWorldTier(float wt) {
+        averageWorldTier = wt;
+        scalingBasedOnAvgWT = 1 + std::pow(1.43f, wt + 1.2) - 2.19f;
+    }
+    float GetAverageWorldTier() {
+        return averageWorldTier;
+    }
+
+    float GetWTScalingMult() {
+        return scalingBasedOnAvgWT;
+    }
+
     ChallengeModeCriteria* GetCriteria() {
         return _challengeModeCriteria;
     }
@@ -366,6 +378,8 @@ protected:
     void WritePersistentData(std::ostringstream& data);
     virtual void WriteSaveDataMore(std::ostringstream& /*data*/) { }
 
+    void CalcNewDifficulty();
+
 private:
     static void LoadObjectData(ObjectData const* creatureData, ObjectInfoMap& objectInfo);
 
@@ -397,6 +411,9 @@ private:
     uint32 tierOneAffix;
     uint32 tierTwoAffix = 0;
     uint32 tierThreeAffix = 0;
+
+    float averageWorldTier = 1.f;
+    float scalingBasedOnAvgWT = 1.f;
 };
 
 #endif

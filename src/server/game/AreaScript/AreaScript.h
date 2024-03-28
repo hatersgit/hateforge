@@ -24,19 +24,19 @@
 #include "ZoneScript.h"
 #include <array>
 
-class GameObject;
-
 enum AreaScriptAuras {
-    CHAMPION    = 9000010,
-    EMPOWERED   = 9000011,
-    GHOSTLY     = 9000012,
-    FANATIC     = 9000013,
-    BERSERKER   = 9000014,
-    POSSESSED   = 9000015,
-    FIERY       = 9000021,
+    CHAMPION = 9000010,
+    EMPOWERED = 9000011,
+    GHOSTLY = 9000012,
+    FANATIC = 9000013,
+    BERSERKER = 9000014,
+    POSSESSED = 9000015,
+    FIERY = 9000021,
 
-    HOTSPOT_XP  = 1000000,
+    HOTSPOT_XP = 1000000,
 };
+
+class GameObject;
 
 class AreaScript : public ZoneScript
 {
@@ -102,7 +102,6 @@ private:
     uint32 _parentZone{};
 
     uint32 boss = 0;
-    std::vector<uint32> _mobAffixes = {EMPOWERED, GHOSTLY, FANATIC, BERSERKER, POSSESSED, FIERY};
 };
 
 #endif

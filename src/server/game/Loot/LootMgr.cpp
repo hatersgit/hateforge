@@ -1725,11 +1725,14 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, 
     if (source)
         if (auto cre = source->ToCreature()) {
             if (source->GetMap()->IsDungeon() || source->GetMap()->IsRaid() || cre->isWorldBoss()) {
-                if (!Entries.empty()) {
+                if (!Entries.empty() && roll_chance_i(50)) {
                     std::random_device rd; // obtain a random number from hardware
                     std::mt19937 gen(rd()); // seed the generator
                     std::uniform_int_distribution<> lootDrop(0, Entries.size() - 1);
                     auto lootDropped = Entries[lootDrop(gen)];
+                    while (lootDropped->reference) {
+                        lootDropped = Entries[lootDrop(gen)];
+                    }
 
                     if (auto itemProto = sObjectMgr->GetItemTemplate(lootDropped->itemid))
                         if (itemProto->Quality >= ITEM_QUALITY_UNCOMMON && (itemProto->Class == ITEM_CLASS_ARMOR || itemProto->Class == ITEM_CLASS_WEAPON)) {
@@ -1738,7 +1741,10 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, 
                             itemProto = sObjectMgr->CreateItemTemplate(guidlow, lootDropped->itemid);
 
                             CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
-                            sScriptMgr->GenerateItem(custom, player);
+                            float ilvlmod = 0.f;
+                            if (auto script = cre->GetInstanceScript())
+                                ilvlmod = script->GetAverageWorldTier();
+                            sScriptMgr->GenerateItem(custom, player, ilvlmod);
                             itemProto = custom->_GetInfo();
                             lootDropped->itemid = guidlow;
                             lootDropped->lootOwner = player->GetGUID();

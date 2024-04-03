@@ -574,16 +574,16 @@ public:
     void OnGiveXP(Player* player, uint32& amount, Unit* victim, uint8 source) override
     {
         if (player->getLevel() <= 9)
-            amount *= fc->GetConfig("Dynamic.XP.Rate.1-9", 10);
+            amount *= fc->GetConfig("Dynamic.XP.Rate.1-9", 15);
 
         else if (player->getLevel() <= 19)
-            amount *= fc->GetConfig("Dynamic.XP.Rate.10-19", 10);
+            amount *= fc->GetConfig("Dynamic.XP.Rate.10-19", 15);
 
         else if (player->getLevel() <= 29)
-            amount *= fc->GetConfig("Dynamic.XP.Rate.20-29", 13);
+            amount *= fc->GetConfig("Dynamic.XP.Rate.20-29", 15);
 
         else if (player->getLevel() <= 39)
-            amount *= fc->GetConfig("Dynamic.XP.Rate.30-39", 13);
+            amount *= fc->GetConfig("Dynamic.XP.Rate.30-39", 15);
 
         else if (player->getLevel() <= 49)
             amount *= fc->GetConfig("Dynamic.XP.Rate.40-49", 15);

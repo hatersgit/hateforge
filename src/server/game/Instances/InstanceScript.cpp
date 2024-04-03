@@ -233,13 +233,13 @@ void InstanceScript::OnPlayerExit(Player* player)
 }
 
 void InstanceScript::CalcNewDifficulty() {
-    auto accWT = 1.f;
+    auto accWT = 0.f;
 
     Map::PlayerList const& plrList = instance->GetPlayers();
     if (!plrList.IsEmpty()) {
         for (Map::PlayerList::const_iterator i = plrList.begin(); i != plrList.end(); ++i)
             if (Player* player = i->GetSource()) {
-                accWT += float(player->GetWorldTier());
+                accWT += float(player->GetWorldTier() - 1);
             }
         SetAverageWorldTier(accWT/plrList.getSize());
     }

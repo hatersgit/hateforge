@@ -28,6 +28,7 @@
 #include "SpellMgr.h"
 #include "Util.h"
 #include "World.h"
+#include <boost/random.hpp>
 
 static Rates const qualityToRate[MAX_ITEM_QUALITY] =
 {
@@ -580,17 +581,29 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     Group* group = lootOwner->GetGroup();
     if (!personal && group)
     {
-
+        std::vector<Player*> elligible = {};
         for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
         {
             if (Player* player = itr->GetSource()) // should actually be looted object instead of lootOwner but looter has to be really close so doesnt really matter
             {
                 if (player->IsAtLootRewardDistance(lootSource ? lootSource : lootOwner))
                 {
-                    tab->Process(*this, store, lootMode, player, 0, true, lootSource);
-                    FillNotNormalLootFor(player);
+                    elligible.push_back(player);
                 }
             }
+        }
+        int amountOfLoot = elligible.size() / 2;
+        std::vector<Player*> hasLoot = {};
+        std::sample(
+            elligible.begin(),
+            elligible.end(),
+            std::back_inserter(hasLoot),
+            amountOfLoot,
+            std::mt19937{ std::random_device{}() }
+        );
+        for (auto player : hasLoot) {
+            tab->Process(*this, store, lootMode, player, 0, true, lootSource);
+            FillNotNormalLootFor(player);
         }
 
         for (uint8 i = 0; i < items.size(); ++i)
@@ -1697,7 +1710,7 @@ bool LootTemplate::CopyConditions(LootItem* li, uint32 conditionLootId) const
 }
 
 // Rolls for every item in the template and adds the rolled items the the loot
-void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, Player const* player, uint8 groupId, bool isTopLevel, WorldObject* source) const
+void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, Player const* player, uint8 groupId, bool isTopLevel, WorldObject* source, std::vector<Player*> receivingLoot) const
 {
     bool rate = store.IsRatesAllowed();
 
@@ -1725,32 +1738,35 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, 
     if (source)
         if (auto cre = source->ToCreature()) {
             if (source->GetMap()->IsDungeon() || source->GetMap()->IsRaid() || cre->isWorldBoss()) {
-                if (!Entries.empty() && roll_chance_i(50)) {
-                    std::random_device rd; // obtain a random number from hardware
-                    std::mt19937 gen(rd()); // seed the generator
-                    std::uniform_int_distribution<> lootDrop(0, Entries.size() - 1);
-                    auto lootDropped = Entries[lootDrop(gen)];
-                    while (lootDropped->reference) {
-                        lootDropped = Entries[lootDrop(gen)];
-                    }
+                if (!Entries.empty()) {
+                    if (cre->IsDungeonBoss() || cre->isWorldBoss()) {
+                        std::vector<LootStoreItem*> copy = Entries;
+                        boost::mt19937 engine;
+                        boost::uniform_int<> unigen;
+                        boost::variate_generator<boost::mt19937, boost::uniform_int<>> gen(engine, unigen);
+                        Acore::Containers::RandomShuffle(copy);
 
-                    if (auto itemProto = sObjectMgr->GetItemTemplate(lootDropped->itemid))
-                        if (itemProto->Quality >= ITEM_QUALITY_UNCOMMON && (itemProto->Class == ITEM_CLASS_ARMOR || itemProto->Class == ITEM_CLASS_WEAPON)) {
-                            auto guidlow = sObjectMgr->GetGenerator<HighGuid::Item>().Generate();
-                            guidlow += guidlow < 200000 ? 200000 : 0;
-                            itemProto = sObjectMgr->CreateItemTemplate(guidlow, lootDropped->itemid);
+                        for (auto lootDropped : copy) {
+                            if (auto itemProto = sObjectMgr->GetItemTemplate(lootDropped->itemid)) {
+                                if (itemProto->Quality >= ITEM_QUALITY_UNCOMMON && (itemProto->Class == ITEM_CLASS_ARMOR || itemProto->Class == ITEM_CLASS_WEAPON)) {
+                                    auto guidlow = sObjectMgr->GetGenerator<HighGuid::Item>().Generate();
+                                    guidlow += guidlow < 200000 ? 200000 : 0;
+                                    itemProto = sObjectMgr->CreateItemTemplate(guidlow, lootDropped->itemid);
 
-                            CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
-                            float ilvlmod = 0.f;
-                            if (auto script = cre->GetInstanceScript())
-                                ilvlmod = script->GetAverageWorldTier();
-                            sScriptMgr->GenerateItem(custom, player, ilvlmod);
-                            itemProto = custom->_GetInfo();
-                            lootDropped->itemid = guidlow;
-                            lootDropped->lootOwner = player->GetGUID();
-                            loot.AddItem(*lootDropped);
-                            return;
+                                    CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
+                                    float ilvlmod = 0.f;
+                                    if (auto script = cre->GetInstanceScript())
+                                        ilvlmod = script->GetAverageWorldTier();
+                                    sScriptMgr->GenerateItem(custom, player, ilvlmod);
+                                    itemProto = custom->_GetInfo();
+                                    lootDropped->itemid = guidlow;
+                                    lootDropped->lootOwner = player->GetGUID();
+                                    loot.AddItem(*lootDropped);
+                                    return;
+                                }
+                            }
                         }
+                    }
                 }
             }
         }

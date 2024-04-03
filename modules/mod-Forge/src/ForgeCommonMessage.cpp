@@ -44,104 +44,114 @@ void ForgeCommonMessage::SendTalentTreeLayout(Player* player, uint32 tab)
 
 std::string ForgeCommonMessage::BuildTree(Player* player, CharacterPointType pointType, std::list<ForgeTalentTab*> tabs)
 {
-
-    for (const auto& tab : tabs)
-    {
-        std::string msg;
-
-        msg = msg + std::to_string(tab->Id) + "^" +
-            tab->Name + "^" + std::to_string(tab->SpellIconId) + "^" +
-            tab->Background + "^" +
-            tab->Description + "^" +
-            std::to_string(tab->Role) + "^" +
-            tab->SpellString + "^" +
-            std::to_string((int)tab->TalentType) + "^" +
-            std::to_string(tab->TabIndex) + "^";
-
-        int i = 0;
-
-        for (auto& talentKvp : tab->Talents)
-        {
-            if (talentKvp.second) {
-                std::string delimiter = "*";
-
-                if (i == 0)
-                    delimiter = "";
-
-                msg = msg + delimiter + std::to_string(tab->Id) + "&" +
-                    std::to_string(talentKvp.second->SpellId) + "&" +
-                    std::to_string(talentKvp.second->ColumnIndex) + "&" +
-                    std::to_string(talentKvp.second->RowIndex) + "&" +
-                    std::to_string(talentKvp.second->RankCost) + "&" +
-                    std::to_string(talentKvp.second->RequiredLevel) + "&" +
-                    std::to_string(talentKvp.second->TabPointReq) + "&" +
-                    std::to_string(talentKvp.second->NumberOfRanks) + "&" +
-                    std::to_string((int)talentKvp.second->PreReqType) + "&";
-
-                int j = 0;
-
-                for (auto& preReq : talentKvp.second->Prereqs)
-                {
-                    std::string reqDel = "@";
-
-                    if (j == 0)
-                        reqDel = "";
-
-                    msg = msg + reqDel + std::to_string(preReq->Talent) + "$" +
-                        std::to_string(preReq->TalentTabId) + "$" +
-                        std::to_string(preReq->RequiredRank);
-
-                    j++;
-                }
-
-                msg = msg + "&"; // delimit the field
-
-                j = 0;
-
-                for (auto& preReq : talentKvp.second->Ranks)
-                {
-                    std::string reqDel = "%";
-
-                    if (j == 0)
-                        reqDel = "";
-
-                    msg = msg + reqDel + std::to_string(preReq.first) + "~" +
-                        std::to_string(preReq.second);
-
-                    j++;
-                }
-
-                msg = msg + "&"; // delimit the field
-
-                j = 0;
-
-                for (auto& preReq : talentKvp.second->UnlearnSpells)
-                {
-                    std::string reqDel = "`";
-
-                    if (j == 0)
-                        reqDel = "";
-
-                    msg = msg + reqDel + std::to_string(preReq);
-
-                    j++;
-                }
-
-                msg = msg + "&" + std::to_string(talentKvp.second->nodeType) + "&"
-                    + std::to_string(talentKvp.second->nodeIndex) + "&";
-
-                for (auto& choice : talentKvp.second->Choices)
-                {
-                    std::string choiceDel = "!";
-
-                    if (j == 0)
-                        choiceDel = "";
-
-                    msg = msg + choiceDel + std::to_string(choice.second->spellId);
-                    j++;
-                }
-                i++;
+    ForgeCharacterSpec* spec;
+    if (fc->TryGetCharacterActiveSpec(player, spec)) {
+        ForgeTalentTab* tab;
+        if (spec->CharacterSpecTabId) {
+            if (fc->TryGetTalentTab(player, spec->CharacterSpecTabId, tab)) {
+                tabs.push_back(tab);
             }
+        }
+
+        std::string msg;
+        for (const auto& tab : tabs)
+        {
+
+            msg = msg + std::to_string(tab->Id) + "^" +
+                tab->Name + "^" + std::to_string(tab->SpellIconId) + "^" +
+                tab->Background + "^" +
+                tab->Description + "^" +
+                std::to_string(tab->Role) + "^" +
+                tab->SpellString + "^" +
+                std::to_string((int)tab->TalentType) + "^" +
+                std::to_string(tab->TabIndex) + "^";
+
+            int i = 0;
+
+            for (auto& talentKvp : tab->Talents)
+            {
+                if (talentKvp.second) {
+                    std::string delimiter = "*";
+
+                    if (i == 0)
+                        delimiter = "";
+
+                    msg = msg + delimiter + std::to_string(tab->Id) + "&" +
+                        std::to_string(talentKvp.second->SpellId) + "&" +
+                        std::to_string(talentKvp.second->ColumnIndex) + "&" +
+                        std::to_string(talentKvp.second->RowIndex) + "&" +
+                        std::to_string(talentKvp.second->RankCost) + "&" +
+                        std::to_string(talentKvp.second->RequiredLevel) + "&" +
+                        std::to_string(talentKvp.second->TabPointReq) + "&" +
+                        std::to_string(talentKvp.second->NumberOfRanks) + "&" +
+                        std::to_string((int)talentKvp.second->PreReqType) + "&";
+
+                    int j = 0;
+
+                    for (auto& preReq : talentKvp.second->Prereqs)
+                    {
+                        std::string reqDel = "@";
+
+                        if (j == 0)
+                            reqDel = "";
+
+                        msg = msg + reqDel + std::to_string(preReq->Talent) + "$" +
+                            std::to_string(preReq->TalentTabId) + "$" +
+                            std::to_string(preReq->RequiredRank);
+
+                        j++;
+                    }
+
+                    msg = msg + "&"; // delimit the field
+
+                    j = 0;
+
+                    for (auto& preReq : talentKvp.second->Ranks)
+                    {
+                        std::string reqDel = "%";
+
+                        if (j == 0)
+                            reqDel = "";
+
+                        msg = msg + reqDel + std::to_string(preReq.first) + "~" +
+                            std::to_string(preReq.second);
+
+                        j++;
+                    }
+
+                    msg = msg + "&"; // delimit the field
+
+                    j = 0;
+
+                    for (auto& preReq : talentKvp.second->UnlearnSpells)
+                    {
+                        std::string reqDel = "`";
+
+                        if (j == 0)
+                            reqDel = "";
+
+                        msg = msg + reqDel + std::to_string(preReq);
+
+                        j++;
+                    }
+
+                    msg = msg + "&" + std::to_string(talentKvp.second->nodeType) + "&"
+                        + std::to_string(talentKvp.second->nodeIndex) + "&";
+
+                    for (auto& choice : talentKvp.second->Choices)
+                    {
+                        std::string choiceDel = "!";
+
+                        if (j == 0)
+                            choiceDel = "";
+
+                        msg = msg + choiceDel + std::to_string(choice.second->spellId);
+                        j++;
+                    }
+                    i++;
+                }
+            }
+            msg += ";";
         }
         player->SendForgeUIMsg(ForgeTopic::TALENT_TREE_LAYOUT, msg);
     }
@@ -325,7 +335,7 @@ void ForgeCommonMessage::SendTalents(Player* player)
     if (fc->TryGetCharacterActiveSpec(player, spec))
     {
         auto pClass = player->getClass();
-        auto cSpec = spec->CharacterSpecTabId;
+        auto cSpec = 0; // TODO FIX spec->CharacterSpecTabId;
         for (auto tpt : fc->TALENT_POINT_TYPES) {
             std::string clientMsg = base64_char.substr(tpt+1, 1)+base64_char.substr(cSpec, 1)+base64_char.substr(pClass, 1);
             switch (tpt) {
@@ -357,7 +367,11 @@ void ForgeCommonMessage::SendTalents(Player* player)
                             auto specTree = spec->Talents[tab->Id];
                             auto specMap = fc->_cacheSpecNodeToSpell[tab->Id];
                             for (int i = 1; i <= specMap.size(); i++) {
-                                clientMsg += base64_char.substr(specTree[specMap[i]]->CurrentRank + 1, 1);
+                                auto search = specTree.find(specMap[i]);
+                                if (search != specTree.end())
+                                    clientMsg += base64_char.substr(specTree[specMap[i]]->CurrentRank + 1, 1);
+                                else
+                                    clientMsg += base64_char.substr(1, 1);
                             }
                         }
                     }

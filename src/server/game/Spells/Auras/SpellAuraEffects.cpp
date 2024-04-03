@@ -371,8 +371,8 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleNoImmediateEffect,                         //308 SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER implemented in Unit::isSpellCrit, ObjectAccessor::GetUnitCriticalChance
     &AuraEffect::HandleNULL,                                      //309 0 spells in 3.3.5
     &AuraEffect::HandleNoImmediateEffect,                         //310 SPELL_AURA_MOD_CREATURE_AOE_DAMAGE_AVOIDANCE implemented in Spell::CalculateDamageDone
-    &AuraEffect::HandleNULL,                                      //311 0 spells in 3.3.5
-    &AuraEffect::HandleNULL,                                      //312 0 spells in 3.3.5
+    &AuraEffect::HandleNoImmediateEffect,                         //311 SPELL_AURA_TRIGGER_SPELL_WITH_PCT_OF_TRIGGER
+    &AuraEffect::HandleNoImmediateEffect,                         //312 SPELL_AURA_EXCHANGE_SP_SCHOOLS
     &AuraEffect::HandleNoImmediateEffect,                         //313 SPELL_AURA_WEAPON_DAMAGE_TO_ELEMENT turn % of weapon damage on calc to a spell type
     &AuraEffect::HandlePreventResurrection,                       //314 SPELL_AURA_PREVENT_RESURRECTION todo
     &AuraEffect::HandleNoImmediateEffect,                         //315 SPELL_AURA_UNDERWATER_WALKING todo
@@ -413,7 +413,10 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleNoImmediateEffect,                         //350 SPELL_AURA_MOD_TAXI_FLIGHT_SPEED
     &AuraEffect::HandleAuraModForgeStat,                          //351 SPELL_AURA_MOD_FORGE_STAT
     &AuraEffect::HandleNoImmediateEffect,                         //352 SPELL_AURA_MOD_RESTED_XP_MAX_AMOUNT implemented in Player::SetRestBonus, Spell::EffectGiveRestedExperience
-    &AuraEffect::HandleNoImmediateEffect,                         //355 SPELL_AURA_MOD_RESTED_XP_RECOVERY_RATE implemented in Player::Update
+    &AuraEffect::HandleNULL,                                      // placeholder
+    &AuraEffect::HandleNoImmediateEffect,                         //354 SPELL_AURA_MOD_RESTED_XP_RECOVERY_RATE implemented in Player::Update
+    &AuraEffect::HandleNoImmediateEffect,                         //355 SPELL_AURA_PROC_TRIGGER_LEAP
+    &AuraEffect::HandleNoImmediateEffect,                         //356 SPELL_AURA_PROC_MANASTEAL
 };
 
 AuraEffect::AuraEffect(Aura* base, uint8 effIndex, int32* baseAmount, Unit* caster):
@@ -482,6 +485,7 @@ int32 AuraEffect::GetMiscValue() const
 
 AuraType AuraEffect::GetAuraType() const
 {
+
     return (AuraType)m_spellInfo->Effects[m_effIndex].ApplyAuraName;
 }
 
@@ -1363,6 +1367,14 @@ void AuraEffect::HandleProc(AuraApplication* aurApp, ProcEventInfo& eventInfo)
         case SPELL_AURA_DUMMY:
         case SPELL_AURA_PROC_TRIGGER_SPELL:
             HandleProcTriggerSpellAuraProc(aurApp, eventInfo);
+            break;
+        case SPELL_AURA_PROC_TRIGGER_LEAP:
+            HandleProcTriggerLeap(aurApp, eventInfo);
+            break;
+        case SPELL_AURA_PROC_MANASTEAL:
+            HandleProcManaSteal(aurApp, eventInfo);
+            break;
+        case SPELL_AURA_TRIGGER_SPELL_WITH_PCT_OF_TRIGGER:
             break;
         case SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE:
             HandleProcTriggerSpellWithValueAuraProc(aurApp, eventInfo);
@@ -7739,6 +7751,59 @@ void AuraEffect::HandleProcTriggerSpellAuraProc(AuraApplication* aurApp, ProcEve
     else
     {
         LOG_ERROR("spells.aura", "AuraEffect::HandleProcTriggerSpellAuraProc: Could not trigger spell {} from aura {} proc, because the spell does not have an entry in Spell.dbc.", triggerSpellId, GetId());
+    }
+}
+
+void AuraEffect::HandleProcTriggerLeap(AuraApplication* aurApp, ProcEventInfo& eventInfo)
+{
+    Unit* triggerCaster = aurApp->GetTarget();
+    Unit* triggerTarget = eventInfo.GetProcTarget();
+
+    if (SpellInfo const* triggering = eventInfo.GetDamageInfo()->GetSpellInfo())
+    {
+        if (auto target = eventInfo.GetDamageInfo()->GetVictim()) {
+            if (auto dmgApp = target->GetAura(triggering->Id, triggerCaster->GetGUID())) {
+                auto potentialTargets = target->SelectAllNearbyNoTotemPartyAndRaid(nullptr, NOMINAL_MELEE_RANGE);
+                if (!potentialTargets.empty())
+                    for (auto tar : potentialTargets) {
+                        if (!tar->GetAuraApplication(triggering->Id, triggerCaster->GetGUID())) {
+                            auto aura = triggerCaster->AddAura(triggering->Id, tar);
+                            aura->SetDuration(dmgApp->GetDuration());
+                            break;
+                        }
+                    }
+            }
+        }
+    }
+}
+
+void AuraEffect::HandleProcManaSteal(AuraApplication* aurApp, ProcEventInfo& eventInfo)
+{
+    Unit* triggerCaster = aurApp->GetTarget();
+    Unit* triggerTarget = eventInfo.GetProcTarget();
+
+    if (eventInfo.GetSpellInfo()->SpellFamilyName != SPELLFAMILY_PERK &&
+        (eventInfo.GetDamageInfo()->GetDamageType() == DIRECT_DAMAGE
+        || eventInfo.GetDamageInfo()->GetDamageType() == SPELL_DIRECT_DAMAGE
+        || eventInfo.GetDamageInfo()->GetDamageType() == HEAL)) {
+        if (auto dealt = eventInfo.GetDamageInfo()->GetDamage()) {
+            auto pct = CalculatePct(dealt, GetSpellInfo()->Effects[m_effIndex].BasePoints);
+            triggerCaster->EnergizeBySpell(triggerCaster, GetSpellInfo(), pct, POWER_MANA);
+        }
+    }
+}
+
+void AuraEffect::HandleProcTriggerSpellWithPctOfTriggerer(AuraApplication* aurApp, ProcEventInfo& eventInfo)
+{
+    Unit* triggerCaster = aurApp->GetTarget();
+    Unit* triggerTarget = eventInfo.GetProcTarget();
+
+    if (eventInfo.GetSpellInfo()->SpellFamilyName != SPELLFAMILY_PERK) {
+        if (int32 dealt = eventInfo.GetDamageInfo()->GetDamage()) {
+            auto pct = CalculatePct(dealt, GetSpellInfo()->Effects[m_effIndex].BasePoints);
+            auto trigger = GetSpellInfo()->Effects[m_effIndex].TriggerSpell;
+            triggerCaster->CastCustomSpell(eventInfo.GetDamageInfo()->GetVictim(), trigger, &dealt, nullptr, nullptr, true);
+        }
     }
 }
 

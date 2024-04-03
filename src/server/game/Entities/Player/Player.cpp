@@ -1881,10 +1881,7 @@ void Player::Regenerate(Powers power)
                 if (sWorld->getBoolConfig(CONFIG_LOW_LEVEL_REGEN_BOOST) && GetLevel() < 15)
                     ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA) * (2.066f - (GetLevel() * 0.066f));
 
-                if (recentCast) // Trinity Updates Mana in intervals of 2s, which is correct
-                    addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * 0.001f * m_regenTimer;
-                else
-                    addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * ManaIncreaseRate * 0.001f * m_regenTimer;
+                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * ManaIncreaseRate * 0.001f * m_regenTimer;
             }
             break;
         case POWER_RAGE:                                    // Regenerate rage
@@ -1942,7 +1939,7 @@ void Player::Regenerate(Powers power)
                             addvalue += -30 * BatteryGaugeDecreaseRate;
                         }
                     }
-                    else if (getClass() == CLASS_DEMON_HUNTER)
+                    else if (getClass() == CLASS_SHAPESHIFTER)
                     {
                         float FuryDecreaseRate = sWorld->getRate(RATE_POWER_FURY_LOSS);
                         addvalue += -30 * FuryDecreaseRate;
@@ -5458,7 +5455,7 @@ float Player::GetMasteryMultiplier() const
             }
             masteryRating = 15;         // And this unlike other two is temp 15
             break;
-        case CLASS_DEMON_HUNTER:
+        case CLASS_SHAPESHIFTER:
             if (spec == TALENT_TREE_DEMON_HUNTER_VENGEANCE)
             {
                 masteryRating = 15;
@@ -16840,7 +16837,7 @@ std::string Player::GetPlayerName()
     {
         case CLASS_BARD:         color = "|cff007F6B"; break;
         case CLASS_DEATH_KNIGHT: color = "|cffC41F3B"; break;
-        case CLASS_DEMON_HUNTER: color = "|cffA330C9"; break;
+        case CLASS_SHAPESHIFTER: color = "|cffA330C9"; break;
         case CLASS_DRUID:        color = "|cffFF7D0A"; break;
         case CLASS_HUNTER:       color = "|cffABD473"; break;
         case CLASS_MAGE:         color = "|cff69CCF0"; break;

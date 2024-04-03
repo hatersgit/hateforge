@@ -371,8 +371,8 @@ enum AuraType
     SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER                   = 308,
     SPELL_AURA_309                                          = 309,
     SPELL_AURA_MOD_CREATURE_AOE_DAMAGE_AVOIDANCE            = 310,
-    SPELL_AURA_311                                          = 311,
-    SPELL_AURA_312                                          = 312,
+    SPELL_AURA_TRIGGER_SPELL_WITH_PCT_OF_TRIGGER            = 311,
+    SPELL_AURA_EXCHANGE_SP_SCHOOLS                          = 312,
     SPELL_AURA_WEAPON_DAMAGE_TO_ELEMENT                     = 313,
     SPELL_AURA_PREVENT_RESURRECTION                         = 314,
     SPELL_AURA_UNDERWATER_WALKING                           = 315,
@@ -415,6 +415,8 @@ enum AuraType
     SPELL_AURA_MOD_RESTED_XP_MAX_AMOUNT                     = 352,
     SPELL_AURA_MOD_RESTED_XP_RECOVERY_RATE                  = 353,
     SPELL_AURA_MOD_CHANGE_DAMAGE_SCHOOL_OF_SPELL            = 354,
+    SPELL_AURA_PROC_TRIGGER_LEAP                            = 355,
+    SPELL_AURA_PROC_MANASTEAL                               = 356,
     TOTAL_AURAS
 };
 

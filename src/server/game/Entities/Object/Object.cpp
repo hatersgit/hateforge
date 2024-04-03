@@ -1837,8 +1837,14 @@ bool WorldObject::CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth, boo
                 return false;
             }
 
-            if (GameObject const* object = obj->ToGameObject()) {
-                switch (object->GetGOInfo()->entry) {
+            if (const GameObject* gob = obj->ToGameObject()) {
+                switch (gob->GetEntry()) {
+                case 1188262: {
+                    return !thisPlayer->HasQuest(90002) && thisPlayer->GetQuestStatus(90002) != QUEST_STATUS_REWARDED;
+                } break;
+                case 1186736: {
+                    return thisPlayer->HasQuest(90002);
+                } break;
                 default:
                     break;
                 }

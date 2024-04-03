@@ -264,7 +264,7 @@ uint8 Player::FindEquipSlot(ItemTemplate const* proto, uint32 slot, bool swap) c
                         slots[0] = EQUIPMENT_SLOT_RANGED;
                     break;
                 case ITEM_SUBCLASS_ARMOR_SIGIL:
-                    if (playerClass == CLASS_DEATH_KNIGHT || playerClass == CLASS_DEMON_HUNTER)
+                    if (playerClass == CLASS_DEATH_KNIGHT)
                         slots[0] = EQUIPMENT_SLOT_RANGED;
                     break;
                 case ITEM_SUBCLASS_ARMOR_INSTRUMENT:
@@ -2435,7 +2435,7 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
         }
 
         // Check for sigils.
-        if (proto->SubClass == ITEM_SUBCLASS_ARMOR_SIGIL && !(_class == CLASS_DEATH_KNIGHT || _class == CLASS_DEMON_HUNTER))
+        if (proto->SubClass == ITEM_SUBCLASS_ARMOR_SIGIL && !(_class == CLASS_DEATH_KNIGHT))
         {
             return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
         }
@@ -2470,7 +2470,7 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
                 subclassToCompare = ITEM_SUBCLASS_ARMOR_MAIL;
                 break;
             case CLASS_ROGUE:
-            case CLASS_DEMON_HUNTER:
+            case CLASS_SHAPESHIFTER:
                 if (proto->HasStat(ITEM_MOD_SPELL_POWER) || proto->HasSpellPowerStat())
                 {
                     return EQUIP_ERR_CANT_DO_RIGHT_NOW;

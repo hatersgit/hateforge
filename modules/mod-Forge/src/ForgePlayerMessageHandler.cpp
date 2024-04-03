@@ -19,7 +19,7 @@
 #include <GetCharacterSpecsHandler.cpp>
 #include <LearnTalentHandler.cpp>
 #include "ForgeCommonMessage.h"
-#include <RespecTalentsHandler.cpp>
+#include <MultiClassHandler.cpp>
 #include <UnlearnTalentHandler.cpp>
 #include <UpdateSpecHandler.cpp>
 #include <GetTalentsHandler.cpp>
@@ -200,35 +200,14 @@ public:
             uint32 levelMod = fc->GetConfig("levelMod", 2);
             if (oldlevel < currentLevel) {
                 int levelDiff = currentLevel - oldlevel;
-
-                if (currentLevel >= 10)
-                {
-                    if (oldlevel < 10 && levelDiff > 1)
-                        levelDiff -= (9 - oldlevel);
-
-                    if (levelDiff > 1) {
-                        int div = levelDiff / 2;
-                        int rem = levelDiff % 2;
-                        fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::TALENT_TREE, div);
-                        if (rem)
-                            div += 1;
-
-                        fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::CLASS_TREE, div);
-                    }
-                    else {
-                        if (currentLevel % 2)
-                            fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::TALENT_TREE, 1);
-                        else
-                            fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::CLASS_TREE, 1);
-                    }
-
-                    if (currentLevel > 40 && currentLevel < 61) { // temp tp equalizer until talent redo
-                        player->RewardExtraBonusTalentPoints(levelDiff);
-                    }
-
-                    cm->SendActiveSpecInfo(player);
-                    cm->SendTalents(player);
+                if (levelDiff > 0) {
+                    int div = levelDiff;
+                    fc->AddCharacterPointsToAllSpecs(player, CharacterPointType::TALENT_TREE, div);
                 }
+
+                cm->SendActiveSpecInfo(player);
+                cm->SendTalents(player);
+
                 cm->SendSpecInfo(player);
                 fc->UpdateCharacterSpec(player, spec);
                 LearnSpellsForLevel(player, player->GetLevel());
@@ -324,7 +303,7 @@ public:
     {
     }
 
-    void GenerateItem(CustomItemTemplate* itemProto, Player const* owner, float ilvlmod) override
+    void GenerateItem(CustomItemTemplate* itemProto, Player const* owner, float ilvlmod, bool complete) override
     {
         std::random_device rd; // obtain a random number from hardware
         std::mt19937 gen(rd()); // seed the generator
@@ -333,6 +312,19 @@ public:
         itemProto->MakeBlankSlate();
         itemProto->SetBonding(NO_BIND);
         itemProto->SetStackable(1);
+
+        if (complete) {
+            switch (itemProto->GetClass()) {
+            case ITEM_CLASS_ARMOR: {
+                if (itemProto->GetSubClass() > 0 && itemProto->GetSubClass() != ITEM_SUBCLASS_ARMOR_SHIELD) {
+                    std::uniform_int_distribution<> armorType(ITEM_SUBCLASS_ARMOR_CLOTH, ITEM_SUBCLASS_ARMOR_PLATE);
+                    itemProto->SetSubClass(armorType(gen));
+                }
+            } break;
+            case ITEM_CLASS_WEAPON:
+                break;
+            }
+        }
 
         auto e = 2.7183;
         auto invType = itemProto->GetInventoryType();
@@ -741,7 +733,6 @@ void AddForgePlayerMessageHandler()
     sTopicRouter->AddHandler(new GetTalentTreeHandler(cache, cm));
     sTopicRouter->AddHandler(new LearnTalentHandler(cache, cm));
     sTopicRouter->AddHandler(new UnlearnTalentHandler(cache, cm));
-    sTopicRouter->AddHandler(new RespecTalentsHandler(cache, cm));
     sTopicRouter->AddHandler(new UpdateSpecHandler(cache));
     sTopicRouter->AddHandler(new PrestigeHandler(cache, cm));
     sTopicRouter->AddHandler(new ActivateClassSpecHandler(cache, cm));
@@ -768,6 +759,8 @@ void AddForgePlayerMessageHandler()
 
     sTopicRouter->AddHandler(new TakePortalHandler(cache, cm));
     sTopicRouter->AddHandler(new GetPortalsHandler(cache, cm));
+
+    sTopicRouter->AddHandler(new MultiClassHandler(cache, cm));
 
     new ForgeCacheCommands();
 }

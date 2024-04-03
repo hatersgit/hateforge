@@ -395,7 +395,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
                 val2 = level * 3.0f + GetStat(STAT_STRENGTH) * 2.0f - 20.0f;
                 break;
             case CLASS_BARD:
-            case CLASS_DEMON_HUNTER:
+            case CLASS_SHAPESHIFTER:
             case CLASS_MONK:
             case CLASS_TINKER:
             case CLASS_HUNTER:

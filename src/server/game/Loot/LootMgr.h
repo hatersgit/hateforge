@@ -119,6 +119,7 @@ enum LootSlotType
     LOOT_SLOT_TYPE_OWNER                = 4,    // ignore binding confirmation and etc, for single player looting
 };
 
+class Creature;
 class Player;
 class LootStore;
 class ConditionMgr;
@@ -312,6 +313,11 @@ struct LootView;
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li);
 ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);
 
+enum InstanceLootPools {
+    DUNGEON = 77777,
+    RAID = 88888,
+};
+
 struct Loot
 {
     friend ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);
@@ -380,6 +386,10 @@ struct Loot
 
     void generateMoneyLoot(uint32 minAmount, uint32 maxAmount);
     bool FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bool personal, bool noEmptyError = false, uint16 lootMode = LOOT_MODE_DEFAULT, WorldObject* lootSource = nullptr);
+
+    // hater: custom injects
+    void GrantBossLootForWorldTier(Loot& loot, Player* player, Creature* lootSource);
+    void SelectRandomLootFromPool(Loot& loot, LootTemplate const* lootTemplate, uint32 baseIlvl, Creature* cre, Player* player);
 
     // Inserts the item into the loot (called by LootTemplate processors)
     void AddItem(LootStoreItem const& item, WorldObject* source = nullptr);

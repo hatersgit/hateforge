@@ -2889,6 +2889,9 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
                             }
                         }
                     case SPELL_AURA_PROC_TRIGGER_SPELL:
+                    case SPELL_AURA_PROC_TRIGGER_LEAP:
+                    case SPELL_AURA_PROC_MANASTEAL:
+                    case SPELL_AURA_TRIGGER_SPELL_WITH_PCT_OF_TRIGGER:
                         // many positive auras have negative triggered spells at damage for example and this not make it negative (it can be canceled for example)
                         break;
                     case SPELL_AURA_MOD_STUN:                   //have positive and negative spells, we can't sort its correctly at this moment.

@@ -4,6 +4,13 @@
 #include "Player.h"
 #include <ForgeCache.cpp>
 
+enum MultiClassOp {
+    SET = 0,
+    CLEAR = 1,
+
+    MAXOP
+};
+
 class ForgeCommonMessage
 {
 public:

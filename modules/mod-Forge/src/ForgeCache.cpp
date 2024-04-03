@@ -480,23 +480,6 @@ public:
 
     bool TryGetTalentTab(Player* player, uint32 tabId, OUT ForgeTalentTab*& tab)
     {
-        auto charRaceItt = RaceAndClassTabMap.find(player->getRace());
-
-        if (charRaceItt == RaceAndClassTabMap.end())
-            return false;
-
-        auto charClassItt = charRaceItt->second.find(player->getClass());
-
-        if (charClassItt == charRaceItt->second.end())
-            return false;
-
-        // all logic before this is to ensure player has access to the tab.
-
-        auto fttItt = charClassItt->second.find(tabId);
-
-        if (fttItt == charClassItt->second.end())
-            return false;
-
         tab = TalentTabs[tabId];
         return true;
     }

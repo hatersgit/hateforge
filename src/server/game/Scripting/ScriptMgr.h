@@ -457,7 +457,7 @@ public: /* PlayerScript */
     void OnAfterCreatureLoot(Player* player);
     void OnAfterCreatureLootMoney(Player* player);
     bool OnCanPlayerFlyInZone(Player* player, uint32 mapId, uint32 zoneId, SpellInfo const* bySpell);
-    void GenerateItem(CustomItemTemplate* itemProto, Player const* owner, float ilvlMod = 0.f);
+    void GenerateItem(CustomItemTemplate* itemProto, Player const* owner, float ilvlMod = 0.f, bool complete = false);
 
     // Anti cheat
     void AnticheatSetCanFlybyServer(Player* player, bool apply);

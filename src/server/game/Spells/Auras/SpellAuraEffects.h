@@ -367,6 +367,9 @@ public:
     void HandleRaidProcFromChargeAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
     void HandleRaidProcFromChargeWithValueAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
     void HandleAuraModTriggerSpellPowerPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+    void HandleProcTriggerLeap(AuraApplication* aurApp, ProcEventInfo& eventInfo);
+    void HandleProcManaSteal(AuraApplication* aurApp, ProcEventInfo& eventInfo);
+    void HandleProcTriggerSpellWithPctOfTriggerer(AuraApplication* aurApp, ProcEventInfo& eventInfo);
 
     // hater: charges
     void HandleAuraAddCharges(AuraApplication const* aurApp, uint8 mode, bool apply) const;

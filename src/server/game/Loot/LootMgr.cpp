@@ -16,6 +16,7 @@
  */
 
 #include "LootMgr.h"
+#include "Config.h"
 #include "Containers.h"
 #include "DisableMgr.h"
 #include "Group.h"
@@ -602,6 +603,17 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
             std::mt19937{ std::random_device{}() }
         );
         for (auto player : hasLoot) {
+            // hater: inject custom loot
+            if (lootSource)
+                if (auto cre = lootSource->ToCreature()) {
+                    auto script = cre->GetInstanceScript();
+                    if (script || cre->isWorldBoss()) {
+                        GrantBossLootForWorldTier(*this, player, cre);
+                        FillNotNormalLootFor(player);
+                        continue;
+                    }
+                }
+
             tab->Process(*this, store, lootMode, player, 0, true, lootSource);
             FillNotNormalLootFor(player);
         }
@@ -615,11 +627,59 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     }
     // ... for personal loot
     else {
+        // hater: inject custom loot
+        if (lootSource)
+            if (auto cre = lootSource->ToCreature()) {
+                auto script = cre->GetInstanceScript();
+                if (script || cre->isWorldBoss()) {
+                    GrantBossLootForWorldTier(*this, lootOwner, cre);
+                    FillNotNormalLootFor(lootOwner);
+                    return true;
+                }
+            }
         tab->Process(*this, store, lootMode, lootOwner, 0, true, lootSource);
         FillNotNormalLootFor(lootOwner);
     }
 
     return true;
+}
+
+void Loot::GrantBossLootForWorldTier(Loot& loot, Player* player, Creature* lootSource) {
+    if (roll_chance_i(50)) {
+        if (lootSource->isWorldBoss())
+            SelectRandomLootFromPool(loot, LootTemplates_Creature.GetLootFor(InstanceLootPools::RAID), sConfigMgr->GetIntDefault("WorldTier.base.level", 80), lootSource, player);
+        else if (lootSource->IsDungeonBoss())
+            SelectRandomLootFromPool(loot, LootTemplates_Creature.GetLootFor(InstanceLootPools::DUNGEON), lootSource->getLevel() + 2, lootSource, player);
+        else
+            return;
+    }
+}
+
+void Loot::SelectRandomLootFromPool(Loot& loot, LootTemplate const* lootTemplate, uint32 baseIlvl, Creature* cre, Player* player) {
+    auto entries = lootTemplate->Entries;
+    if (!entries.empty()) {
+        std::random_device rd; // obtain a random number from hardware
+        std::mt19937 gen(rd()); // seed the generator
+        std::uniform_int_distribution<> lootDrop(0, entries.size() - 1);
+        auto lootDropped = entries[lootDrop(gen)];
+
+        if (auto itemProto = sObjectMgr->GetItemTemplate(lootDropped->itemid)){
+            auto guidlow = sObjectMgr->GetGenerator<HighGuid::Item>().Generate();
+            guidlow += guidlow < 200000 ? 200000 : 0;
+            itemProto = sObjectMgr->CreateItemTemplate(guidlow, lootDropped->itemid);
+
+            CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
+            custom->SetItemLevel(baseIlvl);
+            float ilvlmod = 0.f;
+            if (auto script = cre->GetInstanceScript())
+                ilvlmod = script->GetAverageWorldTier();
+            sScriptMgr->GenerateItem(custom, player, ilvlmod, true);
+            itemProto = custom->_GetInfo();
+            lootDropped->itemid = guidlow;
+            lootDropped->lootOwner = player->GetGUID();
+            loot.AddItem(*lootDropped);
+        }
+    }
 }
 
 void Loot::FillNotNormalLootFor(Player* player)
@@ -1735,41 +1795,6 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, 
     }
 
     bool gearGranted = false;
-    if (source)
-        if (auto cre = source->ToCreature()) {
-            if (source->GetMap()->IsDungeon() || source->GetMap()->IsRaid() || cre->isWorldBoss()) {
-                if (!Entries.empty()) {
-                    if (cre->IsDungeonBoss() || cre->isWorldBoss()) {
-                        std::vector<LootStoreItem*> copy = Entries;
-                        boost::mt19937 engine;
-                        boost::uniform_int<> unigen;
-                        boost::variate_generator<boost::mt19937, boost::uniform_int<>> gen(engine, unigen);
-                        Acore::Containers::RandomShuffle(copy);
-
-                        for (auto lootDropped : copy) {
-                            if (auto itemProto = sObjectMgr->GetItemTemplate(lootDropped->itemid)) {
-                                if (itemProto->Quality >= ITEM_QUALITY_UNCOMMON && (itemProto->Class == ITEM_CLASS_ARMOR || itemProto->Class == ITEM_CLASS_WEAPON)) {
-                                    auto guidlow = sObjectMgr->GetGenerator<HighGuid::Item>().Generate();
-                                    guidlow += guidlow < 200000 ? 200000 : 0;
-                                    itemProto = sObjectMgr->CreateItemTemplate(guidlow, lootDropped->itemid);
-
-                                    CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
-                                    float ilvlmod = 0.f;
-                                    if (auto script = cre->GetInstanceScript())
-                                        ilvlmod = script->GetAverageWorldTier();
-                                    sScriptMgr->GenerateItem(custom, player, ilvlmod);
-                                    itemProto = custom->_GetInfo();
-                                    lootDropped->itemid = guidlow;
-                                    lootDropped->lootOwner = player->GetGUID();
-                                    loot.AddItem(*lootDropped);
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
     // Rolling non-grouped items
     for (auto i = Entries.begin(); i != Entries.end(); ++i)

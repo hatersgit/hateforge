@@ -531,7 +531,7 @@ public:
      * @param bySpell Contains information about the spell that invoked the check
      */
     [[nodiscard]] virtual bool OnCanPlayerFlyInZone(Player* /*player*/, uint32 /*mapId*/, uint32 /*zoneId*/, SpellInfo const* /*bySpell*/) { return true; }
-    virtual void GenerateItem(CustomItemTemplate* itemProto, Player const* owner, float ilvlmod) { }
+    virtual void GenerateItem(CustomItemTemplate* itemProto, Player const* owner, float ilvlmod, bool complete) { }
 
     // Passive Anticheat System
     virtual void AnticheatSetCanFlybyServer(Player* /*player*/, bool /*apply*/) { }

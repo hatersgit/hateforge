@@ -6373,20 +6373,16 @@ void Spell::EffectModifyCurrentSpellCooldown(SpellEffIndex effIndex)
 
     SpellInfo const* spellInfo = GetSpellInfo();
     flag96 spellMask = spellInfo->Effects[effIndex].SpellClassMask;
-    int32 amount = spellInfo->Effects[effIndex].CalcValue();
-    int32 ignoreSpellMask = spellInfo->Effects[effIndex].MiscValue;
-    int32 ignoreSpellFamily = spellInfo->Effects[effIndex].MiscValueB;
-    Player* player = m_caster->ToPlayer();
-    SpellCooldowns const spellCDs = player->GetSpellCooldowns();
+    
+    int32 amount = m_spellValue->EffectBasePoints[effIndex];
 
+    Player* player = m_caster->ToPlayer();
+
+    SpellCooldowns const spellCDs = player->GetSpellCooldowns();
     for (SpellCooldowns::const_iterator itr = spellCDs.begin(); itr != spellCDs.end(); ++itr)
     {
         SpellInfo const* cdSpell = sSpellMgr->GetSpellInfo(itr->first);
-        if (cdSpell && cdSpell->SpellFamilyName == spellInfo->SpellFamilyName && (cdSpell->SpellFamilyFlags & spellMask) && !ignoreSpellMask && !ignoreSpellFamily)
-            player->ModifySpellCooldown(cdSpell->Id, amount);
-        else if (cdSpell && cdSpell->SpellFamilyName == spellInfo->SpellFamilyName && ignoreSpellMask && !ignoreSpellFamily)
-            player->ModifySpellCooldown(cdSpell->Id, amount);
-        else if (cdSpell && ignoreSpellFamily)
+        if (cdSpell->SpellFamilyFlags & spellMask)
             player->ModifySpellCooldown(cdSpell->Id, amount);
     }
 }

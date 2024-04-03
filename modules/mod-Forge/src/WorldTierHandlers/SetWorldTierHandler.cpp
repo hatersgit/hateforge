@@ -111,8 +111,8 @@ public:
                     ForgeCharacterPoint* fcp = fc->GetSpecPoints(iam.player, CharacterPointType::TALENT_TREE, spec->Id);
                     ForgeCharacterPoint* baseFcp = fc->GetCommonCharacterPoint(iam.player, CharacterPointType::TALENT_TREE);
 
-                    baseFcp->Sum = 0;
-                    fcp->Sum = 0;
+                    baseFcp->Sum = 1;
+                    fcp->Sum = 1;
 
                     fc->UpdateCharPoints(iam.player, baseFcp);
                     fc->UpdateCharPoints(iam.player, fcp);
@@ -151,9 +151,10 @@ public:
                 iam.player->SetPower(POWER_HAPPINESS, 0);
 
                 iam.player->TeleportTo(fc->GetRaceStartingZone(iam.player->getRace()));
-                iam.player->AddTimedDelayedOperation(1, getMSTime() + 3000, [this, iam]() {
+                iam.player->AddTimedDelayedOperation(1, getMSTime() + 500, [this, iam]() {
                     iam.player->GetSession()->SetLogoutStartTime(0);
                     });
+
             }
         }
     }

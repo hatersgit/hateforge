@@ -31,6 +31,9 @@ public:
         if (results.empty() || results.size() != 2)
             return;
 
+        if (!fc->isNumber(results[0]) || !fc->isNumber(results[1]))
+            return;
+
         uint32 id = static_cast<uint32>(std::stoul(results[0]));
         uint32 map = static_cast<uint32>(std::stoul(results[1]));
 

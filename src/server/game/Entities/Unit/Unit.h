@@ -1414,6 +1414,7 @@ public:
     std::list<Unit*> SelectAllNearbyNoTotemParty(Unit* exclude = nullptr, float dist = NOMINAL_MELEE_RANGE) const;
     std::list<Unit*> SelectAllNearbyNoTotemRaid(Unit* exclude = nullptr, float dist = NOMINAL_MELEE_RANGE) const;
     std::list<Unit*> SelectAllNearbyNoTotemPartyAndRaid(Unit* exclude = nullptr, float dist = NOMINAL_MELEE_RANGE) const;
+    std::list<Unit*> SelectAllNearbyNoTotemPartyAndRaidWithoutAura(Unit* exclude = nullptr, float dist = NOMINAL_MELEE_RANGE, uint32 aura = 0) const;
     AuraApplication* AuraExists(uint32 auraId) const;
     void SendMeleeAttackStop(Unit* victim = nullptr);
     void SendMeleeAttackStart(Unit* victim, Player* sendTo = nullptr);

@@ -545,6 +545,8 @@ void Unit::Update(uint32 p_time)
     ModifyAuraState(AURA_STATE_HEALTH_ABOVE_75_PERCENT, IsAlive() ? HealthAbovePct(75) : false);
     ModifyAuraState(AURA_STATE_POWER_BELOW_50_PERCENT, IsAlive() ? PowerBelowPct(50) : false);
 
+
+
     UpdateSplineMovement(p_time);
     GetMotionMaster()->UpdateMotion(p_time);
 }
@@ -1492,7 +1494,8 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss,
         return;
     }
 
-    if (auto script = GetInstanceScript()) {
+    auto script = GetInstanceScript();
+    if (!script) {
         if (GetTypeId() != TYPEID_PLAYER) {
             float mod = 1;
             if (auto owner = GetOwner()) {
@@ -1937,7 +1940,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
     if (!weaponRepAuras.empty()) {
         for (auto aura : weaponRepAuras) {
             pctReplaced += (float)aura->GetBaseAmount() / 100.f;
-            replaceBy |= (1 << aura->GetMiscValue());
+            replaceBy |= aura->GetMiscValue();
         }
         pctReplaced /= weaponRepAuras.size();
     }
@@ -1949,7 +1952,9 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
         {
             continue;
         }
-        if (auto script = GetInstanceScript()) {
+
+        auto script = GetInstanceScript();
+        if (!script) {
             if (GetTypeId() != TYPEID_PLAYER) {
                 float mod = 1;
                 if (auto owner = GetOwner()) {
@@ -9072,6 +9077,18 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
             AdvertisedBenefitPct += int32(CalculatePct(DoneAdvertisedBenefit, (*i)->GetAmount()))
             + int32(CalculatePct(ToPlayer()->GetBaseSpellPowerBonus(), (*i)->GetAmount()));
 
+    AuraEffectList const& convertingSPTo = GetAuraEffectsByType(SPELL_AURA_EXCHANGE_SP_SCHOOLS);
+    for (AuraEffectList::const_iterator i = convertingSPTo.begin(); i != convertingSPTo.end(); ++i) {
+        float newRatio = float((*i)->GetAmount()) / 100.f;
+        SpellSchoolMask mask = SpellSchoolMask((*i)->GetMiscValue());
+        float div = newRatio * DoneAdvertisedBenefit;
+
+        if (mask & schoolMask)
+            DoneAdvertisedBenefit += div;
+        else
+            DoneAdvertisedBenefit -= div;
+    }
+
     DoneAdvertisedBenefit += AdvertisedBenefitPct;
     return DoneAdvertisedBenefit;
 }
@@ -12404,7 +12421,8 @@ void Unit::SetMaxHealth(uint32 val)
     if (!val)
         val = 1;
 
-    if (auto script = GetInstanceScript()) {
+    auto script = GetInstanceScript();
+    if (!script) {
         if (GetTypeId() != TYPEID_PLAYER) {
             float mod = 1;
             if (auto owner = GetOwner()) {
@@ -13245,8 +13263,8 @@ void Unit::GetProcAurasTriggeredOnEvent(AuraApplicationProcContainer& aurasTrigg
     // or generate one on our own
     else
     {
-        for (AuraApplicationMap::iterator itr = GetAppliedAuras().begin(); itr != GetAppliedAuras().end(); ++itr)
-        {
+        for (AuraApplicationMap::iterator itr = GetAppliedAuras().begin(); itr != GetAppliedAuras().end(); ++itr) {
+            auto id = itr->second->GetBase()->GetId();
             if (uint8 procEffectMask = itr->second->GetBase()->GetProcEffectMask(itr->second, eventInfo, now))
             {
                 itr->second->GetBase()->PrepareProcToTrigger(itr->second, eventInfo, now);
@@ -13933,6 +13951,37 @@ std::list<Unit*> Unit::SelectAllNearbyNoTotemPartyAndRaid(Unit* exclude, float d
         for (std::list<Unit*>::iterator tIter = targets.begin(); tIter != targets.end();)
         {
             if (!IsWithinLOSInMap(*tIter) || !IsInPartyWith(*tIter))
+            {
+                std::list<Unit*>::iterator tIter2 = tIter;
+                ++tIter;
+                targets.erase(tIter2);
+            }
+            else
+                ++tIter;
+        }
+    }
+
+    // select random
+    return targets;
+}
+
+std::list<Unit*> Unit::SelectAllNearbyNoTotemPartyAndRaidWithoutAura(Unit* exclude, float dist, uint32 aura) const
+{
+    std::list<Unit*> targets;
+
+    if (dist > 0)
+    {
+        Acore::AnyFriendlyNotSelfUnitInObjectRangeCheck u_check(this, this, dist);
+        Acore::UnitListSearcher<Acore::AnyFriendlyNotSelfUnitInObjectRangeCheck> searcher(this, targets, u_check);
+        Cell::VisitAllObjects(this, searcher, dist);
+
+        if (exclude)
+            targets.remove(exclude);
+
+        // remove not LoS targets
+        for (std::list<Unit*>::iterator tIter = targets.begin(); tIter != targets.end();)
+        {
+            if (!IsWithinLOSInMap(*tIter) || !IsInPartyWith(*tIter) || GetAura(aura))
             {
                 std::list<Unit*>::iterator tIter2 = tIter;
                 ++tIter;
@@ -18238,71 +18287,71 @@ UnitMods Unit::ClassSpecDependantUnitMod() const
 
     switch (pClass)
     {
-    case CLASS_WARRIOR:
-        mod = UNIT_MOD_STAT_STRENGTH;
-        break;
-    case CLASS_PALADIN:
-        if (pSpec == TALENT_TREE_PALADIN_HOLY)
-        {
-            mod = UNIT_MOD_STAT_INTELLECT;
+        case CLASS_WARRIOR:
+            mod = UNIT_MOD_STAT_STRENGTH;
             break;
-        }
-        mod = UNIT_MOD_STAT_STRENGTH;
-        break;
-    case CLASS_ROGUE:
-        mod = UNIT_MOD_STAT_AGILITY;
-        break;
-    case CLASS_HUNTER:
-        mod = UNIT_MOD_STAT_AGILITY;
-        break;
-    case CLASS_PRIEST:
-        mod = UNIT_MOD_STAT_INTELLECT;
-        break;
-    case CLASS_DEATH_KNIGHT:
-        mod = UNIT_MOD_STAT_STRENGTH;
-        break;
-    case CLASS_SHAMAN:
-        if (pSpec == TALENT_TREE_SHAMAN_ENHANCEMENT || pSpec == TALENT_TREE_SHAMAN_WATCHER)
-        {
+        case CLASS_PALADIN:
+            if (pSpec == TALENT_TREE_PALADIN_HOLY)
+            {
+                mod = UNIT_MOD_STAT_INTELLECT;
+                break;
+            }
+            mod = UNIT_MOD_STAT_STRENGTH;
+            break;
+        case CLASS_ROGUE:
             mod = UNIT_MOD_STAT_AGILITY;
             break;
-        }
-        mod = UNIT_MOD_STAT_INTELLECT;
-        break;
-    case CLASS_MAGE:
-        mod = UNIT_MOD_STAT_INTELLECT;
-        break;
-    case CLASS_WARLOCK:
-        mod = UNIT_MOD_STAT_INTELLECT;
-        break;
-    case CLASS_DEMON_HUNTER:
-        mod = UNIT_MOD_STAT_AGILITY;
-        break;
-    case CLASS_DRUID:
-        if (pSpec == TALENT_TREE_DRUID_BALANCE || pSpec == TALENT_TREE_DRUID_RESTORATION)
-        {
-            mod = UNIT_MOD_STAT_INTELLECT;
-            break;
-        }
-        mod = UNIT_MOD_STAT_AGILITY;
-        break;
-    case CLASS_MONK:
-        if (pSpec == TALENT_TREE_MONK_ZEALOTRY)
-        {
+        case CLASS_HUNTER:
             mod = UNIT_MOD_STAT_AGILITY;
             break;
-        }
-        mod = UNIT_MOD_STAT_INTELLECT;
-        break;
-    case CLASS_BARD:
-        mod = UNIT_MOD_STAT_INTELLECT;
-        break;
-    case CLASS_TINKER:
-        mod = UNIT_MOD_STAT_INTELLECT;
-        break;
-    default:
-        mod = UNIT_MOD_STAT_STRENGTH;
-        break;
+        case CLASS_PRIEST:
+            mod = UNIT_MOD_STAT_INTELLECT;
+            break;
+        case CLASS_DEATH_KNIGHT:
+            mod = UNIT_MOD_STAT_STRENGTH;
+            break;
+        case CLASS_SHAMAN:
+            if (pSpec == TALENT_TREE_SHAMAN_ENHANCEMENT || pSpec == TALENT_TREE_SHAMAN_WATCHER)
+            {
+                mod = UNIT_MOD_STAT_AGILITY;
+                break;
+            }
+            mod = UNIT_MOD_STAT_INTELLECT;
+            break;
+        case CLASS_MAGE:
+            mod = UNIT_MOD_STAT_INTELLECT;
+            break;
+        case CLASS_WARLOCK:
+            mod = UNIT_MOD_STAT_INTELLECT;
+            break;
+        case CLASS_SHAPESHIFTER:
+            mod = UNIT_MOD_STAT_AGILITY;
+            break;
+        case CLASS_DRUID:
+            if (pSpec == TALENT_TREE_DRUID_BALANCE || pSpec == TALENT_TREE_DRUID_RESTORATION)
+            {
+                mod = UNIT_MOD_STAT_INTELLECT;
+                break;
+            }
+            mod = UNIT_MOD_STAT_AGILITY;
+            break;
+        case CLASS_MONK:
+            if (pSpec == TALENT_TREE_MONK_ZEALOTRY)
+            {
+                mod = UNIT_MOD_STAT_AGILITY;
+                break;
+            }
+            mod = UNIT_MOD_STAT_INTELLECT;
+            break;
+        case CLASS_BARD:
+            mod = UNIT_MOD_STAT_INTELLECT;
+            break;
+        case CLASS_TINKER:
+            mod = UNIT_MOD_STAT_INTELLECT;
+            break;
+        default:
+            mod = UNIT_MOD_STAT_STRENGTH;
+            break;
     }
 
     return mod;
@@ -18316,71 +18365,71 @@ Stats Unit::ClassSpecDependantMainStat() const
 
     switch (pClass)
     {
-    case CLASS_WARRIOR:
-        stat = STAT_STRENGTH;
-        break;
-    case CLASS_PALADIN:
-        if (pSpec == TALENT_TREE_PALADIN_HOLY)
-        {
-            stat = STAT_INTELLECT;
+        case CLASS_WARRIOR:
+            stat = STAT_STRENGTH;
             break;
-        }
-        stat = STAT_STRENGTH;
-        break;
-    case CLASS_ROGUE:
-        stat = STAT_AGILITY;
-        break;
-    case CLASS_HUNTER:
-        stat = STAT_AGILITY;
-        break;
-    case CLASS_PRIEST:
-        stat = STAT_INTELLECT;
-        break;
-    case CLASS_DEATH_KNIGHT:
-        stat = STAT_STRENGTH;
-        break;
-    case CLASS_SHAMAN:
-        if (pSpec == TALENT_TREE_SHAMAN_ENHANCEMENT || pSpec == TALENT_TREE_SHAMAN_WATCHER)
-        {
+        case CLASS_PALADIN:
+            if (pSpec == TALENT_TREE_PALADIN_HOLY)
+            {
+                stat = STAT_INTELLECT;
+                break;
+            }
+            stat = STAT_STRENGTH;
+            break;
+        case CLASS_ROGUE:
             stat = STAT_AGILITY;
             break;
-        }
-        stat = STAT_INTELLECT;
-        break;
-    case CLASS_MAGE:
-        stat = STAT_INTELLECT;
-        break;
-    case CLASS_WARLOCK:
-        stat = STAT_INTELLECT;
-        break;
-    case CLASS_DEMON_HUNTER:
-        stat = STAT_AGILITY;
-        break;
-    case CLASS_DRUID:
-        if (pSpec == TALENT_TREE_DRUID_BALANCE || pSpec == TALENT_TREE_DRUID_RESTORATION)
-        {
-            stat = STAT_INTELLECT;
-            break;
-        }
-        stat = STAT_AGILITY;
-        break;
-    case CLASS_MONK:
-        if (pSpec == TALENT_TREE_MONK_ZEALOTRY)
-        {
+        case CLASS_HUNTER:
             stat = STAT_AGILITY;
             break;
-        }
-        stat = STAT_AGILITY;
-        break;
-    case CLASS_BARD:
-        stat = STAT_INTELLECT;
-        break;
-    case CLASS_TINKER:
-        stat = STAT_INTELLECT;
-        break;
-    default:
-        stat = STAT_STRENGTH;
-        break;
+        case CLASS_PRIEST:
+            stat = STAT_INTELLECT;
+            break;
+        case CLASS_DEATH_KNIGHT:
+            stat = STAT_STRENGTH;
+            break;
+        case CLASS_SHAMAN:
+            if (pSpec == TALENT_TREE_SHAMAN_ENHANCEMENT || pSpec == TALENT_TREE_SHAMAN_WATCHER)
+            {
+                stat = STAT_AGILITY;
+                break;
+            }
+            stat = STAT_INTELLECT;
+            break;
+        case CLASS_MAGE:
+            stat = STAT_INTELLECT;
+            break;
+        case CLASS_WARLOCK:
+            stat = STAT_INTELLECT;
+            break;
+        case CLASS_SHAPESHIFTER:
+            stat = STAT_AGILITY;
+            break;
+        case CLASS_DRUID:
+            if (pSpec == TALENT_TREE_DRUID_BALANCE || pSpec == TALENT_TREE_DRUID_RESTORATION)
+            {
+                stat = STAT_INTELLECT;
+                break;
+            }
+            stat = STAT_AGILITY;
+            break;
+        case CLASS_MONK:
+            if (pSpec == TALENT_TREE_MONK_ZEALOTRY)
+            {
+                stat = STAT_AGILITY;
+                break;
+            }
+            stat = STAT_AGILITY;
+            break;
+        case CLASS_BARD:
+            stat = STAT_INTELLECT;
+            break;
+        case CLASS_TINKER:
+            stat = STAT_INTELLECT;
+            break;
+        default:
+            stat = STAT_STRENGTH;
+            break;
     }
 
     return stat;

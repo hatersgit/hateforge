@@ -29,6 +29,7 @@
 #include "SpellMgr.h"
 #include "Util.h"
 #include "World.h"
+#include <boost/random.hpp>
 
 static Rates const qualityToRate[MAX_ITEM_QUALITY] =
 {
@@ -581,28 +582,40 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     Group* group = lootOwner->GetGroup();
     if (!personal && group)
     {
-
+        std::vector<Player*> elligible = {};
         for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
         {
             if (Player* player = itr->GetSource()) // should actually be looted object instead of lootOwner but looter has to be really close so doesnt really matter
             {
                 if (player->IsAtLootRewardDistance(lootSource ? lootSource : lootOwner))
                 {
-                    // hater: inject custom loot
-                    if (lootSource)
-                        if (auto cre = lootSource->ToCreature()) {
-                            auto script = cre->GetInstanceScript();
-                            if (script || cre->isWorldBoss()) {
-                                GrantBossLootForWorldTier(*this, player, cre);
-                                FillNotNormalLootFor(player);
-                                continue;
-                            }
-                        }
-                            
-                    tab->Process(*this, store, lootMode, player, 0, true, lootSource);
-                    FillNotNormalLootFor(player);
+                    elligible.push_back(player);
                 }
             }
+        }
+        int amountOfLoot = elligible.size() / 2;
+        std::vector<Player*> hasLoot = {};
+        std::sample(
+            elligible.begin(),
+            elligible.end(),
+            std::back_inserter(hasLoot),
+            amountOfLoot,
+            std::mt19937{ std::random_device{}() }
+        );
+        for (auto player : hasLoot) {
+            // hater: inject custom loot
+            if (lootSource)
+                if (auto cre = lootSource->ToCreature()) {
+                    auto script = cre->GetInstanceScript();
+                    if (script || cre->isWorldBoss()) {
+                        GrantBossLootForWorldTier(*this, player, cre);
+                        FillNotNormalLootFor(player);
+                        continue;
+                    }
+                }
+
+            tab->Process(*this, store, lootMode, player, 0, true, lootSource);
+            FillNotNormalLootFor(player);
         }
 
         for (uint8 i = 0; i < items.size(); ++i)
@@ -1757,7 +1770,7 @@ bool LootTemplate::CopyConditions(LootItem* li, uint32 conditionLootId) const
 }
 
 // Rolls for every item in the template and adds the rolled items the the loot
-void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, Player const* player, uint8 groupId, bool isTopLevel, WorldObject* source) const
+void LootTemplate::Process(Loot& loot, LootStore const& store, uint16 lootMode, Player const* player, uint8 groupId, bool isTopLevel, WorldObject* source, std::vector<Player*> receivingLoot) const
 {
     bool rate = store.IsRatesAllowed();
 

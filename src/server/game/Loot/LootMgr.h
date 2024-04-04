@@ -255,7 +255,7 @@ public:
     // Adds an entry to the group (at loading stage)
     void AddEntry(LootStoreItem* item);
     // Rolls for every item in the template and adds the rolled items the the loot
-    void Process(Loot& loot, LootStore const& store, uint16 lootMode, Player const* player, uint8 groupId = 0, bool isTopLevel = true, WorldObject* source = nullptr) const;
+    void Process(Loot& loot, LootStore const& store, uint16 lootMode, Player const* player, uint8 groupId = 0, bool isTopLevel = true, WorldObject* source = nullptr, std::vector<Player*> receivingLoot = {}) const;
     void CopyConditions(ConditionList conditions);
     bool CopyConditions(LootItem* li, uint32 conditionLootId = 0) const;
 

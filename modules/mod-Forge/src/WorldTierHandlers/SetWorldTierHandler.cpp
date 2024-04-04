@@ -151,7 +151,10 @@ public:
                 iam.player->SetPower(POWER_HAPPINESS, 0);
 
                 iam.player->TeleportTo(fc->GetRaceStartingZone(iam.player->getRace()));
-                iam.player->GetSession()->SetLogoutStartTime(GameTime::GetGameTime().count() + 2);
+                iam.player->AddTimedDelayedOperation(1, getMSTime() + 500, [this, iam]() {
+                    iam.player->GetSession()->SetLogoutStartTime(0);
+                    });
+
             }
         }
     }

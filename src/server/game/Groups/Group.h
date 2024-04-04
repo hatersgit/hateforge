@@ -175,7 +175,7 @@ public:
         uint8       flags;
         uint8       roles;
     };
-    typedef std::list<MemberSlot> MemberSlotList;
+    typedef std::vector<MemberSlot> MemberSlotList;
     typedef MemberSlotList::const_iterator member_citerator;
 
 protected:

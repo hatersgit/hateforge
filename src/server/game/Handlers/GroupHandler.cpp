@@ -481,6 +481,9 @@ void WorldSession::HandleLootMethodOpcode(WorldPacket& recvData)
     if (!group->IsLeader(GetPlayer()->GetGUID()) || group->isLFGGroup(true))
         return;
 
+    if (lootMethod != FREE_FOR_ALL)
+        return;
+
     if (lootMethod > NEED_BEFORE_GREED)
         return;
 
@@ -492,7 +495,7 @@ void WorldSession::HandleLootMethodOpcode(WorldPacket& recvData)
     /********************/
 
     // everything's fine, do it
-    group->SetLootMethod((LootMethod)lootMethod);
+    group->SetLootMethod(FREE_FOR_ALL);
     group->SetMasterLooterGuid(lootMaster);
     group->SetLootThreshold((ItemQualities)lootThreshold);
     group->SendUpdate();

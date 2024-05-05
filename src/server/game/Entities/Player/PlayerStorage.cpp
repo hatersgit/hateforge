@@ -252,7 +252,7 @@ uint8 Player::FindEquipSlot(ItemTemplate const* proto, uint32 slot, bool swap) c
                         slots[0] = EQUIPMENT_SLOT_RANGED;
                     break;
                 case ITEM_SUBCLASS_ARMOR_IDOL:
-                    if (playerClass == CLASS_DRUID || playerClass == CLASS_MONK)
+                    if (playerClass == CLASS_DRUID || playerClass == CLASS_SHAPESHIFTER)
                         slots[0] = EQUIPMENT_SLOT_RANGED;
                     break;
                 case ITEM_SUBCLASS_ARMOR_TOTEM:
@@ -2278,7 +2278,6 @@ InventoryResult Player::CanUseItem(Item* pItem, bool not_loading) const
 
                     switch (getClass())
                     {
-                        case CLASS_MONK:
                         case CLASS_HUNTER:
                         case CLASS_SHAMAN:
                             allowEquip = (itemSkill == SKILL_MAIL);
@@ -2423,7 +2422,7 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
         }
 
         // CHeck for idols.
-        if (proto->SubClass == ITEM_SUBCLASS_ARMOR_IDOL && !(_class == CLASS_DRUID || _class == CLASS_MONK))
+        if (proto->SubClass == ITEM_SUBCLASS_ARMOR_IDOL && !(_class == CLASS_DRUID || _class == CLASS_SHAPESHIFTER))
         {
             return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
         }
@@ -2444,56 +2443,6 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
         if (proto->SubClass == ITEM_SUBCLASS_ARMOR_INSTRUMENT && _class != CLASS_BARD)
         {
             return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
-        }
-    }
-
-    if (proto->Class == ITEM_CLASS_ARMOR && proto->SubClass > ITEM_SUBCLASS_ARMOR_MISC && proto->SubClass < ITEM_SUBCLASS_ARMOR_BUCKLER &&
-        proto->InventoryType != INVTYPE_CLOAK)
-    {
-        uint32 subclassToCompare = ITEM_SUBCLASS_ARMOR_CLOTH;
-        switch (_class)
-        {
-            case CLASS_WARRIOR:
-                if (proto->HasStat(ITEM_MOD_SPELL_POWER) || proto->HasSpellPowerStat())
-                {
-                    return EQUIP_ERR_CANT_DO_RIGHT_NOW;
-                }
-                [[fallthrough]];
-            case CLASS_DEATH_KNIGHT:
-            case CLASS_PALADIN:
-            case CLASS_TINKER:
-                subclassToCompare = ITEM_SUBCLASS_ARMOR_PLATE;
-                break;
-            case CLASS_MONK:
-            case CLASS_HUNTER:
-            case CLASS_SHAMAN:
-                subclassToCompare = ITEM_SUBCLASS_ARMOR_MAIL;
-                break;
-            case CLASS_ROGUE:
-            case CLASS_SHAPESHIFTER:
-                if (proto->HasStat(ITEM_MOD_SPELL_POWER) || proto->HasSpellPowerStat())
-                {
-                    return EQUIP_ERR_CANT_DO_RIGHT_NOW;
-                }
-                [[fallthrough]];
-            case CLASS_BARD:
-            case CLASS_DRUID:
-                subclassToCompare = ITEM_SUBCLASS_ARMOR_LEATHER;
-                break;
-            default:
-                break;
-        }
-
-        if (proto->SubClass > subclassToCompare)
-        {
-            return EQUIP_ERR_CANT_DO_RIGHT_NOW;
-        }
-        else if (sWorld->getIntConfig(CONFIG_LOOT_NEED_BEFORE_GREED_ILVL_RESTRICTION) && proto->ItemLevel > sWorld->getIntConfig(CONFIG_LOOT_NEED_BEFORE_GREED_ILVL_RESTRICTION))
-        {
-            if (proto->SubClass < subclassToCompare)
-            {
-                return EQUIP_ERR_CANT_DO_RIGHT_NOW;
-            }
         }
     }
 

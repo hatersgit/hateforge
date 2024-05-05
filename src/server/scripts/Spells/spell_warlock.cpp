@@ -661,7 +661,7 @@ class spell_warl_everlasting_affliction : public SpellScript
     {
         if (Unit* unitTarget = GetHitUnit())
             // Refresh corruption on target
-            if (AuraEffect* aur = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, 0x2, 0, 0, GetCaster()->GetGUID()))
+            if (AuraEffect* aur = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DOT, 0x20, 0, 0, GetCaster()->GetGUID()))
             {
                 aur->GetBase()->RefreshTimersWithMods();
                 aur->ChangeAmount(aur->CalculateAmount(aur->GetCaster()), false);
@@ -845,7 +845,7 @@ class spell_warl_seed_of_corruption : public SpellScript
     }
 };
 
-// -30293 - Soul Leech
+// -110178 - Soul Leech
 class spell_warl_soul_leech : public AuraScript
 {
     PrepareAuraScript(spell_warl_soul_leech);
@@ -854,44 +854,19 @@ class spell_warl_soul_leech : public AuraScript
     {
         return ValidateSpellInfo(
             {
-                SPELL_WARLOCK_SOUL_LEECH_HEAL,
-                SPELL_WARLOCK_IMP_SOUL_LEECH_R1,
-                SPELL_WARLOCK_SOUL_LEECH_PET_MANA_1,
-                SPELL_WARLOCK_SOUL_LEECH_PET_MANA_2,
-                SPELL_WARLOCK_SOUL_LEECH_CASTER_MANA_1,
-                SPELL_WARLOCK_SOUL_LEECH_CASTER_MANA_2,
-                SPELL_REPLENISHMENT
+                110180, // soul leech restore
+                110091 // replenishment
             });
     }
 
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
     {
-        static uint32 const casterMana[2] = { SPELL_WARLOCK_SOUL_LEECH_CASTER_MANA_1, SPELL_WARLOCK_SOUL_LEECH_CASTER_MANA_2 };
-        static uint32 const petMana[2] = { SPELL_WARLOCK_SOUL_LEECH_PET_MANA_1,    SPELL_WARLOCK_SOUL_LEECH_PET_MANA_2 };
-
         PreventDefaultAction();
-        DamageInfo* damageInfo = eventInfo.GetDamageInfo();
-        if (!damageInfo || !damageInfo->GetDamage())
-            return;
 
         Unit* caster = eventInfo.GetActor();
-        int32 bp = CalculatePct(static_cast<int32>(damageInfo->GetDamage()), aurEff->GetAmount());
-        caster->CastCustomSpell(SPELL_WARLOCK_SOUL_LEECH_HEAL, SPELLVALUE_BASE_POINT0, bp, caster, true, nullptr, aurEff);
-
-        // Improved Soul Leech code below
-        AuraEffect const* impSoulLeech = GetTarget()->GetAuraEffectOfRankedSpell(SPELL_WARLOCK_IMP_SOUL_LEECH_R1, EFFECT_1, aurEff->GetCasterGUID());
-        if (!impSoulLeech)
-            return;
-
-        uint8 impSoulLeechRank = impSoulLeech->GetSpellInfo()->GetRank();
-        uint32 selfSpellId = casterMana[impSoulLeechRank - 1];
-        uint32 petSpellId = petMana[impSoulLeechRank - 1];
-
-        caster->CastSpell((Unit*)nullptr, selfSpellId, true, nullptr, aurEff);
-        caster->CastSpell((Unit*)nullptr, petSpellId, true, nullptr, aurEff);
-
-        if (roll_chance_i(impSoulLeech->GetAmount()))
-            caster->CastSpell((Unit*)nullptr, SPELL_REPLENISHMENT, true, nullptr, aurEff);
+        int32 bp = aurEff->GetAmount();
+        caster->CastCustomSpell(caster, 110180, &bp, &bp, nullptr, true, 0, aurEff);
+        caster->CastSpell((Unit*)nullptr, 110091, true, 0, aurEff);
     }
 
     void Register() override

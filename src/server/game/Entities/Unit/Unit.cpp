@@ -270,6 +270,20 @@ SpellInfo const* ProcEventInfo::GetSpellInfo() const
     return nullptr;
 }
 
+SpellSchoolMask ProcEventInfo::GetSchoolMask() const
+{
+    if (_spell)
+        return _spell->GetSpellInfo()->GetSchoolMask();
+
+    if (_damageInfo)
+        return _damageInfo->GetSpellInfo()->GetSchoolMask();
+
+    if (_healInfo)
+        return _healInfo->GetSpellInfo()->GetSchoolMask();
+
+    return SPELL_SCHOOL_MASK_NONE;
+}
+
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
@@ -4026,20 +4040,21 @@ void Unit::_UpdateAutoRepeatSpell()
         return;
     }
 
-    static uint32 const HUNTER_AUTOSHOOT = 75;
+    static uint32 const HUNTER_AUTOSHOOT = 3018;
 
     // Check "realtime" interrupts
-    if ((GetTypeId() == TYPEID_PLAYER && ToPlayer()->isMoving() && spellProto->Id != HUNTER_AUTOSHOOT) || IsNonMeleeSpellCast(false, false, true, spellProto->Id == HUNTER_AUTOSHOOT))
+    if ((GetTypeId() == TYPEID_PLAYER && ToPlayer()->isMoving() && spellProto->Id != HUNTER_AUTOSHOOT && spellProto->Id != 2764 && spellProto->Id != 5019) || IsNonMeleeSpellCast(false, false, true, spellProto->Id == HUNTER_AUTOSHOOT))
     {
         // cancel wand shoot
-        if (spellProto->Id != HUNTER_AUTOSHOOT)
+        if (spellProto->Id != HUNTER_AUTOSHOOT && spellProto->Id != 2764 && spellProto->Id != 5019)
             InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
         m_AutoRepeatFirstCast = true;
         return;
     }
 
     // Apply delay (Hunter's autoshoot not affected)
-    if (m_AutoRepeatFirstCast && getAttackTimer(RANGED_ATTACK) < 500 && spellProto->Id != HUNTER_AUTOSHOOT)
+    if (m_AutoRepeatFirstCast && getAttackTimer(RANGED_ATTACK) < 500 && spellProto->Id != HUNTER_AUTOSHOOT
+        && spellProto->Id != 2764 && spellProto->Id != 5019)
     {
         setAttackTimer(RANGED_ATTACK, 500);
     }
@@ -4052,7 +4067,7 @@ void Unit::_UpdateAutoRepeatSpell()
         SpellCastResult result = m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->CheckCast(true);
         if (result != SPELL_CAST_OK)
         {
-            if (spellProto->Id != HUNTER_AUTOSHOOT)
+            if (spellProto->Id != HUNTER_AUTOSHOOT && spellProto->Id != 2764 && spellProto->Id != 5019)
             {
                 InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
             }
@@ -4101,9 +4116,9 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
         if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL])
         {
             // break autorepeat if not Auto Shot
-            if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 75 &&
-                m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 129999 &&
-                m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 101999)
+            if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 3018 &&
+                m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 2764 &&
+                m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 5019)
                 InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
             m_AutoRepeatFirstCast = true;
         }
@@ -4120,9 +4135,9 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
 
         // it also does break autorepeat if not Auto Shot
         if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL] &&
-            m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 75 &&
-            m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 129999 &&
-            m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 101999)
+            m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 3018 &&
+            m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 2764 && // throw
+            m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 5019) // wand
             InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
         AddUnitState(UNIT_STATE_CASTING);
 
@@ -4131,7 +4146,7 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
     case CURRENT_AUTOREPEAT_SPELL:
     {
         // only Auto Shoot does not break anything
-        if (pSpell->m_spellInfo->Id != 75)
+        if (pSpell->m_spellInfo->Id != 3018 && pSpell->m_spellInfo->Id != 2764 && pSpell->m_spellInfo->Id != 5019)
         {
             // generic autorepeats break generic non-delayed and channeled non-delayed spells
             if (Spell* s = GetCurrentSpell(CURRENT_CHANNELED_SPELL))
@@ -7318,7 +7333,8 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     if (meleeAttack)
         SendMeleeAttackStart(victim);
 
-    AddComboPoints(0);
+    if (GetTypeId() == TYPEID_PLAYER)
+        ToPlayer()->SendComboPoints();
 
     return true;
 }
@@ -8586,28 +8602,6 @@ float Unit::SpellPctDamageModsDone(Unit* victim, SpellInfo const* spellProto, Da
                 AddPct(DoneTotalMod, aurEff->GetAmount());
         }
         break;
-    case SPELLFAMILY_WARLOCK:
-        // Fire and Brimstone
-        if (spellProto->SpellFamilyFlags[1] & 0x00020040)
-            if (victim->HasAuraState(AURA_STATE_CONFLAGRATE))
-            {
-                AuraEffectList const& mDumyAuras = GetAuraEffectsByType(SPELL_AURA_DUMMY);
-                for (AuraEffectList::const_iterator i = mDumyAuras.begin(); i != mDumyAuras.end(); ++i)
-                    if ((*i)->GetSpellInfo()->SpellIconID == 3173)
-                    {
-                        AddPct(DoneTotalMod, (*i)->GetAmount());
-                        break;
-                    }
-            }
-        // Drain Soul - increased damage for targets under 25 % HP
-        if (spellProto->SpellFamilyFlags[0] & 0x00004000)
-            if (!victim->HealthAbovePct(25))
-                DoneTotalMod *= 4;
-        // Shadow Bite (15% increase from each dot)
-        if (spellProto->SpellFamilyFlags[1] & 0x00400000 && IsPet())
-            if (uint8 count = victim->GetDoTsByCaster(GetOwnerGUID()))
-                AddPct(DoneTotalMod, 15 * count);
-        break;
     case SPELLFAMILY_HUNTER:
         // Steady Shot
         if (spellProto->SpellFamilyFlags[1] & 0x1)
@@ -8626,6 +8620,40 @@ float Unit::SpellPctDamageModsDone(Unit* victim, SpellInfo const* spellProto, Da
             if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 196, 0))
                 if (victim->GetDiseasesByCaster(owner->GetGUID()) > 0)
                     AddPct(DoneTotalMod, aurEff->GetAmount());
+        break;
+
+    case SPELLFAMILY_SPELL:
+        // Fire and Brimstone
+        if (spellProto->SpellFamilyFlags[0] & 0x2800)
+            if (victim->HasAura(100048)) // hater: immolate increases
+            {
+                AuraEffectList const& mDumyAuras = GetAuraEffectsByType(SPELL_AURA_DUMMY);
+                for (AuraEffectList::const_iterator i = mDumyAuras.begin(); i != mDumyAuras.end(); ++i)
+                    if ((*i)->GetSpellInfo()->SpellIconID == 3173)
+                    {
+                        AddPct(DoneTotalMod, (*i)->GetAmount());
+                        break;
+                    }
+            }
+
+        if (spellProto->SpellFamilyFlags[0] & 0x4000000)
+            if (victim->HasAura(100141, GetGUID()) || victim->HasAura(100138, GetGUID())) // hater: burn and chill
+            {
+                if (AuraEffect const* aura = GetDummyAuraEffect(SPELLFAMILY_SPELL, 3263, EFFECT_0)) {
+                    auto burnCnt = 0;
+                    if (auto burn = victim->GetAura(100141, GetGUID()))
+                        burnCnt = burn->GetStackAmount();
+                    auto chillCnt = 0;
+                    if (auto chill = victim->GetAura(100138, GetGUID()))
+                        chillCnt = chill->GetStackAmount();
+
+
+                    auto amountPerStack = aura->GetAmount();
+                    auto total = amountPerStack * (burnCnt + chillCnt);
+                    AddPct(DoneTotalMod, total);
+                }
+            }
+
         break;
     }
 
@@ -9183,6 +9211,17 @@ float Unit::SpellDoneCritChance(Unit const* /*victim*/, SpellInfo const* spellPr
     if (Player* modOwner = GetSpellModOwner())
         modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance);
 
+    // hater: crit chance by mechanic type
+    uint32 mechanicMask = spellProto->GetAllEffectsMechanicMask();
+
+    if (mechanicMask)
+    {
+        AuraEffectList const& mDamageDoneMechanic = GetAuraEffectsByType(SPELL_AURA_MOD_MECHANIC_CRIT_CHANCE);
+        for (AuraEffectList::const_iterator i = mDamageDoneMechanic.begin(); i != mDamageDoneMechanic.end(); ++i)
+            if (mechanicMask & uint32(1 << ((*i)->GetMiscValue())))
+                crit_chance += (*i)->GetAmount();
+    }
+
     // xinef: can be negative!
     return crit_chance;
 }
@@ -9262,21 +9301,7 @@ float Unit::SpellTakenCritChance(Unit const* caster, SpellInfo const* spellProto
             // Custom crit by class
             switch (spellProto->SpellFamilyName)
             {
-            case SPELLFAMILY_MAGE:
-                // Glyph of Fire Blast
-                if (spellProto->SpellFamilyFlags[0] == 0x2 && spellProto->SpellIconID == 12)
-                    if (HasAuraWithMechanic((1 << MECHANIC_STUN) | (1 << MECHANIC_KNOCKOUT)))
-                        if (AuraEffect const* aurEff = caster->GetAuraEffect(56369, EFFECT_0))
-                            crit_chance += aurEff->GetAmount();
-                break;
             case SPELLFAMILY_DRUID:
-                // Improved Faerie Fire
-                if (HasAuraState(AURA_STATE_FAERIE_FIRE))
-                    if (AuraEffect const* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 109, 0))
-                        crit_chance += aurEff->GetAmount();
-
-                // cumulative effect - don't break
-
                 // Starfire
                 if (spellProto->SpellFamilyFlags[0] & 0x4 && spellProto->SpellIconID == 1485)
                 {
@@ -9292,26 +9317,9 @@ float Unit::SpellTakenCritChance(Unit const* caster, SpellInfo const* spellProto
                 if (caster->FindCurrentSpellBySpellId(5938))
                     crit_chance = 0.0f;
                 break;
-            case SPELLFAMILY_PALADIN:
-                // Flash of light
-                if (spellProto->SpellFamilyFlags[0] & 0x40000000)
-                {
-                    // Sacred Shield
-                    if (AuraEffect const* aura = GetAuraEffect(58597, 1, GetGUID()))
-                        crit_chance += aura->GetAmount();
-                    break;
-                }
-                // Exorcism
-                else if (spellProto->GetCategory() == 19)
-                {
-                    if (GetCreatureTypeMask() & CREATURE_TYPEMASK_DEMON_OR_UNDEAD)
-                        return 100.0f;
-                    break;
-                }
-                break;
-            case SPELLFAMILY_SHAMAN:
+            case SPELLFAMILY_SPELL:
                 // Lava Burst
-                if (spellProto->SpellFamilyFlags[1] & 0x00001000)
+                if (spellProto->SpellFamilyFlags[0] & 0x00000004)
                 {
                     if (GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_SHAMAN, 0x10000000, 0, 0, caster->GetGUID()))
                         if (GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE) > -100)
@@ -9319,6 +9327,15 @@ float Unit::SpellTakenCritChance(Unit const* caster, SpellInfo const* spellProto
                     break;
                 }
                 break;
+            case SPELLFAMILY_HEAL:
+                // Flash of light
+                if (spellProto->SpellFamilyFlags[0] & 0x00000004)
+                {
+                    // Sacred Shield
+                    if (AuraEffect const* aura = GetAuraEffect(100098, 1, GetGUID()))
+                        crit_chance += aura->GetAmount();
+                    break;
+                }
             }
         }
         break;
@@ -18180,21 +18197,12 @@ bool Unit::CanRestoreMana(SpellInfo const* spellInfo) const
     {
     case 16666: // Demonic Rune
     case 27869: // Dark Rune
-    case 30824: // Shamanistic Rage
-    case 31786: // Spiritual Attunement
-    case 31930: // Judgements of the Wise
-    case 34075: // Aspect of the Viper
-    case 34720: // Thrill of the hunt
-    case 47755: // Rapture
-    case 54425: // Improved Felhunter
-    case 57319: // Blessing of Sanctuary
+    case 110090: // Judgements of the Wise
     case 63337: // Saronite Vapors (regenerate mana)
-    case 63375: // Improved stormstrike
-    case 64372: // Lifebloom
     case 68285: // Improved Leader of the Pack
+    case 110106: // sactuary
+    case 110180: // soul leech
         return true;
-    case 54428: // Divine Plea - only with talent Guarded by the Light
-        return HasSpell(53583);
     default:
         break;
     }
@@ -18335,14 +18343,6 @@ UnitMods Unit::ClassSpecDependantUnitMod() const
             }
             mod = UNIT_MOD_STAT_AGILITY;
             break;
-        case CLASS_MONK:
-            if (pSpec == TALENT_TREE_MONK_ZEALOTRY)
-            {
-                mod = UNIT_MOD_STAT_AGILITY;
-                break;
-            }
-            mod = UNIT_MOD_STAT_INTELLECT;
-            break;
         case CLASS_BARD:
             mod = UNIT_MOD_STAT_INTELLECT;
             break;
@@ -18409,14 +18409,6 @@ Stats Unit::ClassSpecDependantMainStat() const
             if (pSpec == TALENT_TREE_DRUID_BALANCE || pSpec == TALENT_TREE_DRUID_RESTORATION)
             {
                 stat = STAT_INTELLECT;
-                break;
-            }
-            stat = STAT_AGILITY;
-            break;
-        case CLASS_MONK:
-            if (pSpec == TALENT_TREE_MONK_ZEALOTRY)
-            {
-                stat = STAT_AGILITY;
                 break;
             }
             stat = STAT_AGILITY;

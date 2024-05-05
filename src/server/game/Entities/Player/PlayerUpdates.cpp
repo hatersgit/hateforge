@@ -605,13 +605,13 @@ void Player::UpdateRating(CombatRating cr)
         if ((*i)->GetMiscValue() & (1 << cr))
             for (int8 tempCr = 0; tempCr < MAX_COMBAT_RATING; ++tempCr)
                 if ((*i)->GetMiscValueB() & (1 << tempCr))
-                    amount = int32(CalculatePct(GetRatingBonusValue(CombatRating(tempCr)), (*i)->GetAmount()));
+                    amount += int32(CalculatePct(GetRatingBonusValue(CombatRating(tempCr)), (*i)->GetAmount()));
 
     // now apply bonus from SPELL_AURA_MOD_RATING_FROM_ALL_SOURCES_BY_PCT, it is cummulative
     AuraEffectList const& modRatingFromAllSourcesPct = GetAuraEffectsByType(SPELL_AURA_MOD_RATING_FROM_ALL_SOURCES_BY_PCT);
     for (AuraEffectList::const_iterator i = modRatingFromAllSourcesPct.begin(); i != modRatingFromAllSourcesPct.end(); ++i)
         if ((*i)->GetMiscValue() & (1 << cr))
-            amount = int32(CalculatePct(GetRatingBonusValue(cr), (*i)->GetAmount()));
+            amount += int32(CalculatePct(GetRatingBonusValue(cr), (*i)->GetAmount()));
 
     if (amount < 0)
         amount = 0;

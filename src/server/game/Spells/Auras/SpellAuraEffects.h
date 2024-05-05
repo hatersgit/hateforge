@@ -398,9 +398,9 @@ namespace Acore
                     return false;
 
             // Sacred Shield
-            if (spellProtoA->Id == 58597)
+            if (spellProtoA->Id == 100098)
                 return true;
-            if (spellProtoB->Id == 58597)
+            if (spellProtoB->Id == 100098)
                 return false;
 
             // Fel Blossom

@@ -61,7 +61,6 @@ public:
 
 
             cm->SendSpecInfo(iam.player);
-            cm->SendTalents(iam.player);
             iam.player->ActivateSpec(id);
             iam.player->SendInitialSpells();
             iam.player->SendPlaySpellVisual(179); // 53 SpellCastDirected

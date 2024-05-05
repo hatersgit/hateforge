@@ -3302,7 +3302,13 @@ void Spell::DoTriggersOnSpellHit(Unit* unit, uint8 effMask)
         {
             if (CanExecuteTriggersOnHit(effMask, i->triggeredByAura) && roll_chance_i(i->chance))
             {
-                m_caster->CastSpell(unit, i->triggeredSpell->Id, true);
+                Aura* aur = unit->GetAura(m_spellInfo->Id, m_caster->GetGUID());
+                if (auto withValue = i->triggeredByAura->GetEffect(SpellEffIndex(i->triggeredByEffIdx)).MiscValue) {
+                    m_caster->CastCustomSpell(unit, i->triggeredSpell->Id, &withValue, nullptr, nullptr, true);
+                } else {
+                    m_caster->CastSpell(unit, i->triggeredSpell->Id, true);
+                }
+
                 LOG_DEBUG("spells.aura", "Spell {} triggered spell {} by SPELL_AURA_ADD_TARGET_TRIGGER aura", m_spellInfo->Id, i->triggeredSpell->Id);
 
                 // SPELL_AURA_ADD_TARGET_TRIGGER auras shouldn't trigger auras without duration
@@ -3314,7 +3320,6 @@ void Spell::DoTriggersOnSpellHit(Unit* unit, uint8 effMask)
                         // get duration from aura-only once
                         if (!_duration)
                         {
-                            Aura* aur = unit->GetAura(m_spellInfo->Id, m_caster->GetGUID());
                             _duration = aur ? aur->GetDuration() : -1;
                         }
                         triggeredAur->SetDuration(_duration);
@@ -3536,7 +3541,9 @@ SpellCastResult Spell::prepare(SpellCastTargets const* targets, AuraEffect const
     }
 
     //Prevent casting at cast another spell (ServerSide check)
-    if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CAST_IN_PROGRESS) && m_caster->IsNonMeleeSpellCast(false, true, true, m_spellInfo->Id == 75) && m_cast_count)
+    if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CAST_IN_PROGRESS) && m_caster->IsNonMeleeSpellCast(false, true, true, m_spellInfo->Id == 3018
+        || m_spellInfo->Id == 2764
+        || m_spellInfo->Id == 5019) && m_cast_count)
     {
         SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
         finish(false);
@@ -3685,12 +3692,12 @@ SpellCastResult Spell::prepare(SpellCastTargets const* targets, AuraEffect const
                 exceptSpellId = m_spellInfo->Id;
             }
 
-            m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CAST, exceptSpellId, m_spellInfo->Id == 75
-                || m_spellInfo->Id == 129999
-                || m_spellInfo->Id == 101999);
-            m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_SPELL_ATTACK, exceptSpellId, m_spellInfo->Id == 75
-                || m_spellInfo->Id == 129999
-                || m_spellInfo->Id == 101999);
+            m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CAST, exceptSpellId, m_spellInfo->Id == 3018
+                || m_spellInfo->Id == 2764
+                || m_spellInfo->Id == 5019);
+            m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_SPELL_ATTACK, exceptSpellId, m_spellInfo->Id == 3018
+                || m_spellInfo->Id == 2764
+                || m_spellInfo->Id == 5019);
         }
 
         m_caster->SetCurrentCastedSpell(this);
@@ -4733,8 +4740,8 @@ void Spell::SendSpellStart()
     if (castFlags & CAST_FLAG_POWER_LEFT_SELF)
         data << uint32(m_caster->GetPower((Powers)m_spellInfo->PowerType));
 
-    // if (castFlags & CAST_FLAG_PROJECTILE)
-    //     WriteAmmoToPacket(&data);
+    if (castFlags & CAST_FLAG_PROJECTILE)
+         WriteAmmoToPacket(&data);
 
     if (castFlags & CAST_FLAG_UNKNOWN_23)
     {
@@ -4862,8 +4869,8 @@ void Spell::SendSpellGo()
         data << uint32(m_delayTrajectory ? m_delayTrajectory : m_delayMoment);
     }
 
-    // if (castFlags & CAST_FLAG_PROJECTILE)
-    //     WriteAmmoToPacket(&data);
+    if (castFlags & CAST_FLAG_PROJECTILE)
+        WriteAmmoToPacket(&data);
 
     if (castFlags & CAST_FLAG_VISUAL_CHAIN)
     {
@@ -4894,21 +4901,8 @@ void Spell::WriteAmmoToPacket(WorldPacket* data)
                 ammoDisplayID = pItem->GetTemplate()->DisplayInfoID;
             else
             {
-                uint32 ammoID = m_caster->ToPlayer()->GetUInt32Value(PLAYER_AMMO_ID);
-                if (ammoID)
-                {
-                    ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(ammoID);
-                    if (pProto)
-                    {
-                        ammoDisplayID = pProto->DisplayInfoID;
-                        ammoInventoryType = pProto->InventoryType;
-                    }
-                }
-                else if (m_caster->HasAura(46699))      // Requires No Ammo
-                {
-                    ammoDisplayID = 5996;                   // normal arrow
-                    ammoInventoryType = INVTYPE_AMMO;
-                }
+                ammoDisplayID = 5996;                   // normal arrow
+                ammoInventoryType = INVTYPE_AMMO;
             }
         }
     }
@@ -8788,7 +8782,7 @@ void Spell::PrepareTriggersExecutedOnHit()
             int32 chance = m_caster->CalculateSpellDamage(nullptr, auraSpellInfo, auraSpellIdx, &auraBaseAmount);
             chance *= aurEff->GetBase()->GetStackAmount();
             // build trigger and add to the list
-            m_hitTriggerSpells.emplace_back(spellInfo, auraSpellInfo, chance);
+            m_hitTriggerSpells.emplace_back(spellInfo, auraSpellInfo, chance, auraSpellIdx);
         }
     }
 }

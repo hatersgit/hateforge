@@ -61,7 +61,6 @@ public:
                             CharacterDatabase.Execute("update acore_characters.forge_character_specs set charspec = {}, active = 1 where guid = {}", tabId, iam.player->GetGUID().GetCounter());
                             
                             cm->SendSpecInfo(iam.player);
-                            cm->SendTalents(iam.player);
 
                             iam.player->SendPlaySpellVisual(179); // 53 SpellCastDirected
                             iam.player->SendPlaySpellImpact(iam.player->GetGUID(), 362); // 113 EmoteSalute

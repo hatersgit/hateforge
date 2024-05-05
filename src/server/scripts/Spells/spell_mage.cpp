@@ -23,6 +23,11 @@
 #include "SpellScript.h"
 #include "SpellScriptLoader.h"
 #include "TemporarySummon.h"
+
+#include "AreaTriggerEntityScript.h"
+#include "ScriptMgr.h"
+#include "AreaTriggerAI.h"
+
 /*
  * Scripts for spells with SPELLFAMILY_MAGE and SPELLFAMILY_GENERIC spells used by mage players.
  * Ordered alphabetically using scriptname.
@@ -4326,6 +4331,52 @@ class spell_mage_touch_of_the_magi_talent_procs : public SpellScript
     }
 };
 
+struct at_glacial_advance : AreaTriggerAI {
+    at_glacial_advance(AreaTrigger* at) : AreaTriggerAI(at) { }
+
+    void OnInitialize() override
+    {
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(at->GetSpellId());
+        if (!spellInfo)
+            return;
+
+        Unit* caster = at->GetCaster();
+        if (!caster)
+            return;
+    }
+
+    void OnUnitEnter(Unit* unit) override
+    {
+        HandleUnitEnterExit(unit);
+    }
+
+    void OnUnitExit(Unit* unit) override
+    {
+        // Note: this ensures any unit receives a second hit if they happen to be inside the AT when Divine Star starts its return path.
+        HandleUnitEnterExit(unit);
+    }
+
+    void HandleUnitEnterExit(Unit* unit)
+    {
+        Unit* caster = at->GetCaster();
+        if (!caster)
+            return;
+
+        if (std::find(_affectedUnits.begin(), _affectedUnits.end(), unit->GetGUID()) != _affectedUnits.end())
+            return;
+
+        constexpr TriggerCastFlags TriggerFlags = TriggerCastFlags(TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CAST_IN_PROGRESS);
+
+        if (caster->IsValidAttackTarget(unit))
+            caster->CastSpell(unit, 100136, TriggerFlags);
+
+        _affectedUnits.push_back(unit->GetGUID());
+    }
+
+private:
+    std::vector<ObjectGuid> _affectedUnits;
+};
+
 void AddSC_mage_spell_scripts()
 {
     RegisterSpellScript(spell_mage_blazing_speed);
@@ -4433,4 +4484,5 @@ void AddSC_mage_spell_scripts()
     RegisterSpellScript(spell_mage_timewarp);
     RegisterSpellScript(spell_mage_touch_of_the_magi_aura);
     RegisterSpellScript(spell_mage_touch_of_the_magi_talent_procs);
+    RegisterAreaTriggerAI(at_glacial_advance);
 }

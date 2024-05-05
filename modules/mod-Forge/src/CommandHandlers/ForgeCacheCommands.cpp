@@ -25,24 +25,42 @@ public:
             { "forge",      SEC_GAMEMASTER2_L,     true,  &ForgePoints,      "" },
             { "talent",      SEC_GAMEMASTER2_L,     true, &TalentPoints,      "" },
             { "prestige",      SEC_GAMEMASTER2_L,     true, &PrestigePoints,      "" },
-            { "racial",      SEC_GAMEMASTER2_L,     true, &RacialPoints,      "" }
+            { "racial",      SEC_GAMEMASTER2_L,     true, &RacialPoints,      "" },
         };
 
         // Level 1 sub command
         static std::vector<ChatCommand> exampleCommandTable =
         {
             { "reloadCache",      SEC_GAMEMASTER2_L,     true,  &ReloadCache,      ""},
-            { "addpoints",      SEC_GAMEMASTER2_L,     true, nullptr,      "", exampleCommandTable1}
+            { "addpoints",      SEC_GAMEMASTER2_L,     true, nullptr,      "", exampleCommandTable1},
         };
 
         // Root command
         static std::vector<ChatCommand> commandTable =
         {
             //  name       permission   allow console?   handler method      help      child commands table 
-            { "forge",   SEC_GAMEMASTER2_L,      true,           nullptr,         "", exampleCommandTable}
+            { "forge",   SEC_GAMEMASTER2_L,      true,           nullptr,         "", exampleCommandTable},
+            { "itemgen",    SEC_GAMEMASTER2_L, true, &GenItem,  ""}
         };
 
         return commandTable; // Return the root command table
+    }
+
+    static bool GenItem(ChatHandler* handler, char const* args)
+    {
+        if (ForgeCache::instance()->isNumber(args)) {
+            Player* ply = handler->getSelectedPlayerOrSelf();
+
+            int32 baseItem = static_cast<int32>(std::stoul(args));
+            auto guidlow = sObjectMgr->GetGenerator<HighGuid::Item>().Generate();
+            guidlow += guidlow < 200000 ? 200000 : 0;
+            auto itemProto = sObjectMgr->CreateItemTemplate(guidlow, baseItem);
+            CustomItemTemplate* custom = new CustomItemTemplate(itemProto);
+            sScriptMgr->GenerateItem(custom, handler->getSelectedPlayerOrSelf(), 0, true);
+            ply->AddItem(guidlow, 1);
+            return true;
+        }
+        return false;
     }
 
     //          Handle + "Something" + Command

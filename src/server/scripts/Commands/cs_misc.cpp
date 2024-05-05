@@ -2288,14 +2288,11 @@ public:
             case CLASS_WARLOCK:
                 classStr = "Warlock";
                 break;
-            case CLASS_SHAPESHIFTER:
-                classStr = "Shapeshifter";
-                break;
             case CLASS_DRUID:
                 classStr = "Druid";
                 break;
-            case CLASS_MONK:
-                classStr = "Monk";
+            case CLASS_SHAPESHIFTER:
+                classStr = "Shapeshifter";
                 break;
             case CLASS_BARD:
                 classStr = "Bard";

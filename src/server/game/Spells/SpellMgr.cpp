@@ -737,6 +737,8 @@ SpellProcEntry const* SpellMgr::GetSpellProcEntry(uint32 spellId) const
 
 bool SpellMgr::CanSpellTriggerProcOnEvent(SpellProcEntry const& procEntry, ProcEventInfo& eventInfo)
 {
+    auto spell = eventInfo.GetSpellInfo();
+
     // proc type doesn't match
     if (!(eventInfo.GetTypeMask() & procEntry.ProcFlags))
         return false;
@@ -818,6 +820,16 @@ bool SpellMgr::CanSpellTriggerProcOnEvent(SpellProcEntry const& procEntry, ProcE
                 hitMask |= PROC_HIT_NORMAL | PROC_HIT_CRITICAL | PROC_HIT_ABSORB;
         }
         if (!(eventInfo.GetHitMask() & hitMask))
+            return false;
+    }
+
+    if (eventInfo.GetSpellTypeMask() & PROC_SPELL_TYPE_HEAL) {
+        if (!(eventInfo.GetHitMask() & PROC_HIT_CRITICAL) && (eventInfo.GetTypeMask() & PROC_FLAG_CRITICAL_HEALING_DONE))
+            return false;
+    }
+
+    if (eventInfo.GetSpellTypeMask() & PROC_SPELL_TYPE_DAMAGE) {
+        if (!(eventInfo.GetHitMask() & PROC_HIT_CRITICAL) && (eventInfo.GetTypeMask() & PROC_FLAG_CRITICAL_DAMAGE_DONE))
             return false;
     }
 

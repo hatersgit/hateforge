@@ -371,6 +371,25 @@ void MotionMaster::MoveForwards(Unit* target, float dist)
     init.Launch();
 }
 
+void MotionMaster::MoveForwardsFromPosition(float dist, Unit* player)
+{
+    Position const& pos = player->GetPosition();
+    float angle = player->GetOrientation();
+    G3D::Vector3 point;
+    point.x = pos.m_positionX + dist * cosf(angle);
+    point.y = pos.m_positionY + dist * sinf(angle);
+    point.z = pos.m_positionZ;
+
+    if (!_owner->GetMap()->CanReachPositionAndGetValidCoords(_owner, point.x, point.y, point.z, true, false))
+    {
+        return;
+    }
+
+    Movement::MoveSplineInit init(_owner);
+    init.MoveTo(point.x, point.y, point.z, false);
+    init.Launch();
+}
+
 void MotionMaster::MoveCircleTarget(Unit* target)
 {
     if (!target)

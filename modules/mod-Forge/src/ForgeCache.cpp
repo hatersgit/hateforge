@@ -530,7 +530,7 @@ public:
         spec->Description = "Skill Specilization";
         spec->Visability = SpecVisibility::PRIVATE;
         spec->SpellIconId = 133743;
-        spec->CharacterSpecTabId = _playerClassFirstSpec[player->getClass()];
+        spec->CharacterSpecTabId = 0;
 
         player->SetSpecsCount(num);
 
@@ -554,16 +554,20 @@ public:
         if (TryGetForgeTalentTabs(player, CharacterPointType::TALENT_TREE, tabs)) {
             for (auto tab : tabs) {
                 for (auto talent : tab->Talents) {
-                    ForgeCharacterTalent* ct = new ForgeCharacterTalent();
-                    ct->CurrentRank = 0;
-                    ct->SpellId = talent.second->SpellId;
-                    ct->TabId = tab->Id;
-                    ct->type = talent.second->nodeType;
+                    if (talent.second) {
+                        ForgeCharacterTalent* ct = new ForgeCharacterTalent();
+                        ct->CurrentRank = 0;
+                        ct->SpellId = talent.second->SpellId;
+                        ct->TabId = tab->Id;
+                        ct->type = talent.second->nodeType;
 
-                    spec->Talents[tab->Id][ct->SpellId] = ct;
+                        spec->Talents[tab->Id][ct->SpellId] = ct;
+                    }
                 }
             }
         }
+
+        AddCharacterPointsToAllSpecs(player, CharacterPointType::TALENT_TREE, 1);
 
         for (auto pt : TALENT_POINT_TYPES)
         {
@@ -582,7 +586,7 @@ public:
             newFp->Max = maxCp->Max;
             newFp->PointType = pt;
             newFp->SpecId = spec->Id;
-            newFp->Sum = fpt->Sum;
+            newFp->Sum = maxCp->Sum;
 
             UpdateCharPoints(player, newFp);
         }
@@ -1024,31 +1028,50 @@ public:
     std::unordered_map<uint32 /*tabId*/, TreeMetaData*> _cacheTreeMetaData;
 
     void ForgetTalents(Player* player, ForgeCharacterSpec* spec, CharacterPointType pointType) {
-        std::list<ForgeTalentTab*> tabs;
-        if (TryGetForgeTalentTabs(player, pointType, tabs))
+        ForgeTalentTab *primaryTab, *secondaryTab;
+        if (TryGetTalentTab(player, player->getClassMask(), primaryTab) && TryGetTalentTab(player, spec->CharacterSpecTabId, secondaryTab)) {
+            std::vector<ForgeTalentTab*> tabs = { primaryTab, secondaryTab };
             for (auto* tab : tabs) {
-                for (auto spell : tab->Talents) {
-                    if (spell.second->nodeType == NodeType::CHOICE) {
-                        for (auto choice : _choiceNodesRev)
-                            if (player->HasSpell(choice.first))
-                                player->removeSpell(choice.first, player->GetActiveSpecMask(), false);
-                    }
-                    else
-                        for (auto rank : spell.second->Ranks)
-                            if (auto spellInfo = sSpellMgr->GetSpellInfo(rank.second)) {
-                                if (spellInfo->HasEffect(SPELL_EFFECT_LEARN_SPELL))
-                                    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-                                        player->removeSpell(spellInfo->Effects[i].TriggerSpell, player->GetActiveSpecMask(), false);
-
-                                player->RemoveAura(rank.second);
-                                player->removeSpell(rank.second, player->GetActiveSpecMask(), false);
+                if (tab) {
+                    for (auto spell : tab->Talents) {
+                        if (spell.second) {
+                            if (spell.second->nodeType == NodeType::CHOICE) {
+                                for (auto choice : _choiceNodesRev)
+                                    if (player->HasSpell(choice.first))
+                                        player->removeSpell(choice.first, player->GetActiveSpecMask(), false);
                             }
-                    auto talent = spec->Talents[tab->Id].find(spell.first);
-                    if (talent != spec->Talents[tab->Id].end())
-                        talent->second->CurrentRank = 0;
+                            else
+                                for (auto rank : spell.second->Ranks)
+                                    if (auto spellInfo = sSpellMgr->GetSpellInfo(rank.second)) {
+                                        if (spellInfo->HasEffect(SPELL_EFFECT_LEARN_SPELL))
+                                            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i) {
+                                                auto toUnlearn = spellInfo->Effects[i].TriggerSpell;
+                                                if (auto unlearnSpellInfo = sSpellMgr->GetSpellInfo(toUnlearn)) {
+                                                    if (unlearnSpellInfo->HasEffect(SPELL_EFFECT_LEARN_SPELL))
+                                                        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i) {
+                                                            auto subToUnlearn = unlearnSpellInfo->Effects[i].TriggerSpell;
+                                                            player->RemoveAura(subToUnlearn);
+                                                            player->removeSpell(subToUnlearn, player->GetActiveSpecMask(), false);
+                                                        }
+                                                    else {
+                                                        player->RemoveAura(toUnlearn);
+                                                        player->removeSpell(toUnlearn, player->GetActiveSpecMask(), false);
+                                                    }
+                                                }
+                                            }
+
+                                        player->RemoveAura(rank.second);
+                                        player->removeSpell(rank.second, player->GetActiveSpecMask(), false);
+                                    }
+                            auto talent = spec->Talents[tab->Id].find(spell.first);
+                            if (talent != spec->Talents[tab->Id].end())
+                                talent->second->CurrentRank = 0;
+                        }
+                    }
+                    spec->PointsSpent[tab->Id] = 0;
                 }
-                spec->PointsSpent[tab->Id] = 0;
             }
+        }
         ForgeCharacterPoint* fcp = GetSpecPoints(player, pointType, spec->Id);
 
         auto amount = 0;
@@ -1115,6 +1138,8 @@ public:
     std::unordered_map<InventoryType, uint8 /*slots*/> _genItemSlotsForEquipSlot;
     std::unordered_map<ItemModType, float /*value*/> _forgeItemStatValues;
     std::unordered_map<uint8, std::vector<ItemModType>> _forgeItemSecondaryStatPools;
+
+    std::unordered_map<ItemClass, std::unordered_map<uint8 /*subclass*/, std::unordered_map<uint8 /*invtype*/, std::unordered_map<uint32 /*displayid*/, std::string /*name*/>>>> _genItemNamesAndDisplays;
 
     void AddDefaultLoadout(Player* player)
     {
@@ -1288,6 +1313,7 @@ private:
         AddItemStatValue();
         AddItemStatPools();
         AddGemSlotsForItemSlot();
+        AddItemAppearances();
 
         // hater: perks
         AddPerks();
@@ -1374,9 +1400,11 @@ private:
                 for (auto& tals : spec->Talents)
                 {
                     if (tals.first > 0) {
-                        if (TalentTabs[tals.first]->TalentType == ACCOUNT_WIDE_TYPE)
-                            for (auto& tal : tals.second)
-                                sp.second->Talents[tals.first][tal.first] = tal.second;
+                        if (TalentTabs[tals.first]) {
+                            if (TalentTabs[tals.first]->TalentType == ACCOUNT_WIDE_TYPE)
+                                for (auto& tal : tals.second)
+                                    sp.second->Talents[tals.first][tal.first] = tal.second;
+                        }
                     }
                 }
             }
@@ -1576,7 +1604,7 @@ private:
 
     void AddTalentsToTrees()
     {
-        QueryResult talents = WorldDatabase.Query("SELECT * FROM forge_talents order by `talentTabId` asc, `rowIndex` asc, `columnIndex` asc");
+        QueryResult talents = WorldDatabase.Query("SELECT * FROM forge_talents order by `talentTabId` asc, `rowIndex` desc, `columnIndex` asc");
 
         _cacheTreeMetaData.clear();
         _cacheSpecNodeToSpell.clear();
@@ -2206,6 +2234,27 @@ private:
             ItemModType secondarystat = ItemModType(valuesFields[1].Get<uint32>());
 
             _forgeItemSecondaryStatPools[mainstat].emplace_back(secondarystat);
+        } while (values->NextRow());
+    }
+
+    void AddItemAppearances() {
+        _genItemNamesAndDisplays.clear();
+        //std::unordered_map<ItemQualities, std::unordered_map<ItemClass, std::unordered_map<uint8 /*subclass*/, std::unordered_map<uint32 /*displayid*/, std::string /*name*/>>>>
+        QueryResult values = WorldDatabase.Query("select class, subclass, InventoryType, displayid, name from `acore_world`.`item_template` where class in (2, 4) and entry < 80000");
+
+        if (!values)
+            return;
+
+        do
+        {
+            Field* valuesFields = values->Fetch();
+            ItemClass iClass = ItemClass(valuesFields[0].Get<uint8>());
+            uint8 subclass = valuesFields[1].Get<uint8>();
+            uint8 invtype = valuesFields[2].Get<uint8>();
+            uint32 display = valuesFields[3].Get<uint32>();
+            std::string name = valuesFields[4].Get<std::string>();
+
+            _genItemNamesAndDisplays[iClass][subclass][invtype][display] = name;
         } while (values->NextRow());
     }
 

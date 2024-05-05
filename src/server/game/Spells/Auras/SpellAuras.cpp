@@ -28,6 +28,7 @@
 #include "ScriptMgr.h"
 #include "Spell.h"
 #include "SpellAuraEffects.h"
+#include "SpellInfo.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include "Unit.h"
@@ -931,7 +932,9 @@ void Aura::RefreshDuration(bool withMods)
 void Aura::RefreshTimers(bool periodicReset /*= false*/)
 {
     m_maxDuration = CalcMaxDuration();
-    RefreshDuration();
+    if (GetSpellInfo()->AttributesCu & ~SPELL_ATTR1_CU_REAPPLY_NO_REFRESH_DURATION)
+        RefreshDuration();
+
     Unit* caster = GetCaster();
 
     if (!caster)
@@ -1772,6 +1775,49 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                 }
                 break;
+            case SPELLFAMILY_HEAL:
+                if (removeMode == AURA_REMOVE_BY_ENEMY_SPELL && GetSpellInfo()->SpellFamilyFlags[0] & 0x00000008) {
+                    if (AuraEffect const* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_HEAL, 2894, EFFECT_1))
+                    {
+                        auto aura = aurEff->GetBase();
+                        // check cooldown
+                        if (caster->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            if (caster->ToPlayer()->HasSpellCooldown(aura->GetId()))
+                            {
+                                // This additional check is needed to add a minimal delay before cooldown in in effect
+                                // to allow all bubbles broken by a single damage source proc mana return
+                                if (caster->ToPlayer()->GetSpellCooldownDelay(aura->GetId()) <= 11500)
+                                    break;
+                            }
+                            else    // and add if needed
+                                caster->ToPlayer()->AddSpellCooldown(aura->GetId(), 0, 12 * IN_MILLISECONDS);
+                        }
+
+                        // effect on caster
+                        if (AuraEffect const* aurEff = aura->GetEffect(0))
+                        {
+                            float multiplier = (float)aurEff->GetAmount();
+                            if (aurEff->GetId() == 47535)
+                                multiplier -= 0.5f;
+                            else if (aurEff->GetId() == 47537)
+                                multiplier += 0.5f;
+
+                            int32 basepoints0 = int32(CalculatePct(caster->GetMaxPower(POWER_MANA), multiplier));
+                            caster->CastCustomSpell(caster, 47755, &basepoints0, nullptr, nullptr, true);
+                        }
+                        // effect on aura target
+                        if (AuraEffect const* aurEff = aura->GetEffect(1))
+                        {
+                            if (!roll_chance_i(aurEff->GetAmount()))
+                                break;
+
+                            int32 basepoints0 = int32(CalculatePct(target->GetMaxPower(POWER_MANA), 2));
+                            caster->CastCustomSpell(target, 63654, &basepoints0, nullptr, nullptr, true);
+                            break;
+                        }
+                    }
+                }
             case SPELLFAMILY_PRIEST:
                 if (!caster)
                     break;
@@ -3050,9 +3096,25 @@ void UnitAura::FillTargetMap(std::map<Unit*, uint8>& targets, Unit* caster)
                             Cell::VisitAllObjects(GetUnitOwner(), searcher, radius);
                             break;
                         }
-                    case SPELL_EFFECT_APPLY_AREA_AURA_PET:
-                        targetList.push_back(GetUnitOwner());
-                        [[fallthrough]]; /// @todo: Not sure whether the fallthrough was a mistake (forgetting a break) or intended. This should be double-checked.
+                    case SPELL_EFFECT_APPLY_AREA_AURA_PET: {
+                        UnitList temp;
+                        Acore::AnyGroupedUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius, GetSpellInfo()->Effects[effIndex].Effect == SPELL_EFFECT_APPLY_AREA_AURA_RAID);
+                        Acore::UnitListSearcher<Acore::AnyGroupedUnitInObjectRangeCheck> searcher(GetUnitOwner(), temp, u_check);
+                        Cell::VisitAllObjects(GetUnitOwner(), searcher, radius);
+
+                        for (auto unit : temp) {
+                            auto mainPetOnly = GetSpellInfo()->Effects[effIndex].MiscValue;
+                            auto trigger = GetSpellInfo()->Effects[effIndex].ApplyAuraName;
+                            if (mainPetOnly && trigger == SPELL_AURA_PERIODIC_TRIGGER_SPELL) {
+                                if (unit->GetOwnerGUID() == GetUnitOwner()->GetGUID() && unit->IsPet())
+                                    targetList.push_back(unit);
+                            }
+                            else if ((unit->IsSummon() || unit->IsGuardian() || unit->IsPet() || unit->IsTotem())
+                                && unit->GetOwnerGUID() == GetUnitOwner()->GetGUID())
+                                targetList.push_back(unit);
+                        }
+                        break;
+                    }
                     case SPELL_EFFECT_APPLY_AREA_AURA_OWNER:
                         {
                             if (Unit* owner = GetUnitOwner()->GetCharmerOrOwner())

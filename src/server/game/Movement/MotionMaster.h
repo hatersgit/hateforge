@@ -219,6 +219,7 @@ public:
     void MoveCircleTarget(Unit* target);
     void MoveBackwards(Unit* target, float dist);
     void MoveForwards(Unit* target, float dist);
+    void MoveForwardsFromPosition(float dist, Unit* player);
     void MoveConfused();
     void MoveFleeing(Unit* enemy, uint32 time = 0);
     void MovePoint(uint32 id, const Position& pos, bool generatePath = true, bool forceDestination = true)

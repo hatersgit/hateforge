@@ -1370,9 +1370,15 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                             break;
                         }
                     case NPC_VENOMOUS_SNAKE:
-                        SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel * 0.7 - 38));
-                        SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel * 0.8 - 40));
-                        break;
+                        {
+                            AddAura(SPELL_HUNTER_PET_SCALING_01, this);
+                            AddAura(SPELL_HUNTER_PET_SCALING_04, this);
+                            AddAura(SPELL_PET_AVOIDANCE, this);
+
+                            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
+                            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel - (petlevel / 4)));
+                            break;
+                        }
                     case NPC_VIPER:
                         SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(1.3 * petlevel - 64));
                         SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(1.5 * petlevel - 68));

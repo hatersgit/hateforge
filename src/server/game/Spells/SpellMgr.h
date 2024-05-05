@@ -150,8 +150,8 @@ enum ProcFlags
 
     PROC_FLAG_DAMAGE_BLOCKED                  = 0x02000000,    // 25 Damage blocked
 
-    PROC_FLAG_CRITICAL_DAMAGE_DONE            = 0x04000000,    // 26 Damage blocked
-    PROC_FLAG_CRITICAL_DAMAGE_TAKEN           = 0x08000000,    // 26 Damage blocked
+    PROC_FLAG_CRITICAL_DAMAGE_DONE            = 0x04000000,    // 26 crit done
+    PROC_FLAG_CRITICAL_DAMAGE_TAKEN           = 0x08000000,    // 26 crit taken
 
     PROC_FLAG_CRITICAL_HEALING_DONE           = 0x10000000,    // 27 Damage blocked
     PROC_FLAG_CRITICAL_HEALING_TAKEN          = 0x20000000,    // 27 Damage blocked

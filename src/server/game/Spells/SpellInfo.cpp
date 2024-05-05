@@ -1271,7 +1271,7 @@ bool SpellInfo::CanBeUsedInCombat() const
 
 bool SpellInfo::RequiresCombat() const
 {
-    return (AttributesCu & SPELL_ATTR0_CU_REQUIRES_COMBAT);
+    return (AttributesCu & SPELL_ATTR1_CU_REQUIRES_COMBAT);
 }
 
 bool SpellInfo::IsPositive() const
@@ -2145,7 +2145,7 @@ AuraStateType SpellInfo::LoadAuraState() const
         return AURA_STATE_SWIFTMEND;
 
     // Deadly poison aura state
-    if (SpellFamilyName == SPELLFAMILY_ROGUE && SpellFamilyFlags[0] & 0x10000)
+    if (SpellFamilyName == SPELLFAMILY_DOT && SpellFamilyFlags[0] & 0x100000)
         return AURA_STATE_DEADLY_POISON;
 
     // Enrage aura state
@@ -2474,12 +2474,12 @@ uint32 SpellInfo::GetNoHasteTicks() const
     return 6;
 }
 
-uint32 SpellInfo::GetMaxTicks(Unit* caster, float& dmgRatio) const
+uint32 SpellInfo::GetMaxTicks(Unit* caster) const
 {
-    return GetMaxTicks(GetMaxDuration(), caster, dmgRatio);
+    return GetMaxTicks(GetMaxDuration(), caster);
 }
 
-uint32 SpellInfo::GetMaxTicks(int32 DotDuration, Unit* caster, float& dmgRatio) const
+uint32 SpellInfo::GetMaxTicks(int32 DotDuration, Unit* caster) const
 {
     if (DotDuration == 0)
         return 1;
@@ -2499,7 +2499,7 @@ uint32 SpellInfo::GetMaxTicks(int32 DotDuration, Unit* caster, float& dmgRatio) 
             case SPELL_AURA_PERIODIC_TRIGGER_SPELL_FROM_CLIENT:
                 if (Effects[x].Amplitude != 0)
                 {
-                    return CalculateTicks(Effects[x].Amplitude, DotDuration, caster, dmgRatio);
+                    return CalculateTicks(Effects[x].Amplitude, DotDuration, caster);
                 }
                 break;
             }
@@ -2508,9 +2508,8 @@ uint32 SpellInfo::GetMaxTicks(int32 DotDuration, Unit* caster, float& dmgRatio) 
 }
 
 
-uint32 SpellInfo::CalculateTicks(uint32 ampl, int32 DotDuration, Unit* caster, float& dmgRatio) const
+uint32 SpellInfo::CalculateTicks(uint32 ampl, int32 DotDuration, Unit* caster) const
 {
-    dmgRatio = 0;
 
     if (DotDuration == 0)
         return 1;
@@ -2529,17 +2528,15 @@ uint32 SpellInfo::CalculateTicks(uint32 ampl, int32 DotDuration, Unit* caster, f
             auto timeOfTicks = DotDuration / numOfTicks;
             auto castSpeed = 1 - caster->GetFloatValue(UNIT_MOD_CAST_SPEED);
 
-        if (castSpeed > .74)
-                castSpeed = .74;
+            if (castSpeed > .74)
+                    castSpeed = .74;
 
-        if (castSpeed < 0)
-                castSpeed = 0;
+            if (castSpeed < 0)
+                    castSpeed = 0;
 
-        auto calc = DotDuration / (timeOfTicks / castSpeed);
-        auto addedTicks = (int)floor(calc);
-        numOfTicks += addedTicks;
-        dmgRatio = calc - addedTicks;
-            dmgRatio = dmgRatio / numOfTicks;
+            auto calc = DotDuration / (timeOfTicks / castSpeed);
+            auto addedTicks = (int)floor(calc);
+            numOfTicks += addedTicks;
         }
         return numOfTicks;
     }

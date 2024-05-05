@@ -213,7 +213,19 @@ enum SpellCustomAttributes
 
 enum SpellCustomAttributes2
 {
-    SPELL_ATTR0_CU_REQUIRES_COMBAT = 0x00000001,
+    SPELL_ATTR1_CU_REQUIRES_COMBAT = 0x00000001,
+    SPELL_ATTR1_CU_NO_ATTACK_BLOCK = 0x00000002,
+    SPELL_ATTR1_CU_SCALE_DAMAGE_EFFECTS_ONLY = 0x00000004,
+    SPELL_ATTR1_CU_SCALE_HEALING_EFFECTS_ONLY = 0x00000008,
+    SPELL_ATTR1_CU_USE_TARGETS_LEVEL_FOR_SPELL_SCALING = 0x00000010,
+    SPELL_ATTR1_CU_REMOVE_OUTSIDE_DUNGEONS_AND_RAIDS = 0x00000020,
+    SPELL_ATTR1_CU_NOT_USABLE_IN_INSTANCES = 0x00000040,
+    SPELL_ATTR1_CU_USABLE_IN_INSTANCES_ONLY = 0x00000080,
+    SPELL_ATTR1_CU_PERIODIC_CAN_CRIT = 0x00000100,
+    SPELL_ATTR1_CU_IGNORES_CASTER_LEVEL = 0x00000200,
+    SPELL_ATTR1_CU_ONLY_PROC_FROM_CLASS_ABILITIES = 0x00000400, //TODO
+    SPELL_ATTR1_CU_ACTIVATES_REQUIRED_SHAPESHIFT = 0x00000800, //TODO
+    SPELL_ATTR1_CU_REAPPLY_NO_REFRESH_DURATION = 0x00001000,
 };
 
 uint32 GetTargetFlagMask(SpellTargetObjectTypes objType);
@@ -522,9 +534,10 @@ public:
     
     uint32 GetMaxTicks(Unit*, float&) const;
     uint32 GetMaxTicks() const;
+    uint32 GetMaxTicks(Unit* caster) const;
     uint32 GetNoHasteTicks() const;
-    uint32 GetMaxTicks(int32 DotDuration, Unit* caster, float& dmgRatio) const;
-    uint32 CalculateTicks(uint32 ampl, int32 DotDuration, Unit* caster, float& dmgRatio) const;
+    uint32 GetMaxTicks(int32 DotDuration, Unit* caster) const;
+    uint32 CalculateTicks(uint32 ampl, int32 DotDuration, Unit* caster) const;
 
     uint32 CalcCastTime(Unit* caster = nullptr, Spell* spell = nullptr) const;
     uint32 GetRecoveryTime() const;

@@ -2073,10 +2073,12 @@ public:
 
     [[nodiscard]] float GetExpertiseDodgeOrParryReduction(WeaponAttackType attType) const;
     void UpdateBlockPercentage();
+    float GetBlockPercent(OUT float value);
     void UpdateCritPercentage(WeaponAttackType attType);
     void UpdateAllCritPercentages();
     void UpdateParryPercentage();
     void UpdateDodgePercentage();
+    float GetDodgePercent(OUT float value);
     void UpdateMeleeHitChances();
     void UpdateRangedHitChances();
     void UpdateSpellHitChances();
@@ -2290,6 +2292,8 @@ public:
     void SetCanParry(bool value);
     [[nodiscard]] bool CanBlock() const { return m_canBlock; }
     void SetCanBlock(bool value);
+    [[nodiscard]] bool CanDodge() const { return m_canDodge; }
+    void SetCanDodge(bool value);
     [[nodiscard]] bool CanTitanGrip() const { return m_canTitanGrip; }
     void SetCanTitanGrip(bool value);
     [[nodiscard]] bool CanTameExoticPets() const { return IsGameMaster() || HasAuraType(SPELL_AURA_ALLOW_TAME_PET_TYPE); }
@@ -2758,8 +2762,8 @@ public:
     // hater: timed events on player
     void AddTimedDelayedOperation(uint32 spellId, int32 timeout, std::function<void()>&& function)
     {
-        emptyWarned = false;
         timedDelayedOperations[spellId] = std::pair<int32, std::function<void()>>(timeout, function);
+        emptyWarned = false;
     }
 
     /// Called after last delayed operation was deleted
@@ -3013,6 +3017,7 @@ public:
     uint32 m_ArmorProficiency;
     bool m_canParry;
     bool m_canBlock;
+    bool m_canDodge;
     bool m_canTitanGrip;
     uint8 m_swingErrorMsg;
     float m_ammoDPS;

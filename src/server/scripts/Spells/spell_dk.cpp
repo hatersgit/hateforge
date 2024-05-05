@@ -1903,10 +1903,6 @@ class spell_dk_pestilence : public SpellScript
 
         if (target != hitUnit || caster->GetAura(SPELL_DK_GLYPH_OF_DISEASE))
         {
-            // xinef: checked in target selection
-            //if (!m_targets.GetUnitTarget()->IsWithinLOSInMap(unitTarget))
-            //  return;
-
             // And spread them on target
             // Blood Plague
             if (target->GetAura(SPELL_DK_BLOOD_PLAGUE, caster->GetGUID()))

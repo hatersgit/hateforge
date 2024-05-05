@@ -257,6 +257,7 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
     m_ArmorProficiency = 0;
     m_canParry = false;
     m_canBlock = false;
+    m_canDodge = true;
     m_canTitanGrip = false;
     m_ammoDPS = 0.0f;
 
@@ -576,9 +577,7 @@ bool Player::Create(ObjectGuid::LowType guidlow, CharacterCreateInfo* createInfo
 
     InitRunes();
 
-    SetUInt32Value(PLAYER_FIELD_COINAGE, getClass() != CLASS_DEATH_KNIGHT
-                                         ? sWorld->getIntConfig(CONFIG_START_PLAYER_MONEY)
-                                         : sWorld->getIntConfig(CONFIG_START_HEROIC_PLAYER_MONEY));
+    SetUInt32Value(PLAYER_FIELD_COINAGE, sWorld->getIntConfig(CONFIG_START_PLAYER_MONEY));
     SetHonorPoints(sWorld->getIntConfig(CONFIG_START_HONOR_POINTS));
     SetArenaPoints(sWorld->getIntConfig(CONFIG_START_ARENA_POINTS));
 
@@ -1875,86 +1874,7 @@ void Player::Regenerate(Powers power)
     {
         case POWER_MANA:
             {
-                bool recentCast = IsUnderLastManaUseEffect();
-                float ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA);
-
-                if (sWorld->getBoolConfig(CONFIG_LOW_LEVEL_REGEN_BOOST) && GetLevel() < 15)
-                    ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA) * (2.066f - (GetLevel() * 0.066f));
-
-                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * ManaIncreaseRate * 0.001f * m_regenTimer;
-            }
-            break;
-        case POWER_RAGE:                                    // Regenerate rage
-            {
-                if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
-                {
-                    if (getClass() == CLASS_BARD)
-                    {
-                        float DiscordDecreaseRate = sWorld->getRate(RATE_POWER_DISCORD_LOSS);
-                        addvalue += -30 * DiscordDecreaseRate;
-                    }
-                    else
-                    {
-                        float RageDecreaseRate = sWorld->getRate(RATE_POWER_RAGE_LOSS);
-                        addvalue += -20 * RageDecreaseRate;               // 2 rage by tick (= 2 seconds => 1 rage/sec)
-                    }
-                }
-            }
-            break;
-        case POWER_ENERGY:                                  // Regenerate energy (rogue)
-            {
-                float haste = (1 - m_modAttackSpeedPct[BASE_ATTACK]);
-                addvalue += 0.01f * m_regenTimer * sWorld->getRate(RATE_POWER_ENERGY);
-
-                if (haste > 0) {
-                    if (haste > 74)
-                        haste = 74;
-
-                    addvalue += addvalue * haste;
-                }
-            }
-            break;
-        case POWER_RUNIC_POWER:
-            {
-                if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
-                {
-                    if (getClass() == CLASS_PRIEST)
-                    {
-                        if (GetActiveSpec() == TALENT_TREE_PRIEST_SHADOW)
-                        {
-                            float InsanityDecreaseRate = sWorld->getRate(RATE_POWER_INSANITY_LOSS);
-                            addvalue += -30 * InsanityDecreaseRate;
-                        }
-                        else if (GetActiveSpec() == TALENT_TREE_PRIEST_INQUISITION)
-                        {
-                            float WrathDecreaseRate = sWorld->getRate(RATE_POWER_WRATH_LOSS);
-                            addvalue += -30 * WrathDecreaseRate;
-                        }
-                    }
-                    else if (getClass() == CLASS_TINKER)
-                    {
-                        if (GetActiveSpec() != TALENT_TREE_TINKER_PHYSICIAN)
-                        {
-                            float BatteryGaugeDecreaseRate = sWorld->getRate(RATE_POWER_RUNICPOWER_LOSS);
-                            addvalue += -30 * BatteryGaugeDecreaseRate;
-                        }
-                    }
-                    else if (getClass() == CLASS_SHAPESHIFTER)
-                    {
-                        float FuryDecreaseRate = sWorld->getRate(RATE_POWER_FURY_LOSS);
-                        addvalue += -30 * FuryDecreaseRate;
-                    }
-                    else if (getClass() == CLASS_BARD)
-                    {
-                        float HarmonyDecreaseRate = sWorld->getRate(RATE_POWER_HARMONY_LOSS);
-                        addvalue += -30 * HarmonyDecreaseRate;
-                    }
-                    else
-                    {
-                        float RunicPowerDecreaseRate = sWorld->getRate(RATE_POWER_RUNICPOWER_LOSS);
-                        addvalue += -30 * RunicPowerDecreaseRate;         // 3 RunicPower by tick
-                    }
-                }
+                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * 0.001f * m_regenTimer;
             }
             break;
         case POWER_FOCUS: 
@@ -2520,19 +2440,13 @@ void Player::GiveLevel(uint8 level)
     if (Guild* guild = GetGuild())
         guild->UpdateMemberData(this, GUILD_MEMBER_DATA_LEVEL, level);
 
-    PlayerLevelInfo info;
-    sObjectMgr->GetPlayerLevelInfo(getRace(true), getClass(), level, &info);
-
-    PlayerClassLevelInfo classInfo;
-    sObjectMgr->GetPlayerClassLevelInfo(getClass(), level, &classInfo);
-
     WorldPackets::Misc::LevelUpInfo packet;
     packet.Level = level;
-    packet.HealthDelta = int32(classInfo.basehealth) - int32(GetCreateHealth());
+    packet.HealthDelta = int32(level * 30) - int32(GetCreateHealth());
 
     /// @todo find some better solution
     // for (int i = 0; i < MAX_POWERS; ++i)
-    packet.PowerDelta[0] = int32(classInfo.basemana) - int32(GetCreateMana());
+    packet.PowerDelta[0] = int32(level * 2) - int32(GetCreateMana());
     packet.PowerDelta[1] = 0;
     packet.PowerDelta[2] = 0;
     packet.PowerDelta[3] = 0;
@@ -2540,7 +2454,7 @@ void Player::GiveLevel(uint8 level)
     packet.PowerDelta[5] = 0;
 
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        packet.StatDelta[i] = int32(info.stats[i]) - GetCreateStat(Stats(i));
+        packet.StatDelta[i] = int32(level * 2) - GetCreateStat(Stats(i));
 
     SendDirectMessage(packet.Write());
 
@@ -2557,10 +2471,10 @@ void Player::GiveLevel(uint8 level)
 
     // save base values (bonuses already included in stored stats
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        SetCreateStat(Stats(i), info.stats[i]);
+        SetCreateStat(Stats(i), i == STAT_SPIRIT ? 0 : level * 2);
 
-    SetCreateHealth(classInfo.basehealth);
-    SetCreateMana(classInfo.basemana);
+    SetCreateHealth(level * 30);
+    SetCreateMana(100);
 
     InitTalentForLevel();
     InitTaxiNodesForLevel();
@@ -2633,12 +2547,6 @@ void Player::InitStatsForLevel(bool reapplyMods)
     if (reapplyMods)                                        //reapply stats values only on .reset stats (level) command
         _RemoveAllStatBonuses();
 
-    PlayerClassLevelInfo classInfo;
-    sObjectMgr->GetPlayerClassLevelInfo(getClass(), GetLevel(), &classInfo);
-
-    PlayerLevelInfo info;
-    sObjectMgr->GetPlayerLevelInfo(getRace(true), getClass(), GetLevel(), &info);
-
     uint32 maxPlayerLevel = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
     sScriptMgr->OnSetMaxLevel(this, maxPlayerLevel);
     SetUInt32Value(PLAYER_FIELD_MAX_LEVEL, maxPlayerLevel);
@@ -2657,15 +2565,17 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     // save base values (bonuses already included in stored stats
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        SetCreateStat(Stats(i), info.stats[i]);
+        SetCreateStat(Stats(i), i == STAT_SPIRIT ? 0 : GetLevel() * 2);
 
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        SetStat(Stats(i), info.stats[i]);
+        SetStat(Stats(i), i == STAT_SPIRIT ? 0 : GetLevel() * 2);
 
-    SetCreateHealth(classInfo.basehealth);
+    auto baseHP = GetLevel() * 30;
 
-    //set create powers
-    SetCreateMana(classInfo.basemana);
+    SetCreateHealth(baseHP);
+
+    //set create powers: semi low, everything is base mana
+    SetCreateMana(100);
 
     SetArmor(int32(m_createStats[STAT_AGILITY] * 2));
 
@@ -2747,7 +2657,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
         SetMaxPower(Powers(i),  uint32(GetCreatePowers(Powers(i))));
 
-    SetMaxHealth(classInfo.basehealth);                     // stamina bonus will applied later
+    SetMaxHealth(baseHP);                     // stamina bonus will applied later
 
     // cleanup mounted state (it will set correctly at aura loading if player saved at mount.
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
@@ -5481,19 +5391,6 @@ float Player::GetMasteryMultiplier() const
             }
             masteryRating = 15;
             break;
-        case CLASS_MONK:
-            if (spec == TALENT_TREE_MONK_FELLOWSHIP)
-            {
-                masteryRating = 30;
-                break;
-            }
-            else if (spec == TALENT_TREE_MONK_RADIANCE)
-            {
-                masteryRating = 10;
-                break;
-            }
-            masteryRating = 25;
-            break;
         case CLASS_BARD:            // Setting all of it to temp 15 per 1%
             if (spec == TALENT_TREE_BARD_INSPIRATION) // Aleist3r: CBA to change it since spec names changed - should be Melody
             {
@@ -5558,21 +5455,7 @@ float Player::OCTRegenHPPerSpirit()
 
 float Player::OCTRegenMPPerSpirit()
 {
-    uint8 level = GetLevel();
-    uint32 pclass = getClass();
-
-    if (level > GT_MAX_LEVEL)
-        level = GT_MAX_LEVEL;
-
-    //    GtOCTRegenMPEntry     const* baseRatio = sGtOCTRegenMPStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
-    GtRegenMPPerSptEntry  const* moreRatio = sGtRegenMPPerSptStore.LookupEntry((pclass - 1) * GT_MAX_LEVEL + level - 1);
-    if (!moreRatio)
-        return 0.0f;
-
-    // Formula get from PaperDollFrame script
-    float spirit    = GetStat(STAT_SPIRIT);
-    float regen     = spirit * moreRatio->ratio;
-    return regen;
+    return 0.f;
 }
 
 void Player::ApplyRatingMod(CombatRating cr, int32 value, bool apply)
@@ -10883,17 +10766,9 @@ void Player::InitDataForForm(bool reapplyMods)
     switch (form)
     {
         case FORM_GHOUL:
-        case FORM_CAT:
             {
                 if (getPowerType() != POWER_ENERGY)
                     setPowerType(POWER_ENERGY);
-                break;
-            }
-        case FORM_BEAR:
-        case FORM_DIREBEAR:
-            {
-                if (getPowerType() != POWER_RAGE)
-                    setPowerType(POWER_RAGE);
                 break;
             }
         default:                                            // 0, for example
@@ -13574,6 +13449,15 @@ void Player::SetCanBlock(bool value)
 
     m_canBlock = value;
     UpdateBlockPercentage();
+}
+
+void Player::SetCanDodge(bool value)
+{
+    if (m_canDodge == value)
+        return;
+
+    m_canDodge = value;
+    UpdateDodgePercentage();
 }
 
 void Player::SetCanTitanGrip(bool value)
@@ -16841,7 +16725,6 @@ std::string Player::GetPlayerName()
         case CLASS_DRUID:        color = "|cffFF7D0A"; break;
         case CLASS_HUNTER:       color = "|cffABD473"; break;
         case CLASS_MAGE:         color = "|cff69CCF0"; break;
-        case CLASS_MONK:         color = "|cffFF6F61"; break;
         case CLASS_PALADIN:      color = "|cffF58CBA"; break;
         case CLASS_PRIEST:       color = "|cffFFFFFF"; break;
         case CLASS_ROGUE:        color = "|cffFFF569"; break;
@@ -16889,31 +16772,37 @@ uint32 Player::GetSpellCooldownDelay(uint32 spell_id) const
 
 void Player::UpdateOperations()
 {
-    std::vector<uint32> toDelete = {};
-    for (auto spell : timedDelayedOperations) {
-        auto timer = spell.second;
-        int32 diff = timer.first - getMSTime();
+    if (!emptyWarned && IsInWorld()) {
+        std::vector<uint32> toDelete = {};
+        for (auto spell : timedDelayedOperations) {
+            auto timer = spell.second;
+            int32 diff = timer.first - getMSTime();
 
-        if (diff < 0)
-        {
-            timer.second();
-            toDelete.push_back(spell.first);
+            if (diff < 0)
+            {
+                timer.second();
+                toDelete.push_back(spell.first);
+            }
         }
-    }
 
-    for (auto spell : toDelete) {
-        auto info = sSpellMgr->GetSpellInfo(spell);
-        if (auto charged = sObjectMgr->TryGetChargeEntry(info->SpellFamilyFlags)) {
-            auto chargeCount = GetItemCount(charged->chargeItem);
-            auto maxCharges = charged->baseCharges + CalculateSpellMaxCharges(info->SpellFamilyFlags);
+        for (auto spell : toDelete) {
+            if (spell) {
+                auto info = sSpellMgr->GetSpellInfo(spell);
+                if (auto charged = sObjectMgr->TryGetChargeEntry(info->SpellFamilyFlags)) {
+                    auto chargeCount = GetItemCount(charged->chargeItem);
+                    auto maxCharges = charged->baseCharges + CalculateSpellMaxCharges(info->SpellFamilyFlags);
 
-            if (chargeCount >= maxCharges)
+                    if (chargeCount >= maxCharges)
+                        timedDelayedOperations.erase(spell);
+                }
+                else {
+                    timedDelayedOperations.erase(spell);
+                }
+            }
+            else {
                 timedDelayedOperations.erase(spell);
+            }
         }
-        else {
-            timedDelayedOperations.erase(spell);
-        }
-
     }
 
     if (timedDelayedOperations.empty() && !emptyWarned)

@@ -79,14 +79,10 @@ public:
         fc->AddCharacterSpecSlot(player);
         fc->UpdateCharacters(player->GetSession()->GetAccountId(), player);
 
-        if (sConfigMgr->GetBoolDefault("echos", false)) {
             fc->EchosDefaultLoadout(player);
             fc->FillBlankSoulShards(player);
             player->SetWorldTier(WORLD_TIER_1);
-        }
-        else {
-            fc->AddDefaultLoadout(player);
-        }
+            //fc->AddDefaultLoadout(player);
     }
 
     void OnEquip(Player* player, Item* item, uint8 bag, uint8 slot, bool update) override
@@ -99,7 +95,6 @@ public:
         if (!player)
             return;
 
-        LearnSpellsForLevel(player);
         fc->ApplyAccountBoundTalents(player);
         fc->UnlearnFlaggedSpells(player);
 
@@ -120,7 +115,6 @@ public:
         }
 
         fc->ApplyActivePerks(player);
-        LearnSpellsForLevel(player, player->GetLevel());
 
         if (sConfigMgr->GetBoolDefault("echos", false)) {
             auto foundLoadout = fc->_playerActiveTalentLoadouts.find(player->GetGUID().GetCounter());
@@ -134,6 +128,8 @@ public:
             player->SendForgeUIMsg(ForgeTopic::SEND_MAX_WORLD_TIER, std::to_string(std::max(fc->GetCharWorldTierUnlock(player), fc->GetAccountWorldTierUnlock(player))));
             fc->RecalculateShardBonuses(player);
         }
+
+        cm->SendTalents(player);
     }
 
     void OnFirstLogin(Player* player) override {
@@ -210,7 +206,6 @@ public:
 
                 cm->SendSpecInfo(player);
                 fc->UpdateCharacterSpec(player, spec);
-                LearnSpellsForLevel(player, player->GetLevel());
 
                 if (currentLevel == DEFAULT_MAX_LEVEL) {
                     auto tier = player->GetWorldTier();
@@ -328,6 +323,12 @@ public:
 
         auto e = 2.7183;
         auto invType = itemProto->GetInventoryType();
+        auto qual = itemProto->GetQuality();
+
+        auto randomAppearance = fc->_genItemNamesAndDisplays[ItemClass(itemProto->GetClass())][itemProto->GetSubClass()][itemProto->GetInventoryType()];
+        auto entry = Acore::Containers::SelectRandomContainerElement(randomAppearance);
+        itemProto->SetDisplayInfoID(entry.first);
+        itemProto->SetName(entry.second);
 
         ItemModType stats[MAINSTATS] = { ITEM_MOD_STRENGTH, ITEM_MOD_AGILITY, ITEM_MOD_INTELLECT };
 
@@ -352,7 +353,6 @@ public:
             itemProto->SetItemLevel(ilvl);
             itemProto->SetRequiredLevel(1);
             itemProto->SetAllowableClass(CLASSMASK_ALL_PLAYABLE);
-            auto qual = itemProto->GetQuality();
             auto formula = 0.f;
             auto secondaryRolls = 0;
 
@@ -401,6 +401,7 @@ public:
 
                 std::vector<ItemModType> rolled = {};
                 if (itemProto->IsWeapon()) {
+                    bool isThrown = itemProto->GetSubClass() == ITEM_SUBCLASS_WEAPON_THROWN;
                     std::uniform_int_distribution<> dpsdistr(18, 36);
                     std::uniform_real<> delaydistr(.8, 1.2);
                     

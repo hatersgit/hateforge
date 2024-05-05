@@ -616,7 +616,7 @@ class spell_pri_pain_and_suffering_proc : public SpellScript
     {
         // Refresh Shadow Word: Pain on target
         if (Unit* unitTarget = GetHitUnit())
-            if (AuraEffect* aur = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, 0x8000, 0, 0, GetCaster()->GetGUID()))
+            if (AuraEffect* aur = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DOT, 0x8000, 0, 0, GetCaster()->GetGUID()))
             {
                 aur->GetBase()->RefreshTimersWithMods();
                 aur->ChangeAmount(aur->CalculateAmount(aur->GetCaster()), false);
@@ -910,9 +910,9 @@ class spell_pri_shadow_word_death : public SpellScript
     {
         int32 damage = GetHitDamage();
 
-        // Pain and Suffering reduces damage
-        if (AuraEffect* aurEff = GetCaster()->GetDummyAuraEffect(SPELLFAMILY_PRIEST, PRIEST_ICON_ID_PAIN_AND_SUFFERING, EFFECT_1))
-            AddPct(damage, aurEff->GetAmount());
+            // Pain and Suffering reduces damage
+            if (AuraEffect* aurEff = GetCaster()->GetDummyAuraEffect(SPELLFAMILY_PRIEST, PRIEST_ICON_ID_PAIN_AND_SUFFERING, EFFECT_1))
+                AddPct(damage, aurEff->GetAmount());
 
         GetCaster()->CastCustomSpell(GetCaster(), SPELL_PRIEST_SHADOW_WORD_DEATH, &damage, 0, 0, true);
     }

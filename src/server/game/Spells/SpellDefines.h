@@ -93,7 +93,7 @@ enum SpellModOp : uint8
     SPELLMOD_RESIST_MISS_CHANCE         = 16,
     SPELLMOD_JUMP_TARGETS               = 17,
     SPELLMOD_CHANCE_OF_SUCCESS          = 18,
-    SPELLMOD_ACTIVATION_TIME            = 19,
+    SPELLMOD_ACTIVATION_TIME            = 19,  // AMPLITUDE
     SPELLMOD_DAMAGE_MULTIPLIER          = 20,
     SPELLMOD_GLOBAL_COOLDOWN            = 21,
     SPELLMOD_DOT                        = 22,

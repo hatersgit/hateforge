@@ -309,9 +309,9 @@ enum Classes
     CLASS_SHAMAN        = 7,  // TITLE Shaman
     CLASS_MAGE          = 8,  // TITLE Mage
     CLASS_WARLOCK       = 9,  // TITLE Warlock
-    CLASS_SHAPESHIFTER  = 10, // TITLE DemonHunter
+    //CLASS_SHAPESHIFTER  = 10, // TITLE Shapeshifter
     CLASS_DRUID         = 11, // TITLE Druid
-    CLASS_MONK          = 12, // TITLE Monk
+    CLASS_SHAPESHIFTER  = 12, // TITLE Shapeshifter
     CLASS_BARD          = 13, // TITLE Bard
     CLASS_TINKER        = 14  // TITLE Tinker
 };
@@ -323,7 +323,7 @@ enum Classes
     ((1<<(CLASS_WARRIOR-1))      |(1<<(CLASS_PALADIN-1))       |(1<<(CLASS_HUNTER-1))     | \
     (1<<(CLASS_ROGUE-1))         |(1<<(CLASS_PRIEST-1))        |(1<<(CLASS_SHAMAN-1))     | \
     (1<<(CLASS_MAGE-1))          |(1<<(CLASS_WARLOCK-1))       |(1<<(CLASS_DRUID-1))      | \
-    (1<<(CLASS_DEATH_KNIGHT-1))  |(1<<(CLASS_MONK-1))          |(1<<(CLASS_TINKER-1))     | \
+    (1<<(CLASS_DEATH_KNIGHT-1))  |(1<<(CLASS_TINKER-1))     | \
     (1<<(CLASS_SHAPESHIFTER-1))  |(1<<(CLASS_BARD-1)))
 
 // valid classes for creature_template.unit_class
@@ -3041,8 +3041,6 @@ inline uint8 ClassByQuestSort(int32 QuestSort)
             return CLASS_DRUID;
         case QUEST_SORT_DEATH_KNIGHT:
             return CLASS_DEATH_KNIGHT;
-        case QUEST_SORT_MONK:
-            return CLASS_MONK;
         case QUEST_SORT_TINKER:
             return CLASS_TINKER;
         case QUEST_SORT_BARD:

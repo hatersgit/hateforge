@@ -1794,6 +1794,72 @@ class spell_dru_moonkin_form_passive_proc : public AuraScript
     }
 };
 
+// -110282
+class spell_dru_eclipse : public AuraScript
+{
+    PrepareAuraScript(spell_dru_eclipse);
+
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        if (auto damInfo = eventInfo.GetDamageInfo())
+            if (auto spell = damInfo->GetSpellInfo()) {
+                if (!eventInfo.GetActor()->HasAura(48518) && !eventInfo.GetActor()->HasAura(48517))
+                    if (spell->SpellFamilyName == SPELLFAMILY_SPELL) {
+                        switch (spell->SpellFamilyFlags[0]) {
+                        case 0x800000:
+                            eventInfo.GetActor()->CastSpell(eventInfo.GetActor(), 48518, true);
+                            break;
+                        case 0x1000000:
+                            eventInfo.GetActor()->CastSpell(eventInfo.GetActor(), 48517, true);
+                            break;
+                        }
+                    }
+            }
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(spell_dru_eclipse::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+    }
+};
+
+// 110285
+class spell_dru_elunes_fire : public AuraScript
+{
+    PrepareAuraScript(spell_dru_elunes_fire);
+
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        if (auto moonfire = eventInfo.GetDamageInfo()->GetVictim()->GetAura(100118, eventInfo.GetActor()->GetGUID()))
+            moonfire->RefreshDuration(true);
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(spell_dru_elunes_fire::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+    }
+};
+
+// 110329
+class spell_dru_bloodletting : public AuraScript
+{
+    PrepareAuraScript(spell_dru_bloodletting);
+
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        if (auto rip = eventInfo.GetDamageInfo()->GetVictim()->GetAura(100143, eventInfo.GetActor()->GetGUID()))
+            rip->RefreshDuration(true);
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(spell_dru_bloodletting::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     RegisterSpellScript(spell_dru_bear_form_passive);
@@ -1843,5 +1909,9 @@ void AddSC_druid_spell_scripts()
     RegisterSpellScript(spell_dru_item_t6_trinket);
     RegisterSpellScript(spell_dru_t10_restoration_4p_bonus_dummy);
     RegisterSpellScript(spell_dru_moonkin_form_passive_proc);
+
+    RegisterSpellScript(spell_dru_eclipse);
+    RegisterSpellScript(spell_dru_elunes_fire);
+    RegisterSpellScript(spell_dru_bloodletting);
 }
 

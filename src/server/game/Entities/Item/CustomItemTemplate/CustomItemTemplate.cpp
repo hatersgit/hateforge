@@ -624,6 +624,7 @@ float CustomItemTemplate::CalculateDps()
         return 0.98f * val + 11.5f;
         break;
     case INVTYPE_RANGED:
+    case INVTYPE_THROWN:
     case INVTYPE_RANGEDRIGHT:
         switch (GetSubClass()) {
         case ITEM_SUBCLASS_WEAPON_WAND: {

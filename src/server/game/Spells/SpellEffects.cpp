@@ -196,7 +196,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectApplyAreaAura,                            //119 SPELL_EFFECT_APPLY_AREA_AURA_PET
     &Spell::EffectUnused,                                   //120 SPELL_EFFECT_TELEPORT_GRAVEYARD       one spell: Graveyard Teleport Test
     &Spell::EffectWeaponDmg,                                //121 SPELL_EFFECT_NORMALIZED_WEAPON_DMG
-    &Spell::EffectUnused,                                   //122 SPELL_EFFECT_122                      unused
+    &Spell::EffectDisableDodge,                             //122 SPELL_EFFECT_122                      unused
     &Spell::EffectSendTaxi,                                 //123 SPELL_EFFECT_SEND_TAXI                taxi/flight related (misc value is taxi path id)
     &Spell::EffectPullTowards,                              //124 SPELL_EFFECT_PULL_TOWARDS
     &Spell::EffectModifyThreatPercent,                      //125 SPELL_EFFECT_MODIFY_THREAT_PERCENT
@@ -522,56 +522,8 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
         }
         case SPELLFAMILY_ROGUE:
         {
-            // Envenom
-            if (m_spellInfo->SpellFamilyFlags[1] & 0x00000008)
-            {
-                if (Player* player = m_caster->ToPlayer())
-                {
-                    // consume from stack dozes not more that have combo-points
-                    if (uint32 combo = player->GetComboPoints())
-                    {
-                        // Lookup for Deadly poison (only attacker applied)
-                        if (AuraEffect const* aurEff = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, 0x00010000, 0, 0, m_caster->GetGUID()))
-                        {
-                            // count consumed deadly poison doses at target
-                            bool needConsume = true;
-                            uint32 spellId = aurEff->GetId();
-
-                            uint32 doses = aurEff->GetBase()->GetStackAmount();
-                            if (doses > combo)
-                                doses = combo;
-
-                            // Master Poisoner
-                            Unit::AuraEffectList const& auraList = player->GetAuraEffectsByType(SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL_NOT_STACK);
-                            for (Unit::AuraEffectList::const_iterator iter = auraList.begin(); iter != auraList.end(); ++iter)
-                            {
-                                if ((*iter)->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_ROGUE && (*iter)->GetSpellInfo()->SpellIconID == 1960)
-                                {
-                                    uint32 chance = (*iter)->GetSpellInfo()->Effects[EFFECT_2].CalcValue(m_caster);
-
-                                    if (chance && roll_chance_i(chance))
-                                        needConsume = false;
-
-                                    break;
-                                }
-                            }
-
-                            if (needConsume)
-                                for (uint32 i = 0; i < doses; ++i)
-                                    unitTarget->RemoveAuraFromStack(spellId, m_caster->GetGUID());
-
-                            AddPct(damageMultiplier, doses * 100);
-                            damage += int32(player->GetTotalAttackPowerValue(BASE_ATTACK) * 0.09f * combo);
-                        }
-
-                        // Eviscerate and Envenom Bonus Damage (item set effect)
-                        if (m_caster->HasAura(37169))
-                            damage += combo * 40;
-                    }
-                }
-            }
             // Eviscerate
-            else if (m_spellInfo->SpellFamilyFlags[0] & 0x00020000)
+            if (m_spellInfo->SpellFamilyFlags[0] & 0x00020000)
             {
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                 {
@@ -674,6 +626,30 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 break;
             }
             break;
+        }
+        case SPELLFAMILY_MELEE:
+        {
+            // Envenom
+            if (m_spellInfo->SpellFamilyFlags[0] & 0x80000)
+            {
+                if (Player* player = m_caster->ToPlayer())
+                {
+                    // Lookup for Deadly poison (only attacker applied)
+                    if (AuraEffect const* aurEff = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_MELEE, 0x0080000, 0, 0, m_caster->GetGUID()))
+                    {
+                        // count consumed deadly poison doses at target
+                        uint32 spellId = aurEff->GetId();
+
+                        uint32 doses = aurEff->GetBase()->GetStackAmount();
+
+                        for (uint32 i = 0; i < doses; ++i)
+                            unitTarget->RemoveAuraFromStack(spellId, m_caster->GetGUID());
+
+                        AddPct(damageMultiplier, doses * 100);
+                        damage += int32(player->GetTotalAttackPowerValue(BASE_ATTACK) * 0.09f * doses);
+                    }
+                }
+            }
         }
         }
 
@@ -1969,16 +1945,8 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
         level_diff = m_caster->GetLevel() - 60;
         level_multiplier = 4;
         break;
-    case 31930:                                         // Judgements of the Wise
-    case 63375:                                         // Improved Stormstrike
-    case 68082:                                         // Glyph of Seal of Command
+    case 110090:                                        // Judgements of the Wise
         damage = int32(CalculatePct(unitTarget->GetCreateMana(), damage));
-        break;
-    case 48542:                                         // Revitalize
-        damage = int32(CalculatePct(unitTarget->GetMaxPower(power), damage));
-        break;
-    case 71132:                                         // Glyph of Shadow Word: Pain
-        damage = int32(CalculatePct(unitTarget->GetCreateMana(), 1));  // set 1 as value, missing in dbc
         break;
     default:
         break;
@@ -3160,9 +3128,6 @@ void Spell::EffectTameCreature(SpellEffIndex /*effIndex*/)
     if (creatureTarget->IsPet())
         return;
 
-    if (m_caster->getClass() != CLASS_HUNTER)
-        return;
-
     // cast finish successfully
     //SendChannelUpdate(0);
     finish();
@@ -3528,41 +3493,13 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
     }
     case SPELLFAMILY_DEATHKNIGHT:
     {
-        // Plague Strike
-        if (m_spellInfo->SpellFamilyFlags[0] & 0x1)
-        {
-            // Glyph of Plague Strike
-            if (AuraEffect const* aurEff = m_caster->GetAuraEffect(58657, EFFECT_0))
-                AddPct(totalDamagePercentMod, aurEff->GetAmount());
-            break;
-        }
-        // Blood Strike
-        if (m_spellInfo->SpellFamilyFlags[0] & 0x400000)
-        {
-            float disease_amt = m_spellInfo->Effects[EFFECT_2].CalcValue();
-            //Death Knight T8 Melee 4P Bonus
-            if (AuraEffect* aurEff = m_caster->GetAuraEffectDummy(64736))
-                AddPct(disease_amt, aurEff->GetAmount());
 
-            AddPct(totalDamagePercentMod, disease_amt * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) / 2.0f);
 
-            // Glyph of Blood Strike
-            if (m_caster->GetAuraEffect(59332, EFFECT_0))
-                if (unitTarget->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED))
-                    AddPct(totalDamagePercentMod, 20.0f);
-            break;
-        }
-        // Death Strike
-        if (m_spellInfo->SpellFamilyFlags[0] & 0x10)
-        {
-            // Glyph of Death Strike
-            if (AuraEffect const* aurEff = m_caster->GetAuraEffect(59336, EFFECT_0))
-                if (uint32 runic = std::min<uint32>(m_caster->GetPower(POWER_RUNIC_POWER), aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue()))
-                    AddPct(totalDamagePercentMod, runic);
-            break;
-        }
+        break;
+    }
+    case SPELLFAMILY_MELEE: {
         // Obliterate (12.5% more damage per disease)
-        if (m_spellInfo->SpellFamilyFlags[1] & 0x20000)
+        if (m_spellInfo->SpellFamilyFlags[0] & 0x800)
         {
             bool consumeDiseases = true;
             // Annihilation
@@ -3572,41 +3509,19 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                     consumeDiseases = false;
 
             float disease_amt = m_spellInfo->Effects[EFFECT_2].CalcValue();
-            //Death Knight T8 Melee 4P Bonus
-            if (AuraEffect* aurEff = m_caster->GetAuraEffectDummy(64736))
-                AddPct(disease_amt, aurEff->GetAmount());
 
             AddPct(totalDamagePercentMod, disease_amt * unitTarget->GetDiseasesByCaster(m_caster->GetGUID(), consumeDiseases) / 2.0f);
             break;
         }
-        // Blood-Caked Strike - Blood-Caked Blade
-        if (m_spellInfo->SpellIconID == 1736)
-        {
-            int32 weaponDamage = m_caster->CalculateDamage(m_attackType, false, true);
-            ApplyPct(weaponDamage, std::min(uint32(3), unitTarget->GetDiseasesByCaster(m_caster->GetGUID())) * 12.5f);
-            spell_bonus = weaponDamage;
-            break;
-        }
         // Heart Strike
-        if (m_spellInfo->SpellFamilyFlags[0] & 0x1000000)
+        if (m_spellInfo->SpellFamilyFlags[0] & 0x4000)
         {
             float disease_amt = m_spellInfo->Effects[EFFECT_2].CalcValue();
-            //Death Knight T8 Melee 4P Bonus
-            if (AuraEffect* aurEff = m_caster->GetAuraEffectDummy(64736))
-                AddPct(disease_amt, aurEff->GetAmount());
 
             AddPct(totalDamagePercentMod, disease_amt * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()));
             break;
         }
-        // Rune Strike
-        if (m_spellInfo->SpellFamilyFlags[1] & 0x20000000)
-        {
-            spell_bonus += int32(0.15f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
-        }
-
-        break;
-    }
-    }
+    }}
 
     bool normalized = false;
     float weaponDamagePercentMod = 100.0f;
@@ -4762,6 +4677,15 @@ void Spell::EffectParry(SpellEffIndex /*effIndex*/)
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
         m_caster->ToPlayer()->SetCanParry(true);
+}
+
+void Spell::EffectDisableDodge(SpellEffIndex /*effIndex*/)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
+        return;
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        m_caster->ToPlayer()->SetCanDodge(false);
 }
 
 void Spell::EffectBlock(SpellEffIndex /*effIndex*/)

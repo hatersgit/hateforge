@@ -373,6 +373,7 @@ public:
     void EffectResurrect(SpellEffIndex effIndex);
     void EffectParry(SpellEffIndex effIndex);
     void EffectBlock(SpellEffIndex effIndex);
+    void EffectDisableDodge(SpellEffIndex effIndex);
     void EffectLeap(SpellEffIndex effIndex);
     void EffectTransmitted(SpellEffIndex effIndex);
     void EffectDisEnchant(SpellEffIndex effIndex);
@@ -790,6 +791,9 @@ public:
     {
         HitTriggerSpell(SpellInfo const* spellInfo, SpellInfo const* auraSpellInfo, int32 procChance) :
             triggeredSpell(spellInfo), triggeredByAura(auraSpellInfo), chance(procChance) { }
+
+        HitTriggerSpell(SpellInfo const* spellInfo, SpellInfo const* auraSpellInfo, int32 procChance, uint8 effIdx) :
+            triggeredSpell(spellInfo), triggeredByAura(auraSpellInfo), chance(procChance), triggeredByEffIdx(effIdx) { }
 
         SpellInfo const* triggeredSpell;
         SpellInfo const* triggeredByAura;

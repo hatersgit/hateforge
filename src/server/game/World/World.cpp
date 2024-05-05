@@ -2050,8 +2050,8 @@ void World::SetInitialWorldSettings()
     LOG_INFO("server.loading", "Loading Vendors...");
     sObjectMgr->LoadVendors();                                   // must be after load CreatureTemplate and ItemTemplate
 
-    LOG_INFO("server.loading", "Loading Trainers...");
-    sObjectMgr->LoadTrainerSpell();                              // must be after load CreatureTemplate
+    LOG_INFO("server.loading", "SKIP Loading Trainers...");
+    //sObjectMgr->LoadTrainerSpell();                              // must be after load CreatureTemplate
 
     sObjectMgr->InitializeQueriesData();
 

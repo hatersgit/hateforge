@@ -111,7 +111,6 @@ public:
 
                         cm->SendTalentTreeLayout(iam.player);
                         cm->SendSpecInfo(iam.player);
-                        cm->SendTalents(iam.player);
                     } else
                         iam.player->SendForgeUIMsg(ForgeTopic::ACTIVATE_SPEC_ERROR, "Unknown Secondary Class");
                 }

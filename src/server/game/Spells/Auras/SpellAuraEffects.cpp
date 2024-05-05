@@ -369,7 +369,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleNULL,                                      //306 0 spells in 3.3.5
     &AuraEffect::HandleNULL,                                      //307 0 spells in 3.3.5
     &AuraEffect::HandleNoImmediateEffect,                         //308 SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER implemented in Unit::isSpellCrit, ObjectAccessor::GetUnitCriticalChance
-    &AuraEffect::HandleNULL,                                      //309 0 spells in 3.3.5
+    &AuraEffect::HandleNoImmediateEffect,                         //309 SPELL_AURA_MOD_MECHANIC_CRIT_CHANCE
     &AuraEffect::HandleNoImmediateEffect,                         //310 SPELL_AURA_MOD_CREATURE_AOE_DAMAGE_AVOIDANCE implemented in Spell::CalculateDamageDone
     &AuraEffect::HandleNoImmediateEffect,                         //311 SPELL_AURA_TRIGGER_SPELL_WITH_PCT_OF_TRIGGER
     &AuraEffect::HandleNoImmediateEffect,                         //312 SPELL_AURA_EXCHANGE_SP_SCHOOLS
@@ -1427,7 +1427,6 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
     switch (GetMiscValue())
     {
         case FORM_CAT:
-            spellId = 3025;
             HotWSpellId = 24900;
             break;
         case FORM_TREE:
@@ -6672,10 +6671,10 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                 }
                 break;
             }
-        case SPELLFAMILY_HUNTER:
+        case SPELLFAMILY_RANGED:
             {
                 // Explosive Shot
-                if (GetSpellInfo()->SpellFamilyFlags[1] & 0x80000000)
+                if (GetSpellInfo()->SpellFamilyFlags[0] & 0x8)
                 {
                     if (caster)
                         caster->CastCustomSpell(53352, SPELLVALUE_BASE_POINT0, m_amount, target, true, nullptr, this);
@@ -7626,12 +7625,20 @@ void AuraEffect::HandlePeriodicEnergizeAuraTick(Unit* target, Unit* caster) cons
     // ignore negative values (can be result apply spellmods to aura damage
     int32 amount = std::max(m_amount, 0);
 
-    SpellPeriodicAuraLogInfo pInfo(this, amount, 0, 0, 0, 0.0f, false);
+    uint32 maxPower = target->GetMaxPower(PowerType);
+    if (maxPower == 0)
+        return;
+
+    int32 gain = amount;
+    if (GetMiscValueB())
+        gain = CalculatePct(maxPower, std::abs(amount));
+
+    SpellPeriodicAuraLogInfo pInfo(this, gain, 0, 0, 0, 0.0f, false);
     target->SendPeriodicAuraLog(&pInfo);
 
     LOG_DEBUG("spells.aura.effect", "PeriodicTick: {} energize {} for {} dmg inflicted by {}",
-                    GetCasterGUID().ToString(), target->GetGUID().ToString(), amount, GetId());
-    int32 gain = target->ModifyPower(PowerType, amount);
+                    GetCasterGUID().ToString(), target->GetGUID().ToString(), gain, GetId());
+        gain = target->ModifyPower(PowerType, gain);
 
     if (caster)
         target->GetThreatManager().ForwardThreatForAssistingMe(caster, float(gain) * 0.5f, GetSpellInfo(), true);
@@ -7759,21 +7766,31 @@ void AuraEffect::HandleProcTriggerLeap(AuraApplication* aurApp, ProcEventInfo& e
     Unit* triggerCaster = aurApp->GetTarget();
     Unit* triggerTarget = eventInfo.GetProcTarget();
 
-    if (SpellInfo const* triggering = eventInfo.GetDamageInfo()->GetSpellInfo())
+    Unit* target;
+    SpellInfo const* triggering;
+    if (auto damageInfo = eventInfo.GetDamageInfo()) {
+        triggering = damageInfo->GetSpellInfo();
+        target = damageInfo->GetVictim();
+    }
+    else if (auto healInfo = eventInfo.GetHealInfo()) {
+        triggering = healInfo->GetSpellInfo();
+        target = healInfo->GetTarget();
+    }
+
+    if (triggering)
     {
-        if (auto target = eventInfo.GetDamageInfo()->GetVictim()) {
-            if (auto dmgApp = target->GetAura(triggering->Id, triggerCaster->GetGUID())) {
-                auto potentialTargets = target->SelectAllNearbyNoTotemPartyAndRaid(nullptr, NOMINAL_MELEE_RANGE);
-                if (!potentialTargets.empty())
-                    for (auto tar : potentialTargets) {
-                        if (!tar->GetAuraApplication(triggering->Id, triggerCaster->GetGUID())) {
-                            auto aura = triggerCaster->AddAura(triggering->Id, tar);
-                            aura->SetDuration(dmgApp->GetDuration());
-                            break;
-                        }
+        if (auto app = target->GetAura(triggering->Id, triggerCaster->GetGUID())) {
+            auto potentialTargets = target->SelectAllNearbyNoTotemPartyAndRaid(nullptr, NOMINAL_MELEE_RANGE);
+            if (!potentialTargets.empty())
+                for (auto tar : potentialTargets) {
+                    if (!tar->GetAuraApplication(triggering->Id, triggerCaster->GetGUID())) {
+                        auto aura = triggerCaster->AddAura(triggering->Id, tar);
+                        aura->SetDuration(app->GetDuration());
+                        break;
                     }
-            }
+                }
         }
+
     }
 }
 
@@ -7781,15 +7798,17 @@ void AuraEffect::HandleProcManaSteal(AuraApplication* aurApp, ProcEventInfo& eve
 {
     Unit* triggerCaster = aurApp->GetTarget();
     Unit* triggerTarget = eventInfo.GetProcTarget();
-
-    if (eventInfo.GetSpellInfo()->SpellFamilyName != SPELLFAMILY_PERK &&
-        (eventInfo.GetDamageInfo()->GetDamageType() == DIRECT_DAMAGE
-        || eventInfo.GetDamageInfo()->GetDamageType() == SPELL_DIRECT_DAMAGE
-        || eventInfo.GetDamageInfo()->GetDamageType() == HEAL)) {
-        if (auto dealt = eventInfo.GetDamageInfo()->GetDamage()) {
-            auto pct = CalculatePct(dealt, GetSpellInfo()->Effects[m_effIndex].BasePoints);
-            triggerCaster->EnergizeBySpell(triggerCaster, GetSpellInfo(), pct, POWER_MANA);
+    int32 dealt = 0;
+    if (eventInfo.GetSpellInfo()->SpellFamilyName != SPELLFAMILY_PERK) {
+        if (auto damageInfo = eventInfo.GetDamageInfo()) {
+            if (damageInfo->GetDamageType() == DIRECT_DAMAGE || damageInfo->GetDamageType() == SPELL_DIRECT_DAMAGE)
+                dealt = damageInfo->GetDamage();
         }
+        else if (auto healInfo = eventInfo.GetHealInfo())
+            dealt = healInfo->GetHeal() + healInfo->GetAbsorb();
+
+        auto pct = CalculatePct(dealt, GetSpellInfo()->Effects[m_effIndex].BasePoints);
+        triggerCaster->EnergizeBySpell(triggerCaster, GetSpellInfo(), pct, POWER_MANA);
     }
 }
 
@@ -8026,6 +8045,6 @@ void AuraEffect::HandleCreateAreaTrigger(AuraApplication const* aurApp, uint8 mo
         if (apply)
             AreaTrigger::CreateAreaTrigger(GetMiscValue(), caster, target, GetSpellInfo(), *target, GetBase()->GetDuration(), { m_spellInfo->SpellVisual[0], m_spellInfo->SpellVisual[1] }, nullptr, this);
         //else
-           // caster->RemoveAreaTrigger(this);
+           //caster->RemoveAreaTrigger(this);
     }
 }

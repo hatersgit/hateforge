@@ -169,9 +169,8 @@ AC_API_EXPORT EnumText EnumUtils<Classes>::ToString(Classes value)
         case CLASS_SHAMAN: return { "CLASS_SHAMAN", "Shaman", "" };
         case CLASS_MAGE: return { "CLASS_MAGE", "Mage", "" };
         case CLASS_WARLOCK: return { "CLASS_WARLOCK", "Warlock", "" };
-        case CLASS_SHAPESHIFTER: return { "CLASS_DEMON_HUNTER", "Shapeshifter", "" };
+        case CLASS_SHAPESHIFTER: return { "CLASS_SHAPESHIFTER", "Shapeshifter", "" };
         case CLASS_DRUID: return { "CLASS_DRUID", "Druid", "" };
-        case CLASS_MONK: return { "CLASS_MONK", "Monk", "" };
         case CLASS_BARD: return { "CLASS_BARD", "Bard", "" };
         case CLASS_TINKER: return { "CLASS_TINKER", "Tinker", "" };
         default: throw std::out_of_range("value");
@@ -195,9 +194,8 @@ AC_API_EXPORT Classes EnumUtils<Classes>::FromIndex(size_t index)
         case 6: return CLASS_SHAMAN;
         case 7: return CLASS_MAGE;
         case 8: return CLASS_WARLOCK;
-        case 9: return CLASS_SHAPESHIFTER;
         case 10: return CLASS_DRUID;
-        case 11: return CLASS_MONK;
+        case 11: return CLASS_SHAPESHIFTER;
         case 12: return CLASS_BARD;
         case 13: return CLASS_TINKER;
         default: throw std::out_of_range("index");
@@ -218,9 +216,8 @@ AC_API_EXPORT size_t EnumUtils<Classes>::ToIndex(Classes value)
         case CLASS_SHAMAN: return 6;
         case CLASS_MAGE: return 7;
         case CLASS_WARLOCK: return 8;
-        case CLASS_SHAPESHIFTER: return 9;
         case CLASS_DRUID: return 10;
-        case CLASS_MONK: return 11;
+        case CLASS_SHAPESHIFTER: return 11;
         case CLASS_BARD: return 12;
         case CLASS_TINKER: return 13;
         default: throw std::out_of_range("value");

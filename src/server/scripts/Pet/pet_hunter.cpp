@@ -123,7 +123,7 @@ struct npc_pet_hunter_snake_trap : public ScriptedAI
         {
             _init = true;
 
-            uint32 health = uint32(107 * (me->GetLevel() - 40) * 0.025f);
+            uint32 health = uint32(107 * me->GetLevel() * 0.025f);
             me->SetCreateHealth(health);
             me->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)health);
             me->SetMaxHealth(health);
@@ -134,20 +134,6 @@ struct npc_pet_hunter_snake_trap : public ScriptedAI
 
             if (me->GetEntry() == NPC_VENOMOUS_SNAKE)
                 DoCastSelf(SPELL_HUNTER_DEADLY_POISON_PASSIVE, true);
-
-            // Glyph of Snake Trap
-            if (Unit* owner = me->GetOwner())
-                if (owner->GetAuraEffectDummy(SPELL_HUNTER_GLYPH_OF_SNAKE_TRAP))
-                    me->CastSpell(me, SPELL_HUNTER_PET_SCALING, true);
-        }
-
-        _spellTimer += diff;
-        if (_spellTimer >= 3000)
-        {
-            if (urand(0, 2) == 0) // 33% chance to cast
-                DoCastVictim(RAND(SPELL_HUNTER_MIND_NUMBING_POISON, SPELL_HUNTER_CRIPPLING_POISON));
-
-            _spellTimer = 0;
         }
 
         DoMeleeAttackIfReady();
@@ -156,6 +142,26 @@ struct npc_pet_hunter_snake_trap : public ScriptedAI
 private:
     bool _init;
     uint32 _spellTimer;
+};
+
+// 34657
+class spell_snake_deadly_poison : public AuraScript
+{
+    PrepareAuraScript(spell_snake_deadly_poison);
+
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        auto spell = aurEff->GetTriggerSpell();
+        if (auto owner = eventInfo.GetActor()->GetOwner())
+            if (auto player = owner->ToPlayer())
+                player->CastSpell(eventInfo.GetDamageInfo()->GetVictim(), spell, true, nullptr, aurEff, player->GetGUID());
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(spell_snake_deadly_poison::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+    }
 };
 
 // 57627 - Charge
@@ -310,4 +316,5 @@ void AddSC_hunter_pet_scripts()
     RegisterSpellScript(spell_pet_guard_dog);
     RegisterSpellScript(spell_pet_silverback);
     RegisterSpellScript(spell_pet_culling_the_herd);
+    RegisterSpellScript(spell_snake_deadly_poison);
 }

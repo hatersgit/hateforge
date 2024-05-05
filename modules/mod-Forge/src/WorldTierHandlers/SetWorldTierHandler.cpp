@@ -60,36 +60,9 @@ public:
                 ForgeCharacterSpec* spec;
                 if (fc->TryGetCharacterActiveSpec(iam.player, spec))
                 {
-                    for (auto& tab : spec->Talents)
-                    {
-                        CharacterPointType cpt;
-                        if (fc->TryGetTabPointType(tab.first, cpt))
+                    fc->ForgetTalents(iam.player, spec, TALENT_TREE);
 
-                            switch (cpt)
-                            {
-                            case CharacterPointType::TALENT_TREE:
-                                ForgeTalentTab* ftt;
-                                if (fc->TryGetTalentTab(iam.player, tab.first, ftt))
-                                {
-                                    spec->PointsSpent[ftt->Id] = 0;
-                                    for (auto t : tab.second) {
-
-                                        if (auto spellInfo = sSpellMgr->GetSpellInfo(t.second->SpellId)) {
-                                            if (spellInfo->HasAttribute(SPELL_ATTR0_PASSIVE))
-                                                iam.player->RemoveOwnedAura(ftt->Talents[t.second->SpellId]->Ranks[t.second->CurrentRank]);
-                                            else
-                                                iam.player->postCheckRemoveSpell(ftt->Talents[t.second->SpellId]->Ranks[t.second->CurrentRank]); // Remove all spells.
-
-                                            t.second->CurrentRank = 0; // only remove talents here.
-                                        }
-                                    }
-                                }
-                                break;
-
-                            default:
-                                break;
-                            }
-                    }
+                    spec->CharacterSpecTabId = 0;
 
                     if (iam.player->getLevel() == DEFAULT_MAX_LEVEL)
                     {
@@ -119,7 +92,6 @@ public:
                     fc->UpdateCharacterSpec(iam.player, spec);
                 }
 
-                iam.player->ClearBonusTalentPoints();
                 iam.player->resetAllSpecs();
                 iam.player->SetUInt32Value(PLAYER_XP, 0);
                 iam.player->SetLevel(1);
@@ -151,10 +123,9 @@ public:
                 iam.player->SetPower(POWER_HAPPINESS, 0);
 
                 iam.player->TeleportTo(fc->GetRaceStartingZone(iam.player->getRace()));
-                iam.player->AddTimedDelayedOperation(1, getMSTime() + 500, [this, iam]() {
-                    iam.player->GetSession()->SetLogoutStartTime(0);
-                    });
 
+                std::this_thread::sleep_for(1s);
+                iam.player->GetSession()->LogoutPlayer(true);
             }
         }
     }

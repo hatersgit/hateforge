@@ -102,11 +102,9 @@ enum PaladinSpells
 
     SPELL_PALADIN_GLYPH_OF_DIVINITY_PROC = 54986,
 
-    SPELL_PALADIN_JUDGEMENTS_OF_THE_WISE_MANA = 31930,
-    SPELL_REPLENISHMENT = 57669,
     SPELL_PALADIN_RIGHTEOUS_VENGEANCE_DAMAGE = 61840,
     SPELL_PALADIN_SHEATH_OF_LIGHT_HEAL = 54203,
-    SPELL_PALADIN_SACRED_SHIELD_TRIGGER = 58597,
+
     SPELL_PALADIN_T8_HOLY_4P_BONUS = 64895,
     SPELL_PALADIN_HEART_OF_THE_CRUSADER_EFF_R1 = 21183,
 
@@ -129,7 +127,15 @@ enum PaladinSpells
     SPELL_PALADIN_HOLY_MENDING = 64891,
 
     SPELL_PALADIN_JUDGEMENT_OF_LIGHT_HEAL = 20267,
-    SPELL_PALADIN_JUDGEMENT_OF_WISDOM_MANA = 20268
+    SPELL_PALADIN_JUDGEMENT_OF_WISDOM_MANA = 20268,
+
+
+
+
+    SPELL_PALADIN_JUDGEMENTS_OF_THE_WISE_MANA = 110090,
+    SPELL_REPLENISHMENT = 110091,
+
+    SPELL_PALADIN_SACRED_SHIELD_TRIGGER = 100098,
 };
 
 enum PaladinSpellIcons
@@ -1413,7 +1419,7 @@ class spell_pal_item_t6_trinket : public AuraScript
     }
 };
 
-// 20185 - Judgement of Light
+// 110096 - Judgement of Light
 class spell_pal_judgement_of_light_heal : public AuraScript
 {
     PrepareAuraScript(spell_pal_judgement_of_light_heal);
@@ -1493,7 +1499,7 @@ class spell_pal_judgements_of_the_just : public AuraScript
     }
 };
 
-// -31876 - Judgements of the Wise
+// -110092 - Judgements of the Wise
 class spell_pal_judgements_of_the_wise : public AuraScript
 {
     PrepareAuraScript(spell_pal_judgements_of_the_wise);
@@ -1522,7 +1528,7 @@ class spell_pal_judgements_of_the_wise : public AuraScript
     }
 };
 
-// 53601 - Sacred Shield (dummy)
+// 100097 - Sacred Shield (dummy)
 class spell_pal_sacred_shield_dummy : public AuraScript
 {
     PrepareAuraScript(spell_pal_sacred_shield_dummy);
@@ -1531,8 +1537,7 @@ class spell_pal_sacred_shield_dummy : public AuraScript
     {
         return ValidateSpellInfo(
             {
-                SPELL_PALADIN_SACRED_SHIELD_TRIGGER,
-                SPELL_PALADIN_T8_HOLY_4P_BONUS
+                SPELL_PALADIN_SACRED_SHIELD_TRIGGER
             });
     }
 
@@ -1548,11 +1553,6 @@ class spell_pal_sacred_shield_dummy : public AuraScript
         if (_cooldownEnd > now)
             return;
 
-        Seconds cooldown(aurEff->GetAmount());
-        if (AuraEffect const* bonus = caster->GetAuraEffect(SPELL_PALADIN_T8_HOLY_4P_BONUS, EFFECT_0, caster->GetGUID()))
-            cooldown = Seconds(bonus->GetAmount());
-
-        _cooldownEnd = now + cooldown;
         caster->CastSpell(eventInfo.GetActionTarget(), SPELL_PALADIN_SACRED_SHIELD_TRIGGER, true, nullptr, aurEff);
     }
 

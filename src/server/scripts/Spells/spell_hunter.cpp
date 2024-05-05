@@ -460,7 +460,7 @@ class spell_hun_chimera_shot : public SpellScript
 
     bool Validate(SpellInfo const* /*spellInfo*/) override
     {
-        return ValidateSpellInfo({ SPELL_HUNTER_CHIMERA_SHOT_SERPENT, SPELL_HUNTER_CHIMERA_SHOT_VIPER, SPELL_HUNTER_CHIMERA_SHOT_SCORPID });
+        return ValidateSpellInfo({ SPELL_HUNTER_CHIMERA_SHOT_SERPENT});
     }
 
     void HandleScriptEffect(SpellEffIndex /*effIndex*/)
@@ -479,38 +479,16 @@ class spell_hun_chimera_shot : public SpellScript
 
                 // Search only Serpent Sting, Viper Sting, Scorpid Sting auras
                 flag96 familyFlag = aura->GetSpellInfo()->SpellFamilyFlags;
-                if (!(familyFlag[1] & 0x00000080 || familyFlag[0] & 0x0000C000))
+                uint32 fam = aura->GetSpellInfo()->SpellFamilyName;
+                if (fam == SPELLFAMILY_DOT && !(familyFlag[0] & 0x10))
                     continue;
                 if (AuraEffect const* aurEff = aura->GetEffect(EFFECT_0))
                 {
-                    // Serpent Sting - Instantly deals 40% of the damage done by your Serpent Sting.
-                    if (familyFlag[0] & 0x4000)
-                    {
-                        spellId = SPELL_HUNTER_CHIMERA_SHOT_SERPENT;
+                    spellId = SPELL_HUNTER_CHIMERA_SHOT_SERPENT;
 
-                        // calculate damage of basic tick (bonuses are already factored in AuraEffect)
-                        basePoint = aurEff->GetAmount() * aurEff->GetTotalTicks();
-                        ApplyPct(basePoint, 40);
-                    }
-                    // Viper Sting - Instantly restores mana to you equal to 60% of the total amount drained by your Viper Sting.
-                    else if (familyFlag[1] & 0x00000080)
-                    {
-                        spellId = SPELL_HUNTER_CHIMERA_SHOT_VIPER;
-
-                        // % of mana drained in max duration
-                        basePoint = aurEff->GetAmount() * aurEff->GetTotalTicks();
-
-                        // max value
-                        int32 maxManaReturn = CalculatePct(static_cast<int32>(caster->GetMaxPower(POWER_MANA)), basePoint * 2);
-                        ApplyPct(basePoint, unitTarget->GetMaxPower(POWER_MANA));
-                        if (basePoint > maxManaReturn)
-                            basePoint = maxManaReturn;
-
-                        ApplyPct(basePoint, 60);
-                    }
-                    // Scorpid Sting - Attempts to Disarm the target for 10 sec. This effect cannot occur more than once per 1 minute.
-                    else if (familyFlag[0] & 0x00008000)
-                        spellId = SPELL_HUNTER_CHIMERA_SHOT_SCORPID;
+                    // calculate damage of basic tick (bonuses are already factored in AuraEffect)
+                    basePoint = aurEff->GetAmount() * aurEff->GetTotalTicks();
+                    ApplyPct(basePoint, 40);
 
                     // Refresh aura duration
                     aura->RefreshDuration();
@@ -867,7 +845,7 @@ class spell_hun_piercing_shots : public AuraScript
             SpellInfo const* piercingShots = sSpellMgr->AssertSpellInfo(SPELL_HUNTER_PIERCING_SHOTS);
             uint32 dmg = dmgInfo->GetDamage();
 
-            uint32 bp = CalculatePct(int32(dmg), aurEff->GetAmount()) / static_cast<int32>(piercingShots->GetMaxTicks());
+            uint32 bp = CalculatePct(int32(dmg), aurEff->GetAmount()) / static_cast<int32>(piercingShots->GetMaxTicks(caster));
 
             caster->CastCustomSpell(SPELL_HUNTER_PIERCING_SHOTS, SPELLVALUE_BASE_POINT0, bp, target, true, nullptr, aurEff);
         }
@@ -1734,6 +1712,34 @@ class spell_hunter_binding_shot : public SpellScript
     }
 };
 
+// 100056 only with -110194
+class spell_hunter_intoxication : public AuraScript
+{
+    PrepareAuraScript(spell_hunter_intoxication);
+
+    void HandleTick(AuraEffect const* aurEff)
+    {
+        if (Unit* caster = GetCaster())
+            if (auto player = caster->ToPlayer())
+                if (AuraEffect* aurEff = player->GetDummyAuraEffect(SPELLFAMILY_RANGED, 2229, EFFECT_0))
+                    if (auto pet = player->GetPet())
+                        if (pet->IsHunterPet()) {
+                            auto pct = aurEff->GetAmount();
+                            uint32 maxPower = pet->GetMaxPower(POWER_FOCUS);
+                            if (maxPower == 0)
+                                return;
+
+                            uint32 gain = CalculatePct(maxPower, pct);
+                            pet->ModifyPower(POWER_FOCUS, gain);
+                        }
+    }
+
+    void Register() override
+    {
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_hunter_intoxication::HandleTick, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+    }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     RegisterSpellScript(spell_hun_check_pet_los);
@@ -1778,5 +1784,7 @@ void AddSC_hunter_spell_scripts()
     RegisterSpellScript(spell_hun_kill_command_pet);
     RegisterSpellScript(spell_hun_rapid_recuperation_trigger);
     RegisterSpellScript(spell_hun_thrill_of_the_hunt);
+
+    RegisterSpellScript(spell_hunter_intoxication);
 }
 

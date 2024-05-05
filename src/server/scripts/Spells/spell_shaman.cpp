@@ -91,6 +91,8 @@ enum ShamanSpells
     SPELL_SHAMAN_T10_ENHANCEMENT_4P_BONUS = 70832,
 
     SPELL_SHAMAN_FLOW_OF_THE_TIDES              = 999999999, // TODO: use real id
+
+    SPELL_SEARING_BOLT = 3606, // hater updated searing totem spell
 };
 
 enum ShamanSpellIcons
@@ -151,6 +153,28 @@ class spell_sha_totem_of_wrath : public SpellScript
     void Register() override
     {
         AfterCast += SpellCastFn(spell_sha_totem_of_wrath::HandleAfterCast);
+    }
+};
+
+// 3606
+class spell_sha_totem_searing_bolt : public SpellScript
+{
+    PrepareSpellScript(spell_sha_totem_searing_bolt);
+
+    void OnHit(SpellEffIndex /*effIndex*/)
+    {
+        if (GetCaster()->IsTotem()) {
+            auto owner = GetCaster()->GetOwner();
+            if (auto effect = owner->GetDummyAuraEffect(SPELLFAMILY_SUMMON, 1812, EFFECT_0)) {
+                auto amount = effect->GetAmount();
+                owner->CastCustomSpell(GetExplTargetUnit(), 200002, &amount, nullptr, nullptr, true, 0, effect);
+            }
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_sha_totem_searing_bolt::OnHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
     }
 };
 
@@ -2047,5 +2071,7 @@ void AddSC_shaman_spell_scripts()
     RegisterSpellScript(spell_sha_t3_6p_bonus);
     RegisterSpellScript(spell_sha_t10_elemental_4p_bonus);
     RegisterSpellScript(spell_sha_windfury_weapon);
+
+    RegisterSpellScript(spell_sha_totem_searing_bolt);
 }
 

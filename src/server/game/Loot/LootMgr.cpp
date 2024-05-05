@@ -608,7 +608,9 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
                 if (auto cre = lootSource->ToCreature()) {
                     auto script = cre->GetInstanceScript();
                     if (script || cre->isWorldBoss()) {
-                        GrantBossLootForWorldTier(*this, player, cre);
+                        if (roll_chance_i(50))
+                            GrantBossLootForWorldTier(*this, player, cre);
+
                         FillNotNormalLootFor(player);
                         continue;
                     }
@@ -645,14 +647,12 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
 }
 
 void Loot::GrantBossLootForWorldTier(Loot& loot, Player* player, Creature* lootSource) {
-    if (roll_chance_i(50)) {
-        if (lootSource->isWorldBoss())
-            SelectRandomLootFromPool(loot, LootTemplates_Creature.GetLootFor(InstanceLootPools::RAID), sConfigMgr->GetIntDefault("WorldTier.base.level", 80), lootSource, player);
-        else if (lootSource->IsDungeonBoss())
-            SelectRandomLootFromPool(loot, LootTemplates_Creature.GetLootFor(InstanceLootPools::DUNGEON), lootSource->getLevel() + 2, lootSource, player);
-        else
-            return;
-    }
+    if (lootSource->isWorldBoss())
+        SelectRandomLootFromPool(loot, LootTemplates_Creature.GetLootFor(InstanceLootPools::RAID), sConfigMgr->GetIntDefault("WorldTier.base.level", 80), lootSource, player);
+    else if (lootSource->IsDungeonBoss())
+        SelectRandomLootFromPool(loot, LootTemplates_Creature.GetLootFor(InstanceLootPools::DUNGEON), lootSource->getLevel() + 2, lootSource, player);
+    else
+        return;
 }
 
 void Loot::SelectRandomLootFromPool(Loot& loot, LootTemplate const* lootTemplate, uint32 baseIlvl, Creature* cre, Player* player) {

@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS `acore_world`.`forge_talents` (
   `nodeIndex` INT NOT null,
   PRIMARY KEY (`spellid`, `talentTabId`),
   UNIQUE  KEY `UniqueKey` (`talentTabId`, `columnIndex`, `rowIndex`));
-
+TRUNCATE acore_world.forge_talents;
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(768, 512, 1, 8, 1, 1, 1, 1, 0, 0, 1, 1);
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(1579, 4, 5, 8, 1, 1, 1, 1, 0, 0, 1, 2);
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(9634, 512, 5, 8, 1, 1, 1, 1, 0, 0, 1, 2);
@@ -275,7 +275,7 @@ CREATE TABLE IF NOT EXISTS `acore_world`.`forge_talent_ranks` (
   `rank` INT UNSIGNED NOT NULL,
   `spellId` MEDIUMINT UNSIGNED NULL,
   PRIMARY KEY (`talentSpellId`, `talentTabId`, `rank`));
-
+TRUNCATE acore_world.forge_talent_ranks;
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(768, 512, 1, 768);
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(1579, 4, 1, 1579);
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(9634, 512, 1, 9634);
@@ -730,7 +730,7 @@ CREATE TABLE IF NOT EXISTS `acore_world`.`forge_talent_tabs` (
   `tabType` INT UNSIGNED NOT NULL,
   `TabIndex` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`id`));
-
+TRUNCATE acore_world.forge_talent_tabs;
 INSERT INTO acore_world.forge_talent_tabs (id, classMask, raceMask, name, spellIcon, background, description, `role`, spellString, tabType, TabIndex) VALUES(1, 1, 2043, 'Warrior', 5, ' ', 'Something', 0, 'null', 0, 1);
 INSERT INTO acore_world.forge_talent_tabs (id, classMask, raceMask, name, spellIcon, background, description, `role`, spellString, tabType, TabIndex) VALUES(2, 2, 2043, 'Paladin', 5, ' ', 'Something', 0, 'null', 0, 1);
 INSERT INTO acore_world.forge_talent_tabs (id, classMask, raceMask, name, spellIcon, background, description, `role`, spellString, tabType, TabIndex) VALUES(4, 4, 2043, 'Hunter', 5, ' ', 'Something', 0, 'null', 0, 1);
@@ -751,7 +751,7 @@ CREATE TABLE IF NOT EXISTS `acore_world`.`forge_talent_prereq` (
   `reqTalentTabId` INT UNSIGNED NOT NULL,
   `reqRank` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`reqId`, `spellid`, `talentTabId`));
-
+TRUNCATE acore_world.forge_talent_prereq;
 INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(33201, 16, 100078, 16, 1);
 INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(34297, 512, 17007, 512, 1);
 INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(63334, 32, 100034, 32, 1);

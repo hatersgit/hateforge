@@ -84,3 +84,22 @@ INSERT INTO acore_world.spell_ranks (first_spell_id, spell_id, `rank`) VALUES(11
 INSERT INTO acore_world.spell_ranks (first_spell_id, spell_id, `rank`) VALUES(110335, 110337, 3);
 INSERT INTO acore_world.spell_ranks (first_spell_id, spell_id, `rank`) VALUES(110335, 110336, 2);
 INSERT INTO acore_world.spell_ranks (first_spell_id, spell_id, `rank`) VALUES(110335, 110335, 1);
+
+
+DROP TABLE IF EXISTS `skilllineability_dbc`;
+CREATE TABLE `skilllineability_dbc` (
+  `ID` int NOT NULL DEFAULT '0',
+  `SkillLine` int NOT NULL DEFAULT '0',
+  `Spell` int NOT NULL DEFAULT '0',
+  `RaceMask` int NOT NULL DEFAULT '0',
+  `ClassMask` int NOT NULL DEFAULT '0',
+  `MinSkillLineRank` int NOT NULL DEFAULT '0',
+  `SupercededBySpell` int NOT NULL DEFAULT '0',
+  `AcquireMethod` int NOT NULL DEFAULT '0',
+  `TrivialSkillLineRankHigh` int NOT NULL DEFAULT '0',
+  `TrivialSkillLineRankLow` int NOT NULL DEFAULT '0',
+  `CharacterPoints_1` int NOT NULL DEFAULT '0',
+  `CharacterPoints_2` int NOT NULL DEFAULT '0',
+  `TradeSkillCategoryID` int DEFAULT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

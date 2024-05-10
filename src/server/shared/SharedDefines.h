@@ -123,7 +123,7 @@ enum class ForgeTopic
     ACTIVE_SOULSHARDS               = 132,
 
     // worldtier
-    SEND_MAX_WORLD_TIER             = 140,
+    SEND_WORLD_TIER                 = 140,
     SHOW_WORLD_TIER_SELECT          = 141,
     SET_WORLD_TIER                  = 142,
 

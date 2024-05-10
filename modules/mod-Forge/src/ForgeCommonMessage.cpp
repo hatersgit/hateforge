@@ -329,6 +329,14 @@ bool ForgeCommonMessage::CanLearnTalent(Player* player, uint32 tabId, uint32 spe
     return false;
 }
 
+void ForgeCommonMessage::SendWorldTierInfo(Player* player)
+{
+    auto activeTier = player->GetWorldTier();
+    auto maxTier = std::max(fc->GetCharWorldTierUnlock(player), fc->GetAccountWorldTierUnlock(player));
+
+    player->SendForgeUIMsg(ForgeTopic::SEND_WORLD_TIER, std::to_string(activeTier)+";"+std::to_string(maxTier));
+}
+
 void ForgeCommonMessage::SendTalents(Player* player)
 {
     ForgeCharacterSpec* spec;

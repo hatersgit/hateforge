@@ -23,7 +23,7 @@ public:
             return;
 
         if (iam.message == "?") {
-            iam.player->SendForgeUIMsg(ForgeTopic::SEND_MAX_WORLD_TIER, std::to_string(std::max(fc->GetCharWorldTierUnlock(iam.player), fc->GetAccountWorldTierUnlock(iam.player))));
+            cm->SendWorldTierInfo(iam.player);
             return;
         }
 
@@ -127,6 +127,8 @@ public:
                 std::this_thread::sleep_for(1s);
                 iam.player->GetSession()->LogoutPlayer(true);
             }
+
+            cm->SendWorldTierInfo(iam.player);
         }
     }
 

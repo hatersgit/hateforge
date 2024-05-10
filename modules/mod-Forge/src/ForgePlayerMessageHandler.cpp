@@ -74,15 +74,13 @@ public:
 
     void OnCreate(Player* player) override
     {
-        // setup DB
         player->SetSpecsCount(0);
         fc->AddCharacterSpecSlot(player);
         fc->UpdateCharacters(player->GetSession()->GetAccountId(), player);
 
-            fc->EchosDefaultLoadout(player);
-            fc->FillBlankSoulShards(player);
-            player->SetWorldTier(WORLD_TIER_1);
-            //fc->AddDefaultLoadout(player);
+        fc->FillBlankSoulShards(player);
+        player->SetWorldTier(WORLD_TIER_1);
+        fc->AddDefaultLoadout(player);
     }
 
     void OnEquip(Player* player, Item* item, uint8 bag, uint8 slot, bool update) override
@@ -119,7 +117,7 @@ public:
         if (sConfigMgr->GetBoolDefault("echos", false)) {
             auto foundLoadout = fc->_playerActiveTalentLoadouts.find(player->GetGUID().GetCounter());
             if (foundLoadout == fc->_playerActiveTalentLoadouts.end()) {
-                fc->EchosDefaultLoadout(player);
+                fc->AddDefaultLoadout(player);
             }
 
             if (fc->GetCharWorldTierUnlock(player) > fc->GetAccountWorldTierUnlock(player) && fc->GetCharWorldTierUnlock(player) > WORLD_TIER_2)
@@ -127,6 +125,18 @@ public:
 
             player->SendForgeUIMsg(ForgeTopic::SEND_MAX_WORLD_TIER, std::to_string(std::max(fc->GetCharWorldTierUnlock(player), fc->GetAccountWorldTierUnlock(player))));
             fc->RecalculateShardBonuses(player);
+
+            ForgeCharacterSpec* spec;
+            if (fc->TryGetCharacterActiveSpec(player, spec)) {
+                // Purge and relearn all talents
+                fc->ForgetTalents(player, spec, TALENT_TREE);
+                ForgeAddonMessage msg;
+                msg.topic = "1";
+                msg.player = player;
+                std::string message = fc->_playerActiveTalentLoadouts[player->GetGUID().GetCounter()]->talentString;
+                msg.message = message;
+                sTopicRouter->Route(msg, message);
+            }
         }
 
         cm->SendTalents(player);
@@ -311,7 +321,7 @@ public:
         if (complete) {
             switch (itemProto->GetClass()) {
             case ITEM_CLASS_ARMOR: {
-                if (itemProto->GetSubClass() > 0 && itemProto->GetSubClass() != ITEM_SUBCLASS_ARMOR_SHIELD) {
+                if (itemProto->GetSubClass() > 0 && itemProto->GetSubClass() != ITEM_SUBCLASS_ARMOR_SHIELD && itemProto->GetInventoryType() !=  INVTYPE_CLOAK) {
                     std::uniform_int_distribution<> armorType(ITEM_SUBCLASS_ARMOR_CLOTH, ITEM_SUBCLASS_ARMOR_PLATE);
                     itemProto->SetSubClass(armorType(gen));
                 }
@@ -326,6 +336,9 @@ public:
         auto qual = itemProto->GetQuality();
 
         auto randomAppearance = fc->_genItemNamesAndDisplays[ItemClass(itemProto->GetClass())][itemProto->GetSubClass()][itemProto->GetInventoryType()];
+        if (randomAppearance.empty())
+            return;
+
         auto entry = Acore::Containers::SelectRandomContainerElement(randomAppearance);
         itemProto->SetDisplayInfoID(entry.first);
         itemProto->SetName(entry.second);
@@ -400,6 +413,7 @@ public:
                 curValue -= amountForAttributes;
 
                 std::vector<ItemModType> rolled = {};
+                bool needsMana = false;
                 if (itemProto->IsWeapon()) {
                     bool isThrown = itemProto->GetSubClass() == ITEM_SUBCLASS_WEAPON_THROWN;
                     std::uniform_int_distribution<> dpsdistr(18, 36);
@@ -453,6 +467,7 @@ public:
                             curValue -= valueForThis;
                             rolled.push_back(ITEM_MOD_DEFENSE_SKILL_RATING);
                         }
+                        needsMana = true;
                         break;
                     }
                     case ITEM_SUBCLASS_ARMOR_MAIL: {
@@ -480,6 +495,7 @@ public:
                             rolled.push_back(ITEM_MOD_ATTACK_POWER);
                             rolled.push_back(ITEM_MOD_SPELL_POWER);
                         }
+                        needsMana = true;
                         break;
                     }
                     case ITEM_SUBCLASS_ARMOR_LEATHER: {
@@ -497,6 +513,7 @@ public:
                             curValue -= valueForThis;
                             rolled.push_back(ITEM_MOD_ATTACK_POWER);
                         }
+                        needsMana = true;
                         break;
                     }
                     case ITEM_SUBCLASS_ARMOR_CLOTH: {
@@ -514,6 +531,7 @@ public:
                             curValue -= valueForThis;
                             rolled.push_back(ITEM_MOD_SPELL_POWER);
                         }
+                        needsMana = true;
                         break;
                     }
                     case ITEM_SUBCLASS_ARMOR_SHIELD: {
@@ -529,6 +547,15 @@ public:
                         curValue -= amountForBR;
                         rolled.push_back(ITEM_MOD_BLOCK_RATING);
                     }}
+                }
+
+                if (needsMana) {
+                    auto extraMana = int32(slotmod * ilvl / 10.f);
+                    statCount++;
+                    itemProto->SetStatsCount(statCount);
+                    itemProto->SetStatType(statCount - 1, ITEM_MOD_MANA);
+                    itemProto->SetStatValue(statCount - 1, extraMana);
+                    itemProto->SetStatValueMax(statCount - 1, extraMana);
                 }
 
                 std::uniform_int_distribution<> secondarydistr(0, 8);

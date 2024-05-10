@@ -790,15 +790,16 @@ public:
     struct HitTriggerSpell
     {
         HitTriggerSpell(SpellInfo const* spellInfo, SpellInfo const* auraSpellInfo, int32 procChance) :
-            triggeredSpell(spellInfo), triggeredByAura(auraSpellInfo), chance(procChance) { }
+            triggeredSpell(spellInfo), triggeredByAura(auraSpellInfo), chance(procChance), damage(0) { }
 
-        HitTriggerSpell(SpellInfo const* spellInfo, SpellInfo const* auraSpellInfo, int32 procChance, uint8 effIdx) :
-            triggeredSpell(spellInfo), triggeredByAura(auraSpellInfo), chance(procChance), triggeredByEffIdx(effIdx) { }
+        HitTriggerSpell(SpellInfo const* spellInfo, SpellInfo const* auraSpellInfo, int32 procChance, uint8 effIdx, int32 damageFromTrigger) :
+            triggeredSpell(spellInfo), triggeredByAura(auraSpellInfo), chance(procChance), triggeredByEffIdx(effIdx), damage(damageFromTrigger) { }
 
         SpellInfo const* triggeredSpell;
         SpellInfo const* triggeredByAura;
         uint8 triggeredByEffIdx;
         int32 chance;
+        int32 damage;
     };
 
     bool CanExecuteTriggersOnHit(uint8 effMask, SpellInfo const* triggeredByAura = nullptr) const;

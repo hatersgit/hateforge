@@ -31,7 +31,6 @@ public:
         uint32 specId = static_cast<uint32>(std::stoul(results[0]));
         uint32 spellId = static_cast<uint32>(std::stoul(results[1]));
         ForgeCharacterSpec* spec;
-        CharacterPerkType perkType;
 
         if (specId != iam.player->GetActiveSpec()) {
             iam.player->SendForgeUIMsg(ForgeTopic::LEARN_PERK_ERROR, "You are attempting to add a perk to a spec that is not active. Abuse of game systems will result in a ban. Id "
@@ -41,53 +40,46 @@ public:
 
         if (fc->TryGetCharacterActiveSpec(iam.player, spec))
         {
-            for (int i = 0; i < CharacterPerkType::MAX; i++) {
-                auto type = CharacterPerkType(i);
-                if (fc->PerkInQueue(spec, spellId, type))
-                {
-                    auto perkMap = spec->perks[type];
-                    auto perk = perkMap.find(spellId);
 
-                    CharacterSpecPerk* csp = new CharacterSpecPerk();
-                    Perk* spell = fc->GetPerk(iam.player->getClass(), spellId, type);
-                    if (perk == perkMap.end()) {
-                        csp->rank = 0;
-                        csp->uuid = spec->perkQueue[type].begin()->first;
-                        csp->spell = spell;
-                        perkMap[spellId] = csp;
-                    }
-                    else
-                        csp = perk->second;
+            if (fc->PerkInQueue(spec, spellId))
+            {
+                auto perkMap = spec->perks;
+                auto perk = perkMap.find(spellId);
 
-                    if (csp->spell->ranks.size() == csp->rank)
-                    {
-                        iam.player->SendForgeUIMsg(ForgeTopic::LEARN_PERK_ERROR, "This perk cannot be upgraded any further.");
-                        return;
-                    }
-
-                    auto rankIt = spell->ranks.find(csp->rank);
-                    if (rankIt != spell->ranks.end())
-                        iam.player->removeSpell(rankIt->second, SPEC_MASK_ALL, false);
-
-                    csp->rank++;
-
-                    rankIt = spell->ranks.find(csp->rank);
-                    if (rankIt != spell->ranks.end())
-                        iam.player->learnSpell(rankIt->second, true);
-                    else
-                        return;
-
-
-                    spec->perks[type][spellId] = csp;
-                    fc->LearnCharacterPerkInternal(iam.player, spec, csp, type);
-                    spec->perkQueue[type].clear();
-                    CharacterDatabase.DirectExecute("DELETE FROM character_perk_selection_queue where `guid` = {} and `specId` = {} and `type` = {}", iam.player->GetGUID().GetCounter(), spec->Id, type);
-
-                    cm->SendPerks(iam.player, specId);
-
-                    iam.player->SendPlaySpellVisual(179); // 53 SpellCastDirected
-                    iam.player->SendPlaySpellImpact(iam.player->GetGUID(), 362); // 113 EmoteSalute
+                CharacterSpecPerk* csp = new CharacterSpecPerk();
+                Perk* spell = fc->GetPerk(spellId);
+                if (perk == perkMap.end()) {
+                    csp->rank = 0;
+                    csp->uuid = spec->perkQueue.begin()->first;
+                    csp->spell = spell;
+                    perkMap[spellId] = csp;
                 }
+                else
+                    csp = perk->second;
+
+                if (csp->spell->maxRank == csp->rank)
+                {
+                    iam.player->SendForgeUIMsg(ForgeTopic::LEARN_PERK_ERROR, "This perk cannot be upgraded any further.");
+                    return;
+                }
+
+                auto spellId = csp->spell->spellId;
+
+                iam.player->RemoveAura(csp->spell->spellId);
+                csp->rank++;
+
+                if (auto aura = iam.player->AddAura(spellId, iam.player))
+                    aura->SetStackAmount(csp->rank);
+
+                spec->perks[spellId] = csp;
+                fc->LearnCharacterPerkInternal(iam.player, spec, csp);
+                spec->perkQueue.clear();
+                CharacterDatabase.DirectExecute("DELETE FROM character_perk_selection_queue where `guid` = {} and `specId` = {}", iam.player->GetGUID().GetCounter(), spec->Id);
+
+                cm->SendPerks(iam.player, specId);
+
+                iam.player->SendPlaySpellVisual(179); // 53 SpellCastDirected
+                iam.player->SendPlaySpellImpact(iam.player->GetGUID(), 362); // 113 EmoteSalute
             }
         }
         else

@@ -3303,8 +3303,24 @@ void Spell::DoTriggersOnSpellHit(Unit* unit, uint8 effMask)
             if (CanExecuteTriggersOnHit(effMask, i->triggeredByAura) && roll_chance_i(i->chance))
             {
                 Aura* aur = unit->GetAura(m_spellInfo->Id, m_caster->GetGUID());
-                if (auto withValue = i->triggeredByAura->GetEffect(SpellEffIndex(i->triggeredByEffIdx)).MiscValue) {
-                    m_caster->CastCustomSpell(unit, i->triggeredSpell->Id, &withValue, nullptr, nullptr, true);
+                if (auto Mode = i->triggeredByAura->GetEffect(SpellEffIndex(i->triggeredByEffIdx)).MiscValue) {
+                    switch (Mode) {
+                    case 1: // With flat value
+                        {
+                            if (auto withValue = i->triggeredByAura->GetEffect(SpellEffIndex(i->triggeredByEffIdx)).MiscValueB) {
+                                m_caster->CastCustomSpell(unit, i->triggeredSpell->Id, &withValue, nullptr, nullptr, true);
+                            }
+                        }
+                        break;
+                    case 2: // With % of triggering spell
+                        {
+                            if (auto pctOf = i->triggeredByAura->GetEffect(SpellEffIndex(i->triggeredByEffIdx)).MiscValueB) {
+                                int32 dealt = CalculatePct(i->damage, pctOf);
+                                m_caster->CastCustomSpell(unit, i->triggeredSpell->Id, &dealt, nullptr, nullptr, true);
+                            }
+                        }
+                        break;
+                    }
                 } else {
                     m_caster->CastSpell(unit, i->triggeredSpell->Id, true);
                 }
@@ -8781,8 +8797,8 @@ void Spell::PrepareTriggersExecutedOnHit()
             // proc chance is stored in effect amount
             int32 chance = m_caster->CalculateSpellDamage(nullptr, auraSpellInfo, auraSpellIdx, &auraBaseAmount);
             chance *= aurEff->GetBase()->GetStackAmount();
-            // build trigger and add to the list
-            m_hitTriggerSpells.emplace_back(spellInfo, auraSpellInfo, chance, auraSpellIdx);
+            // build trigger and add to the list 
+            m_hitTriggerSpells.emplace_back(spellInfo, auraSpellInfo, chance, auraSpellIdx, m_damage); // hater: add damage to store in case we want %s of dam
         }
     }
 }

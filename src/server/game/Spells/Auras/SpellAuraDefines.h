@@ -417,6 +417,8 @@ enum AuraType
     SPELL_AURA_MOD_CHANGE_DAMAGE_SCHOOL_OF_SPELL            = 354,
     SPELL_AURA_PROC_TRIGGER_LEAP                            = 355,
     SPELL_AURA_PROC_MANASTEAL                               = 356,
+    SPELL_AURA_PROC_TRIGGER_RIPPLE_OF_TRIGGER               = 357,
+    SPELL_AURA_PROC_TRIGGER_COPY_OF_TRIGGER                 = 358,
     TOTAL_AURAS
 };
 

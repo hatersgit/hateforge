@@ -26,7 +26,7 @@ public:
         if (iam.message == "-1" || iam.message == "" || !fc->isNumber(iam.message))
         {
             ForgeCharacterSpec* spec;
-            if (fc->TryGetCharacterActiveSpec(iam.player, spec) && iam.player->getLevel() >= 10) {
+            if (fc->TryGetCharacterActiveSpec(iam.player, spec)) {
                 cm->SendTalents(iam.player);
             }
         }

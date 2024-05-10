@@ -765,7 +765,7 @@ class spell_dk_blood_caked_blade : public AuraScript
     }
 };
 
-// 49028 - Dancing Rune Weapon
+// 100038 - Dancing Rune Weapon
 class spell_dk_dancing_rune_weapon : public AuraScript
 {
     PrepareAuraScript(spell_dk_dancing_rune_weapon);
@@ -779,12 +779,8 @@ class spell_dk_dancing_rune_weapon : public AuraScript
         if (!spellInfo)
             return true;
 
-        // Death Coil exception, Check if spell is from spellbook
-        if (spellInfo->Id != SPELL_DK_DEATH_COIL_DAMAGE && !eventInfo.GetActor()->ToPlayer()->HasActiveSpell(spellInfo->Id))
-            return false;
-
         // Can't cast raise dead/ally, death grip, dark command, death pact, death and decay, anti-magic shell
-        if (spellInfo->SpellFamilyFlags.HasFlag(0x20A1220, 0x10000000, 0x0))
+        if (spellInfo->SpellFamilyName != SPELLFAMILY_MELEE)
             return false;
 
         // AoE can be cast only once

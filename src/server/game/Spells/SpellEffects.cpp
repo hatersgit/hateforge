@@ -3503,7 +3503,7 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
         {
             bool consumeDiseases = true;
             // Annihilation
-            if (AuraEffect const* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 2710, EFFECT_0))
+            if (AuraEffect const* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_MELEE, 2710, EFFECT_0))
                 // Do not consume diseases if roll sucesses
                 if (roll_chance_i(aurEff->GetAmount()))
                     consumeDiseases = false;

@@ -36,7 +36,7 @@ public:
                 auto primClass = fc->base64_char.find(classInfo.substr(1, 1));
                 auto secClass = fc->base64_char.find(classInfo.substr(2, 1));
                 secClass = secClass == 64 ? 0 : secClass;
-                if (primClass > CLASS_DRUID || secClass > CLASS_DRUID)
+                if (primClass > CLASS_SHAPESHIFTER || secClass > CLASS_SHAPESHIFTER)
                     return;
 
                 auto primaryClass = 1 << (primClass-1);
@@ -87,6 +87,7 @@ public:
 
                         if (VerifyFlatTable(iam.player, primaryTab) && VerifyFlatTable(iam.player, secondaryTab)) {
                             fc->ForgetTalents(iam.player, spec, type);
+                            fc->SaveLoadout(iam.player, iam.message);
                             std::list<uint32> tabs = {};
 
                             for (auto ct : toLearn) {
@@ -106,7 +107,7 @@ public:
                                         points->Sum -= ft->RankCost;
 
                                         for (auto s : ft->UnlearnSpells)
-                                            iam.player->removeSpell(s, SPEC_MASK_ALL, false);
+                                            iam.player->removeSpell(s, SPEC_MASK_ALL, true);
 
                                         auto rankedSpell = ft->Ranks[ct->CurrentRank];
                                         if (!iam.player->HasSpell(ct->SpellId)) {

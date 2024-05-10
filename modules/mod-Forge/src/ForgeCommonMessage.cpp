@@ -429,11 +429,11 @@ std::string BuildPerk(Perk* perk)
     std::string dict = "~";
 
     out = std::to_string(perk->spellId) +
-        "&" + std::to_string(perk->allowableClass) +
-        dict + std::to_string(perk->groupId) +
+        "&" + std::to_string(perk->associatedClass) +
+        dict + std::to_string(perk->mutexGroup) +
         dict + std::to_string(perk->isAura) +
-        dict + std::to_string(perk->isUnique) +
-        dict + perk->tags + ","; //comma-separated tags
+        dict + std::to_string(perk->maxRank) +
+        dict + perk->tags + ",";
 
     return out;
 }

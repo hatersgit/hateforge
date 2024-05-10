@@ -417,6 +417,8 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleNoImmediateEffect,                         //354 SPELL_AURA_MOD_RESTED_XP_RECOVERY_RATE implemented in Player::Update
     &AuraEffect::HandleNoImmediateEffect,                         //355 SPELL_AURA_PROC_TRIGGER_LEAP
     &AuraEffect::HandleNoImmediateEffect,                         //356 SPELL_AURA_PROC_MANASTEAL
+    &AuraEffect::HandleNoImmediateEffect,                         //356 SPELL_AURA_PROC_TRIGGER_RIPPLE_OF_TRIGGER
+    &AuraEffect::HandleNoImmediateEffect,                         //356 SPELL_AURA_PROC_TRIGGER_COPY_OF_TRIGGER
 };
 
 AuraEffect::AuraEffect(Aura* base, uint8 effIndex, int32* baseAmount, Unit* caster):
@@ -1375,6 +1377,7 @@ void AuraEffect::HandleProc(AuraApplication* aurApp, ProcEventInfo& eventInfo)
             HandleProcManaSteal(aurApp, eventInfo);
             break;
         case SPELL_AURA_TRIGGER_SPELL_WITH_PCT_OF_TRIGGER:
+            HandleProcTriggerSpellWithPctOfTriggerer(aurApp, eventInfo);
             break;
         case SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE:
             HandleProcTriggerSpellWithValueAuraProc(aurApp, eventInfo);
@@ -1387,6 +1390,12 @@ void AuraEffect::HandleProc(AuraApplication* aurApp, ProcEventInfo& eventInfo)
             break;
         case SPELL_AURA_RAID_PROC_FROM_CHARGE_WITH_VALUE:
             HandleRaidProcFromChargeWithValueAuraProc(aurApp, eventInfo);
+            break;
+        case SPELL_AURA_PROC_TRIGGER_RIPPLE_OF_TRIGGER:
+            HandleProcTriggerSpellRippleOfTrigger(aurApp, eventInfo);
+            break;
+        case SPELL_AURA_PROC_TRIGGER_COPY_OF_TRIGGER:
+            HandleProcTriggerSpellCopyOfTrigger(aurApp, eventInfo);
             break;
         default:
             break;
@@ -6673,13 +6682,6 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
             }
         case SPELLFAMILY_RANGED:
             {
-                // Explosive Shot
-                if (GetSpellInfo()->SpellFamilyFlags[0] & 0x8)
-                {
-                    if (caster)
-                        caster->CastCustomSpell(53352, SPELLVALUE_BASE_POINT0, m_amount, target, true, nullptr, this);
-                    break;
-                }
                 switch (GetSpellInfo()->Id)
                 {
                     // Feeding Frenzy Rank 1
@@ -7799,29 +7801,102 @@ void AuraEffect::HandleProcManaSteal(AuraApplication* aurApp, ProcEventInfo& eve
     Unit* triggerCaster = aurApp->GetTarget();
     Unit* triggerTarget = eventInfo.GetProcTarget();
     int32 dealt = 0;
-    if (eventInfo.GetSpellInfo()->SpellFamilyName != SPELLFAMILY_PERK) {
-        if (auto damageInfo = eventInfo.GetDamageInfo()) {
-            if (damageInfo->GetDamageType() == DIRECT_DAMAGE || damageInfo->GetDamageType() == SPELL_DIRECT_DAMAGE)
-                dealt = damageInfo->GetDamage();
-        }
-        else if (auto healInfo = eventInfo.GetHealInfo())
-            dealt = healInfo->GetHeal() + healInfo->GetAbsorb();
+    if (auto info = eventInfo.GetSpellInfo())
+        if (info->SpellFamilyName == SPELLFAMILY_PERK)
+            return;
 
-        auto pct = CalculatePct(dealt, GetSpellInfo()->Effects[m_effIndex].BasePoints);
-        triggerCaster->EnergizeBySpell(triggerCaster, GetSpellInfo(), pct, POWER_MANA);
+    if (auto damageInfo = eventInfo.GetDamageInfo()) {
+        if (damageInfo->GetDamageType() == DIRECT_DAMAGE || damageInfo->GetDamageType() == SPELL_DIRECT_DAMAGE)
+            dealt = damageInfo->GetDamage();
     }
+    else if (auto healInfo = eventInfo.GetHealInfo())
+        dealt = healInfo->GetHeal() + healInfo->GetAbsorb();
+
+    auto pct = CalculatePct(dealt, GetSpellInfo()->Effects[m_effIndex].CalcValue());
+    triggerCaster->EnergizeBySpell(triggerCaster, GetSpellInfo(), pct, POWER_MANA);
 }
 
 void AuraEffect::HandleProcTriggerSpellWithPctOfTriggerer(AuraApplication* aurApp, ProcEventInfo& eventInfo)
 {
+        Unit* triggerCaster = aurApp->GetTarget();
+        Unit* triggerTarget = eventInfo.GetProcTarget();
+
+        if (auto info = eventInfo.GetSpellInfo())
+            if (info->SpellFamilyName == SPELLFAMILY_PERK || eventInfo.GetProcSpell()->IsTriggered())
+                return;
+
+        if (int32 dealt = eventInfo.GetDamageInfo()->GetDamage()) {
+            auto target = eventInfo.GetDamageInfo()->GetVictim();
+            auto pct = CalculatePct(dealt, GetSpellInfo()->Effects[m_effIndex].CalcValue());
+            auto trigger = GetSpellInfo()->Effects[m_effIndex].TriggerSpell;
+            triggerCaster->CastCustomSpell(target, trigger, &pct, nullptr, nullptr, true, 0, nullptr, triggerCaster->GetGUID());
+        }
+}
+
+void AuraEffect::HandleProcTriggerSpellRippleOfTrigger(AuraApplication* aurApp, ProcEventInfo& eventInfo)
+{
+        Unit* triggerCaster = aurApp->GetTarget();
+        Unit* triggerTarget = eventInfo.GetProcTarget();
+
+        Unit* target;
+        SpellInfo const* triggering = nullptr;
+        int32 amount = 0;
+        if (auto damageInfo = eventInfo.GetDamageInfo()) {
+            triggering = damageInfo->GetSpellInfo();
+            target = damageInfo->GetVictim();
+            amount = damageInfo->GetDamage();
+        }
+        else if (auto healInfo = eventInfo.GetHealInfo()) {
+            triggering = healInfo->GetSpellInfo();
+            target = healInfo->GetTarget();
+            amount = healInfo->GetHeal() + healInfo->GetAbsorb();
+        }
+
+        if (auto procBy = eventInfo.GetProcSpell())
+            if (procBy->IsTriggered())
+                return;
+
+        if (triggering)
+        {
+            auto targets = GetSpellInfo()->Effects[m_effIndex].CalcValue();
+            auto potentialTargets = target->SelectAllNearbyNoTotemPartyAndRaid(target, NOMINAL_MELEE_RANGE);
+            if (!potentialTargets.empty()) {
+                Acore::Containers::RandomResize(potentialTargets, targets);
+                for (auto tar : potentialTargets) {
+                    triggerCaster->CastSpell(tar, triggering->Id, true, 0, this, triggerCaster->GetGUID());
+                }
+            }
+        }
+}
+
+void AuraEffect::HandleProcTriggerSpellCopyOfTrigger(AuraApplication* aurApp, ProcEventInfo& eventInfo)
+{
     Unit* triggerCaster = aurApp->GetTarget();
     Unit* triggerTarget = eventInfo.GetProcTarget();
 
-    if (eventInfo.GetSpellInfo()->SpellFamilyName != SPELLFAMILY_PERK) {
-        if (int32 dealt = eventInfo.GetDamageInfo()->GetDamage()) {
-            auto pct = CalculatePct(dealt, GetSpellInfo()->Effects[m_effIndex].BasePoints);
-            auto trigger = GetSpellInfo()->Effects[m_effIndex].TriggerSpell;
-            triggerCaster->CastCustomSpell(eventInfo.GetDamageInfo()->GetVictim(), trigger, &dealt, nullptr, nullptr, true);
+    Unit* target;
+    SpellInfo const* triggering;
+    int32 amount = 0;
+    if (auto damageInfo = eventInfo.GetDamageInfo()) {
+        triggering = damageInfo->GetSpellInfo();
+        target = damageInfo->GetVictim();
+        amount = damageInfo->GetDamage();
+    }
+    else if (auto healInfo = eventInfo.GetHealInfo()) {
+        triggering = healInfo->GetSpellInfo();
+        target = healInfo->GetTarget();
+        amount = healInfo->GetHeal() + healInfo->GetAbsorb();
+    }
+
+    if (auto pct = triggering->Effects[m_effIndex].MiscValue) {
+        amount = CalculatePct(amount, pct);
+    }
+
+    if (triggering)
+    {
+        auto chance = GetSpellInfo()->Effects[m_effIndex].CalcValue();
+        if (roll_chance_i(chance)) {
+            triggerCaster->CastSpell(target, triggering->Id, true, 0, this, triggerCaster->GetGUID());
         }
     }
 }

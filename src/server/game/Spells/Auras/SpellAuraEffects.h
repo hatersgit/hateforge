@@ -370,7 +370,9 @@ public:
     void HandleProcTriggerLeap(AuraApplication* aurApp, ProcEventInfo& eventInfo);
     void HandleProcManaSteal(AuraApplication* aurApp, ProcEventInfo& eventInfo);
     void HandleProcTriggerSpellWithPctOfTriggerer(AuraApplication* aurApp, ProcEventInfo& eventInfo);
-
+    void HandleProcTriggerSpellRippleOfTrigger(AuraApplication* aurApp, ProcEventInfo& eventInfo);
+    void HandleProcTriggerSpellCopyOfTrigger(AuraApplication* aurApp, ProcEventInfo& eventInfo);
+    
     // hater: charges
     void HandleAuraAddCharges(AuraApplication const* aurApp, uint8 mode, bool apply) const;
 };

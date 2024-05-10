@@ -315,10 +315,9 @@ void Player::UpdateMaxHealth()
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
     if (HasAura(110143)) {
-        float ratings = 0.f;
-        GetBlockPercent(ratings);
-        GetDodgePercent(ratings);
-        value * (ratings/100.f);
+        float ratings = GetBlockPercent(0.f);
+        ratings += GetDodgePercent(0.f);
+        value = CalculatePct(value, 100.f + 2.f*ratings);
     }
 
     sScriptMgr->OnAfterUpdateMaxHealth(this, value);

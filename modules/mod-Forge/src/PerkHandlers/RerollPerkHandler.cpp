@@ -32,49 +32,39 @@ public:
         uint32 spellId = static_cast<uint32>(std::stoul(results[1]));
 
         ForgeCharacterSpec* spec;
-        CharacterPerkType perkType;
 
         if (fc->TryGetCharacterActiveSpec(iam.player, spec)) {
 
-            if (specId != iam.player->GetActiveSpec()) {
+            if (specId != spec->Id) {
                 iam.player->SendForgeUIMsg(ForgeTopic::LEARN_PERK_ERROR, "Incorrect spec for reroll request: Id "
-                    + std::to_string(specId) + " given when " + std::to_string(iam.player->GetActiveSpec()) + " expected.");
+                    + std::to_string(specId) + " given when " + std::to_string(spec->Id) + " expected.");
                 return;
             }
 
             if (iam.player->HasItemCount(REROLL_TOKEN)) {
-                for (int i = CharacterPerkType::COMBAT; i < CharacterPerkType::MAX; i++) {
-                    auto type = CharacterPerkType(i);
-                    auto csp = spec->perks[type].find(spellId);
-                    if (csp != spec->perks[type].end()) {
-                        iam.player->DestroyItemCount(REROLL_TOKEN, 1, true);
-                        auto perk = csp->second;
-                        auto rank = perk->rank;
-                        auto spell = perk->spell;
+                auto csp = spec->perks.find(spellId);
+                if (csp != spec->perks.end()) {
+                    iam.player->DestroyItemCount(REROLL_TOKEN, 1, true);
+                    auto perk = csp->second;
+                    auto rank = perk->rank;
+                    auto spell = perk->spell->spellId;
 
-                        auto rankIt = spell->ranks.find(rank);
-                        if (rankIt != spell->ranks.end()) {
-                            iam.player->removeSpell(rankIt->second, SPEC_MASK_ALL, false);
+                    iam.player->RemoveAura(spell);
+                    rank--;
 
-                            rank--;
-
-                            if (rank) {
-                                rankIt = spell->ranks.find(rank);
-                                if (rankIt != spell->ranks.end())
-                                    iam.player->learnSpell(rankIt->second, true);
-
-                                csp->second->rank = rank;
-                            }
-                            else {
-                                csp->second->rank = rank;
-                                fc->LearnCharacterPerkInternal(iam.player, spec, csp->second, CharacterPerkType(i));
-                                spec->perks[type].erase(spellId);
-                            }
-
-                            cm->SendPerks(iam.player, spec->Id);
-                        }
-                        return;
+                    if (rank) {
+                        if (auto aura = iam.player->AddAura(spell, iam.player))
+                            aura->SetStackAmount(rank);
+                        csp->second->rank = rank;
+                        spec->perks[spellId] = csp->second;
+                        fc->LearnCharacterPerkInternal(iam.player, spec, csp->second);
                     }
+                    else {
+                        csp->second->rank = 0;
+                        fc->LearnCharacterPerkInternal(iam.player, spec, csp->second);
+                        spec->perks.erase(spellId);
+                    }
+                    cm->SendPerks(iam.player, spec->Id);
                 }
             }
             else {

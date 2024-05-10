@@ -34,24 +34,19 @@ public:
                 return;
             }
 
-            for (int i = CharacterPerkType::ARCHETYPE; i < CharacterPerkType::MAX; i++) {
-                auto max = i == 0 ? 1 : iam.player->GetLevel() / 2;
-                auto  present = fc->CountPerksByType(iam.player, CharacterPerkType(i));
+            auto max = iam.player->GetLevel() / 2;
+            auto  present = fc->CountPerksByType(iam.player);
 
-                if ((max - present) < 1)
-                    continue;
+            if ((max - present) < 1) {
+                return;
+            }
 
-                if (iam.player->GetLevel() < 2 && i > CharacterPerkType::ARCHETYPE)
-                    continue;
+            if (spec->perkQueue.empty())
+                fc->InsertNewPerksForLevelUp(iam.player, spec);
 
-                auto perkType = CharacterPerkType(i);
-                if (spec->perkQueue[perkType].empty())
-                    fc->InsertNewPerksForLevelUp(iam.player, spec, perkType);
-
-                if (!spec->perkQueue[perkType].empty()) {
-                    SendSelection(iam.player, spec->perkQueue[perkType].begin()->second);
-                    return;
-                }
+            if (!spec->perkQueue.empty()) {
+                SendSelection(iam.player, spec->perkQueue.begin()->second);
+                return;
             }
         }
     }

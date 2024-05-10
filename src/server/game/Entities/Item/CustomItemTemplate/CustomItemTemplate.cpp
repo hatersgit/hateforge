@@ -944,6 +944,7 @@ void CustomItemTemplate::MakeBlankSlate() {
         SetDamageTypeB(0);
     }
     SetArmorDamageModifier(0);
+    SetItemSet(0);
     SetFlags(GetFlags() & ~ITEM_FLAG_UNIQUE_EQUIPPABLE);
 }
 

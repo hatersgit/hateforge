@@ -1820,6 +1820,8 @@ void SpellMgr::LoadSpellProcs()
     isTriggerAura[SPELL_AURA_DAMAGE_IMMUNITY] = true;
     isTriggerAura[SPELL_AURA_PROC_TRIGGER_SPELL] = true;
     isTriggerAura[SPELL_AURA_PROC_TRIGGER_LEAP] = true;
+    isTriggerAura[SPELL_AURA_PROC_TRIGGER_RIPPLE_OF_TRIGGER] = true;
+    isTriggerAura[SPELL_AURA_PROC_TRIGGER_COPY_OF_TRIGGER] = true;
     isTriggerAura[SPELL_AURA_PROC_MANASTEAL] = true;
     isTriggerAura[SPELL_AURA_TRIGGER_SPELL_WITH_PCT_OF_TRIGGER] = true;
     isTriggerAura[SPELL_AURA_PROC_TRIGGER_DAMAGE] = true;
@@ -1902,6 +1904,8 @@ void SpellMgr::LoadSpellProcs()
                 case SPELL_AURA_PROC_TRIGGER_SPELL:
                 case SPELL_AURA_PROC_TRIGGER_DAMAGE:
                 case SPELL_AURA_PROC_TRIGGER_LEAP:
+                case SPELL_AURA_PROC_TRIGGER_RIPPLE_OF_TRIGGER:
+                case SPELL_AURA_PROC_TRIGGER_COPY_OF_TRIGGER:
                 case SPELL_AURA_PROC_MANASTEAL:
                 case SPELL_AURA_TRIGGER_SPELL_WITH_PCT_OF_TRIGGER:
                     addTriggerFlag = true;
@@ -3046,7 +3050,8 @@ void SpellMgr::LoadSpellInfoCustomAttributes()
                                 // NOTE: Enchant Weapon - Blade Ward also has proc aura spell and is proced directly
                                 // however its not expected to stack so this check is good
                                 if (procInfo->HasAura(SPELL_AURA_PROC_TRIGGER_SPELL) || procInfo->HasAura(SPELL_AURA_PROC_TRIGGER_LEAP)
-                                    || procInfo->HasAura(SPELL_AURA_PROC_MANASTEAL) || procInfo->HasAura(SPELL_AURA_TRIGGER_SPELL_WITH_PCT_OF_TRIGGER))
+                                    || procInfo->HasAura(SPELL_AURA_PROC_MANASTEAL) || procInfo->HasAura(SPELL_AURA_TRIGGER_SPELL_WITH_PCT_OF_TRIGGER)
+                                    || procInfo->HasAura(SPELL_AURA_PROC_TRIGGER_RIPPLE_OF_TRIGGER) || procInfo->HasAura(SPELL_AURA_PROC_TRIGGER_COPY_OF_TRIGGER))
                                     continue;
 
                                 procInfo->AttributesCu |= SPELL_ATTR0_CU_ENCHANT_PROC;

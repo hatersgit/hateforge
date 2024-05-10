@@ -14,17 +14,17 @@ CREATE TABLE IF NOT EXISTS `acore_world`.`forge_talents` (
   PRIMARY KEY (`spellid`, `talentTabId`),
   UNIQUE  KEY `UniqueKey` (`talentTabId`, `columnIndex`, `rowIndex`));
 TRUNCATE acore_world.forge_talents;
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(768, 512, 1, 8, 1, 1, 1, 1, 0, 0, 1, 1);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(768, 2048, 1, 8, 1, 1, 1, 1, 0, 0, 1, 1);
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(1579, 4, 5, 8, 1, 1, 1, 1, 0, 0, 1, 2);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(9634, 512, 5, 8, 1, 1, 1, 1, 0, 0, 1, 2);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(9634, 2048, 5, 8, 1, 1, 1, 1, 0, 0, 1, 2);
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(12834, 1, 1, 7, 1, 1, 1, 3, 0, 0, 0, 3);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(12975, 512, 6, 7, 1, 1, 1, 1, 0, 0, 1, 5);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(17007, 512, 3, 4, 1, 1, 1, 1, 0, 0, 0, 12);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(12975, 2048, 6, 7, 1, 1, 1, 1, 0, 0, 1, 5);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(17007, 2048, 3, 4, 1, 1, 1, 1, 0, 0, 0, 12);
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(24858, 1024, 4, 0, 1, 1, 1, 1, 0, 0, 1, 22);
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(29074, 128, 0, 2, 1, 1, 1, 3, 0, 0, 0, 18);
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(33201, 16, 1, 4, 1, 1, 1, 2, 0, 0, 0, 12);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(34297, 512, 3, 2, 1, 1, 1, 2, 0, 0, 0, 18);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(62600, 512, 4, 7, 1, 1, 1, 1, 0, 0, 0, 4);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(34297, 2048, 3, 2, 1, 1, 1, 2, 0, 0, 0, 18);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(62600, 2048, 4, 7, 1, 1, 1, 1, 0, 0, 0, 4);
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(63334, 32, 2, 4, 1, 1, 1, 1, 0, 0, 0, 12);
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100000, 64, 0, 7, 1, 1, 1, 1, 0, 0, 1, 3);
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100001, 64, 0, 3, 1, 1, 1, 1, 0, 0, 1, 16);
@@ -145,15 +145,15 @@ INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowInd
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100133, 128, 5, 5, 1, 1, 1, 1, 0, 0, 1, 10);
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100134, 128, 2, 5, 1, 1, 1, 1, 0, 0, 1, 9);
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100142, 128, 3, 6, 1, 1, 1, 1, 0, 0, 1, 6);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100143, 512, 1, 6, 1, 1, 1, 1, 0, 0, 1, 6);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100144, 512, 0, 5, 1, 1, 1, 1, 0, 0, 1, 8);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100145, 512, 2, 7, 1, 1, 1, 1, 0, 0, 1, 3);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100146, 512, 2, 3, 1, 1, 1, 1, 0, 0, 1, 15);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100147, 512, 1, 2, 1, 1, 1, 1, 0, 0, 1, 17);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100148, 512, 5, 6, 1, 1, 1, 1, 0, 0, 1, 7);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100149, 512, 5, 3, 1, 1, 1, 1, 0, 0, 1, 16);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100150, 512, 6, 4, 1, 1, 1, 1, 0, 0, 1, 13);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100151, 512, 0, 1, 1, 1, 1, 1, 0, 0, 1, 20);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100143, 2048, 1, 6, 1, 1, 1, 1, 0, 0, 1, 6);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100144, 2048, 0, 5, 1, 1, 1, 1, 0, 0, 1, 8);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100145, 2048, 2, 7, 1, 1, 1, 1, 0, 0, 1, 3);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100146, 2048, 2, 3, 1, 1, 1, 1, 0, 0, 1, 15);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100147, 2048, 1, 2, 1, 1, 1, 1, 0, 0, 1, 17);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100148, 2048, 5, 6, 1, 1, 1, 1, 0, 0, 1, 7);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100149, 2048, 5, 3, 1, 1, 1, 1, 0, 0, 1, 16);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100150, 2048, 6, 4, 1, 1, 1, 1, 0, 0, 1, 13);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(100151, 2048, 0, 1, 1, 1, 1, 1, 0, 0, 1, 20);
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110000, 64, 0, 5, 1, 1, 1, 5, 0, 0, 0, 9);
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110005, 64, 1, 3, 1, 1, 1, 5, 0, 0, 0, 17);
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110011, 64, 2, 4, 1, 1, 1, 4, 0, 0, 0, 11);
@@ -260,14 +260,14 @@ INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowInd
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110303, 128, 2, 3, 1, 1, 1, 4, 0, 0, 0, 15);
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110307, 128, 3, 4, 1, 1, 1, 1, 0, 0, 0, 12);
 INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110313, 128, 3, 0, 1, 1, 1, 5, 0, 0, 0, 23);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110319, 512, 2, 5, 1, 1, 1, 5, 0, 0, 0, 9);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110324, 512, 1, 4, 1, 1, 1, 5, 0, 0, 0, 11);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110329, 512, 0, 3, 1, 1, 1, 1, 0, 0, 0, 14);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110330, 512, 4, 5, 1, 1, 1, 5, 0, 0, 0, 10);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110335, 512, 6, 2, 1, 1, 1, 1, 0, 0, 0, 19);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110336, 512, 6, 0, 1, 1, 1, 3, 0, 0, 0, 23);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110339, 512, 5, 1, 1, 1, 1, 3, 0, 0, 0, 22);
-INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110343, 512, 2, 1, 1, 1, 1, 3, 0, 0, 0, 21);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110319, 2048, 2, 5, 1, 1, 1, 5, 0, 0, 0, 9);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110324, 2048, 1, 4, 1, 1, 1, 5, 0, 0, 0, 11);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110329, 2048, 0, 3, 1, 1, 1, 1, 0, 0, 0, 14);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110330, 2048, 4, 5, 1, 1, 1, 5, 0, 0, 0, 10);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110335, 2048, 6, 2, 1, 1, 1, 1, 0, 0, 0, 19);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110336, 2048, 6, 0, 1, 1, 1, 3, 0, 0, 0, 23);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110339, 2048, 5, 1, 1, 1, 1, 3, 0, 0, 0, 22);
+INSERT INTO acore_world.forge_talents (spellid, talentTabId, columnIndex, rowIndex, rankCost, minLevel, talentType, numberRanks, preReqType, tabPointReq, nodeType, nodeIndex) VALUES(110343, 2048, 2, 1, 1, 1, 1, 3, 0, 0, 0, 21);
 
 CREATE TABLE IF NOT EXISTS `acore_world`.`forge_talent_ranks` (
   `talentSpellId` MEDIUMINT UNSIGNED NOT NULL,
@@ -276,18 +276,18 @@ CREATE TABLE IF NOT EXISTS `acore_world`.`forge_talent_ranks` (
   `spellId` MEDIUMINT UNSIGNED NULL,
   PRIMARY KEY (`talentSpellId`, `talentTabId`, `rank`));
 TRUNCATE acore_world.forge_talent_ranks;
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(768, 512, 1, 768);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(768, 2048, 1, 768);
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(1579, 4, 1, 1579);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(9634, 512, 1, 9634);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(9634, 2048, 1, 9634);
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(12834, 1, 1, 12834);
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(12834, 1, 2, 12849);
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(12834, 1, 3, 12867);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(12975, 512, 1, 12975);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(17007, 512, 1, 17007);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(12975, 2048, 1, 12975);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(17007, 2048, 1, 17007);
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(24858, 1024, 1, 24858);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(34297, 512, 1, 34297);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(34297, 512, 2, 34300);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(62600, 512, 1, 62600);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(34297, 2048, 1, 34297);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(34297, 2048, 2, 34300);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(62600, 2048, 1, 62600);
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(63334, 32, 1, 63334);
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100000, 64, 1, 100000);
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100001, 64, 1, 100001);
@@ -408,15 +408,15 @@ INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, 
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100133, 128, 1, 100133);
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100134, 128, 1, 100134);
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100142, 128, 1, 100142);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100143, 512, 1, 100143);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100144, 512, 1, 100144);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100145, 512, 1, 100145);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100146, 512, 1, 100146);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100147, 512, 1, 100147);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100148, 512, 1, 100148);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100149, 512, 1, 100149);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100150, 512, 1, 100150);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100151, 512, 1, 100151);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100143, 2048, 1, 100143);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100144, 2048, 1, 100144);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100145, 2048, 1, 100145);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100146, 2048, 1, 100146);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100147, 2048, 1, 100147);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100148, 2048, 1, 100148);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100149, 2048, 1, 100149);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100150, 2048, 1, 100150);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(100151, 2048, 1, 100151);
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110000, 64, 1, 110000);
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110000, 64, 2, 110001);
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110000, 64, 3, 110002);
@@ -690,32 +690,32 @@ INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, 
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110313, 128, 3, 110315);
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110313, 128, 4, 110316);
 INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110313, 128, 5, 110317);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110319, 512, 1, 110319);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110319, 512, 2, 110320);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110319, 512, 3, 110321);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110319, 512, 4, 110322);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110319, 512, 5, 110323);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110324, 512, 1, 110324);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110324, 512, 2, 110325);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110324, 512, 3, 110326);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110324, 512, 4, 110327);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110324, 512, 5, 110328);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110329, 512, 1, 110329);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110330, 512, 1, 110330);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110330, 512, 2, 110331);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110330, 512, 3, 110332);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110330, 512, 4, 110333);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110330, 512, 5, 110334);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110335, 512, 1, 110335);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110336, 512, 1, 110336);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110336, 512, 2, 110337);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110336, 512, 3, 110338);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110339, 512, 1, 110339);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110339, 512, 2, 110340);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110339, 512, 3, 110341);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110343, 512, 1, 110343);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110343, 512, 2, 110344);
-INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110343, 512, 3, 110345);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110319, 2048, 1, 110319);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110319, 2048, 2, 110320);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110319, 2048, 3, 110321);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110319, 2048, 4, 110322);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110319, 2048, 5, 110323);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110324, 2048, 1, 110324);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110324, 2048, 2, 110325);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110324, 2048, 3, 110326);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110324, 2048, 4, 110327);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110324, 2048, 5, 110328);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110329, 2048, 1, 110329);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110330, 2048, 1, 110330);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110330, 2048, 2, 110331);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110330, 2048, 3, 110332);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110330, 2048, 4, 110333);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110330, 2048, 5, 110334);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110335, 2048, 1, 110335);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110336, 2048, 1, 110336);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110336, 2048, 2, 110337);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110336, 2048, 3, 110338);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110339, 2048, 1, 110339);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110339, 2048, 2, 110340);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110339, 2048, 3, 110341);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110343, 2048, 1, 110343);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110343, 2048, 2, 110344);
+INSERT INTO acore_world.forge_talent_ranks (talentSpellId, talentTabId, `rank`, spellId) VALUES(110343, 2048, 3, 110345);
 
 CREATE TABLE IF NOT EXISTS `acore_world`.`forge_talent_tabs` (
   `id` INT UNSIGNED NOT NULL,
@@ -740,7 +740,7 @@ INSERT INTO acore_world.forge_talent_tabs (id, classMask, raceMask, name, spellI
 INSERT INTO acore_world.forge_talent_tabs (id, classMask, raceMask, name, spellIcon, background, description, `role`, spellString, tabType, TabIndex) VALUES(64, 64, 2043, 'Shaman', 5, ' ', 'Something', 0, 'null', 0, 1);
 INSERT INTO acore_world.forge_talent_tabs (id, classMask, raceMask, name, spellIcon, background, description, `role`, spellString, tabType, TabIndex) VALUES(128, 128, 2043, 'Mage', 5, ' ', 'Something', 0, 'null', 0, 1);
 INSERT INTO acore_world.forge_talent_tabs (id, classMask, raceMask, name, spellIcon, background, description, `role`, spellString, tabType, TabIndex) VALUES(256, 256, 2043, 'Warlock', 5, ' ', 'Something', 0, 'null', 0, 1);
-INSERT INTO acore_world.forge_talent_tabs (id, classMask, raceMask, name, spellIcon, background, description, `role`, spellString, tabType, TabIndex) VALUES(512, 512, 2043, 'Shapeshifter', 5, ' ', 'Something', 0, 'null', 0, 1);
+INSERT INTO acore_world.forge_talent_tabs (id, classMask, raceMask, name, spellIcon, background, description, `role`, spellString, tabType, TabIndex) VALUES(2048, 2048, 2043, 'Shapeshifter', 5, ' ', 'Something', 0, 'null', 0, 1);
 INSERT INTO acore_world.forge_talent_tabs (id, classMask, raceMask, name, spellIcon, background, description, `role`, spellString, tabType, TabIndex) VALUES(1024, 1024, 2043, 'Druid', 5, ' ', 'Something', 0, 'null', 0, 1);
 
 CREATE TABLE IF NOT EXISTS `acore_world`.`forge_talent_prereq` (
@@ -753,7 +753,7 @@ CREATE TABLE IF NOT EXISTS `acore_world`.`forge_talent_prereq` (
   PRIMARY KEY (`reqId`, `spellid`, `talentTabId`));
 TRUNCATE acore_world.forge_talent_prereq;
 INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(33201, 16, 100078, 16, 1);
-INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(34297, 512, 17007, 512, 1);
+INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(34297, 2048, 17007, 2048, 1);
 INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(63334, 32, 100034, 32, 1);
 INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(100012, 1, 12834, 1, 3);
 INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(100022, 2, 100023, 2, 1);
@@ -764,7 +764,7 @@ INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, re
 INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(100084, 16, 110236, 16, 5);
 INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(100086, 16, 110242, 16, 3);
 INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(100142, 128, 100125, 128, 1);
-INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(100148, 512, 9634, 512, 1);
+INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(100148, 2048, 9634, 2048, 1);
 INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(100156, 256, 110151, 256, 3);
 INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(110000, 64, 100000, 64, 1);
 INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(110005, 64, 100003, 64, 1);
@@ -844,12 +844,12 @@ INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, re
 INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(110303, 128, 100134, 128, 1);
 INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(110307, 128, 100142, 128, 1);
 INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(110313, 128, 100126, 128, 1);
-INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(110319, 512, 100145, 512, 1);
-INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(110324, 512, 100143, 512, 1);
-INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(110329, 512, 100144, 512, 1);
-INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(110335, 512, 100150, 512, 1);
-INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(110339, 512, 100149, 512, 1);
-INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(110344, 512, 100146, 512, 1);
+INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(110319, 2048, 100145, 2048, 1);
+INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(110324, 2048, 100143, 2048, 1);
+INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(110329, 2048, 100144, 2048, 1);
+INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(110335, 2048, 100150, 2048, 1);
+INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(110339, 2048, 100149, 2048, 1);
+INSERT INTO acore_world.forge_talent_prereq (spellid, talentTabId, reqTalent, reqTalentTabId, reqRank) VALUES(110344, 2048, 100146, 2048, 1);
 
 CREATE TABLE IF NOT EXISTS `acore_world`.`forge_talent_exclusive` (
   `talentSpellId` MEDIUMINT UNSIGNED NOT NULL,

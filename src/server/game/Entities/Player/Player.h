@@ -2287,12 +2287,22 @@ public:
     int32 CalculateCorpseReclaimDelay(bool load = false);
     void SendCorpseReclaimDelay(uint32 delay);
 
+    bool AurasPreventingParry() {
+        return HasAura(9364);
+    }
+    bool AurasPreventingBlock() {
+        return HasAura(9364) || HasAura(110143);
+    }
+    bool AurasPreventingDodge() {
+        return HasAura(110143);
+    }
+
     [[nodiscard]] uint32 GetShieldBlockValue() const override;                 // overwrite Unit version (virtual)
-    [[nodiscard]] bool CanParry() const { return m_canParry; }
+    [[nodiscard]] bool CanParry() { return m_canParry && !AurasPreventingParry(); }
     void SetCanParry(bool value);
-    [[nodiscard]] bool CanBlock() const { return m_canBlock; }
+    [[nodiscard]] bool CanBlock() { return m_canBlock && !AurasPreventingBlock(); }
     void SetCanBlock(bool value);
-    [[nodiscard]] bool CanDodge() const { return m_canDodge; }
+    [[nodiscard]] bool CanDodge() { return m_canDodge && !AurasPreventingDodge(); }
     void SetCanDodge(bool value);
     [[nodiscard]] bool CanTitanGrip() const { return m_canTitanGrip; }
     void SetCanTitanGrip(bool value);

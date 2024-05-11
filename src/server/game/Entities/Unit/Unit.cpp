@@ -3767,8 +3767,12 @@ uint32 Unit::GetDefenseSkillValue(Unit const* target) const
 
 float Unit::GetUnitDodgeChance() const
 {
-    if (GetTypeId() == TYPEID_PLAYER)
-        return ToPlayer()->GetRealDodge(); //GetFloatValue(PLAYER_DODGE_PERCENTAGE);
+    if (GetTypeId() == TYPEID_PLAYER) {
+        Player const* player = ToPlayer();
+        if (player->CanDodge())
+            return ToPlayer()->GetRealDodge(); //GetFloatValue(PLAYER_DODGE_PERCENTAGE);
+        return 0.f;
+    }
     else
     {
         if (ToCreature()->IsTotem())

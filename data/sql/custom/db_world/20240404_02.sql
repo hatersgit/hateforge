@@ -5,7 +5,7 @@ DELETE FROM acore_world.spell_script_names where ScriptName in (
 	'spell_sha_totem_searing_bolt', 'spell_pri_atonement', 'spell_dru_elunes_fire', 'spell_dru_eclipse', 
 	'spell_mage_glacial_advance', 'spell_dk_dancing_rune_weapon', 'spell_dk_pestilence', 'spell_pri_penance', 'spell_dru_living_seed'
 );
-
+INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(-110092, 'spell_pal_judgements_of_the_wise');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(110096, 'spell_pal_judgement_of_light_heal');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100097, 'spell_pal_sacred_shield_dummy');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(-110178, 'spell_warl_soul_leech');
@@ -87,6 +87,9 @@ INSERT INTO acore_world.spell_ranks (first_spell_id, spell_id, `rank`) VALUES(11
 INSERT INTO acore_world.spell_ranks (first_spell_id, spell_id, `rank`) VALUES(110335, 110337, 3);
 INSERT INTO acore_world.spell_ranks (first_spell_id, spell_id, `rank`) VALUES(110335, 110336, 2);
 INSERT INTO acore_world.spell_ranks (first_spell_id, spell_id, `rank`) VALUES(110335, 110335, 1);
+INSERT INTO acore_world.spell_ranks (first_spell_id, spell_id, `rank`) VALUES(110092, 110092, 1);
+INSERT INTO acore_world.spell_ranks (first_spell_id, spell_id, `rank`) VALUES(110092, 110093, 3);
+INSERT INTO acore_world.spell_ranks (first_spell_id, spell_id, `rank`) VALUES(110092, 110094, 2);
 
 
 DROP TABLE IF EXISTS `skilllineability_dbc`;

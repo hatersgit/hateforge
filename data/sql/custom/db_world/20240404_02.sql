@@ -26,7 +26,7 @@ INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100034,
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100081, 'spell_pri_penance');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(-110272, 'spell_dru_living_seed');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100014, 'spell_warr_slam');
-
+INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100084, 'spell_pri_vampiric_touch');
 
 
 
@@ -59,7 +59,8 @@ INSERT INTO acore_world.creature_template_spell (CreatureID, `Index`, Spell, Ver
 
 delete from acore_world.spell_ranks where first_spell_id in (
 	110335, 110282, 110282, 110282, 110272, 110272, 110272, 110271, 110256, 110256, 110256, 110188, 
-	110188, 110188, 110184, 110184, 110184, 110130, 110130, 110130, 110107, 110107, 110107, 110178
+	110188, 110188, 110184, 110184, 110184, 110130, 110130, 110130, 110107, 110107, 110107, 110178,
+	110092
 	);
 INSERT INTO acore_world.spell_ranks (first_spell_id, spell_id, `rank`) VALUES(110282, 110284, 3);
 INSERT INTO acore_world.spell_ranks (first_spell_id, spell_id, `rank`) VALUES(110282, 110283, 2);

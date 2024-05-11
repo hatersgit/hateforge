@@ -7786,9 +7786,10 @@ void AuraEffect::HandleProcTriggerLeap(AuraApplication* aurApp, ProcEventInfo& e
             if (!potentialTargets.empty())
                 for (auto tar : potentialTargets) {
                     if (!tar->GetAuraApplication(triggering->Id, triggerCaster->GetGUID())) {
-                        auto aura = triggerCaster->AddAura(triggering->Id, tar);
-                        aura->SetDuration(app->GetDuration());
-                        break;
+                        if (auto aura = triggerCaster->AddAura(triggering->Id, tar)) {
+                            aura->SetDuration(app->GetDuration());
+                            break;
+                        }
                     }
                 }
         }
@@ -7822,7 +7823,11 @@ void AuraEffect::HandleProcTriggerSpellWithPctOfTriggerer(AuraApplication* aurAp
         Unit* triggerTarget = eventInfo.GetProcTarget();
 
         if (auto info = eventInfo.GetSpellInfo())
-            if (info->SpellFamilyName == SPELLFAMILY_PERK || eventInfo.GetProcSpell()->IsTriggered())
+            if (info->SpellFamilyName == SPELLFAMILY_PERK)
+                return;
+
+        if (auto proc = eventInfo.GetProcSpell())
+            if (proc->IsTriggered())
                 return;
 
         if (int32 dealt = eventInfo.GetDamageInfo()->GetDamage()) {

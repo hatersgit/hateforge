@@ -51,6 +51,8 @@ public:
 
                     if (maxTierAllowed >= tier)
                         iam.player->SetWorldTier(Difficulty(tier));
+
+                    cm->SendWorldTierInfo(iam.player);
                 }
             }
 
@@ -127,8 +129,6 @@ public:
                 std::this_thread::sleep_for(1s);
                 iam.player->GetSession()->LogoutPlayer(true);
             }
-
-            cm->SendWorldTierInfo(iam.player);
         }
     }
 

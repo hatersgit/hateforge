@@ -123,7 +123,6 @@ public:
             if (fc->GetCharWorldTierUnlock(player) > fc->GetAccountWorldTierUnlock(player) && fc->GetCharWorldTierUnlock(player) > WORLD_TIER_2)
                 fc->SetAccountWorldTierUnlock(player, fc->GetCharWorldTierUnlock(player) - 1);
 
-            player->SendForgeUIMsg(ForgeTopic::SEND_MAX_WORLD_TIER, std::to_string(std::max(fc->GetCharWorldTierUnlock(player), fc->GetAccountWorldTierUnlock(player))));
             fc->RecalculateShardBonuses(player);
 
             ForgeCharacterSpec* spec;
@@ -240,7 +239,7 @@ public:
                             break;
                         }
                         }
-                        player->SendForgeUIMsg(ForgeTopic::SEND_MAX_WORLD_TIER, std::to_string(fc->GetCharWorldTierUnlock(player)));
+                        cm->SendWorldTierInfo(player);
                     }
                     auto rewarded = 1;
                     if (tier > 2) {

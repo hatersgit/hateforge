@@ -18,7 +18,7 @@ public:
 
     void HandleMessage(ForgeAddonMessage& iam) override
     {
-        if (fc->isNumber(iam.message)) {
+        /*if (fc->isNumber(iam.message)) {
             uint32 id = static_cast<uint32>(std::stoul(iam.message));
             ForgeCharacterSpec* spec;
             if (fc->TryGetCharacterActiveSpec(iam.player, spec) && id > 1) {
@@ -36,7 +36,7 @@ public:
 
                 cm->SendLoadouts(iam.player);
             }
-        }
+        }*/
     }
 
 private:

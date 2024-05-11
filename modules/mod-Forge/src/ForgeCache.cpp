@@ -1094,12 +1094,11 @@ public:
     struct PlayerLoadout {
         bool active;
         uint8 id;
-        uint32 tabId;
         std::string name;
         std::string talentString;
     };
     // hater: player loadout storage
-    std::unordered_map<uint32 /*guid*/, std::unordered_map<uint32 /*tabId*/, std::unordered_map<uint8 /*id*/, PlayerLoadout*>>> _playerTalentLoadouts;
+    std::unordered_map<uint32 /*guid*/, std::unordered_map<uint8 /*id*/, PlayerLoadout*>> _playerTalentLoadouts;
     std::unordered_map<uint32 /*guid*/, PlayerLoadout*> _playerActiveTalentLoadouts;
 
     std::unordered_map<uint32 /*class*/, uint32 /*spec*/> _playerClassFirstSpec;
@@ -1130,14 +1129,13 @@ public:
             plo->active = true;
             plo->id = 1;
             plo->name = "Default";
-            plo->tabId = tab->Id;
             plo->talentString = loadout;
 
-            _playerTalentLoadouts[guid][tab->Id][plo->id] = plo;
+            _playerTalentLoadouts[guid][plo->id] = plo;
             _playerActiveTalentLoadouts[guid] = plo;
 
-            CharacterDatabase.Execute("insert into `forge_character_talent_loadouts` (`guid`, `id`, `talentTabId`, `name`, `talentString`, `active`) values ({}, {}, {}, '{}', '{}', {})",
-                guid, plo->id, tab->Id, plo->name, loadout, true);
+            CharacterDatabase.Execute("insert into `forge_character_talent_loadouts` (`guid`, `id`, `name`, `talentString`, `active`) values ({}, {}, '{}', '{}', {})",
+                guid, plo->id, plo->name, loadout, true);
         }
     }
 
@@ -1149,16 +1147,14 @@ public:
 
         if (plos != _playerTalentLoadouts.end())
         {
-            auto spec = plos->second.find(1);
-            if (spec != plos->second.end()) {
-                auto exists = spec->second.find(active->id);
-                if (exists != spec->second.end()) {
-                    exists->second->talentString = loadout;
-                    active->talentString = loadout;
+            auto exists = plos->second.find(active->id);
+            if (exists != plos->second.end()) {
 
-                    CharacterDatabase.DirectExecute("UPDATE `forge_character_talent_loadouts` set `talentString` = '{}' WHERE `guid` = {} and `id` = {}",
-                        loadout, guid, active->id);
-                }
+                exists->second->talentString = loadout;
+                active->talentString = loadout;
+
+                CharacterDatabase.DirectExecute("UPDATE `forge_character_talent_loadouts` set `talentString` = '{}' WHERE `guid` = {} and `id` = {}",
+                    loadout, guid, active->id);
             }
         }
     }
@@ -2118,13 +2114,12 @@ private:
 
             PlayerLoadout* plo = new PlayerLoadout();
             plo->id = id;
-            plo->tabId = tabId;
             plo->name = name;
             plo->talentString = talentString;
             plo->active = active;
 
 
-            _playerTalentLoadouts[guid][tabId][id] = plo;
+            _playerTalentLoadouts[guid][id] = plo;
             _playerActiveTalentLoadouts[guid] = plo;
         } while (loadouts->NextRow());
     }

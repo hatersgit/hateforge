@@ -22,7 +22,7 @@ public:
         if (iam.message.empty())
             return;
 
-        std::vector<std::string> results;
+        /*std::vector<std::string> results;
         boost::algorithm::split(results, iam.message, boost::is_any_of(";"));
 
         if (results.empty() || results.size() != 3 || !fc->isNumber(results[0]))
@@ -51,8 +51,8 @@ public:
         auto plos = fc->_playerTalentLoadouts.find(guid);
         if (plos != fc->_playerTalentLoadouts.end())
         {
-            auto spec = plos->second.find(specId);
-            if (spec != plos->second.end()) {
+            auto exists = plos->second.find(id);
+            if (exists != plos->second.end()) {
                 auto exists = spec->second.find(id);
                 if (exists != spec->second.end()) {
                     exists->second->name = name;
@@ -68,13 +68,12 @@ public:
                     fc->_playerTalentLoadouts[guid][specId][active->id] = active;
                     iam.player->SaveLoadoutActions(specId, active->id);
 
-                    CharacterDatabase.DirectExecute("update `forge_character_talent_loadouts` set `active` = 0 where `guid` = {} and `talentTabId` = {}",
-                        guid, active->tabId);
+                    CharacterDatabase.DirectExecute("update `forge_character_talent_loadouts` set `active` = 0 where `guid` = {} and `id` = {}",
+                        guid, specId);
 
                     ForgeCache::PlayerLoadout* plo = new ForgeCache::PlayerLoadout();
                     plo->active = true;
                     plo->id = id;
-                    plo->tabId = specId;
                     plo->name = name;
                     plo->talentString = talentString;
 
@@ -87,7 +86,7 @@ public:
             }
         }
 
-        cm->SendLoadouts(iam.player);
+        cm->SendLoadouts(iam.player); */
     }
 
 private:

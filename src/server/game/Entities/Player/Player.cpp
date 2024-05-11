@@ -14019,6 +14019,14 @@ void Player::_LoadSkills(PreparedQueryResult result)
             if (!rcEntry)
             {
                 LOG_ERROR("entities.player", "Character {} has skill {} that does not exist.", GetGUID().ToString(), skill);
+
+                CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHARACTER_SKILL);
+
+                stmt->SetData(0, GetGUID().GetCounter());
+                stmt->SetData(1, skill);
+
+                CharacterDatabase.Execute(stmt);
+
                 continue;
             }
 

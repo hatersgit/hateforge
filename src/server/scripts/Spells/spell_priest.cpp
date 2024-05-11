@@ -923,7 +923,7 @@ class spell_pri_shadow_word_death : public SpellScript
     }
 };
 
-// -34914 - Vampiric Touch
+// -100084 - Vampiric Touch
 class spell_pri_vampiric_touch : public AuraScript
 {
     PrepareAuraScript(spell_pri_vampiric_touch);

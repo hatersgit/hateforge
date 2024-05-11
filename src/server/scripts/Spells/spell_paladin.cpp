@@ -132,6 +132,7 @@ enum PaladinSpells
 
 
 
+    SPELL_PALADIN_JUDGEMENTS_OF_THE_WISE_MANA = 110090,
     SPELL_REPLENISHMENT = 110091,
 
     SPELL_PALADIN_SACRED_SHIELD_TRIGGER = 100098,
@@ -1517,7 +1518,7 @@ class spell_pal_judgements_of_the_wise : public AuraScript
         PreventDefaultAction();
 
         Unit* caster = eventInfo.GetActor();
-        caster->CastSpell((Unit*)nullptr, SPELL_PALADIN_JUDGEMENTS_OF_THE_WISE_MANA, true, nullptr, aurEff);
+        //caster->CastSpell((Unit*)nullptr, SPELL_PALADIN_JUDGEMENTS_OF_THE_WISE_MANA, true, nullptr, aurEff);
         caster->CastSpell((Unit*)nullptr, SPELL_REPLENISHMENT, true, nullptr, aurEff);
     }
 

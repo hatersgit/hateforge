@@ -429,7 +429,7 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
             level -= int32(std::max(_spellInfo->BaseLevel, _spellInfo->SpellLevel));
             basePoints += int32(level * basePointsPerLevel);
         }
-        else if (basePoints && _spellInfo->HasAttribute(SPELL_ATTR0_SCALES_WITH_CREATURE_LEVEL)) {
+        else if (basePoints) {
             if (Player* player = ((Unit*)caster)->ToPlayer()) {
                 // general formula is L+(L-10)(L-10)(.016)
                 int32 level = int32(caster->GetLevel());

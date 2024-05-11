@@ -196,7 +196,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectApplyAreaAura,                            //119 SPELL_EFFECT_APPLY_AREA_AURA_PET
     &Spell::EffectUnused,                                   //120 SPELL_EFFECT_TELEPORT_GRAVEYARD       one spell: Graveyard Teleport Test
     &Spell::EffectWeaponDmg,                                //121 SPELL_EFFECT_NORMALIZED_WEAPON_DMG
-    &Spell::EffectDisableDodge,                             //122 SPELL_EFFECT_122                      unused
+    &Spell::EffectDisableDefenseOutcome,                             //122 SPELL_EFFECT_122                      unused
     &Spell::EffectSendTaxi,                                 //123 SPELL_EFFECT_SEND_TAXI                taxi/flight related (misc value is taxi path id)
     &Spell::EffectPullTowards,                              //124 SPELL_EFFECT_PULL_TOWARDS
     &Spell::EffectModifyThreatPercent,                      //125 SPELL_EFFECT_MODIFY_THREAT_PERCENT
@@ -4679,10 +4679,12 @@ void Spell::EffectParry(SpellEffIndex /*effIndex*/)
         m_caster->ToPlayer()->SetCanParry(true);
 }
 
-void Spell::EffectDisableDodge(SpellEffIndex /*effIndex*/)
+void Spell::EffectDisableDefenseOutcome(SpellEffIndex effIndex)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
         return;
+
+    auto outcome = m_spellInfo->Effects[effIndex].MiscValue;
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
         m_caster->ToPlayer()->SetCanDodge(false);

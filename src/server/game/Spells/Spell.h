@@ -373,7 +373,7 @@ public:
     void EffectResurrect(SpellEffIndex effIndex);
     void EffectParry(SpellEffIndex effIndex);
     void EffectBlock(SpellEffIndex effIndex);
-    void EffectDisableDodge(SpellEffIndex effIndex);
+    void EffectDisableDefenseOutcome(SpellEffIndex effIndex);
     void EffectLeap(SpellEffIndex effIndex);
     void EffectTransmitted(SpellEffIndex effIndex);
     void EffectDisEnchant(SpellEffIndex effIndex);

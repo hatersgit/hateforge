@@ -607,7 +607,7 @@ void Player::UpdateBlockPercentage()
     float value = 0.0f;
     if (CanBlock())
     {
-        GetBlockPercent(value);
+        value = GetBlockPercent(value);
     }
     SetStatFloatValue(PLAYER_BLOCK_PERCENTAGE, value);
 }
@@ -767,7 +767,7 @@ void Player::UpdateDodgePercentage()
     float value = 0.f;
     if (CanDodge())
     {
-        GetDodgePercent(value);
+        value = GetDodgePercent(value);
     }
 
     SetStatFloatValue(PLAYER_DODGE_PERCENTAGE, value);

@@ -12116,11 +12116,6 @@ void Player::resetSpells()
 
 void Player::LearnCustomSpells()
 {
-    if (!sWorld->getBoolConfig(CONFIG_START_CUSTOM_SPELLS))
-    {
-        return;
-    }
-
     // learn default race/class spells
     PlayerInfo const* info = sObjectMgr->GetPlayerInfo(getRace(), getClass());
     ASSERT(info);

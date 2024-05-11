@@ -430,13 +430,51 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
             basePoints += int32(level * basePointsPerLevel);
         }
         else if (basePoints) {
-            if (Player* player = ((Unit*)caster)->ToPlayer()) {
-                // general formula is L+(L-10)(L-10)(.016)
-                int32 level = int32(caster->GetLevel());
-                int32 pct = int32(level + (level-10)*(level-10)*.016f);
-
-                basePoints = CalculatePct(basePoints, pct);
+            bool canEffectScale = false;
+            switch (Effect)
+            {
+            case SPELL_EFFECT_SCHOOL_DAMAGE:
+            case SPELL_EFFECT_POWER_DRAIN:
+            case SPELL_EFFECT_HEALTH_LEECH:
+            case SPELL_EFFECT_HEAL:
+            case SPELL_EFFECT_WEAPON_DAMAGE:
+            case SPELL_EFFECT_POWER_BURN:
+            case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+            case SPELL_EFFECT_FORCE_CAST_WITH_VALUE:
+                canEffectScale = true;
+                break;
+            default:
+                break;
             }
+
+            switch (ApplyAuraName)
+            {
+            case SPELL_AURA_PERIODIC_DAMAGE:
+            case SPELL_AURA_PERIODIC_HEAL:
+            case SPELL_AURA_DAMAGE_SHIELD:
+            case SPELL_AURA_PERIODIC_LEECH:
+            case SPELL_AURA_PERIODIC_MANA_LEECH:
+            case SPELL_AURA_SCHOOL_ABSORB:
+                canEffectScale = true;
+                break;
+            case SPELL_AURA_MOD_WEAPON_SCHOOL_DAMAGE_EFFECT:
+                if (Amplitude == 1)
+                    canEffectScale = true;
+                else
+                    canEffectScale = false;
+                break;
+            default:
+                break;
+            }
+
+            if (Player* player = ((Unit*)caster)->ToPlayer())
+                if (canEffectScale) {
+                    // general formula is x+0.1(x)^2 + 4
+                    int32 level = int32(caster->GetLevel());
+                    int32 pct = int32(4 + level + (level) * (level) * .01f);
+
+                    basePoints = CalculatePct(basePoints, pct);
+                }
         }
     }
 

@@ -1576,7 +1576,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
             }*/
 
             // Leader of the Pack
-            if (player->HasTalent(17007, player->GetActiveSpec()))
+            if (player->HasSpell(17007))
             {
                 SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(24932);
                 if (spellInfo && spellInfo->Stances & (1 << (GetMiscValue() - 1)))
@@ -7813,7 +7813,7 @@ void AuraEffect::HandleProcManaSteal(AuraApplication* aurApp, ProcEventInfo& eve
     else if (auto healInfo = eventInfo.GetHealInfo())
         dealt = healInfo->GetHeal() + healInfo->GetAbsorb();
 
-    auto pct = CalculatePct(dealt, GetSpellInfo()->Effects[m_effIndex].CalcValue());
+    auto pct = std::max(CalculatePct(dealt, GetSpellInfo()->Effects[m_effIndex].CalcValue()), 1);
     triggerCaster->EnergizeBySpell(triggerCaster, GetSpellInfo(), pct, POWER_MANA);
 }
 

@@ -218,7 +218,7 @@ public:
 
                 if (currentLevel == DEFAULT_MAX_LEVEL) {
                     auto tier = player->GetWorldTier();
-                    auto unlock = fc->GetCharWorldTierUnlock(player);
+                    auto unlock = std::max(fc->GetCharWorldTierUnlock(player), fc->GetAccountWorldTierUnlock(player));
                     if (unlock == tier && tier < WORLD_TIER_4) {
                         switch (tier) {
                         case WORLD_TIER_1: {

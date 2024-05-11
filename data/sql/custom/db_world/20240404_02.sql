@@ -4,7 +4,7 @@ DELETE FROM acore_world.spell_script_names where ScriptName in (
 	'spell_rog_killing_spree_AuraScript', 'spell_rog_tricks_of_the_trade', 'spell_hun_chimera_shot',
 	'spell_sha_totem_searing_bolt', 'spell_pri_atonement', 'spell_dru_elunes_fire', 'spell_dru_eclipse', 
 	'spell_mage_glacial_advance', 'spell_dk_dancing_rune_weapon', 'spell_dk_pestilence', 'spell_pri_penance', 'spell_dru_living_seed',
-	'spell_warr_slam'
+	'spell_warr_slam', 'spell_pri_vampiric_touch'
 );
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(-110092, 'spell_pal_judgements_of_the_wise');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(110096, 'spell_pal_judgement_of_light_heal');

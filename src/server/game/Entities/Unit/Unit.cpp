@@ -3768,8 +3768,8 @@ uint32 Unit::GetDefenseSkillValue(Unit const* target) const
 float Unit::GetUnitDodgeChance() const
 {
     if (GetTypeId() == TYPEID_PLAYER) {
-        Player const* player = ToPlayer();
-        if (player->CanDodge())
+        auto player = ToPlayer();
+        if (((Player*)player)->CanDodge())
             return ToPlayer()->GetRealDodge(); //GetFloatValue(PLAYER_DODGE_PERCENTAGE);
         return 0.f;
     }
@@ -3792,7 +3792,7 @@ float Unit::GetUnitParryChance() const
 
     if (Player const* player = ToPlayer())
     {
-        if (player->CanParry())
+        if (((Player*)player)->CanParry())
         {
             Item* tmpitem = player->GetWeaponForAttack(BASE_ATTACK, true);
             if (!tmpitem)
@@ -3835,7 +3835,7 @@ float Unit::GetUnitBlockChance() const
 {
     if (Player const* player = ToPlayer())
     {
-        if (player->CanBlock())
+        if (((Player*) player)->CanBlock())
         {
             Item* tmpitem = player->GetUseableItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
             if (tmpitem && !tmpitem->IsBroken() && tmpitem->GetTemplate()->Block)

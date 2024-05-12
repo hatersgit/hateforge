@@ -3,7 +3,7 @@ DELETE FROM acore_world.spell_script_names where ScriptName in (
 	'spell_warl_soul_leech', 'spell_hunter_intoxication', 'spell_snake_deadly_poison', 'spell_rog_killing_spree_SpellScript',
 	'spell_rog_killing_spree_AuraScript', 'spell_rog_tricks_of_the_trade', 'spell_hun_chimera_shot',
 	'spell_sha_totem_searing_bolt', 'spell_pri_atonement', 'spell_dru_elunes_fire', 'spell_dru_eclipse', 
-	'spell_mage_glacial_advance', 'spell_dk_dancing_rune_weapon', 'spell_dk_pestilence', 'spell_pri_penance', 
+	'spell_dk_dancing_rune_weapon', 'spell_dk_pestilence', 'spell_pri_penance', 
 	'spell_dru_living_seed', 'spell_warr_slam', 'spell_pri_vampiric_touch', 'spell_mage_glacial_advance',
 	'aura_mage_glacial_advance', 'spell_mage_elemental_pulse'
 );
@@ -17,7 +17,6 @@ INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(3606, '
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(110247, 'spell_pri_atonement');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(110285, 'spell_dru_elunes_fire');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(-110282, 'spell_dru_eclipse');
-INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100136, 'spell_mage_glacial_advance');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100068, 'spell_rog_killing_spree_SpellScript');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100068, 'spell_rog_killing_spree_AuraScript');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100075, 'spell_rog_tricks_of_the_trade');

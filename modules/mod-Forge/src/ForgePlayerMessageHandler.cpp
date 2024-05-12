@@ -138,6 +138,8 @@ public:
             }
         }
 
+        LearnSpellsForLevel(player, player->GetLevel());
+
         cm->SendTalents(player);
     }
 
@@ -212,6 +214,7 @@ public:
 
                 cm->SendActiveSpecInfo(player);
                 cm->SendTalents(player);
+                LearnSpellsForLevel(player, currentLevel);
 
                 cm->SendSpecInfo(player);
                 fc->UpdateCharacterSpec(player, spec);
@@ -699,50 +702,14 @@ private:
         if (player->HasUnitState(UNIT_STATE_DIED))
             player->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-        auto spells = sObjectMgr->getTrainerSpellsForClass();
-        if (!spells.empty()) {
-            LearnSpellsForClass(player, CLASS_DRUID + 3, newlevel, spells);
-            LearnSpellsForClass(player, player->getClass(), newlevel, spells);
-        }
-    }
+        if (newlevel >= 20) {
+            if (!player->HasSpell(33388))
+                player->learnSpell(33388);
 
-    void LearnSpellsForClass(Player* player, uint8 search, uint8 newLevel, CacheTrainerSpellByClassContainer pool) {
-        auto classSpells = pool.find(search);
-        if (classSpells != pool.end()) {
-            for (auto spell : classSpells->second)
-            {
-                TrainerSpell const* tSpell = &spell.second;
+            if (newlevel >= 40)
+                if (!player->HasSpell(33391))
+                    player->learnSpell(33391);
 
-                if (player->HasSpell(tSpell->spell))
-                    continue;
-
-                bool valid = true;
-                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-                {
-                    if (!tSpell->learnedSpell[i])
-                        continue;
-                    if (!player->IsSpellFitByClassAndRace(tSpell->learnedSpell[i]))
-                    {
-                        valid = false;
-                        break;
-                    }
-                }
-
-                if (newLevel < tSpell->reqLevel)
-                    continue;
-
-                if (!valid)
-                    continue;
-
-                if (player->GetTrainerSpellState(tSpell) != TRAINER_SPELL_GREEN)
-                    continue;
-
-                // learn explicitly or cast explicitly
-                if (tSpell->IsCastable())
-                    player->CastSpell(player, tSpell->spell, true);
-                else
-                    player->learnSpell(tSpell->spell);
-            }
         }
     }
 };

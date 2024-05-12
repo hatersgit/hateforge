@@ -273,13 +273,13 @@ SpellInfo const* ProcEventInfo::GetSpellInfo() const
 SpellSchoolMask ProcEventInfo::GetSchoolMask() const
 {
     if (_spell)
-        return _spell->GetSpellInfo()->GetSchoolMask();
+        return _spell->GetSpellInfo() ? _spell->GetSpellInfo()->GetSchoolMask() : _spell->GetSpellSchoolMask();
 
     if (_damageInfo)
-        return _damageInfo->GetSpellInfo()->GetSchoolMask();
+        return _damageInfo->GetSpellInfo() ? _damageInfo->GetSpellInfo()->GetSchoolMask() : _damageInfo->GetSchoolMask();
 
     if (_healInfo)
-        return _healInfo->GetSpellInfo()->GetSchoolMask();
+        return _healInfo->GetSpellInfo() ? _healInfo->GetSpellInfo()->GetSchoolMask() : _healInfo->GetSchoolMask();
 
     return SPELL_SCHOOL_MASK_NONE;
 }

@@ -371,6 +371,9 @@ public:
     void EffectEnchantHeldItem(SpellEffIndex effIndex);
     void EffectSummonObject(SpellEffIndex effIndex);
     void EffectResurrect(SpellEffIndex effIndex);
+
+    void EffectMassResurrect(SpellEffIndex effIndex);
+
     void EffectParry(SpellEffIndex effIndex);
     void EffectBlock(SpellEffIndex effIndex);
     void EffectDisableDefenseOutcome(SpellEffIndex effIndex);

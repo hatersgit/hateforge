@@ -5673,14 +5673,15 @@ AuraEffect* Unit::GetAuraEffectOfRankedSpell(uint32 spellId, uint8 effIndex, Obj
 AuraEffect* Unit::GetAuraEffect(AuraType type, SpellFamilyNames name, uint32 iconId, uint8 effIndex) const
 {
     AuraEffectList const& auras = GetAuraEffectsByType(type);
-    for (Unit::AuraEffectList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-    {
-        if (effIndex != (*itr)->GetEffIndex())
-            continue;
-        SpellInfo const* spell = (*itr)->GetSpellInfo();
-        if (spell->SpellIconID == iconId && spell->SpellFamilyName == name)
-            return *itr;
-    }
+    if (!auras.empty())
+        for (Unit::AuraEffectList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+        {
+            if (effIndex != (*itr)->GetEffIndex())
+                continue;
+            SpellInfo const* spell = (*itr)->GetSpellInfo();
+            if (spell->SpellIconID == iconId && spell->SpellFamilyName == name)
+                return *itr;
+        }
     return nullptr;
 }
 

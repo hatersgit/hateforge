@@ -249,6 +249,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectGiveRestedExperience,                     //172 SPELL_EFFECT_GIVE_RESTED_EXPERIENCE_BONUS
     &Spell::EffectGiveHonor,                                //173 SPELL_EFFECT_GIVE_HONOR
     &Spell::EffectReceiveItem,                              //174 SPELL_EFFECT_RECEIVE_ITEM
+    &Spell::EffectMassResurrect,                            //175 MASS_RES
 };
 
 wEffect WeaponAndSchoolDamageEffects[TOTAL_WEAPON_DAMAGE_EFFECTS] =
@@ -4652,6 +4653,35 @@ void Spell::EffectResurrect(SpellEffIndex effIndex)
 
     target->setResurrectRequestData(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
     SendResurrectRequest(target);
+}
+
+void Spell::EffectMassResurrect(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+        return;
+
+    if (!m_caster)
+        return;
+
+    Player* target = m_caster->ToPlayer();
+    if (!target)
+    {
+        return;
+    }
+
+    if (auto group = target->GetGroup())
+        for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+            if (Player* player = itr->GetSource()) // should actually be looted object instead of lootOwner but looter has to be really close so doesnt really matter
+                if (player->IsInWorld())
+                    if (player->IsInRange3d(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, 40)
+                        && !player->IsAlive() && !player->isResurrectRequested()) {
+                        uint32 health = player->CountPctFromMaxHealth(damage);
+                        uint32 mana = CalculatePct(player->GetMaxPower(POWER_MANA), damage);
+                        ExecuteLogEffectResurrect(effIndex, player);
+
+                        player->setResurrectRequestData(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
+                        SendResurrectRequest(player);
+                    }
 }
 
 void Spell::EffectAddExtraAttacks(SpellEffIndex effIndex)

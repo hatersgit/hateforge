@@ -1116,6 +1116,7 @@ enum SpellEffects
     SPELL_EFFECT_GIVE_RESTED_EXPERIENCE_BONUS       = 172,
     SPELL_EFFECT_GIVE_HONOR                         = 173,
     SPELL_EFFECT_RECEIVE_ITEM                       = 174,
+    SPELL_EFFECT_MASS_RES                           = 175,
     TOTAL_SPELL_EFFECTS                            
 };
 

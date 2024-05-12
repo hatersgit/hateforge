@@ -3,8 +3,9 @@ DELETE FROM acore_world.spell_script_names where ScriptName in (
 	'spell_warl_soul_leech', 'spell_hunter_intoxication', 'spell_snake_deadly_poison', 'spell_rog_killing_spree_SpellScript',
 	'spell_rog_killing_spree_AuraScript', 'spell_rog_tricks_of_the_trade', 'spell_hun_chimera_shot',
 	'spell_sha_totem_searing_bolt', 'spell_pri_atonement', 'spell_dru_elunes_fire', 'spell_dru_eclipse', 
-	'spell_mage_glacial_advance', 'spell_dk_dancing_rune_weapon', 'spell_dk_pestilence', 'spell_pri_penance', 'spell_dru_living_seed',
-	'spell_warr_slam', 'spell_pri_vampiric_touch'
+	'spell_mage_glacial_advance', 'spell_dk_dancing_rune_weapon', 'spell_dk_pestilence', 'spell_pri_penance', 
+	'spell_dru_living_seed', 'spell_warr_slam', 'spell_pri_vampiric_touch', 'spell_mage_glacial_advance',
+	'aura_mage_glacial_advance', 'spell_mage_elemental_pulse'
 );
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(-110092, 'spell_pal_judgements_of_the_wise');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(110096, 'spell_pal_judgement_of_light_heal');
@@ -27,6 +28,9 @@ INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100081,
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(-110272, 'spell_dru_living_seed');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100014, 'spell_warr_slam');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100084, 'spell_pri_vampiric_touch');
+INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100136, 'spell_mage_glacial_advance');
+INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100135, 'aura_mage_glacial_advance');
+INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100133, 'spell_mage_elemental_pulse');
 
 
 
@@ -40,7 +44,7 @@ INSERT INTO acore_world.spell_proc (SpellId, SchoolMask, SpellFamilyName, SpellF
 INSERT INTO acore_world.spell_proc (SpellId, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, ProcFlags, SpellTypeMask, SpellPhaseMask, HitMask, AttributesMask, ProcsPerMinute, Chance, Cooldown, Charges) VALUES(-110188, 0, 23, 0, 0, 0, 0, 1, 2, 0, 0, 0.0, 0.0, 0, 1);
 INSERT INTO acore_world.spell_proc (SpellId, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, ProcFlags, SpellTypeMask, SpellPhaseMask, HitMask, AttributesMask, ProcsPerMinute, Chance, Cooldown, Charges) VALUES(-110256, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0.0, 0.0, 0, 0);
 INSERT INTO acore_world.spell_proc (SpellId, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, ProcFlags, SpellTypeMask, SpellPhaseMask, HitMask, AttributesMask, ProcsPerMinute, Chance, Cooldown, Charges) VALUES(-110271, 8, 0, 0, 0, 0, 0, 1, 2, 2, 0, 0.0, 0.0, 0, 0);
-INSERT INTO acore_world.spell_proc (SpellId, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, ProcFlags, SpellTypeMask, SpellPhaseMask, HitMask, AttributesMask, ProcsPerMinute, Chance, Cooldown, Charges) VALUES(-110272, 0, 16, 0, 0, 0, 0, 1, 2, 2, 0, 0.0, 0.0, 0, 0);
+INSERT INTO acore_world.spell_proc (SpellId, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, ProcFlags, SpellTypeMask, SpellPhaseMask, HitMask, AttributesMask, ProcsPerMinute, Chance, Cooldown, Charges) VALUES(-110272, 0, 0, 0, 0, 0, 0, 1, 2, 2, 0, 0.0, 0.0, 0, 0);
 INSERT INTO acore_world.spell_proc (SpellId, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, ProcFlags, SpellTypeMask, SpellPhaseMask, HitMask, AttributesMask, ProcsPerMinute, Chance, Cooldown, Charges) VALUES(-110282, 0, 16, 0, 0, 0, 0, 1, 2, 2, 0, 0.0, 0.0, 0, 0);
 INSERT INTO acore_world.spell_proc (SpellId, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, ProcFlags, SpellTypeMask, SpellPhaseMask, HitMask, AttributesMask, ProcsPerMinute, Chance, Cooldown, Charges) VALUES(110285, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0.0, 0.0, 0, 0);
 INSERT INTO acore_world.spell_proc (SpellId, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, ProcFlags, SpellTypeMask, SpellPhaseMask, HitMask, AttributesMask, ProcsPerMinute, Chance, Cooldown, Charges) VALUES(-110335, 0, 0, 0, 0, 0, 0, 1, 0, 16, 0, 0.0, 0.0, 0, 0);

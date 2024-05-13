@@ -30,6 +30,9 @@ INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100084,
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100136, 'spell_mage_glacial_advance');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100135, 'aura_mage_glacial_advance');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100133, 'spell_mage_elemental_pulse');
+INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100036, 'spell_dk_rune_strike');
+INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100040, 'spell_dk_plague_strike');
+
 
 
 

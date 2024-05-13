@@ -8,7 +8,7 @@ CREATE TABLE acore_world.`spell_bonus_data` (
   `ap_dot_bonus` float NOT NULL DEFAULT '0',
   `spellname` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '',
   `effectType` int not null default 0,
-  PRIMARY KEY (`entry`)
+  PRIMARY KEY (`entry`, `effect`)
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO acore_world.spell_bonus_data (entry, effect, sp_direct_bonus, sp_dot_bonus, ap_bonus, ap_dot_bonus, spellname, effectType) VALUES(100002, 0, 0.135, 0.0, 0.0, 0.0, 'Fire Nova', 3);

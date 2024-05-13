@@ -2639,8 +2639,61 @@ class spell_dk_vendetta : public AuraScript
     }
 };
 
+// 100040
+class spell_dk_plague_strike: public SpellScript
+{
+    PrepareSpellScript(spell_dk_plague_strike);
+
+    void HandleAfterHit()
+    {
+        if (Player* caster = GetCaster()->ToPlayer())
+            if (Unit* unitTarget = GetHitUnit())
+            {
+                auto spellToCast = 55078;
+                if (unitTarget->HasAura(spellToCast))
+                {
+                    spellToCast = 55095;
+                    if (unitTarget->HasAura(spellToCast)) {
+                        caster->CastSpell(caster, 100153, true);
+                        return;
+                    }
+                }
+                caster->CastSpell(unitTarget, spellToCast, true);
+            }
+    }
+
+    void Register() override
+    {
+        AfterHit += SpellHitFn(spell_dk_plague_strike::HandleAfterHit);
+    }
+};
+
+// 100036
+class spell_dk_rune_strike : public SpellScript
+{
+    PrepareSpellScript(spell_dk_rune_strike);
+
+    void HandleAfterHit()
+    {
+        if (Player* caster = GetCaster()->ToPlayer())
+            if (Unit* unitTarget = GetHitUnit())
+                if (auto diseases = unitTarget->GetDiseasesByCaster(caster->GetGUID())) {
+                    auto manaPer = GetSpellInfo()->GetEffect(EFFECT_0).CalcValue();
+                    caster->EnergizeBySpell(caster, GetSpellInfo(), manaPer*diseases, POWER_MANA);
+                }
+    }
+
+    void Register() override
+    {
+        AfterHit += SpellHitFn(spell_dk_rune_strike::HandleAfterHit);
+    }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
+    RegisterSpellScript(spell_dk_rune_strike);
+    RegisterSpellScript(spell_dk_plague_strike);
+
     RegisterSpellScript(spell_dk_acclimation);
     RegisterSpellScript(spell_dk_advantage_t10_4p);
     RegisterSpellScript(spell_dk_wandering_plague);

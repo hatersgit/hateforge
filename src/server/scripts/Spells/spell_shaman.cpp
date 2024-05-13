@@ -828,7 +828,7 @@ class spell_sha_fire_nova : public SpellScript
         {
             uint8 rank = GetSpellInfo()->GetRank();
             if (totem->IsTotem())
-                caster->CastSpell(totem, sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1, rank), true);
+                caster->CastSpell(totem, 61655, true);
         }
     }
 

@@ -1599,9 +1599,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     // Can't proc on self
                     if (GetCasterGUID() == target->GetGUID())
                         break;
-                    if (caster->GetAuraEffectDummy(1150043)) {
-                        caster->CastSpell(target, 1150007, true);
-                    }
 
                     AuraEffect* aurEff = nullptr;
                     // Ebon Plaguebringer / Crypt Fever

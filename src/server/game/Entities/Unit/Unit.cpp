@@ -2115,14 +2115,7 @@ ThornsDamage Unit::CalculateThorns(Unit* attacker, Unit* victim, bool calcMisses
 
         if (calcMisses)
         {
-            // Damage shield can be resisted...
-            if (SpellMissInfo missInfo = victim->SpellHitResult(this, i_spellProto, false))
-            {
-                victim->SendSpellMiss(this, i_spellProto->Id, missInfo);
-                continue;
-            }
-
-            // ...or immuned
+            // immuned
             if (IsImmunedToDamageOrSchool(i_spellProto->GetSchoolMask()))
             {
                 victim->SendSpellDamageImmune(this, i_spellProto->Id);
@@ -2130,7 +2123,7 @@ ThornsDamage Unit::CalculateThorns(Unit* attacker, Unit* victim, bool calcMisses
             }
 
             if (Unit* caster = dmgShieldItr->GetCaster())
-                damage = attacker->SpellDamageBonusTaken(caster, i_spellProto, damage, SPELL_DIRECT_DAMAGE);
+                damage = attacker->SpellDamageBonusTaken(caster, i_spellProto, damage, SPELL_DIRECT_DAMAGE, 1, dmgShieldItr->GetEffIndex());
         }
         thornsDmg.ThornsDamageMap[i_spellProto->GetSchoolMask()] += damage;
     }
@@ -8802,7 +8795,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     float spCoeff = spellProto->Effects[effIndex].BonusMultiplier;
     float apCoeff = 0.f;
 
-    SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id);
+    SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id, effIndex);
     if (bonus || spellProto->Id == 1310029)
     {
         if (damagetype == DOT)
@@ -8882,7 +8875,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     return uint32(std::max(tmpDamage, 0.0f));
 }
 
-uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack)
+uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack, uint8 effIndex)
 {
     if (!spellProto || damagetype == DIRECT_DAMAGE)
         return pdamage;
@@ -8951,7 +8944,7 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
 
     // Check for table values
     float coeff = 0;
-    SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id);
+    SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id, effIndex);
     if (bonus)
         coeff = (damagetype == DOT) ? bonus->dot_damage : bonus->direct_damage;
 
@@ -9656,7 +9649,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     float coeff = spellProto->Effects[effIndex].BonusMultiplier;
 
     // Check for table values
-    SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id);
+    SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id, effIndex);
     if (bonus)
     {
         if (damagetype == DOT)
@@ -9735,7 +9728,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     return uint32(std::max(heal, 0.0f));
 }
 
-uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, uint32 healamount, DamageEffectType damagetype, uint32 stack)
+uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, uint32 healamount, DamageEffectType damagetype, uint32 stack, uint8 effIndex)
 {
     float TakenTotalMod = 1.0f;
     float minval = 0.0f;
@@ -9800,7 +9793,7 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
     }
 
     // Check for table values
-    SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id);
+    SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id, effIndex);
     float coeff = 0;
     float factorMod = 1.0f;
     if (bonus)

@@ -836,18 +836,27 @@ bool SpellMgr::CanSpellTriggerProcOnEvent(SpellProcEntry const& procEntry, ProcE
     return true;
 }
 
-SpellBonusEntry const* SpellMgr::GetSpellBonusData(uint32 spellId) const
+SpellBonusEntry const* SpellMgr::GetSpellBonusData(uint32 spellId, uint8 effIndex) const
 {
     // Lookup data
     SpellBonusMap::const_iterator itr = mSpellBonusMap.find(spellId);
-    if (itr != mSpellBonusMap.end())
-        return &itr->second;
+    if (itr != mSpellBonusMap.end()) {
+        auto eff = itr->second.find(effIndex);
+        if (eff != itr->second.end())
+            return &eff->second;
+
+        return nullptr;
+    }
+
     // Not found, try lookup for 1 spell rank if exist
     if (uint32 rank_1 = GetFirstSpellInChain(spellId))
     {
         SpellBonusMap::const_iterator itr2 = mSpellBonusMap.find(rank_1);
-        if (itr2 != mSpellBonusMap.end())
-            return &itr2->second;
+        if (itr2 != mSpellBonusMap.end()) {
+            auto eff2 = itr2->second.find(effIndex);
+            if (eff2 != itr2->second.end())
+                return &eff2->second;
+        }
     }
     return nullptr;
 }
@@ -1970,8 +1979,8 @@ void SpellMgr::LoadSpellBonuses()
 
     mSpellBonusMap.clear();                             // need for reload case
 
-    //                                                0      1             2          3         4
-    QueryResult result = WorldDatabase.Query("SELECT entry, direct_bonus, dot_bonus, ap_bonus, ap_dot_bonus FROM spell_bonus_data");
+    //                                                0      1      2             3          4         5
+    QueryResult result = WorldDatabase.Query("SELECT entry, effect, direct_bonus, dot_bonus, ap_bonus, ap_dot_bonus FROM spell_bonus_data");
     if (!result)
     {
         LOG_WARN("server.loading", ">> Loaded 0 spell bonus data. DB table `spell_bonus_data` is empty.");
@@ -1992,11 +2001,13 @@ void SpellMgr::LoadSpellBonuses()
             continue;
         }
 
-        SpellBonusEntry& sbe = mSpellBonusMap[entry];
-        sbe.direct_damage = fields[1].Get<float>();
-        sbe.dot_damage    = fields[2].Get<float>();
-        sbe.ap_bonus      = fields[3].Get<float>();
-        sbe.ap_dot_bonus   = fields[4].Get<float>();
+        uint8 effect = fields[1].Get<uint8>();
+
+        SpellBonusEntry& sbe = mSpellBonusMap[entry][effect];
+        sbe.direct_damage = fields[2].Get<float>();
+        sbe.dot_damage    = fields[3].Get<float>();
+        sbe.ap_bonus      = fields[4].Get<float>();
+        sbe.ap_dot_bonus   = fields[5].Get<float>();
 
         ++count;
     } while (result->NextRow());

@@ -186,6 +186,8 @@ public:
         if (player) {
             if (auto script = player->GetInstanceScript())
                 return !script->IsEncounterInProgress();
+            else
+                return true;
         }
         return false;
     }

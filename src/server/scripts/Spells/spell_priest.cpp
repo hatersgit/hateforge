@@ -882,7 +882,7 @@ class spell_pri_renew : public AuraScript
             if (AuraEffect const* empoweredRenewAurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, PRIEST_ICON_ID_EMPOWERED_RENEW_TALENT, EFFECT_1))
             {
                 uint32 heal = GetEffect(EFFECT_0)->GetAmount();
-                heal = GetTarget()->SpellHealingBonusTaken(caster, GetSpellInfo(), heal, DOT);
+                heal = GetTarget()->SpellHealingBonusTaken(caster, GetSpellInfo(), heal, DOT, 1, EFFECT_0);
 
                 float f;
                 int32 basepoints0 = empoweredRenewAurEff->GetAmount() * GetEffect(EFFECT_0)->GetTotalTicks(f) * int32(heal) / 100;

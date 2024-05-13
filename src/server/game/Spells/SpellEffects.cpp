@@ -249,7 +249,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectGiveRestedExperience,                     //172 SPELL_EFFECT_GIVE_RESTED_EXPERIENCE_BONUS
     &Spell::EffectGiveHonor,                                //173 SPELL_EFFECT_GIVE_HONOR
     &Spell::EffectReceiveItem,                              //174 SPELL_EFFECT_RECEIVE_ITEM
-    &Spell::EffectMassResurrect,                            //175 MASS_RES
+    &Spell::EffectMassResurrect,                            //175 SPELL_EFFECT_MASS_RES
 };
 
 wEffect WeaponAndSchoolDamageEffects[TOTAL_WEAPON_DAMAGE_EFFECTS] =
@@ -444,7 +444,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 if (aura)
                 {
                     uint32 pdamage = uint32(std::max(aura->GetAmount(), 0));
-                    pdamage = unitTarget->SpellDamageBonusTaken(m_caster, aura->GetSpellInfo(), pdamage, DOT, aura->GetBase()->GetStackAmount());
+                    pdamage = unitTarget->SpellDamageBonusTaken(m_caster, aura->GetSpellInfo(), pdamage, DOT, aura->GetBase()->GetStackAmount(), effIndex);
                     uint32 pct_dir = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, (effIndex + 1));
                     uint8 baseTotalTicks = uint8(m_caster->CalcSpellDuration(aura->GetSpellInfo()) / aura->GetSpellInfo()->Effects[EFFECT_0].Amplitude);
 
@@ -663,7 +663,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             damageMultiplier = (damageMultiplier * 0.01) + m_originalCaster->SpellPctDamageModsDone(unitTarget, m_spellInfo, SPELL_DIRECT_DAMAGE);
 
             damage = m_originalCaster->SpellDamageBonusDone(unitTarget, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE, effIndex);
-            damage = unitTarget->SpellDamageBonusTaken(m_originalCaster, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
+            damage = unitTarget->SpellDamageBonusTaken(m_originalCaster, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE, 1, effIndex);
         }
 
         damage /= damageDivisor;
@@ -1395,7 +1395,7 @@ void Spell::EffectPowerDrain(SpellEffIndex effIndex)
 
     // add spell damage bonus
     damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE, effIndex);
-    damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
+    damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE, 1, effIndex);
 
     // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
     int32 power = damage;
@@ -1563,7 +1563,7 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
             int32 tickheal = targetAura->GetAmount();
             if (Unit* auraCaster = targetAura->GetCaster())
-                tickheal = unitTarget->SpellHealingBonusTaken(auraCaster, targetAura->GetSpellInfo(), tickheal, DOT);
+                tickheal = unitTarget->SpellHealingBonusTaken(auraCaster, targetAura->GetSpellInfo(), tickheal, DOT, 1, effIndex);
 
             //int32 tickheal = targetAura->GetSpellInfo()->EffectBasePoints[idx] + 1;
             //It is said that talent bonus should not be included
@@ -1589,12 +1589,12 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
         else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags[0] & 0x00080000)
         {
             addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, int32(caster->CountPctFromMaxHealth(damage)), HEAL, effIndex);
-            addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
+            addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL, 1, effIndex);
         }
         else if (m_spellInfo->Id != 33778) // not lifebloom
         {
             addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL, effIndex);
-            addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
+            addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL, 1, effIndex);
         }
 
         // Implemented this way as there is no other way to do it currently (that I know :P)...
@@ -1625,7 +1625,7 @@ void Spell::EffectHealPct(SpellEffIndex effIndex)
         return;
 
     uint32 heal = m_originalCaster->SpellHealingBonusDone(unitTarget, m_spellInfo, unitTarget->CountPctFromMaxHealth(damage), HEAL, effIndex);
-    heal = unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, HEAL);
+    heal = unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, HEAL, 1, effIndex);
 
     m_damage -= heal;
 }
@@ -1644,7 +1644,7 @@ void Spell::EffectHealMechanical(SpellEffIndex effIndex)
 
     uint32 heal = m_originalCaster->SpellHealingBonusDone(unitTarget, m_spellInfo, uint32(damage), HEAL, effIndex);
 
-    m_damage -= unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, HEAL);
+    m_damage -= unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, HEAL, 1,  effIndex);
 }
 
 void Spell::EffectHealthLeech(SpellEffIndex  effIndex)
@@ -1656,7 +1656,7 @@ void Spell::EffectHealthLeech(SpellEffIndex  effIndex)
         return;
 
     damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE, effIndex);
-    damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
+    damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE, 1, effIndex);
 
     LOG_DEBUG("spells.aura", "HealthLeech :{}", damage);
 

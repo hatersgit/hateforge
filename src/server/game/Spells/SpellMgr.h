@@ -308,7 +308,7 @@ struct SpellBonusEntry
     float  ap_dot_bonus;
 };
 
-typedef std::unordered_map<uint32, SpellBonusEntry>     SpellBonusMap;
+typedef std::unordered_map<uint32 /*id*/, std::unordered_map<uint8 /*effIndex*/, SpellBonusEntry>> SpellBonusMap;
 
 enum SpellGroupSpecialFlags
 {
@@ -675,7 +675,7 @@ public:
     static bool CanSpellTriggerProcOnEvent(SpellProcEntry const& procEntry, ProcEventInfo& eventInfo);
 
     // Spell bonus data table
-    [[nodiscard]] SpellBonusEntry const* GetSpellBonusData(uint32 spellId) const;
+    [[nodiscard]] SpellBonusEntry const* GetSpellBonusData(uint32 spellId, uint8 effIndex) const;
 
     // Spell threat table
     [[nodiscard]] SpellThreatEntry const* GetSpellThreatEntry(uint32 spellID) const;

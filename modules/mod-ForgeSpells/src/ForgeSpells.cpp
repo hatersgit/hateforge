@@ -279,7 +279,7 @@ public:
                             det = DOT;
 
                         damage = player->SpellDamageBonusDone(player, si, damage, det, EFFECT_0);
-                        damage = player->SpellDamageBonusTaken(player, si, damage, det);
+                        damage = player->SpellDamageBonusTaken(player, si, damage, det, 1, EFFECT_0);
                     }
 
                     sScriptMgr->ModifySpellDamageTaken(player, player, damage, si);

@@ -5,7 +5,8 @@ DELETE FROM acore_world.spell_script_names where ScriptName in (
 	'spell_sha_totem_searing_bolt', 'spell_pri_atonement', 'spell_dru_elunes_fire', 'spell_dru_eclipse', 
 	'spell_dk_dancing_rune_weapon', 'spell_dk_pestilence', 'spell_pri_penance', 
 	'spell_dru_living_seed', 'spell_warr_slam', 'spell_pri_vampiric_touch', 'spell_mage_glacial_advance',
-	'aura_mage_glacial_advance', 'spell_mage_elemental_pulse'
+	'aura_mage_glacial_advance', 'spell_mage_elemental_pulse'. 'spell_dk_rune_strike', 'spell_dk_plague_strike',
+	'spell_sha_fire_nova'
 );
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(-110092, 'spell_pal_judgements_of_the_wise');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(110096, 'spell_pal_judgement_of_light_heal');
@@ -30,6 +31,10 @@ INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100084,
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100136, 'spell_mage_glacial_advance');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100135, 'aura_mage_glacial_advance');
 INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100133, 'spell_mage_elemental_pulse');
+INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100036, 'spell_dk_rune_strike');
+INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100040, 'spell_dk_plague_strike');
+INSERT INTO acore_world.spell_script_names (spell_id, ScriptName) VALUES(100002, 'spell_sha_fire_nova');
+
 
 
 

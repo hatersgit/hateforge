@@ -741,7 +741,7 @@ enum SpellAttr5 : uint32
     SPELL_ATTR5_NOT_ON_PLAYER_CONTROLLED_NPC                   = 0x00000100, // TITLE Cannot target player controlled units but can target players
     SPELL_ATTR5_EXTRA_INITIAL_PERIOD                           = 0x00000200, // TITLE Immediately do periodic tick on apply
     SPELL_ATTR5_DO_NOT_DISPLAY_DURATION                        = 0x00000400, // TITLE Do not send aura duration to client
-    SPELL_ATTR5_IMPLIED_TARGETING                              = 0x00000800, // TITLE Auto-target target of target (client only)
+    SPELL_ATTR5_IMPLIED_TARGETING                                 = 0x00000800, // TITLE Auto-target target of target (client only)
     SPELL_ATTR5_MELEE_CHAIN_TARGETING                          = 0x00001000, // TITLE Unknown attribute 12@Attr5 DESCRIPTION Cleave related?
     SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC                   = 0x00002000, // TITLE Duration scales with Haste Rating
     SPELL_ATTR5_NOT_AVALIABLE_WHILE_CHARMED                    = 0x00004000, // TITLE Charmed units cannot cast this spell

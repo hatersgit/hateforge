@@ -10365,7 +10365,7 @@ void Unit::MeleeDamageBonus(Unit* victim, int32& damage, float& doneTotalMod, We
         {
             if (bonus->ap_bonus > 0)
             {
-                DoneFlatBenefit += int32(bonus->ap_bonus * APbonus);
+                DoneFlatBenefit += int32(bonus->ap_bonus * GetTotalAttackPowerValue(BASE_ATTACK, victim));
             }
         }
     }

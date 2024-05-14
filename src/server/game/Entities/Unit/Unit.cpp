@@ -10289,7 +10289,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
     return uint32(std::max(tmpDamage, 0.0f));
 }
 
-void Unit::MeleeDamageBonus(Unit* victim, int32& damage, float& doneTotalMod, WeaponAttackType attType, SpellInfo const* spellProto, SpellSchoolMask damageSchoolMask)
+void Unit::MeleeDamageBonus(Unit* victim, int32& damage, float& doneTotalMod, WeaponAttackType attType, SpellInfo const* spellProto, SpellSchoolMask damageSchoolMask, uint8 effIndex)
 {
     if (!victim)
         return;
@@ -10357,6 +10357,17 @@ void Unit::MeleeDamageBonus(Unit* victim, int32& damage, float& doneTotalMod, We
                     break;
                 }
         DoneFlatBenefit += int32(APbonus / 14.0f * GetAPMultiplier(attType, normalized));
+    }
+
+    if (spellProto) {
+        SpellBonusEntry const* bonus = sSpellMgr->GetSpellBonusData(spellProto->Id, effIndex);
+        if (bonus)
+        {
+            if (bonus->ap_bonus > 0)
+            {
+                DoneFlatBenefit += int32(bonus->ap_bonus * GetTotalAttackPowerValue(BASE_ATTACK, victim));
+            }
+        }
     }
 
     // Done total percent damage auras. if the amount passed in 

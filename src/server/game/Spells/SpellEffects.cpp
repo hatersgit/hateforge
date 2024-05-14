@@ -3492,26 +3492,13 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
         }
         break;
     }
-    case SPELLFAMILY_DEATHKNIGHT:
-    {
 
-
-        break;
-    }
     case SPELLFAMILY_MELEE: {
-        // Obliterate (12.5% more damage per disease)
+        // Obliterate (15% more damage per disease)
         if (m_spellInfo->SpellFamilyFlags[0] & 0x800)
         {
-            bool consumeDiseases = true;
-            // Annihilation
-            if (AuraEffect const* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_MELEE, 2710, EFFECT_0))
-                // Do not consume diseases if roll sucesses
-                if (roll_chance_i(aurEff->GetAmount()))
-                    consumeDiseases = false;
-
             float disease_amt = m_spellInfo->Effects[EFFECT_2].CalcValue();
-
-            AddPct(totalDamagePercentMod, disease_amt * unitTarget->GetDiseasesByCaster(m_caster->GetGUID(), consumeDiseases) / 2.0f);
+            AddPct(totalDamagePercentMod, disease_amt* unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) / 2.0f);
             break;
         }
         // Heart Strike
@@ -3614,7 +3601,7 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
     ProcessWeaponDamageSchoolEffects(weaponDamage, totalDamagePercentMod, effIndex);
 
     totalDamagePercentMod = totalDamagePercentMod / 100; // adjust to a 100% = 1.0f value
-    m_caster->MeleeDamageBonus(unitTarget, weaponDamage, totalDamagePercentMod, m_attackType, m_spellInfo);
+    m_caster->MeleeDamageBonus(unitTarget, weaponDamage, totalDamagePercentMod, m_attackType, m_spellInfo, m_spellSchoolMask, effIndex);
     totalDamagePercentMod = totalDamagePercentMod * 100; // return to a 100% = 100.0f value
 
     ApplyPct(weaponDamage, totalDamagePercentMod);
@@ -3637,6 +3624,19 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
     }
 
     m_damage += eff_damage;
+
+    switch (m_spellInfo->SpellFamilyName) {
+    case SPELLFAMILY_MELEE: {
+        if (m_spellInfo->SpellFamilyFlags[0] & 0x800)
+            if (AuraEffect const* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_MELEE, 2710, EFFECT_0)) // Soul Harvest
+                if (roll_chance_i(aurEff->GetAmount())) {
+                    float disease_amt = GetSpellInfo()->GetEffect(EFFECT_1).CalcValue();
+                    int32 harvest = CalculatePct(m_damage, disease_amt* unitTarget->GetDiseasesByCaster(m_caster->GetGUID(), true) / 2.f);
+                    m_caster->CastCustomSpell(unitTarget, 110346, &harvest, nullptr, nullptr, true, 0, nullptr, m_caster->GetGUID());
+                }
+        break;
+    }
+    }
 }
 
 void Spell::EffectThreat(SpellEffIndex /*effIndex*/)

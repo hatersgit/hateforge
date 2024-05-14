@@ -554,7 +554,7 @@ public:
                 }
 
                 if (needsMana) {
-                    auto extraMana = int32(slotmod * ilvl / 10.f);
+                    auto extraMana = int32(slotmod * ilvl / 13.f);
                     statCount++;
                     itemProto->SetStatsCount(statCount);
                     itemProto->SetStatType(statCount - 1, ITEM_MOD_MANA);
